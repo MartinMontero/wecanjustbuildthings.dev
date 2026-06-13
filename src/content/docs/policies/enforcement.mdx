@@ -78,21 +78,25 @@ Endpoints and config keys can appear in *negative* contexts ("we deliberately do
 for human review and weights imports highest. The signal definitions live in
 `enforcement/excluded-provider-signals.yaml`.
 
-## The exception: recipes
+## Locking down configurable tools: recipes
 
-The one sanctioned way to ship a tool that *can* reach an excluded provider is a
-**provider-agnostic recipe**. Layer 3 validates each recipe against a contract:
+A tool that is itself *configurable* to reach an excluded provider may be admitted
+**only** under a **provider-lockdown recipe** — and the recipe must prove the
+excluded providers are forbidden, not merely available. This is enforcement of the
+exclusion, not an exemption from it. Layer 3 validates each recipe against a
+contract:
 
-- it must target a catalog entry marked `provider_agnostic: true`;
+- it must target a catalog entry marked `provider_agnostic: true` (i.e. the tool
+  has a configurable provider picker);
 - every excluded **LLM provider** (OpenAI, xAI) must appear in the recipe's
-  `must_not_be_one_of` list — otherwise the recipe doesn't actually close the
-  loophole and is **rejected**;
-- no permitted provider may itself be an excluded organization;
+  `must_not_be_one_of` list — otherwise the recipe does not actually forbid them
+  and is **rejected**;
+- no "permitted" provider may itself be an excluded organization;
 - verification steps must block the excluded providers' endpoints.
 
-A recipe that forgets to exclude OpenAI fails the build. See the
-[Shakespeare BYOK recipe](/recipes/shakespeare-byok-configuration/) for a passing
-example.
+A recipe that forgets to forbid OpenAI fails the build. See the
+[Shakespeare lockdown recipe](/recipes/shakespeare-byok-configuration/) for a
+passing example.
 
 ## What runs, and when
 

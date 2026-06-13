@@ -123,7 +123,7 @@ function loadCatalogEntries(): DocEntry[] {
 function doRecipes(): void {
   if (!recipesDir) return;
   didWork = true;
-  heading(`Recipes — provider-agnostic exception contract (${recipesDir})`);
+  heading(`Recipes — provider-lockdown contract (${recipesDir})`);
   const catalog = loadCatalogEntries();
   const recipes = readDocEntries(recipesDir).filter((e) => e.frontmatter.entry_type === 'recipe');
   for (const recipe of recipes) {

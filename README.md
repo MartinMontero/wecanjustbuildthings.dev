@@ -42,9 +42,13 @@ spirit. A blocking CI engine checks three independent layers:
 3. **Layer 3 — provider strings.** Scans source for excluded SDK imports,
    endpoints, and config keys.
 
-The single exception is a **provider-agnostic recipe** — a machine-checked
-configuration for a tool that can use *either* an excluded or a permitted
-provider (e.g. [Shakespeare](https://gitlab.com/soapbox-pub/shakespeare)).
+The exclusion of Meta, OpenAI, and xAI is **absolute — there are no exceptions to
+it.** A tool that is itself *configurable* to reach an excluded provider (such as
+[Shakespeare](https://gitlab.com/soapbox-pub/shakespeare)'s bring-your-own-key
+model picker) is admitted **only** under a machine-checked **provider-lockdown
+recipe** that **forbids every excluded provider** and verifies they are
+unreachable. The recipe enforces the prohibition; it never grants an exemption
+from it. Shakespeare is constrained, not trusted.
 
 ```sh
 npm run enforce                         # catalog + recipe checks
@@ -136,7 +140,7 @@ lighthouserc.json  Lighthouse CI budgets   ·   lychee.toml  dead-link config
   [PIE Cookbook](https://github.com/piepdx/pie-cookbook).
 - The catalog is grounded in what the **And Other Stuff** collective uses to ship
   freedom tech.
-- The provider-agnostic exception models
+- The provider-lockdown recipe model is anchored to
   [Shakespeare](https://gitlab.com/soapbox-pub/shakespeare)'s BYOK design.
 
 ## License

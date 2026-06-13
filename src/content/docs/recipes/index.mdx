@@ -1,6 +1,6 @@
 ---
 title: Recipes
-description: Provider-agnostic configuration recipes — the single sanctioned exception to the exclusion policy.
+description: Provider-lockdown recipes — binding, machine-checked configurations that forbid excluded providers in tools that could otherwise reach them.
 sidebar:
   order: 0
   label: Overview
@@ -8,25 +8,26 @@ sidebar:
 
 import { Aside, LinkCard } from '@astrojs/starlight/components';
 
-Recipes are the **only** exception mechanism in the catalog. Most tools are either
-clean or not. A few can be configured to use *either* an excluded provider or a
-permitted one — and for those, a recipe documents (and machine-verifies) the
-clean configuration.
+The exclusion of Meta, OpenAI, and xAI is **absolute**. Recipes are not an
+exception to it — they are how the catalog *enforces* it on tools that could
+otherwise slip past. Most tools are simply clean or not. A few are *configurable*
+to reach an excluded provider at runtime (a bring-your-own-key picker, say); a
+recipe **forbids** those providers and machine-verifies they're unreachable.
 
-<Aside type="note" title="Every recipe is enforced">
-A recipe must target a catalog entry marked `provider_agnostic: true`, name every
-excluded LLM provider in its `must_not_be_one_of` list, and include verification
-steps that block the excluded providers' endpoints. A recipe that forgets to
-exclude OpenAI fails CI. See
-[how enforcement works](/policies/enforcement/#the-exception-recipes).
+<Aside type="note" title="A recipe forbids — it never permits">
+A recipe must target a catalog entry marked `provider_agnostic: true` (a tool with
+a configurable provider picker), name **every** excluded LLM provider in its
+`must_not_be_one_of` list, and include verification steps that block the excluded
+providers' endpoints. A recipe that fails to forbid OpenAI is **rejected** by CI.
+See [how enforcement works](/policies/enforcement/#locking-down-configurable-tools-recipes).
 </Aside>
 
 ## Recipes
 
 <LinkCard
-  title="Shakespeare — provider-agnostic BYOK configuration"
+  title="Shakespeare — provider lockdown (BYOK)"
   href="/recipes/shakespeare-byok-configuration/"
-  description="Configure Shakespeare to use only permitted model providers, and verify no traffic reaches OpenAI, xAI, or Google."
+  description="Lock Shakespeare to permitted model providers only, and verify no traffic reaches OpenAI, xAI, or Google."
 />
 
 ## Proposing a recipe

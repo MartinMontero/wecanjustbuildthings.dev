@@ -1,6 +1,6 @@
 ---
 title: The exclusion policy
-description: What is excluded from the catalog, why, and the single mechanism by which an exception is possible.
+description: What is excluded from the catalog, why, and how configurable tools are locked down so the exclusion holds at runtime.
 entry_type: policy
 sidebar:
   order: 1
@@ -38,20 +38,27 @@ that sends data *to* one, is not. The distinction is what Layer 1 (ownership),
 Layer 2 (transitive ownership), and Layer 3 (data-flow strings) each check.
 </Aside>
 
-## The only exception: provider-agnostic recipes
+## Configurable tools: the provider-lockdown recipe
 
-Some genuinely useful tools can be configured to use *either* an excluded
-provider or a permitted one. The canonical example is **Shakespeare**, the
-browser-based Nostr app builder: it offers a provider picker that includes
-OpenAI and xAI **as well as** Anthropic, DeepSeek, Kimi, OpenRouter, and local
-Ollama.
+The exclusion above is **absolute — nothing earns an exemption from it.** But some
+tools are themselves *configurable* to reach an excluded provider at runtime. The
+canonical example is **Shakespeare**, the browser-based Nostr app builder: its
+bring-your-own-key picker *can* be pointed at OpenAI or xAI as easily as at
+Anthropic, DeepSeek, Kimi, OpenRouter, or local Ollama.
 
-For these, the catalog allows a **provider-agnostic recipe** — a documented,
-machine-checked configuration that pins the tool to permitted providers and
-describes how to verify no traffic reaches an excluded endpoint. This is the
-*only* exception mechanism, and it is itself enforced: see the
-[Shakespeare BYOK recipe](/recipes/shakespeare-byok-configuration/) and the
-[recipe contract](/policies/enforcement/#the-exception-recipes).
+A tool like that is admitted to the catalog **only** under a
+**provider-lockdown recipe** (`recipe_type: configuration`) — a documented,
+machine-checked configuration that **forbids every excluded provider**, pins the
+tool to permitted ones, and prescribes how to verify that no traffic reaches an
+excluded endpoint.
+
+This is **not** a loophole or a "trusted tool" exception. It is the opposite: a
+**stricter** requirement that exists precisely because the tool *could* otherwise
+slip past Layer 3. **Shakespeare is strictly forbidden from using any dependency
+or provider owned by Meta, OpenAI, or xAI** — the recipe is the binding,
+enforced mechanism that guarantees it. See the
+[Shakespeare lockdown recipe](/recipes/shakespeare-byok-configuration/) and the
+[recipe contract](/policies/enforcement/#locking-down-configurable-tools-recipes).
 
 ## Origin advisories (Meta-built, permissively licensed)
 

@@ -2,8 +2,11 @@
 #
 # This list is enforced at three layers; any direct or transitive dependency
 # whose owner matches an entry below blocks the catalog entry from publishing.
-# The provider-agnostic recipe contract (see excluded-provider-signals.yaml and
-# the recipe validator) is the ONLY exception mechanism.
+# The exclusion is ABSOLUTE — nothing is exempt from it. A tool that is merely
+# *configurable* to reach an excluded provider (e.g. Shakespeare's BYOK picker)
+# is admitted only under a provider-lockdown recipe that FORBIDS those providers
+# and verifies they are unreachable (see excluded-provider-signals.yaml and the
+# recipe validator). The recipe enforces the prohibition; it is not an exemption.
 #
 # Signal fields are matched per ecosystem. Any field may be omitted; the loader
 # fills empty defaults. Add the narrowest signal that is true — over-broad

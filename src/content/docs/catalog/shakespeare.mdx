@@ -1,11 +1,11 @@
 ---
 title: Shakespeare
-description: A browser-based, bring-your-own-key AI app builder for Nostr — the canonical provider-agnostic exception in this catalog.
+description: A browser-based, bring-your-own-key AI app builder for Nostr — admitted only under a binding recipe that forbids OpenAI, xAI, and Google.
 entry_type: service
 dependency_name: shakespeare
 ecosystem: other
 category: AI & Agents
-what_it_does: "Shakespeare is a browser-only AI coding environment from Soapbox for building Nostr apps. It stores your model-provider key in IndexedDB (BYOK) and lets you choose the provider — which is exactly why it qualifies for a provider-agnostic recipe rather than an outright exclusion."
+what_it_does: "Shakespeare is a browser-only AI coding environment from Soapbox for building Nostr apps. It stores your model-provider key in IndexedDB (BYOK) and lets you choose the provider — which is exactly why it is admitted only under a binding provider-lockdown recipe that forbids OpenAI, xAI, and Google."
 protocols: [nostr]
 homepage_url: https://shakespeare.diy
 repo_url: https://gitlab.com/soapbox-pub/shakespeare
@@ -48,14 +48,17 @@ License read as <code>AGPL-3.0-or-later</code> from
 on the <code>main</code> branch at commit <code>a824677fe2d1</code>.
 </Aside>
 
-## Why it's a recipe, not an exclusion
+## Why Shakespeare must carry a lockdown recipe
 
 Shakespeare's provider picker includes permitted providers (Anthropic, DeepSeek,
 Kimi, OpenRouter, OpenCode Zen, PayPerQ, local Ollama) **and** excluded ones
-(OpenAI, xAI, Google). Because a genuinely clean configuration exists, the
-catalog doesn't exclude it outright — it requires a
-[provider-agnostic recipe](/recipes/shakespeare-byok-configuration/) that pins
-the configuration to permitted providers and describes how to verify it.
+(OpenAI, xAI, Google). **Shakespeare is strictly forbidden from using the
+excluded providers** — and because its own UI *could* reach them, it is admitted
+to the catalog only under a binding
+[provider-lockdown recipe](/recipes/shakespeare-byok-configuration/) that pins the
+configuration to permitted providers and machine-verifies the excluded ones are
+unreachable. The recipe enforces the prohibition; it is not a pass that lets
+Shakespeare use them. Shakespeare is constrained, not trusted.
 
 <Aside type="caution" title="There is no NOSTR_SERVICE_PROVIDER env var">
 Older write-ups describe configuring Shakespeare via a server-side environment
@@ -67,7 +70,7 @@ network observation, not via an env var that doesn't exist.
 
 ## See also
 
-- The [exception recipe](/recipes/shakespeare-byok-configuration/) that makes a
-  clean configuration verifiable.
-- [How enforcement works](/policies/enforcement/#the-exception-recipes) — the
+- The [provider-lockdown recipe](/recipes/shakespeare-byok-configuration/) that
+  forbids the excluded providers and makes the clean configuration verifiable.
+- [How enforcement works](/policies/enforcement/#locking-down-configurable-tools-recipes) — the
   contract every recipe must satisfy.

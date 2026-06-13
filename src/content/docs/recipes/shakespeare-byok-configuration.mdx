@@ -1,6 +1,6 @@
 ---
-title: Shakespeare — provider-agnostic BYOK configuration
-description: The canonical exception recipe — configure Shakespeare to use only permitted model providers, and verify no traffic reaches OpenAI, xAI, or Google.
+title: Shakespeare — provider lockdown (BYOK)
+description: The canonical provider-lockdown recipe — Shakespeare is forbidden from using OpenAI/xAI/Google; lock it to permitted providers and verify they're unreachable.
 entry_type: recipe
 recipe_type: configuration
 target_entry: Shakespeare
@@ -23,10 +23,12 @@ sidebar:
 
 import { Steps, Aside } from '@astrojs/starlight/components';
 
-[Shakespeare](/catalog/shakespeare/) is the catalog's one provider-agnostic
-exception: it can talk to excluded providers (OpenAI, xAI, Google) **or**
-permitted ones. This recipe documents — and machine-verifies — the clean
-configuration.
+[Shakespeare](/catalog/shakespeare/) is **strictly forbidden from using any
+provider owned by Meta, OpenAI, or xAI.** Its bring-your-own-key picker *could*
+be pointed at OpenAI, xAI, or Google — so Shakespeare is allowed in the catalog
+**only** under this binding recipe, which locks the picker to permitted providers
+and machine-verifies that the excluded ones are unreachable. This is enforcement
+of the exclusion, not an exemption from it.
 
 <Aside type="note" title="Canonical source">
 Shakespeare lives on **GitLab**, not GitHub:
@@ -71,13 +73,14 @@ If you picked Anthropic, you should see traffic to `api.anthropic.com` and
 nothing to any excluded host. If you picked local Ollama, you should see traffic
 only to `localhost`.
 
-<Aside type="tip" title="Why this is the only exception">
-Most tools are either clean or not. Shakespeare is the rare case where the *same
-tool* can be either, depending on a setting — so the catalog allows a documented,
-checkable configuration instead of an outright exclusion. The
-[recipe contract](/policies/enforcement/#the-exception-recipes) requires that
-every excluded LLM provider appears in <code>must_not_be_one_of</code>, so a
-recipe that quietly forgot to exclude OpenAI would fail CI.
+<Aside type="caution" title="A lockdown, not a loophole">
+This recipe does not make Shakespeare a "trusted" tool, and it grants no
+permission to touch excluded providers. It is the opposite: a binding constraint
+that **forbids** them. The
+[recipe contract](/policies/enforcement/#locking-down-configurable-tools-recipes)
+requires that every excluded LLM provider appears in
+<code>must_not_be_one_of</code> and that the verification steps block their
+endpoints — so a recipe that quietly failed to forbid OpenAI is **rejected** by CI.
 </Aside>
 
 ## Applying the same pattern elsewhere

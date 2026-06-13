@@ -17,7 +17,8 @@ interface Step {
 }
 
 /**
- * Validate a provider-agnostic exception recipe against the contract:
+ * Validate a provider-lockdown recipe against the contract. A recipe FORBIDS the
+ * excluded providers (it is enforcement, never an exemption):
  *  - structural completeness;
  *  - target_entry_slug resolves to a catalog entry marked provider_agnostic;
  *  - every excluded LLM provider is named in must_not_be_one_of (so the recipe

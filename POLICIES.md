@@ -36,19 +36,22 @@ sending data to them, is not.
 
 All three run on every PR (`verify.yml`) and weekly (`license-watch.yml`).
 
-## The only exception: provider-agnostic recipes
+## Configurable tools: the provider-lockdown recipe (NOT an exemption)
 
-A tool that can be configured to use *either* an excluded or a permitted provider
-may carry a **provider-agnostic recipe**. The recipe contract (enforced by
-`enforcement/cli.ts layer3 --recipes`):
+The exclusion is absolute; nothing is exempt from it. A tool that is itself
+*configurable* to reach an excluded provider at runtime (e.g. a BYOK model picker)
+is admitted **only** under a **provider-lockdown recipe** that **forbids** every
+excluded provider and proves they are unreachable. The recipe enforces the
+prohibition — it never grants permission to use an excluded provider. The recipe
+contract (enforced by `enforcement/cli.ts layer3 --recipes`):
 
-- `target_entry_slug` must resolve to a catalog entry with
-  `provider_agnostic: true`;
+- `target_entry_slug` must resolve to a catalog entry with `provider_agnostic: true`
+  (the tool has a configurable provider picker);
 - every excluded **LLM provider** must appear in `must_not_be_one_of`;
-- no permitted provider may itself be an excluded org;
+- no "permitted" provider may itself be an excluded org;
 - verification steps must block the excluded providers' endpoints.
 
-A recipe that forgets to exclude an LLM provider fails the build.
+A recipe that fails to forbid an excluded LLM provider is **rejected** by the build.
 
 ## Verification standards for catalog entries
 
