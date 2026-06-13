@@ -1,0 +1,67 @@
+# wecanjustbuildthings.dev — excluded organizations registry.
+#
+# This list is enforced at three layers; any direct or transitive dependency
+# whose owner matches an entry below blocks the catalog entry from publishing.
+# The provider-agnostic recipe contract (see excluded-provider-signals.yaml and
+# the recipe validator) is the ONLY exception mechanism.
+#
+# Signal fields are matched per ecosystem. Any field may be omitted; the loader
+# fills empty defaults. Add the narrowest signal that is true — over-broad
+# signals (e.g. the bare token "facebook") cause false positives and must be
+# disambiguated by Layer 3 import-context matching.
+
+meta:
+  display_name: "Meta Platforms (Facebook, Instagram, WhatsApp, Threads, Reality Labs, Oculus)"
+  github_orgs: [facebook, facebookresearch, facebookincubator, facebookarchive, fbsamples, instagram, WhatsApp, oculus, reactnative-tvos]
+  npm_scopes: ["@facebook", "@meta", "@oculus"]   # NB: @react-native* are community-published; Layer 3 disambiguates by import path
+  npm_packages: [facebook-nodejs-business-sdk, react-native-fbsdk-next]
+  pypi_maintainers: [facebook, meta, facebookresearch]
+  pypi_packages: [facebook-business, facebook-sdk]
+  crates_publishers: [facebook, meta]
+  crates_packages: []
+  hex_publishers: []
+  hex_packages: []
+  rubygems_authors: [facebook]
+  rubygems_packages: [koala]   # facebook graph client; surfaced for review
+  maven_groups: [com.facebook, com.facebook.android, com.facebook.react, com.meta]
+  pub_publishers: [facebook.com]
+  pub_packages: [facebook_app_events]
+  go_module_prefixes: [github.com/facebook/, github.com/facebookincubator/, github.com/facebookresearch/, github.com/facebookarchive/]
+
+openai:
+  display_name: "OpenAI"
+  llm_provider: true
+  github_orgs: [openai]
+  npm_scopes: ["@openai"]
+  npm_packages: [openai, openai-node, openai-agents, openai-fetch, "@openai/agents"]
+  pypi_maintainers: [openai]
+  pypi_packages: [openai, openai-agents]
+  crates_publishers: [openai]
+  crates_packages: [async-openai, openai-api-rs]
+  hex_publishers: [openai]
+  hex_packages: [openai_ex]
+  rubygems_authors: [openai]
+  rubygems_packages: [ruby-openai]
+  maven_groups: [com.openai]
+  pub_publishers: []
+  pub_packages: [dart_openai, openai_dart]
+  go_module_prefixes: [github.com/openai/, github.com/sashabaranov/go-openai]
+
+xai:
+  display_name: "xAI (Grok)"
+  llm_provider: true
+  github_orgs: [xai-org]
+  npm_scopes: ["@x-ai", "@xai"]
+  npm_packages: [grok-sdk, "@x-ai/grok-sdk"]
+  pypi_maintainers: [xai, xai-org]
+  pypi_packages: [xai, xai-sdk, grok-sdk]
+  crates_publishers: [xai]
+  crates_packages: []
+  hex_publishers: []
+  hex_packages: []
+  rubygems_authors: []
+  rubygems_packages: []
+  maven_groups: []
+  pub_publishers: []
+  pub_packages: []
+  go_module_prefixes: [github.com/xai-org/]

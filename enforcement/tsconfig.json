@@ -1,0 +1,17 @@
+{
+  "extends": "astro/tsconfigs/base",
+  "include": ["**/*.ts", "../scripts/**/*.ts"],
+  "exclude": ["tests/fixtures"],
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "target": "es2023",
+    "lib": ["es2023"],
+    "strict": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  }
+}

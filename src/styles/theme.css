@@ -1,0 +1,59 @@
+/* We Can Just Build Things — Starlight theme overrides.
+   Purple accent (freedom-tech / Nostr lineage), high-contrast, no web fonts
+   (system stack only) to keep the site fast and tracker-free. */
+
+:root {
+  --sl-color-accent-low: #241152;
+  --sl-color-accent: #6d3bd6;
+  --sl-color-accent-high: #c9b6f5;
+
+  --sl-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, Helvetica, Arial, sans-serif;
+  --sl-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: #d7c7f7;
+  --sl-color-accent: #5a2db8;
+  --sl-color-accent-high: #2a1259;
+}
+
+/* Status pills used across catalog entries and PIE pages. */
+.wcb-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 1.25rem;
+}
+.wcb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.32rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--sl-color-gray-5);
+  background: var(--sl-color-gray-6);
+  color: var(--sl-color-white);
+}
+.wcb-badge--verified { border-color: #1a7f37; color: #4ac26b; }
+.wcb-badge--blocked { border-color: #b35900; color: #f0883e; }
+.wcb-badge--under_review { border-color: #9a6700; color: #e3b341; }
+.wcb-badge--active { border-color: #1a7f37; color: #4ac26b; }
+.wcb-badge--minimal { border-color: #9a6700; color: #e3b341; }
+.wcb-badge--dormant { border-color: #b35900; color: #f0883e; }
+.wcb-badge--abandoned { border-color: #b62324; color: #ff7b72; }
+
+/* Compact definition grid for catalog entry metadata. */
+.wcb-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.35rem 1rem;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.9rem;
+}
+.wcb-meta dt { font-weight: 600; color: var(--sl-color-gray-2); }
+.wcb-meta dd { margin: 0; }

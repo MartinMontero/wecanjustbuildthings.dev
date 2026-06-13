@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+.astro/
+.output/
+
+# Generated catalog data (regenerated from data/aos-dependency-audit.csv)
+# NOTE: the source spreadsheet/CSV is committed; generated reports are not.
+reports/
+
+# Pagefind index (regenerated on build)
+public/pagefind/
+
+# Environment / secrets — never commit
+.env
+.env.*
+!.env.example
+*.local
+
+# Caches
+.cache/
+.fetch-cache/
+.eslintcache
+.lighthouseci/
+test-results/
+playwright-report/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Logs
+*.log
+npm-debug.log*

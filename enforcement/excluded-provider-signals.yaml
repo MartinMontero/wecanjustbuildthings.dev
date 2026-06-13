@@ -1,0 +1,64 @@
+# wecanjustbuildthings.dev — Layer 3 provider-string signals.
+#
+# Layer 3 scans source trees for evidence that excluded providers are reachable:
+# network endpoints, SDK imports, and config keys. Endpoints and config keys can
+# legitimately appear in negative contexts ("we do NOT call api.openai.com"), so
+# matches are reported with file:line for human review, and import signals are
+# weighted highest because they are the hardest to explain away.
+
+openai:
+  endpoints:
+    - api.openai.com
+    - oai.azure.com            # Azure-hosted OpenAI; configurable, surfaced for review
+    - api.openai.azure.com
+  imports:
+    js_ts: ["from ['\"]openai['\"]", "from ['\"]@openai/", "require\\(['\"]openai['\"]\\)"]
+    py: ["^\\s*import openai\\b", "^\\s*from openai\\b", "^\\s*from openai_agents\\b"]
+    rust: ["use openai::", "use async_openai::"]
+    go: ["github\\.com/sashabaranov/go-openai", "github\\.com/openai/openai-go"]
+    ruby: ["require ['\"]openai['\"]", "require ['\"]ruby-openai['\"]"]
+    elixir: ["alias OpenAI", "use OpenAI"]
+    dart: ["package:openai_dart/", "package:dart_openai/"]
+    kotlin: ["import com\\.openai\\.", "import com\\.aallam\\.openai"]
+  config_keys:
+    - OPENAI_API_KEY
+    - OPENAI_ORG_ID
+    - OPENAI_BASE_URL          # may be repointed to a permitted gateway; surfaced for review
+    - OPENAI_PROJECT_ID
+
+xai:
+  endpoints:
+    - api.x.ai
+    - api.grok.com
+    - grok.x.ai
+  imports:
+    js_ts: ["from ['\"]@x-ai/", "from ['\"]grok-sdk['\"]", "require\\(['\"]grok-sdk['\"]\\)"]
+    py: ["^\\s*import xai\\b", "^\\s*from xai\\b", "^\\s*from xai_sdk\\b", "^\\s*import grok\\b"]
+    go: ["github\\.com/xai-org/"]
+  config_keys:
+    - XAI_API_KEY
+    - GROK_API_KEY
+
+meta:
+  endpoints:
+    - graph.facebook.com
+    - graph.instagram.com
+    - graph.threads.net
+    - whatsapp-business.facebook.com
+    - api.whatsapp.com
+    - business.facebook.com
+  imports:
+    js_ts:
+      - "from ['\"]facebook-nodejs-business-sdk['\"]"
+      - "from ['\"]@facebook/"
+      - "from ['\"]@meta/"
+      - "require\\(['\"]facebook-nodejs-business-sdk['\"]\\)"
+    py: ["^\\s*from facebook_business\\b", "^\\s*import facebook_business\\b"]
+    php: ["use Facebook\\\\Facebook"]
+  config_keys:
+    - FB_APP_ID
+    - FB_APP_SECRET
+    - FACEBOOK_APP_ID
+    - META_APP_ID
+    - INSTAGRAM_ACCESS_TOKEN
+    - WHATSAPP_BUSINESS_TOKEN
