@@ -1,0 +1,103 @@
+---
+title: Quickstart with an agent
+description: Use the catalog, skills, and recipes with Goose or Claude Code to build a Nostr or AT Protocol tool — with the exclusion policy enforced before anything ships.
+entry_type: page
+sidebar:
+  order: 3
+---
+
+import { Steps, Tabs, TabItem, Aside, Code } from '@astrojs/starlight/components';
+
+This walks you from zero to a vetted, policy-clean starting point for a Nostr or
+AT Protocol tool, using an AI agent as a skilled collaborator. It assumes nothing
+beyond a terminal.
+
+<Aside type="caution" title="Bring your own model key — and keep it clean">
+This project's whole point is that what you build does not route through excluded
+providers. When you configure your agent, use a permitted model provider
+(Anthropic, DeepSeek, Kimi, OpenRouter, or local Ollama). See the
+[Shakespeare BYOK recipe](/recipes/shakespeare-byok-configuration/) for the
+pattern and how to verify it.
+</Aside>
+
+## 1. Install a harness
+
+<Tabs>
+  <TabItem label="Goose">
+    Goose is an open-source agent harness now stewarded under the Linux
+    Foundation. Install it and configure it with a **permitted** provider:
+
+    ```sh
+    # See https://block.github.io/goose/ for the current installer
+    curl -fsSL https://block.github.io/goose/install.sh | bash
+    goose configure   # choose Anthropic / OpenRouter / Ollama — not OpenAI or xAI
+    ```
+  </TabItem>
+  <TabItem label="Claude Code">
+    ```sh
+    npm install -g @anthropic-ai/claude-code
+    claude            # in your project directory
+    ```
+  </TabItem>
+</Tabs>
+
+## 2. Scaffold from the Nostr / AT Protocol archetype
+
+The repository ships a [Spec Kit archetype](/contribute/) for a Nostr + AT
+Protocol web client whose constitution forbids excluded dependencies and wires in
+the enforcement engine.
+
+```sh
+git clone https://github.com/martinmontero/wecanjustbuildthings.dev
+cp -r wecanjustbuildthings.dev/templates/spec-kit/nostr-web-client my-app
+cd my-app
+```
+
+## 3. Pick components from the catalog, not from memory
+
+Don't ask the agent "what library should I use for Nostr?" — ask the catalog.
+Every entry is [license-verified at a commit](/policies/) and screened against
+the [exclusion policy](/policies/enforcement/).
+
+<Steps>
+
+1. Browse the [Catalog](/catalog/) or the relevant [build-flow stage](/pie/cooking/).
+2. Note the components you want (e.g. `nostr-tools`, `@noble/curves`,
+   `@atproto/api`).
+3. Hand the agent the list **and** the constraint: *"use only these, and run the
+   enforcement engine before committing."*
+
+</Steps>
+
+## 4. Let the agent build inside the guardrails
+
+The [skills](/contribute/) ship as both Claude Code skills and Goose recipes.
+They read the policy first, stop and ask when information is missing, and refuse
+to commit on a policy violation.
+
+```sh
+# After the agent makes changes, the same gate CI runs:
+npm run enforce        # catalog + recipe checks
+npx tsx enforcement/cli.ts all --tree .   # scan this project's own tree
+```
+
+If a dependency — or one of *its* dependencies — is owned by Meta, OpenAI, or
+xAI, the engine prints the exact chain and exits non-zero. Nothing ships until
+it's green.
+
+## 5. Verify the provider posture
+
+Before you deploy, confirm the running app talks to no excluded endpoint. The
+recipes describe a 5-minute network-observation check; the principle is simple:
+
+```sh
+# Watch outbound connections while exercising the app; none should hit
+# api.openai.com, api.x.ai, or graph.facebook.com
+```
+
+<Aside type="tip" title="What you end up with">
+A stable artifact someone can audit: pinned, license-verified dependencies; a
+clean provider posture; a real license; and a build that fails loudly if any of
+that regresses. That is the difference between "an agent wrote some code" and
+"we shipped something accountable."
+</Aside>

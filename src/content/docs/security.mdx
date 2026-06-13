@@ -1,0 +1,62 @@
+---
+title: Security
+description: The security posture of the catalog and how to report a vulnerability.
+entry_type: page
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+This catalog asks people to trust its judgment about what's safe to depend on, so
+its own posture has to hold up to inspection.
+
+## Reporting a vulnerability
+
+<Aside type="caution" title="Please report privately first">
+If you find a security issue in this site, the enforcement engine, or a recipe,
+report it privately via GitHub Security Advisories on the
+[repository](https://github.com/martinmontero/wecanjustbuildthings.dev/security/advisories/new)
+rather than opening a public issue. We aim to acknowledge within **5 business
+days**.
+</Aside>
+
+Please include: what you found, how to reproduce it, and the impact you see. If
+it's a false positive or false negative in the enforcement engine, a failing
+test case is the most useful thing you can send.
+
+## What the site is — and isn't
+
+This is a **static site**. There is no server-side application, no database, no
+user accounts, and no user-submitted data processed at runtime. The attack
+surface is correspondingly small: the build pipeline, the dependencies, and the
+hosting configuration.
+
+## Supply-chain integrity
+
+The catalog's reason to exist is supply-chain accountability, and it is applied
+to the catalog itself:
+
+- **Every dependency is screened** by the [three-layer enforcement
+  engine](/policies/enforcement/) on every pull request — direct, transitive,
+  and provider-string layers.
+- **Licenses are pinned to a commit**, not just declared, so a silent relicense
+  is detectable.
+- **A weekly license-watcher** hashes upstream `LICENSE` files and scans recent
+  commits for relicensing keywords, opening a PR when something drifts.
+- **A weekly maintenance-checker** reclassifies entries that have gone dormant or
+  abandoned.
+
+## Secrets and tokens
+
+The site needs no secrets to build the catalog. Deployment uses a scoped
+Cloudflare API token and account ID stored as repository secrets; an optional
+`GITHUB_TOKEN` raises rate limits for the indexing and weekly jobs. No model-
+provider keys are ever required or stored — anything that talks to a model does
+so client-side, BYOK, per the [recipes](/recipes/).
+
+## Hardening checklist (what CI enforces)
+
+- Content schema validated with `astro check`.
+- Enforcement engine green (Layers 1–3 + recipe contract).
+- Dead-link checking on every PR.
+- Pinned action versions and Node version in CI.
+- No analytics or third-party scripts unless explicitly configured.

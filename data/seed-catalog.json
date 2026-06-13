@@ -1,0 +1,137 @@
+[
+  {
+    "name": "nostr-tools",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Frameworks & Libraries",
+    "protocols": ["nostr"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "what_it_does": "The foundational JavaScript/TypeScript toolkit for Nostr: event creation and signing, relay connections, NIP-19 encoding, and key management. The default starting point for most Nostr web clients."
+  },
+  {
+    "name": "@nostr-dev-kit/ndk",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Frameworks & Libraries",
+    "protocols": ["nostr"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "what_it_does": "A higher-level Nostr Development Kit that manages relay pools, subscriptions, caching, and signers so app developers can work with Nostr data without hand-rolling relay logic."
+  },
+  {
+    "name": "@atproto/api",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Frameworks & Libraries",
+    "protocols": ["atproto"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "what_it_does": "The official AT Protocol (Bluesky) client SDK for JavaScript/TypeScript: agents, session management, and typed access to the com.atproto and app.bsky lexicons."
+  },
+  {
+    "name": "nostr",
+    "ecosystem": "rust",
+    "entry_type": "library",
+    "category": "Frameworks & Libraries",
+    "protocols": ["nostr"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "what_it_does": "The rust-nostr core crate: a high-performance, no-std-friendly implementation of Nostr primitives — events, keys, NIPs — used by relays, signers, and native clients."
+  },
+  {
+    "name": "github.com/nbd-wtf/go-nostr",
+    "ecosystem": "go",
+    "entry_type": "library",
+    "category": "Frameworks & Libraries",
+    "protocols": ["nostr"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "what_it_does": "The most widely used Go library for Nostr: event handling, relay pools, and NIP helpers. The backbone of many relays and backend services."
+  },
+  {
+    "name": "atproto",
+    "ecosystem": "py",
+    "entry_type": "library",
+    "category": "Frameworks & Libraries",
+    "protocols": ["atproto"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "what_it_does": "A complete, typed AT Protocol / Bluesky SDK for Python, including firehose consumption and lexicon-generated models."
+  },
+  {
+    "name": "@noble/curves",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Security & Privacy",
+    "protocols": ["nostr", "general"],
+    "pie_anchor": "§4 Cooking → Catalysts / Pressure",
+    "what_it_does": "Audited, zero-dependency elliptic-curve cryptography (secp256k1, ed25519, and more). The signing foundation under most Nostr key handling."
+  },
+  {
+    "name": "@scure/base",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Security & Privacy",
+    "protocols": ["general", "nostr"],
+    "pie_anchor": "§4 Cooking → Catalysts / Pressure",
+    "what_it_does": "Audited, zero-dependency base encodings (bech32, base58, base64). Used for NIP-19 (npub/nsec) and address encoding across freedom-tech stacks."
+  },
+  {
+    "name": "astro",
+    "ecosystem": "js",
+    "entry_type": "framework",
+    "category": "Dev Environment & Tooling",
+    "protocols": ["general"],
+    "pie_anchor": "§4 Cooking → The Oven",
+    "what_it_does": "A content-first web framework that ships zero JavaScript by default. Ideal for fast, accessible sites and documentation — this catalog runs on it."
+  },
+  {
+    "name": "@astrojs/starlight",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Frameworks & Libraries",
+    "protocols": ["general"],
+    "pie_anchor": "§4 Cooking → The Oven",
+    "what_it_does": "A full-featured documentation theme for Astro with built-in search, i18n, and accessibility. The framework powering this catalog's interface."
+  },
+  {
+    "name": "typescript",
+    "ecosystem": "js",
+    "entry_type": "tool",
+    "category": "Dev Environment & Tooling",
+    "protocols": ["general"],
+    "pie_anchor": "§4 Cooking → The Oven",
+    "what_it_does": "A typed superset of JavaScript that catches errors before runtime. The lingua franca of the Nostr and AT Protocol JS ecosystems."
+  },
+  {
+    "name": "vite",
+    "ecosystem": "js",
+    "entry_type": "tool",
+    "category": "Dev Environment & Tooling",
+    "protocols": ["general"],
+    "pie_anchor": "§4 Cooking → The Oven",
+    "what_it_does": "A fast build tool and dev server with instant HMR. The default bundler under Astro, SvelteKit, and most modern web clients."
+  },
+  {
+    "name": "zod",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Frameworks & Libraries",
+    "protocols": ["general"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "what_it_does": "TypeScript-first schema validation with static type inference. Used here to validate every catalog entry's frontmatter at build time."
+  },
+  {
+    "name": "vitest",
+    "ecosystem": "js",
+    "entry_type": "tool",
+    "category": "Testing & QA",
+    "protocols": ["general"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "what_it_does": "A fast, Vite-native unit test runner with a Jest-compatible API. The default test framework for modern TypeScript projects."
+  },
+  {
+    "name": "eslint",
+    "ecosystem": "js",
+    "entry_type": "tool",
+    "category": "Dev Environment & Tooling",
+    "protocols": ["general"],
+    "pie_anchor": "§4 Cooking → Pressure",
+    "what_it_does": "A pluggable linter that enforces code quality and catches bugs statically. A baseline quality gate for any shippable codebase."
+  }
+]

@@ -1,0 +1,78 @@
+---
+title: About & maintenance
+description: What this project is, how it stays current, and why it's designed to outlast its first maintainer.
+entry_type: page
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+**We Can Just Build Things** is a verified, values-enforced catalog and guided
+build flow for shipping Nostr, AT Protocol, and general open-source tools with AI
+agents. It exists to give the person defining what their community needs a way to
+deliver a professional-grade product without first having to become a developer —
+and to make the result accountable to the people who depend on it.
+
+It is built to be **shared infrastructure**, not a walled garden. The methodology
+is open, the catalog is open, and the enforcement engine is open.
+
+## How it stays current
+
+Maintenance runs in three layers, increasing in cost as you go up. The whole
+design assumes humans are scarce and automation is cheap — anything checkable by
+tooling is checked by tooling.
+
+### Automated, weekly, free
+A scheduled GitHub Action runs every Monday and:
+- **license-watcher** hashes each upstream `LICENSE`, compares it to the recorded
+  license + commit, and scans recent commits for relicensing keywords
+  (`relicens`, `now under`, `BSL`, `SSPL`, …) — three independent signals, so it
+  catches a quiet relicense before it's a surprise.
+- **maintenance-checker** pings each entry's release feed and reclassifies status
+  (`active` < 90d, `minimal` < 12mo, `dormant` < 36mo, `abandoned` beyond).
+- The **three-layer enforcement engine** re-runs against the full tree, so a
+  transitive dependency that newly pulls in an excluded provider is caught even
+  when no manifest changed.
+
+Each opens a PR with the proposed diff. No human is needed until the PR exists.
+
+### Human review, weekly, low effort
+A maintainer glances at the bot PRs — typically ~15 minutes a week. New-tool
+contributions arrive via [issue template and CMS](/contribute/), both of which
+run the enforcement engine before a PR is mergeable, so review is mostly "does
+this fit, is the description accurate" rather than "is this clean."
+**Review SLA: 7 business days** to first response.
+
+### Periodic, larger, scheduled
+Twice a year, a full re-verification pass refreshes every license commit SHA,
+revalidates primary-source links, and regenerates adoption metadata. Because the
+tooling does the heavy lifting, this is a half-day of reviewing diffs, not an
+audit from scratch.
+
+<Aside type="note" title="The honest part">
+A catalog of this scale maintained by hand would collapse within six months —
+every comparable directory that's tried has. This one works only because the
+verification is automated. Humans spend their attention on what tooling genuinely
+can't decide: editorial judgment, new-category structure, and contested
+exclusions.
+</Aside>
+
+## Designed to outlast its first maintainer
+
+If the original maintainer disappears on day fifteen, someone else can fork the
+repository, run the same workflows, and the catalog keeps verifying itself. The
+[access-transfer checklist](https://github.com/martinmontero/wecanjustbuildthings.dev)
+in the repo covers moving the hosting, DNS, and analytics ownership cleanly.
+
+## Lineage and attribution
+
+- The build flow adapts the open [PIE Cookbook](https://github.com/piepdx/pie-cookbook)
+  from the Portland Incubator Experiment.
+- The catalog is grounded in what the **And Other Stuff** collective actually
+  uses to ship freedom-tech projects.
+- The provider-agnostic exception is modeled on
+  [Shakespeare](https://gitlab.com/soapbox-pub/shakespeare)'s BYOK design.
+
+## Want to help?
+
+See [Contribute](/contribute/) to add a tool, fix an entry, or adapt the flow for
+your own program.

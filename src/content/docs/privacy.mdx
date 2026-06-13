@@ -1,0 +1,52 @@
+---
+title: Privacy
+description: How this site treats your data — no cookies, no trackers, no excluded providers. Privacy-first by construction.
+entry_type: page
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+This site practices what the catalog preaches.
+
+## What we collect: as close to nothing as possible
+
+- **No cookies.** The site sets none. There is no consent banner because there is
+  nothing to consent to.
+- **No third-party trackers.** No Google Analytics, no Meta pixel, no ad SDKs —
+  and the [enforcement engine](/policies/enforcement/) would block them if a
+  contributor tried to add one.
+- **No account, no login** to read anything.
+
+## Analytics, if any
+
+If the maintainer enables analytics, it is **Plausible** — a cookieless,
+privacy-respecting analytics tool that collects no personal data and no
+cross-site identifiers. It is only loaded when a `PLAUSIBLE_DOMAIN` is configured
+at build time; in local development and in forks, **no analytics script is
+included at all**. You can confirm this in `astro.config.mjs`.
+
+<Aside type="tip" title="Verify it yourself">
+Open your browser's network tab on any page. With analytics disabled you should
+see requests only to this site's own origin. That's the same kind of
+network-observation check the [recipes](/recipes/) ask you to run on what *you*
+build.
+</Aside>
+
+## Search
+
+Site search is powered by **Pagefind**, which builds a static index at deploy
+time and runs entirely in your browser. Your search queries never leave your
+device and hit no server.
+
+## What we don't do
+
+- We don't sell, share, or broker data — there isn't any to broker.
+- We don't embed fonts, scripts, or images from third-party CDNs that could log
+  your IP. The site uses your system font stack and self-hosts its assets.
+- We don't route anything through Meta, OpenAI, or xAI. That's the whole point.
+
+## Contact
+
+Privacy questions or concerns: open an issue on the
+[repository](https://github.com/martinmontero/wecanjustbuildthings.dev), or see
+[Security](/security/) for how to report a vulnerability privately.

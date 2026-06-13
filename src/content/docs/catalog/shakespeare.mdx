@@ -1,0 +1,73 @@
+---
+title: Shakespeare
+description: A browser-based, bring-your-own-key AI app builder for Nostr — the canonical provider-agnostic exception in this catalog.
+entry_type: service
+dependency_name: shakespeare
+ecosystem: js
+category: AI & Agents
+what_it_does: "Shakespeare is a browser-only AI coding environment from Soapbox for building Nostr apps. It stores your model-provider key in IndexedDB (BYOK) and lets you choose the provider — which is exactly why it qualifies for a provider-agnostic recipe rather than an outright exclusion."
+protocols: [nostr]
+homepage_url: https://shakespeare.diy
+repo_url: https://gitlab.com/soapbox-pub/shakespeare
+registry_url: https://gitlab.com/soapbox-pub/shakespeare
+license_spdx: AGPL-3.0-or-later
+license_source_url: https://gitlab.com/soapbox-pub/shakespeare/-/blob/a824677fe2d1b4cdd9815873559ae83b3971bdde/LICENSE
+license_source_commit_sha: a824677fe2d1b4cdd9815873559ae83b3971bdde
+maintenance_status: active
+last_release_at: "2026-06-12"
+aos_repos_using: 0
+pie_anchor: "§4 Cooking → Recipes"
+provider_agnostic: true
+verification_status: verified
+verified_at: "2026-06-13"
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Shakespeare is a browser-only AI app builder for Nostr, made by Soapbox. You
+describe an app and it scaffolds and edits it in the browser, talking to a model
+provider whose API key you supply yourself (BYOK), stored locally in IndexedDB.
+
+<div class="wcb-badges">
+<span class="wcb-badge wcb-badge--AGPL">license: AGPL-3.0-or-later</span>
+<span class="wcb-badge wcb-badge--active">status: active</span>
+<span class="wcb-badge wcb-badge--verified">verification: verified</span>
+</div>
+
+<dl class="wcb-meta">
+  <dt>Ecosystem</dt><dd>js / browser app</dd>
+  <dt>Category</dt><dd>AI &amp; Agents</dd>
+  <dt>License</dt><dd>AGPL-3.0-or-later</dd>
+  <dt>Canonical source</dt><dd><a href="https://gitlab.com/soapbox-pub/shakespeare">gitlab.com/soapbox-pub/shakespeare</a> (GitLab, not GitHub)</dd>
+  <dt>App</dt><dd><a href="https://shakespeare.diy">shakespeare.diy</a></dd>
+</dl>
+
+<Aside type="tip" title="Verified at a commit">
+License read as <code>AGPL-3.0-or-later</code> from
+<a href="https://gitlab.com/soapbox-pub/shakespeare/-/blob/a824677fe2d1b4cdd9815873559ae83b3971bdde/LICENSE">LICENSE</a>
+on the <code>main</code> branch at commit <code>a824677fe2d1</code>.
+</Aside>
+
+## Why it's a recipe, not an exclusion
+
+Shakespeare's provider picker includes permitted providers (Anthropic, DeepSeek,
+Kimi, OpenRouter, OpenCode Zen, PayPerQ, local Ollama) **and** excluded ones
+(OpenAI, xAI, Google). Because a genuinely clean configuration exists, the
+catalog doesn't exclude it outright — it requires a
+[provider-agnostic recipe](/recipes/shakespeare-byok-configuration/) that pins
+the configuration to permitted providers and describes how to verify it.
+
+<Aside type="caution" title="There is no NOSTR_SERVICE_PROVIDER env var">
+Older write-ups describe configuring Shakespeare via a server-side environment
+variable. That does not match the current (Act 2) architecture: Shakespeare is a
+**browser-only client** and the provider is chosen in **Settings → AI Provider**,
+stored client-side. The recipe enforces via UI-setting documentation plus
+network observation, not via an env var that doesn't exist.
+</Aside>
+
+## See also
+
+- The [exception recipe](/recipes/shakespeare-byok-configuration/) that makes a
+  clean configuration verifiable.
+- [How enforcement works](/policies/enforcement/#the-exception-recipes) — the
+  contract every recipe must satisfy.

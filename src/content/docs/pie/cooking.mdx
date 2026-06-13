@@ -1,0 +1,68 @@
+---
+title: Cooking
+description: The core of the build flow — base ingredients, the oven, and the recipes, mapped to the verified catalog.
+entry_type: pie
+sidebar:
+  order: 4
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import CatalogList from '../../../components/CatalogList.astro';
+
+**Cooking is where you build.** The PIE Cookbook's *Cooking* section breaks down
+into a *primary objective*, *base ingredients*, *other critical ingredients*, the
+*oven*, and *recipes*. This is where the catalog plugs directly in: each grouping
+maps to a set of vetted, license-checked components.
+
+<Aside type="note" title="From the source">
+This adapts the *Cooking → Primary objective / Base ingredients / Other critical
+ingredients / Oven / Recipes* section of the
+[PIE Cookbook](https://github.com/piepdx/pie-cookbook). The catalog mappings
+below are this project's addition.
+</Aside>
+
+## The Oven — your environment, infrastructure, and tooling
+
+The oven is what you cook *in*: your dev environment, build tooling, hosting, and
+storage. Get this right and everything else is faster; get it wrong and you fight
+your tools all day.
+
+<CatalogList pie="The Oven" />
+
+## Recipes — your frameworks and libraries
+
+The main-course ingredients: the frameworks and libraries that make up the body
+of what you ship. For Nostr and AT Protocol work this is where the protocol SDKs
+live.
+
+<CatalogList pie="Recipes" />
+
+## Catalysts & Pressure — security, identity, and observability
+
+The ingredients that determine whether what you ship is *safe*: cryptography,
+key handling, and the monitoring that tells you when something's wrong. For the
+communities this catalog serves, these are not optional garnishes.
+
+<CatalogList pie="Catalysts" />
+<CatalogList pie="Pressure" />
+
+## Build by protocol
+
+If you already know your substrate, jump straight to the components for it:
+
+<CardGrid>
+  <LinkCard title="Nostr" href="/catalog/" description="Signed-event social and messaging primitives." />
+  <LinkCard title="AT Protocol" href="/catalog/" description="The Bluesky / atproto stack." />
+</CardGrid>
+
+### Nostr components
+<CatalogList protocol="nostr" />
+
+### AT Protocol components
+<CatalogList protocol="atproto" />
+
+<Aside type="tip" title="Hand this to your agent">
+Once you've chosen ingredients, give the list to your harness with the
+constraint *"use only these, and run the enforcement engine before committing."*
+See the [quickstart](/start/quickstart/) for the exact commands.
+</Aside>

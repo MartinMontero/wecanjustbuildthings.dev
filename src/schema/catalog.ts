@@ -85,14 +85,14 @@ export const catalogFields = z.object({
   ecosystem: z.enum(ECOSYSTEMS).optional(),
   category: z.string().min(1).optional(),
   what_it_does: z.string().min(1).optional(),
-  homepage_url: z.string().url().optional(),
-  repo_url: z.string().url().optional(),
-  registry_url: z.string().url().optional(),
+  homepage_url: z.url().optional(),
+  repo_url: z.url().optional(),
+  registry_url: z.url().optional(),
   protocols: z.array(z.enum(PROTOCOLS)).default([]),
 
   // ---- License verification (the accountability core) ----
   license_spdx: z.string().min(1).optional(),
-  license_source_url: z.string().url().optional(),
+  license_source_url: z.url().optional(),
   license_source_commit_sha: z.string().min(7).optional(),
 
   // ---- Maintenance ----
@@ -141,7 +141,7 @@ export const catalogExtend = catalogFields.superRefine((data, ctx) => {
     for (const [field, value] of required) {
       if (value === undefined || value === null || value === '') {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           path: [field as string],
           message: `Catalog entry (entry_type: ${data.entry_type}) requires "${String(field)}".`,
         });
@@ -151,14 +151,14 @@ export const catalogExtend = catalogFields.superRefine((data, ctx) => {
     // A verified entry must pin a commit SHA; a blocked entry must say why.
     if (data.verification_status === 'verified' && !data.license_source_commit_sha) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ['license_source_commit_sha'],
         message: 'A verified catalog entry must pin license_source_commit_sha (the commit the license was read at).',
       });
     }
     if (data.verification_status === 'blocked' && !data.verification_blocked_reason) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ['verification_blocked_reason'],
         message: 'A blocked entry must document verification_blocked_reason.',
       });
@@ -167,25 +167,25 @@ export const catalogExtend = catalogFields.superRefine((data, ctx) => {
 
   if (data.entry_type === 'recipe') {
     if (!data.recipe_type) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['recipe_type'], message: 'Recipe requires recipe_type.' });
+      ctx.addIssue({ code: "custom", path: ['recipe_type'], message: 'Recipe requires recipe_type.' });
     }
     if (!data.target_entry_slug) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ['target_entry_slug'],
         message: 'Recipe requires target_entry_slug (the catalog entry it configures).',
       });
     }
     if (!data.excluded_providers_unreachable_when || data.excluded_providers_unreachable_when.length === 0) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ['excluded_providers_unreachable_when'],
         message: 'Recipe requires at least one excluded_providers_unreachable_when guard.',
       });
     }
     if (!data.verification_steps || data.verification_steps.length === 0) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         path: ['verification_steps'],
         message: 'Recipe requires at least one verification_step.',
       });

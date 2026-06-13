@@ -1,0 +1,107 @@
+---
+title: How enforcement works
+description: The three-layer enforcement engine in plain language — direct dependencies, the transitive tree, and provider strings in source.
+entry_type: policy
+sidebar:
+  order: 2
+  label: How enforcement works
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+The [exclusion policy](/policies/) is only meaningful because a machine enforces
+it. The engine is a TypeScript CLI (`enforcement/cli.ts`) that runs in CI on
+every pull request and weekly against the whole catalog. It checks three
+independent layers — a thing can hide from one, but not all three.
+
+<Aside type="tip" title="Run it yourself">
+```sh
+# Catalog + recipes (what the site's CI runs)
+npm run enforce
+# Scan any project's own source tree
+npx tsx enforcement/cli.ts all --tree path/to/project
+```
+The engine is offline and deterministic: it matches against a checked-in policy
+file, so the same input always produces the same result.
+</Aside>
+
+## Layer 1 — direct dependencies
+
+Layer 1 reads a project's manifests — `package.json`, `Cargo.toml`,
+`pyproject.toml`/`requirements.txt`, `go.mod`, `mix.exs`, `pubspec.yaml`,
+`Gemfile`, and Gradle build files — and flags any **directly declared**
+dependency owned by an excluded organization. For the catalog itself, it also
+reads every entry's frontmatter and confirms the tool it describes isn't an
+excluded package.
+
+> *Example:* adding `openai` to `package.json` fails Layer 1 with
+> `"openai" → openai (npm_package: openai)`.
+
+## Layer 2 — the transitive tree
+
+The dangerous case is the dependency you didn't choose: a library you trust that
+quietly pulls in an excluded client three levels down. Layer 2 walks the full
+lockfile graph — across **13 formats** (npm, pnpm, yarn classic & Berry, Cargo,
+uv, Poetry, pip-compile, Go modules, Bundler, Hex, pub, Gradle) — and reports the
+**entire chain** to the excluded package.
+
+> *Example:* `a@1.0.0 → openai@4.0.0 → openai` shows exactly how the excluded
+> package got in.
+
+<Aside type="note" title="Honest limits, surfaced not hidden">
+Some lockfiles (`pubspec.lock`, `gradle.lockfile`, `requirements.txt` without
+pip-compile `# via` markers) record the closure but not the edges. For those,
+Layer 2 still **detects** an excluded package's presence but says plainly that it
+**cannot reconstruct the chain** — it never pretends to a certainty it doesn't
+have.
+</Aside>
+
+## Layer 3 — provider strings in source
+
+Ownership isn't the whole story: a permissively-licensed, independently-owned
+library can still ship code that *calls* an excluded provider. Layer 3 scans
+source for three kinds of signal:
+
+<Steps>
+
+1. **Imports** — `import OpenAI from "openai"`, `from facebook_business …`,
+   `use async_openai::` — the strongest signal, hardest to explain away.
+
+2. **Endpoints** — `api.openai.com`, `api.x.ai`, `graph.facebook.com`.
+
+3. **Config keys** — `OPENAI_API_KEY`, `XAI_API_KEY`, `META_APP_ID`.
+
+</Steps>
+
+Endpoints and config keys can appear in *negative* contexts ("we deliberately do
+**not** call `api.openai.com`"), so Layer 3 reports each match with `file:line`
+for human review and weights imports highest. The signal definitions live in
+`enforcement/excluded-provider-signals.yaml`.
+
+## The exception: recipes
+
+The one sanctioned way to ship a tool that *can* reach an excluded provider is a
+**provider-agnostic recipe**. Layer 3 validates each recipe against a contract:
+
+- it must target a catalog entry marked `provider_agnostic: true`;
+- every excluded **LLM provider** (OpenAI, xAI) must appear in the recipe's
+  `must_not_be_one_of` list — otherwise the recipe doesn't actually close the
+  loophole and is **rejected**;
+- no permitted provider may itself be an excluded organization;
+- verification steps must block the excluded providers' endpoints.
+
+A recipe that forgets to exclude OpenAI fails the build. See the
+[Shakespeare BYOK recipe](/recipes/shakespeare-byok-configuration/) for a passing
+example.
+
+## What runs, and when
+
+| Trigger | What runs |
+|---|---|
+| Every pull request | Layer 1 (catalog) + recipe validation + `astro check` + dead-link check |
+| Weekly cron (Mondays) | All three layers + license-watcher + maintenance-checker, opening PRs with any drift |
+| Locally, any time | `npm run enforce` or `enforcement/cli.ts all --tree .` |
+
+The engine has a test suite of its own (40+ tests covering every parser and the
+recipe contract), because the thing that enforces accountability has to be
+accountable too.

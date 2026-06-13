@@ -1,0 +1,75 @@
+---
+title: Why not just use Goose?
+description: The difference between an AI agent harness (Goose, Claude Code, Aider) and the orchestration layer that decides, verifies, and refuses.
+entry_type: page
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Goose is a **harness** — a general-purpose framework for connecting an AI model
+to tools, files, and APIs so it can execute tasks. So is Claude Code. So is
+Aider. They are genuinely useful, and this project is built to run on top of
+them, not to replace them.
+
+But a harness doesn't know what you should build. It doesn't know which
+dependencies are safe. It doesn't know what license changed last week, and it
+doesn't have an opinion about any of it. **You** bring the intent, the
+architecture, the policy, and the verification standards. The harness brings the
+hands.
+
+## The gap that opens
+
+That works for people who already know what they're doing. A community organizer
+who needs a tool to document illegal evictions can't open Goose and say "build me
+the thing I need" — not because Goose can't write code, but because nobody told
+Goose:
+
+- what the thing should actually be,
+- which dependencies are trustworthy,
+- which ones quietly relicensed to a non-free license last month,
+- which architectural patterns protect user data from state actors,
+- or which deployment path doesn't route through surveillance infrastructure.
+
+The harness executes. It doesn't decide, it doesn't verify, and it doesn't
+refuse.
+
+## What this project is
+
+**We Can Just Build Things is the layer above the harness.** It is the structured
+intent, the verified dependency catalog, the exclusion policy with enforcement
+teeth, and the PIE-anchored decision flow that takes someone from "my community
+has this problem" to "here is the architecture, here are the vetted components,
+here is the recipe that assembles them under these constraints."
+
+When an agent finally runs — whether it's Goose, Claude Code, or anything else —
+it runs inside a frame of decisions that have already been made, verified, and
+documented. The skills here aren't open-ended "do whatever seems right" prompts;
+they are scoped workflows with policy files read first, stop-and-ask triggers
+when information is missing, and a [three-layer enforcement
+engine](/policies/enforcement/) that blocks the commit if something violates the
+exclusion policy.
+
+<Aside type="note" title="The drill and the blueprints">
+The difference is the difference between giving someone a power drill and giving
+them a power drill **plus** the blueprints, the materials list with every board
+inspected, the building code, and a foreman who won't let them frame a wall with
+rotten lumber. Goose is the drill. This is everything else. The harness is
+interchangeable; the orchestration layer is the product.
+</Aside>
+
+## Why the distinction is not academic
+
+A harness optimizes for the short head: the demo, the first deploy, the
+conference talk. In the long tail — month six of production, the relay operator
+who discovers rate limiting was never added, the organizer who finds out their
+moderation pipeline was quietly sending user content to a third-party model — the
+absence of verification compounds into real harm.
+
+This project is built for the person in the long tail: the one whose safety
+depends on what they build, who needs to make decisions with their eyes open.
+The [operational advisories](/policies/), the [enforcement
+engine](/policies/enforcement/), and the [configuration recipes](/recipes/) are
+the mechanisms that move accountability from a storyteller's good intentions to a
+stable artifact that can be inspected by the person who bears the risk.

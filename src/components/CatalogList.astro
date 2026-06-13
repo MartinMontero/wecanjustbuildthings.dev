@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+
+interface Props {
+  category?: string;
+  protocol?: string;
+  pie?: string;
+  limit?: number;
+}
+
+const { category, protocol, pie, limit } = Astro.props;
+
+const CATALOG_TYPES = new Set(['tool', 'framework', 'library', 'service', 'protocol']);
+
+let entries = await getCollection('docs', ({ data }) => {
+  if (!data.entry_type || !CATALOG_TYPES.has(data.entry_type)) return false;
+  if (category && data.category !== category) return false;
+  if (protocol && !(data.protocols ?? []).some((p) => p === protocol)) return false;
+  if (pie && !(data.pie_anchor ?? '').includes(pie)) return false;
+  return true;
+});
+
+entries = entries.sort(
+  (a, b) => (b.data.aos_repos_using ?? 0) - (a.data.aos_repos_using ?? 0) || a.id.localeCompare(b.id),
+);
+
+if (limit) entries = entries.slice(0, limit);
+---
+
+{
+  entries.length === 0 ? (
+    <p>
+      <em>No catalog entries match this filter yet.</em>
+    </p>
+  ) : (
+    <ul class="wcb-catalog-list">
+      {entries.map((entry) => (
+        <li>
+          <a href={`/${entry.id}/`}>
+            <strong>{entry.data.dependency_name}</strong>
+          </a>{' '}
+          <span class={`wcb-badge wcb-badge--${entry.data.verification_status}`}>
+            {entry.data.verification_status}
+          </span>{' '}
+          <span class={`wcb-badge wcb-badge--${entry.data.maintenance_status}`}>
+            {entry.data.maintenance_status}
+          </span>
+          <br />
+          <span class="wcb-catalog-desc">{entry.data.what_it_does}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .wcb-catalog-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+  }
+  .wcb-catalog-list li {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--sl-color-gray-6);
+  }
+  .wcb-catalog-desc {
+    color: var(--sl-color-gray-3);
+    font-size: 0.9rem;
+  }
+</style>

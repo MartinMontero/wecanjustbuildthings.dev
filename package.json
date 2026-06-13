@@ -32,6 +32,7 @@
     "sharp": "^0.35.1"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
     "@iarna/toml": "^2.2.5",
     "@types/node": "^22.10.0",
     "@yarnpkg/lockfile": "^1.1.0",

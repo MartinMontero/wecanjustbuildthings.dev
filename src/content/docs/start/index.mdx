@@ -1,0 +1,83 @@
+---
+title: What this is
+description: A 3-minute orientation to We Can Just Build Things — the verified catalog, the guided flow, and the policy engine that sit above your AI agent.
+entry_type: page
+sidebar:
+  order: 1
+---
+
+import { Steps, Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+**We Can Just Build Things** is an open operational system for building production-grade,
+privacy-respecting software with AI agents — without having to already be a
+developer to make the decisions that matter.
+
+It exists because people with ideas hit a wall the moment they try to act on
+them. Not a wall of capability — a wall of **navigation**. There is no shortage
+of free, open-source tools. There are tens of thousands of them, scattered
+across registries and Discord screenshots, with no reliable way to tell which
+are maintained, which quietly relicensed last year, and which route your users'
+data through infrastructure you'd never knowingly choose.
+
+This project solves both problems at once: it makes the landscape navigable for
+someone who isn't already inside it, and it takes a position on what belongs in
+it — **enforced by tooling, not by good intentions in a README.**
+
+## The three things it gives you
+
+<CardGrid>
+  <LinkCard
+    title="A verified catalog"
+    href="/catalog/"
+    description="Tools license-checked at a specific commit and screened against a strict exclusion policy. Each entry shows its work."
+  />
+  <LinkCard
+    title="A guided build flow"
+    href="/pie/about/"
+    description="A decision flow adapted from the PIE PDX accelerator: from “my community has a problem” to a concrete, vetted plan."
+  />
+  <LinkCard
+    title="A policy engine with teeth"
+    href="/policies/enforcement/"
+    description="A three-layer check that blocks anything depending on Meta, OpenAI, or xAI — directly or transitively."
+  />
+  <LinkCard
+    title="Reusable agent skills"
+    href="/contribute/"
+    description="Skills and recipes that encode real engineering discipline into repeatable workflows for Goose or Claude Code."
+  />
+</CardGrid>
+
+## How you'll actually use it
+
+<Steps>
+
+1. **Start from your problem, not a tool.** Walk the [build flow](/pie/about/) to
+   turn an intent ("my community needs to document evictions safely") into a
+   shape: what you have, what's missing, what the working theory is.
+
+2. **Get a vetted shortlist.** By the end you have concrete, license-checked
+   components that match your stage, your stack, and the values you care about.
+
+3. **Hand the frame to an agent.** Point Goose, Claude Code, or Aider at the
+   [recipes](/recipes/) and [skills](/contribute/). The agent runs *inside* a
+   set of decisions that have already been made, verified, and documented.
+
+4. **Ship something accountable.** The output is a stable artifact someone can
+   audit — pinned dependencies, a clean provider posture, a real license.
+
+</Steps>
+
+<Aside type="tip" title="You don't have to become a developer">
+The person defining what their community needs never has to become an engineer.
+But the product they deliver should be indistinguishable from one built by a
+professional team. That gap is what the catalog, the flow, and the policy engine
+close.
+</Aside>
+
+## Who it's for
+
+This is **not** built for the founder who already controls the agent network and
+sets the norms. It's built for the organizer, the nonprofit, the feminist tech
+collective — the person who has to *trust* a system without being able to see
+inside it. Read [why that distinction matters →](/start/vs-harness/)

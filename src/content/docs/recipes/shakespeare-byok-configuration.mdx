@@ -1,0 +1,87 @@
+---
+title: Shakespeare — provider-agnostic BYOK configuration
+description: The canonical exception recipe — configure Shakespeare to use only permitted model providers, and verify no traffic reaches OpenAI, xAI, or Google.
+entry_type: recipe
+recipe_type: configuration
+target_entry: Shakespeare
+target_entry_slug: shakespeare
+provider_agnostic: false
+excluded_providers_unreachable_when:
+  - description: "Shakespeare's provider picker (browser-side, IndexedDB) is set to a permitted provider."
+    config_surface: ui_setting
+    setting_path: "Settings → AI Provider"
+    must_be_one_of: [anthropic, deepseek, kimi, ollama-local, openrouter, opencode-zen, payperq]
+    must_not_be_one_of: [openai, xai, google]
+verification_steps:
+  - description: "After configuring the provider, exercise the app for 5 minutes and confirm no requests reach the excluded hosts."
+    method: network_observation
+    duration_minutes: 5
+    blocked_hosts: [api.openai.com, api.x.ai, generativelanguage.googleapis.com]
+sidebar:
+  label: Shakespeare (BYOK)
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+[Shakespeare](/catalog/shakespeare/) is the catalog's one provider-agnostic
+exception: it can talk to excluded providers (OpenAI, xAI, Google) **or**
+permitted ones. This recipe documents — and machine-verifies — the clean
+configuration.
+
+<Aside type="note" title="Canonical source">
+Shakespeare lives on **GitLab**, not GitHub:
+[gitlab.com/soapbox-pub/shakespeare](https://gitlab.com/soapbox-pub/shakespeare),
+AGPL-3.0, default branch `main`. Pinned for this recipe at commit
+[`a824677f`](https://gitlab.com/soapbox-pub/shakespeare/-/commit/a824677fe2d1b4cdd9815873559ae83b3971bdde)
+(12 Jun 2026).
+</Aside>
+
+## Configure (≈2 minutes)
+
+<Steps>
+
+1. Open Shakespeare at [shakespeare.diy](https://shakespeare.diy).
+
+2. Go to **Settings → AI Provider**.
+
+3. Choose a **permitted** provider — one of: Anthropic, DeepSeek, Kimi (Moonshot),
+   OpenRouter, OpenCode Zen, PayPerQ, or local **Ollama**.
+
+4. Paste your own API key for that provider (BYOK). It's stored locally in your
+   browser's IndexedDB — it is not sent to Shakespeare's servers.
+
+5. **Do not** select OpenAI, xAI, or Google.
+
+</Steps>
+
+## Verify (≈5 minutes)
+
+The configuration is only trustworthy if you confirm it. Watch the network while
+you use the app:
+
+```sh
+# In the browser devtools Network tab, or via a proxy/inspector,
+# exercise Shakespeare for ~5 minutes and confirm NO requests to:
+#   api.openai.com
+#   api.x.ai
+#   generativelanguage.googleapis.com
+```
+
+If you picked Anthropic, you should see traffic to `api.anthropic.com` and
+nothing to any excluded host. If you picked local Ollama, you should see traffic
+only to `localhost`.
+
+<Aside type="tip" title="Why this is the only exception">
+Most tools are either clean or not. Shakespeare is the rare case where the *same
+tool* can be either, depending on a setting — so the catalog allows a documented,
+checkable configuration instead of an outright exclusion. The
+[recipe contract](/policies/enforcement/#the-exception-recipes) requires that
+every excluded LLM provider appears in <code>must_not_be_one_of</code>, so a
+recipe that quietly forgot to exclude OpenAI would fail CI.
+</Aside>
+
+## Applying the same pattern elsewhere
+
+Any agent harness you use to build with this catalog — Goose, Claude Code, Aider —
+should follow the same BYOK discipline: pick a permitted provider, supply your own
+key, and verify the network. See the [quickstart](/start/quickstart/).

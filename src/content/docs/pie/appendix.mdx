@@ -1,0 +1,43 @@
+---
+title: Appendix
+description: The toolkit and resources — including the verified catalog itself and the agent skills.
+entry_type: pie
+sidebar:
+  order: 6
+---
+
+import { Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+The PIE Cookbook's *Appendix* gathers statistics, class breakdowns, a tool kit,
+and resources. Here, the appendix is mostly a set of pointers into the parts of
+this project you'll use while cooking.
+
+<Aside type="note" title="From the source">
+This adapts the *Appendix → Tool Kit / Resources* subsections of the
+[PIE Cookbook](https://github.com/piepdx/pie-cookbook).
+</Aside>
+
+## The tool kit
+
+<CardGrid>
+  <LinkCard title="The catalog" href="/catalog/" description="Every vetted ingredient, license-checked at a commit." />
+  <LinkCard title="The recipes" href="/recipes/" description="Configuration patterns that wire tools together safely." />
+  <LinkCard title="The skills" href="/contribute/" description="Agent skills and Goose recipes that encode the discipline." />
+  <LinkCard title="The archetype" href="/contribute/" description="A Spec Kit scaffold for Nostr + AT Protocol clients." />
+</CardGrid>
+
+## Resources
+
+- **The exclusion policy** — [what's excluded and why](/policies/).
+- **How enforcement works** — [the three-layer engine in plain language](/policies/enforcement/).
+- **Privacy & security** — [how this site treats your data](/privacy/) and its
+  [security posture](/security/).
+- **The PIE Cookbook** — the upstream methodology, at
+  [github.com/piepdx/pie-cookbook](https://github.com/piepdx/pie-cookbook).
+
+## A note on statistics
+
+The cookbook reports on cohorts and outcomes. The analog here is the catalog's
+own health: how many entries are `verified` vs. `under_review`, and how fresh the
+license and maintenance data is. Those numbers are produced by the weekly
+automation described in [About & maintenance](/about/), not asserted by hand.

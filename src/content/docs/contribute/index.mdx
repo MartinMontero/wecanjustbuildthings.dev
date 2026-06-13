@@ -1,0 +1,92 @@
+---
+title: Add a tool
+description: How to contribute a tool, recipe, or fix — and how the enforcement engine gates every contribution before it can merge.
+entry_type: page
+sidebar:
+  order: 1
+  label: Add a tool
+---
+
+import { Steps, Tabs, TabItem, Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+Contributions are welcome, and the bar is mechanical, not social: **a tool gets
+in if it passes the [enforcement engine](/policies/enforcement/) and is described
+accurately.** "Is this dependency clean?" is already answered by CI, so review is
+about fit and accuracy.
+
+## Add a tool
+
+<Tabs>
+  <TabItem label="Issue template">
+    The lowest-friction path. Open a **New tool** issue and fill in the
+    dependency name, ecosystem, primary-source URL, and license claim. The
+    template is structured so a maintainer (or an agent skill) can turn it into a
+    verified entry.
+
+    [Open a new-tool issue →](https://github.com/martinmontero/wecanjustbuildthings.dev/issues/new?template=new-tool.yml)
+  </TabItem>
+  <TabItem label="CMS (no Git)">
+    For non-developers, the site ships a Git-based CMS (**Sveltia**) at
+    `/admin/`. Sign in with GitHub, fill in the fields, and it opens a pull
+    request for you — the same PR a developer would open, so the same CI runs.
+  </TabItem>
+  <TabItem label="Pull request">
+    Generate an entry with the catalog tooling and open a PR:
+
+    ```sh
+    # add your tool to data/seed-catalog.json, then:
+    npm run data:fetch          # fetches license @ commit, maintenance, metadata
+    npm run enforce             # must pass
+    npm run check               # astro schema validation
+    ```
+  </TabItem>
+</Tabs>
+
+## What CI checks before a merge
+
+<Steps>
+
+1. **`astro check`** — your entry's frontmatter matches the schema (a verified
+   entry must pin a license commit; a blocked entry must say why).
+
+2. **Enforcement Layer 1** — the tool isn't owned by an excluded organization.
+
+3. **Recipe contract** (if you added a recipe) — it targets a
+   `provider_agnostic` entry and actually excludes the LLM providers.
+
+4. **Dead-link check** — your primary-source and license URLs resolve.
+
+</Steps>
+
+<Aside type="caution" title="The engine is not advisory">
+If your contribution introduces a dependency on Meta, OpenAI, or xAI — directly
+or transitively — the PR fails and cannot merge. That's a feature. Use a
+[provider-agnostic recipe](/recipes/shakespeare-byok-configuration/) if the tool
+legitimately supports a permitted provider.
+</Aside>
+
+## Build with the skills and archetype
+
+The repository also ships reusable assets for building *with* an agent:
+
+<CardGrid>
+  <LinkCard
+    title="Agent skills"
+    href="https://github.com/martinmontero/wecanjustbuildthings.dev/tree/main/skills"
+    description="catalog-entry-author, license-watcher, maintenance-checker — as Claude Code skills and Goose recipes. Each runs the enforcement engine before committing."
+  />
+  <LinkCard
+    title="Spec Kit archetype"
+    href="https://github.com/martinmontero/wecanjustbuildthings.dev/tree/main/templates/spec-kit/nostr-web-client"
+    description="A scaffold for a Nostr + AT Protocol web client whose constitution forbids excluded dependencies."
+  />
+</CardGrid>
+
+See the [quickstart](/start/quickstart/) for using these with Goose or Claude
+Code, and [Contributing guidelines](https://github.com/martinmontero/wecanjustbuildthings.dev/blob/main/CONTRIBUTING.md)
+for the full flow.
+
+## Maintenance & governance
+
+How the catalog stays current, the review SLAs, and how it's designed to outlast
+its first maintainer are documented in [About & maintenance](/about/).

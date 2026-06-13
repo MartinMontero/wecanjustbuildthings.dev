@@ -1,0 +1,55 @@
+---
+title: About the build flow
+description: How the guided build flow adapts the PIE PDX accelerator's “cookbook” methodology into a path from intent to a shippable, vetted plan.
+entry_type: pie
+sidebar:
+  order: 1
+  label: About the flow
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+The build flow is adapted from the **PIE Cookbook** — the open-source playbook of
+the Portland Incubator Experiment (PIE PDX), a long-running accelerator that
+documented how it actually helped people go from an idea to a working venture.
+The cookbook is published openly; this flow re-uses its structure and metaphor
+and points back to the source throughout.
+
+<Aside type="note" title="Source & attribution">
+The section structure here mirrors the PIE Cookbook's own outline — *About*,
+*Baking PIE*, *Kitchen Prep*, *Cooking*, *Other flavors of PIE*, and *Appendix*.
+Read the original at
+[github.com/piepdx/pie-cookbook](https://github.com/piepdx/pie-cookbook). Where
+this site adapts the language, it says so; it does not put words in the
+cookbook's mouth.
+</Aside>
+
+## Why a cooking metaphor
+
+The cookbook frames building something as cooking: you take stock of your kitchen
+(**Kitchen Prep** — the environmental scan), you assemble ingredients and use the
+right equipment (**Cooking** — base ingredients, the oven, the recipes), and you
+learn from what worked and what didn't. The metaphor is useful here because it
+keeps the focus on *the cook* — the person with the intent — rather than on the
+tools. Tools are ingredients; you are still the one cooking.
+
+That is exactly the stance this project takes toward AI agents: the agent is a
+very capable sous-chef, but you decide what's for dinner, and you're accountable
+for what comes out of the kitchen.
+
+## The shape of the flow
+
+<CardGrid>
+  <LinkCard title="Baking PIE" href="/pie/baking-pie/" description="Context and history — why an open accelerator methodology, and why open source." />
+  <LinkCard title="Kitchen Prep" href="/pie/kitchen-prep/" description="The environmental scan: what you have, what's missing, your working theory." />
+  <LinkCard title="Cooking" href="/pie/cooking/" description="The core: base ingredients, the oven, and the recipes — where the catalog plugs in." />
+  <LinkCard title="Other flavors" href="/pie/other-flavors/" description="How collectives and accelerators reuse this as shared infrastructure." />
+  <LinkCard title="Appendix" href="/pie/appendix/" description="The toolkit and resources — including the catalog itself." />
+</CardGrid>
+
+## How to read it
+
+You don't have to go in order, but most people benefit from starting at
+[Kitchen Prep](/pie/kitchen-prep/): name the problem before you reach for a tool.
+By the time you get to [Cooking](/pie/cooking/) you'll be choosing from a
+[catalog](/catalog/) of vetted components instead of a search-engine guess.
