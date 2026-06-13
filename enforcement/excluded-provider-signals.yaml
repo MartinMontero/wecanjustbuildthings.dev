@@ -12,7 +12,7 @@ openai:
     - oai.azure.com            # Azure-hosted OpenAI; configurable, surfaced for review
     - api.openai.azure.com
   imports:
-    js_ts: ["from ['\"]openai['\"]", "from ['\"]@openai/", "require\\(['\"]openai['\"]\\)"]
+    js_ts: ["from ['\"]openai['\"]", "from ['\"]openai/", "from ['\"]@openai/", "require\\(['\"]openai['\"]\\)", "import\\(['\"]openai['\"]\\)"]
     py: ["^\\s*import openai\\b", "^\\s*from openai\\b", "^\\s*from openai_agents\\b"]
     rust: ["use openai::", "use async_openai::"]
     go: ["github\\.com/sashabaranov/go-openai", "github\\.com/openai/openai-go"]
@@ -32,7 +32,7 @@ xai:
     - api.grok.com
     - grok.x.ai
   imports:
-    js_ts: ["from ['\"]@x-ai/", "from ['\"]grok-sdk['\"]", "require\\(['\"]grok-sdk['\"]\\)"]
+    js_ts: ["from ['\"]@x-ai/", "from ['\"]grok-sdk['\"]", "require\\(['\"]grok-sdk['\"]\\)", "import\\(['\"]grok-sdk['\"]\\)", "import\\(['\"]@x-ai/"]
     py: ["^\\s*import xai\\b", "^\\s*from xai\\b", "^\\s*from xai_sdk\\b", "^\\s*import grok\\b"]
     go: ["github\\.com/xai-org/"]
   config_keys:
@@ -53,6 +53,7 @@ meta:
       - "from ['\"]@facebook/"
       - "from ['\"]@meta/"
       - "require\\(['\"]facebook-nodejs-business-sdk['\"]\\)"
+      - "import\\(['\"]facebook-nodejs-business-sdk['\"]\\)"
     py: ["^\\s*from facebook_business\\b", "^\\s*import facebook_business\\b"]
     php: ["use Facebook\\\\Facebook"]
   config_keys:

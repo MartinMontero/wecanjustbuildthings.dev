@@ -7,7 +7,8 @@ export interface RegistryInfo {
   publishedAt?: string;
   repoUrl?: string;
   homepageUrl?: string;
-  registryUrl: string;
+  /** Undefined when the entry has no package registry (e.g. ecosystem: other). */
+  registryUrl?: string;
   /** Commit SHA the published artifact was built from, when the registry records it. */
   gitHead?: string;
 }
@@ -44,7 +45,8 @@ async function crates(name: string): Promise<RegistryInfo> {
   if (!res.ok || !res.json) return info;
   const d = res.json as Record<string, any>;
   const newest = d.versions?.[0];
-  info.version = d.crate?.newest_version ?? newest?.num;
+  // Read version and license from the SAME release so the pin is consistent.
+  info.version = newest?.num ?? d.crate?.newest_version;
   info.license = newest?.license;
   info.publishedAt = newest?.created_at;
   info.repoUrl = normalizeRepo(d.crate?.repository);
@@ -77,7 +79,8 @@ function classifierLicense(classifiers: string[] | undefined): string | undefine
     'License :: OSI Approved :: MIT License': 'MIT',
     'License :: OSI Approved :: Apache Software License': 'Apache-2.0',
     'License :: OSI Approved :: BSD License': 'BSD-3-Clause',
-    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)': 'GPL-3.0',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)': 'GPL-3.0-or-later',
+    'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)': 'AGPL-3.0-or-later',
     'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)': 'MPL-2.0',
   };
   for (const c of classifiers ?? []) if (map[c]) return map[c];
@@ -156,6 +159,8 @@ export function fetchRegistry(name: string, ecosystem: Ecosystem): Promise<Regis
     case 'go':
       return golang(name);
     default:
-      return Promise.resolve({ registryUrl: '' });
+      // No package registry for this ecosystem (e.g. 'other', or kotlin without
+      // a Maven POM fetcher) — leave registryUrl undefined so it's omitted.
+      return Promise.resolve({});
   }
 }

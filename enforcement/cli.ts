@@ -68,9 +68,11 @@ const treeDir = typeof flags.tree === 'string' ? flags.tree : undefined;
 const reportDir = typeof flags['report-dir'] === 'string' ? flags['report-dir'] : 'reports/enforcement';
 
 let hadBlock = false;
+let didWork = false;
 
 function doLayer1(): void {
   if (catalogDir) {
+    didWork = true;
     heading(`Layer 1 — catalog entries (${catalogDir})`);
     const report = runCatalogLayer1(catalogDir, orgs);
     writeJsonReport(`${reportDir}/layer1-catalog.json`, report);
@@ -100,6 +102,7 @@ function doLayer2(): void {
     warn('layer2: transitive walk needs a source tree with lockfiles (pass --tree)');
     return;
   }
+  didWork = true;
   heading(`Layer 2 — transitive lockfile walk (${treeDir})`);
   const report = runLayer2OnTree(treeDir, orgs);
   writeJsonReport(`${reportDir}/layer2-tree.json`, report);
@@ -119,6 +122,7 @@ function loadCatalogEntries(): DocEntry[] {
 
 function doRecipes(): void {
   if (!recipesDir) return;
+  didWork = true;
   heading(`Recipes — provider-agnostic exception contract (${recipesDir})`);
   const catalog = loadCatalogEntries();
   const recipes = readDocEntries(recipesDir).filter((e) => e.frontmatter.entry_type === 'recipe');
@@ -138,6 +142,7 @@ function doRecipes(): void {
 
 function doLayer3(): void {
   if (treeDir) {
+    didWork = true;
     heading(`Layer 3 — provider-string scan (${treeDir})`);
     const report = runLayer3OnTree(treeDir, signals);
     writeJsonReport(`${reportDir}/layer3-tree.json`, report);
@@ -159,6 +164,7 @@ function doRecipeFile(path: string | undefined): void {
     return;
   }
   heading(`Recipe — ${path}`);
+  didWork = true;
   let entry: DocEntry;
   try {
     const content = readFileSync(path, 'utf8');
@@ -200,11 +206,19 @@ switch (command) {
     process.exitCode = 2;
 }
 
+const KNOWN_COMMANDS = new Set(['layer1', 'layer2', 'layer3', 'recipe', 'all']);
+
 if (hadBlock) {
   console.log('');
   block('Enforcement failed: one or more entries violate the exclusion policy.');
   process.exitCode = 1;
-} else if (command !== 'default') {
+} else if (KNOWN_COMMANDS.has(command) && !didWork) {
+  // A real command ran but had nothing to scan (no --catalog/--tree/--recipes).
+  // Do not report a misleading "passed" — that masks a misconfigured CI step.
+  console.log('');
+  warn('Nothing was scanned. Pass --catalog, --tree, and/or --recipes.');
+  process.exitCode = 2;
+} else if (KNOWN_COMMANDS.has(command)) {
   console.log('');
   pass('Enforcement passed.');
 }

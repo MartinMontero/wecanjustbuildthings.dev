@@ -83,9 +83,10 @@ test('rejects a permitted provider that is itself excluded', () => {
   assert.equal(result.status, 'block');
 });
 
-test('warns when verification steps do not block excluded endpoints', () => {
+test('rejects a recipe whose verification steps block no excluded endpoint', () => {
   const fm = structuredClone(validFrontmatter);
   fm.verification_steps[0]!.blocked_hosts = [];
   const result = validateRecipe(recipe(fm), ctx);
-  assert.ok(result.warnings.some((w) => w.includes('endpoint')));
+  assert.equal(result.status, 'block');
+  assert.ok(result.errors.some((e) => e.includes('endpoint')));
 });

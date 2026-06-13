@@ -10,9 +10,13 @@ export interface GitLabMeta {
 
 export function parseGitLabRepo(url: string | undefined): string | null {
   if (!url) return null;
-  const m = url.match(/gitlab\.com\/(.+?)(?:\.git)?(?:[#?].*)?$/i);
+  const m = url.match(/gitlab\.com\/([^?#]+)/i);
   if (!m) return null;
-  return m[1]!.replace(/\/$/, '');
+  let path = m[1]!.replace(/\.git$/, '').replace(/\/+$/, '');
+  // Strip GitLab's "/-/tree|blob|commit|…" deep-link suffix to leave group/project.
+  const dash = path.indexOf('/-/');
+  if (dash >= 0) path = path.slice(0, dash);
+  return path || null;
 }
 
 const KEY_TO_SPDX: Record<string, string> = {

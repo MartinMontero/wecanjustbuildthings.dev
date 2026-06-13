@@ -67,6 +67,26 @@ snapshots:
   expectChain(parsePnpmLock(lock, 'pnpm-lock.yaml'), 'openai', ['a', 'openai']);
 });
 
+test('pnpm-lock.yaml v5 — slash-separated /name/version keys still detect', () => {
+  const lock = `lockfileVersion: 5.4
+importers:
+  .:
+    dependencies:
+      a: 1.0.0
+packages:
+  /a/1.0.0:
+    dependencies:
+      openai: 4.20.0
+  /openai/4.20.0:
+    dev: false
+  /@openai/agents/0.1.0:
+    dev: false
+`;
+  const findings = findExcludedInGraph(parsePnpmLock(lock, 'pnpm-lock.yaml'), orgs);
+  assert.ok(findings.some((f) => f.excluded_package.startsWith('openai@')), 'unscoped /openai/4.20.0 must be detected');
+  assert.ok(findings.some((f) => f.excluded_package.startsWith('@openai/agents')), 'scoped must be detected');
+});
+
 test('yarn.lock v1 — chain a → openai', () => {
   const lock = `a@^1.0.0:
   version "1.0.0"
@@ -161,6 +181,18 @@ openai==1.30.0
     # via a
 `;
   expectChain(parseRequirementsLock(lock, 'requirements.txt'), 'openai', ['a', 'openai']);
+});
+
+test('requirements.txt # via — forward parent reference (alphabetical order) still traces chain', () => {
+  // pip-compile sorts alphabetically. The excluded child (openai) and its
+  // `# via uvicorn-ext` marker appear BEFORE the parent's own node, so the
+  // parent→child edge is a forward reference that single-pass parsing would drop.
+  const lock = `openai==1.10.0
+    # via uvicorn-ext
+uvicorn-ext==2.0.0
+    # via -r requirements.in
+`;
+  expectChain(parseRequirementsLock(lock, 'requirements.txt'), 'openai', ['uvicorn-ext', 'openai']);
 });
 
 test('requirements.txt without # via — closure-only', () => {

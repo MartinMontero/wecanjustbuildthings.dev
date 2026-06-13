@@ -52,7 +52,7 @@ const orgs = loadExcludedOrgs();
 
 async function loadSpdxIds(): Promise<Set<string>> {
   const cacheFile = 'data/spdx-licenses.json';
-  type SpdxList = { licenses?: Array<{ licenseId: string }> };
+  type SpdxList = { licenses?: Array<{ licenseId: string; isDeprecatedLicenseId?: boolean }> };
   let json: SpdxList | null = null;
   if (existsSync(cacheFile)) {
     json = JSON.parse(readFileSync(cacheFile, 'utf8')) as SpdxList;
@@ -66,7 +66,9 @@ async function loadSpdxIds(): Promise<Set<string>> {
       writeFileSync(cacheFile, JSON.stringify(json, null, 2));
     }
   }
-  const ids = new Set((json?.licenses ?? []).map((l) => l.licenseId));
+  // Validate only against current, non-deprecated SPDX ids so a deprecated id
+  // (e.g. "GPL-3.0") is not accepted as canonical.
+  const ids = new Set((json?.licenses ?? []).filter((l) => !l.isDeprecatedLicenseId).map((l) => l.licenseId));
   if (ids.size === 0) console.warn('  ! SPDX license list unavailable — entries will be marked under_review.');
   return ids;
 }
@@ -82,6 +84,12 @@ function normalizeSpdx(raw: string | undefined): string | undefined {
     'ISC License': 'ISC',
     'GPLv3': 'GPL-3.0-or-later',
     'AGPLv3': 'AGPL-3.0-or-later',
+    // Deprecated SPDX ids → canonical replacements.
+    'GPL-3.0': 'GPL-3.0-or-later',
+    'GPL-2.0': 'GPL-2.0-or-later',
+    'LGPL-3.0': 'LGPL-3.0-or-later',
+    'LGPL-2.1': 'LGPL-2.1-or-later',
+    'AGPL-3.0': 'AGPL-3.0-or-later',
   };
   return map[raw] ?? raw;
 }
@@ -115,12 +123,11 @@ function normalizeEcosystem(raw: string | undefined): Ecosystem {
 
 /** Minimal CSV parse of the AOS "ALL DEPENDENCIES" export. */
 function parseAuditCsv(text: string): SeedRow[] {
-  const lines = text.split(/\r?\n/).filter(Boolean);
+  const records = parseCsvRecords(text);
   const rows: SeedRow[] = [];
-  for (const line of lines.slice(1)) {
-    const cols = splitCsvLine(line);
+  for (const cols of records.slice(1)) {
     const [name, ecosystem, category, , whatItDoes] = cols;
-    if (!name) continue;
+    if (!name || !name.trim()) continue;
     rows.push({
       name: name.trim(),
       ecosystem: normalizeEcosystem(ecosystem),
@@ -132,24 +139,41 @@ function parseAuditCsv(text: string): SeedRow[] {
   return rows;
 }
 
-function splitCsvLine(line: string): string[] {
-  const out: string[] = [];
-  let cur = '';
+/** RFC-4180-ish CSV parser that correctly handles quoted fields spanning
+ *  multiple lines (common in a human-maintained "What It Does" column). */
+function parseCsvRecords(text: string): string[][] {
+  const records: string[][] = [];
+  let row: string[] = [];
+  let field = '';
   let inQuotes = false;
-  for (let i = 0; i < line.length; i += 1) {
-    const ch = line[i]!;
-    if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') {
-        cur += '"';
-        i += 1;
-      } else inQuotes = !inQuotes;
-    } else if (ch === ',' && !inQuotes) {
-      out.push(cur);
-      cur = '';
-    } else cur += ch;
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i]!;
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          field += '"';
+          i += 1;
+        } else inQuotes = false;
+      } else field += ch;
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      row.push(field);
+      field = '';
+    } else if (ch === '\n') {
+      row.push(field);
+      records.push(row);
+      row = [];
+      field = '';
+    } else if (ch !== '\r') {
+      field += ch;
+    }
   }
-  out.push(cur);
-  return out;
+  if (field.length > 0 || row.length > 0) {
+    row.push(field);
+    records.push(row);
+  }
+  return records;
 }
 
 function yamlString(value: string): string {
@@ -159,7 +183,7 @@ function yamlString(value: string): string {
 function frontmatter(fields: Record<string, unknown>): string {
   const lines: string[] = ['---'];
   for (const [key, value] of Object.entries(fields)) {
-    if (value === undefined || value === null) continue;
+    if (value === undefined || value === null || value === '') continue;
     if (Array.isArray(value)) {
       if (value.length === 0) continue;
       lines.push(`${key}: [${value.map((v) => yamlString(String(v))).join(', ')}]`);
@@ -189,23 +213,34 @@ async function buildEntry(row: SeedRow, used: Set<string>, spdxIds: Set<string>)
   const gh = parseGitHubRepo(reg.repoUrl);
   const meta = gh ? await fetchGitHubMeta(gh.owner, gh.repo) : null;
 
+  // A catalog entry needs at least one primary source URL (the schema requires
+  // license_source_url). Without any, we can't author a valid entry — skip and
+  // log rather than write something broken.
+  if (!reg.repoUrl && !reg.registryUrl && !reg.homepageUrl) {
+    console.warn(`  ~ ${slug}: skipped — no primary source URL (ecosystem ${row.ecosystem})`);
+    return { slug, name: row.name, ecosystem: row.ecosystem, verification_status: 'under_review' };
+  }
+
   const spdxRaw = meta?.spdx_id ?? normalizeSpdx(reg.license);
   const spdx = spdxRaw;
   const spdxValid = Boolean(spdxRaw && spdxIds.has(spdxRaw));
 
-  // Pin the license to a commit. Prefer GitHub's license-commit lookup; fall
-  // back to the registry-recorded publish commit (npm `gitHead`), which needs no
-  // GitHub call and is just as much a verifiable pin.
-  const sha = meta?.license_commit_sha ?? reg.gitHead;
   const repo = gh ? `${gh.owner}/${gh.repo}` : undefined;
-  const licenseSourceUrl =
-    repo && sha
-      ? `https://github.com/${repo}/blob/${sha}/${meta?.license_path ?? 'LICENSE'}`
-      : reg.repoUrl ?? reg.registryUrl;
+  // A license is "read at a commit" only when GitHub confirmed both the LICENSE
+  // path and the commit that touched it. The npm `gitHead` fallback is a publish
+  // commit, not a verified LICENSE-file read — pin to it but describe it honestly.
+  const verifiedBlob = Boolean(repo && meta?.license_path && meta?.license_commit_sha);
+  const sha = meta?.license_commit_sha ?? reg.gitHead;
+  const licenseSourceUrl = verifiedBlob
+    ? `https://github.com/${repo}/blob/${meta!.license_commit_sha}/${meta!.license_path}`
+    : repo && sha
+      ? `https://github.com/${repo}/tree/${sha}`
+      : (reg.repoUrl ?? reg.registryUrl);
 
   const lastActivity = meta?.pushed_at ?? reg.publishedAt;
   const status = maintenanceStatus(lastActivity, meta?.archived);
 
+  // "verified" requires a valid SPDX id, a commit pin, and a source repo.
   const verified = spdxValid && Boolean(sha) && Boolean(reg.repoUrl);
   const verification_status: BuiltEntry['verification_status'] = verified ? 'verified' : 'under_review';
 
@@ -252,13 +287,15 @@ ${badge('verification', verification_status)}
   <dt>License</dt><dd>${spdx ?? 'unknown'}${spdxValid ? '' : ' (unverified SPDX)'}</dd>
   <dt>Latest version</dt><dd>${reg.version ?? 'unknown'}</dd>
   ${reg.repoUrl ? `<dt>Source</dt><dd><a href="${reg.repoUrl}">${reg.repoUrl}</a></dd>` : ''}
-  <dt>Registry</dt><dd><a href="${reg.registryUrl}">${reg.registryUrl}</a></dd>
+  ${reg.registryUrl ? `<dt>Registry</dt><dd><a href="${reg.registryUrl}">${reg.registryUrl}</a></dd>` : ''}
 </dl>
 
 ${
-  sha
-    ? `<Aside type="tip" title="Verified at a commit">License read as <code>${spdx}</code> from <a href="${licenseSourceUrl}">${meta?.license_path ?? 'LICENSE'}</a> at commit <code>${sha.slice(0, 12)}</code>.</Aside>`
-    : `<Aside type="caution" title="Pending full verification">A pinned license commit could not be retrieved automatically; this entry is marked <code>under_review</code> until a maintainer confirms the source.</Aside>`
+  verifiedBlob
+    ? `<Aside type="tip" title="Verified at a commit">License read as <code>${spdx}</code> from <a href="${licenseSourceUrl}">${meta!.license_path}</a> at commit <code>${sha!.slice(0, 12)}</code>.</Aside>`
+    : sha
+      ? `<Aside type="tip" title="Pinned to a publish commit">Registry declares <code>${spdx}</code>; pinned to <a href="${licenseSourceUrl}">commit <code>${sha.slice(0, 12)}</code></a>. A maintainer pass with a GitHub token can upgrade this to a verified LICENSE-file read.</Aside>`
+      : `<Aside type="caution" title="Pending full verification">A pinned license commit could not be retrieved automatically; this entry is <code>under_review</code> until a maintainer confirms the source.</Aside>`
 }
 
 ## Why it's in the catalog

@@ -85,7 +85,9 @@ export function validateRecipe(recipe: DocEntry, ctx: RecipeValidationContext): 
   for (const key of requiredExcluded) {
     const endpoints = ctx.signals.find((s) => s.key === key)?.endpoints ?? [];
     if (endpoints.length > 0 && !endpoints.some((e) => blockedHosts.has(e))) {
-      warnings.push(`no verification step blocks a ${key} endpoint (expected one of: ${endpoints.join(', ')})`);
+      // A recipe that claims an excluded provider is "unreachable" but verifies
+      // nothing is not a valid exception — fail it.
+      errors.push(`verification steps must block a ${key} endpoint (expected one of: ${endpoints.join(', ')})`);
     }
   }
 

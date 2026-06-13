@@ -63,6 +63,22 @@ test('go.mod parser flags excluded module prefixes', () => {
   assert.deepEqual(flaggedNames(deps), ['github.com/openai/openai-go']);
 });
 
+test('go.mod replace directive reroutes to an excluded module and is flagged', () => {
+  const { deps } = parseGoMod(
+    `module example.com/app\n\ngo 1.24\n\nrequire example.com/llm v0.1.0\n\nreplace example.com/llm => github.com/openai/openai-go v1.0.0\n`,
+    'go.mod',
+  );
+  assert.deepEqual(flaggedNames(deps), ['github.com/openai/openai-go']);
+});
+
+test('go.mod block replace reroute is flagged; local paths are ignored', () => {
+  const { deps } = parseGoMod(
+    `module example.com/app\ngo 1.24\nreplace (\n\texample.com/local => ./vendor/local\n\texample.com/llm => github.com/openai/openai-go v1.0.0\n)\n`,
+    'go.mod',
+  );
+  assert.deepEqual(flaggedNames(deps), ['github.com/openai/openai-go']);
+});
+
 test('mix.exs parser flags excluded deps and warns on dynamic blocks', () => {
   const { deps } = parseMixExs(
     `defmodule App.MixProject do\n  defp deps do\n    [\n      {:phoenix, "~> 1.7"},\n      {:openai_ex, "~> 0.5"}\n    ]\n  end\nend\n`,

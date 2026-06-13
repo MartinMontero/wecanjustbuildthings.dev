@@ -41,8 +41,12 @@ export async function getCached(url: string, opts: { auth?: boolean; retries?: n
         /* not json */
       }
       const result: FetchResult = { ok: res.ok, status: res.status, json, text };
-      // Cache successes and definitive 404s (so we don't re-poll missing things).
-      if (res.ok || res.status === 404) writeFileSync(file, JSON.stringify(result), 'utf8');
+      // Cache only genuinely-useful responses: a parsed-JSON success, or a
+      // definitive 404. A 200 that isn't JSON (WAF/captive-portal/proxy HTML)
+      // must NOT be cached, or it poisons every later run for that URL.
+      if ((res.ok && json !== null) || res.status === 404) {
+        writeFileSync(file, JSON.stringify(result), 'utf8');
+      }
       if (res.status === 403 || res.status === 429) {
         // Rate limited. Only back off and retry when we have a token that can
         // actually raise the limit; otherwise fail fast so the caller degrades

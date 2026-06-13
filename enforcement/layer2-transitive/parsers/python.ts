@@ -78,31 +78,41 @@ export function parseRequirementsLock(content: string, file: string): LockGraph 
   const hasVia = /#\s*via/.test(content);
   graph.edges_known = hasVia;
 
-  let current: { name: string; version?: string } | null = null;
   const nodeOf = (spec: string) => {
     const m = spec.match(/^([A-Za-z0-9][A-Za-z0-9._-]*)\s*==\s*([^\s;]+)/) ?? spec.match(/^([A-Za-z0-9][A-Za-z0-9._-]*)/);
     if (!m) return null;
     return { name: m[1]!, version: m[2] };
   };
 
+  // Pass 1: create every package node. pip-compile sorts alphabetically, so a
+  // `# via <parent>` marker can name a parent defined later in the file — we must
+  // know all nodes before resolving edges, or forward references get dropped.
   for (const raw of lines) {
-    const line = raw.replace(/\r$/, '');
-    const trimmed = line.trim();
+    const trimmed = raw.replace(/\r$/, '').trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const node = nodeOf(trimmed);
+    if (node) graph.nodes.set(nodeKey(node.name, node.version), node);
+  }
+
+  if (!hasVia) return graph;
+
+  const nameToKey = new Map<string, string>();
+  for (const [key, node] of graph.nodes) nameToKey.set(node.name.toLowerCase(), key);
+
+  // Pass 2: attach `# via <parent>` edges (parent → current child).
+  let current: { name: string; version?: string } | null = null;
+  for (const raw of lines) {
+    const trimmed = raw.replace(/\r$/, '').trim();
     if (!trimmed) continue;
     if (!trimmed.startsWith('#')) {
-      const node = nodeOf(trimmed);
-      if (node) {
-        current = node;
-        graph.nodes.set(nodeKey(node.name, node.version), node);
-      }
+      current = nodeOf(trimmed);
       continue;
     }
-    // comment line; pip-compile lists parents after "# via"
-    if (!hasVia || !current) continue;
+    if (!current) continue;
     const viaInline = trimmed.match(/#\s*via\s+(.+)$/);
     const parentName = viaInline ? viaInline[1]!.trim() : trimmed.replace(/^#\s*/, '').trim();
     if (!parentName || parentName.startsWith('-')) continue; // skip "# via -r requirements.in"
-    const parentKey = [...graph.nodes.keys()].find((k) => k.split('@')[0] === parentName);
+    const parentKey = nameToKey.get(parentName.toLowerCase());
     if (parentKey) {
       const list = graph.edges.get(parentKey) ?? [];
       list.push(nodeKey(current.name, current.version));

@@ -1,8 +1,22 @@
 import type { DependencyRef, ExcludedOrg, PolicyMatch } from './types.ts';
 
-/** PyPI normalizes names: case-insensitive, runs of -_. collapse to a single -. */
-function normalizePy(name: string): string {
+/** Loose normalization: case-insensitive, and -_/. collapse to a single -.
+ *  Matches how PyPI and crates.io canonicalize names (so `Async_OpenAI`
+ *  === `async-openai`). */
+function loose(name: string): string {
   return name.toLowerCase().replace(/[-_.]+/g, '-');
+}
+
+/** Case-insensitive exact membership (npm/rubygems/hex/pub names). */
+function includesCI(list: string[], value: string): boolean {
+  const v = value.toLowerCase();
+  return list.some((x) => x.toLowerCase() === v);
+}
+
+/** Loose membership (PyPI / crates name canonicalization). */
+function includesLoose(list: string[], value: string): boolean {
+  const v = loose(value);
+  return list.some((x) => loose(x) === v);
 }
 
 function npmScopeOf(name: string): string | undefined {
@@ -15,6 +29,9 @@ function npmScopeOf(name: string): string | undefined {
 /**
  * Decide whether a single declared/resolved dependency matches the exclusion
  * policy, using only signals derivable from the package coordinate (no network).
+ * All comparisons are case-insensitive because every registry treats package
+ * names case-insensitively — exact matching would be a trivially-bypassable
+ * false negative in a security gate.
  *
  * Network-based owner resolution (npm `maintainers`, crates `links.publisher`,
  * …) is an optional enrichment performed by the indexing pipeline; the engine
@@ -28,57 +45,56 @@ export function matchDependency(dep: DependencyRef, orgs: ExcludedOrg[]): Policy
     switch (dep.ecosystem) {
       case 'js': {
         const scope = dep.scope ?? npmScopeOf(name);
-        if (scope && org.npm_scopes.includes(scope)) {
+        if (scope && includesCI(org.npm_scopes, scope)) {
           out.push({ org_key: org.key, signal: 'npm_scope', matched_value: scope });
         }
-        if (org.npm_packages.includes(name)) {
+        if (includesCI(org.npm_packages, name)) {
           out.push({ org_key: org.key, signal: 'npm_package', matched_value: name });
         }
         break;
       }
       case 'py': {
-        const n = normalizePy(name);
-        if (org.pypi_packages.some((p) => normalizePy(p) === n)) {
+        if (includesLoose(org.pypi_packages, name)) {
           out.push({ org_key: org.key, signal: 'pypi_package', matched_value: name });
         }
         break;
       }
       case 'rust': {
-        if (org.crates_packages.includes(name)) {
+        if (includesLoose(org.crates_packages, name)) {
           out.push({ org_key: org.key, signal: 'crates_package', matched_value: name });
         }
         break;
       }
       case 'go': {
-        const hit = org.go_module_prefixes.find(
-          (pre) => name === pre.replace(/\/$/, '') || name.startsWith(pre),
-        );
-        if (hit) {
-          out.push({ org_key: org.key, signal: 'go_module_prefix', matched_value: hit });
-        }
+        const lname = name.toLowerCase();
+        const hit = org.go_module_prefixes.find((pre) => {
+          const lpre = pre.toLowerCase();
+          return lname === lpre.replace(/\/$/, '') || lname.startsWith(lpre);
+        });
+        if (hit) out.push({ org_key: org.key, signal: 'go_module_prefix', matched_value: hit });
         break;
       }
       case 'ruby': {
-        if (org.rubygems_packages.includes(name)) {
+        if (includesCI(org.rubygems_packages, name)) {
           out.push({ org_key: org.key, signal: 'rubygems_package', matched_value: name });
         }
         break;
       }
       case 'elixir': {
-        if (org.hex_packages.includes(name)) {
+        if (includesCI(org.hex_packages, name)) {
           out.push({ org_key: org.key, signal: 'hex_package', matched_value: name });
         }
         break;
       }
       case 'dart': {
-        if (org.pub_packages.includes(name)) {
+        if (includesCI(org.pub_packages, name)) {
           out.push({ org_key: org.key, signal: 'pub_package', matched_value: name });
         }
         break;
       }
       case 'kotlin': {
-        const group = dep.scope ?? (name.includes(':') ? name.split(':')[0] : name);
-        if (group && org.maven_groups.some((g) => group === g || group.startsWith(`${g}.`))) {
+        const group = (dep.scope ?? (name.includes(':') ? name.split(':')[0] : name)).toLowerCase();
+        if (group && org.maven_groups.some((g) => group === g.toLowerCase() || group.startsWith(`${g.toLowerCase()}.`))) {
           out.push({ org_key: org.key, signal: 'maven_group', matched_value: group });
         }
         break;

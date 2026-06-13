@@ -51,3 +51,13 @@ test('npm scope match is distinct from unrelated scopes', () => {
   assert.equal(isExcluded(ref('@nostr-dev-kit/ndk', 'js'), orgs), false);
   assert.equal(isExcluded(ref('@openai/whatever', 'js'), orgs), true);
 });
+
+test('matching is case-insensitive (registries treat names case-insensitively)', () => {
+  // Exact-match ecosystems must not be bypassable by capitalization.
+  assert.equal(isExcluded(ref('OpenAI', 'js'), orgs), true);
+  assert.equal(isExcluded(ref('@OpenAI/agents', 'js'), orgs), true);
+  assert.equal(isExcluded(ref('Ruby-OpenAI', 'ruby'), orgs), true);
+  assert.equal(isExcluded(ref('GitHub.com/OpenAI/openai-go', 'go'), orgs), true);
+  // crates canonicalizes - and _ AND case:
+  assert.equal(isExcluded(ref('Async_OpenAI', 'rust'), orgs), true);
+});

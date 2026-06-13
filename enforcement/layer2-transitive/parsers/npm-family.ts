@@ -87,9 +87,12 @@ function splitNameVersion(spec: string): KeyParts {
   let s = spec.startsWith('/') ? spec.slice(1) : spec;
   const paren = s.indexOf('(');
   if (paren >= 0) s = s.slice(0, paren);
+  // pnpm v6+/v9 and yarn use `name@version`; pnpm v5 uses `/name/version`.
   const at = s.lastIndexOf('@');
-  if (at <= 0) return { name: s, version: '' };
-  return { name: s.slice(0, at), version: s.slice(at + 1) };
+  if (at > 0) return { name: s.slice(0, at), version: s.slice(at + 1) };
+  const slash = s.lastIndexOf('/');
+  if (slash > 0) return { name: s.slice(0, slash), version: s.slice(slash + 1) };
+  return { name: s, version: '' };
 }
 
 /** pnpm-lock.yaml (v9 `snapshots` + `importers`; v6 `packages` fallback). */

@@ -18,12 +18,12 @@ const RULES: Rule[] = [
   { test: (f) => f === 'package.json', parser: parsePackageJson },
   { test: (f) => f === 'Cargo.toml', parser: parseCargoToml },
   { test: (f) => f === 'pyproject.toml', parser: parsePyprojectToml },
-  { test: (f) => /^requirements.*\.txt$/.test(f), parser: parseRequirementsTxt },
+  { test: (f) => /^(requirements|constraints).*\.(txt|in)$/.test(f), parser: parseRequirementsTxt },
   { test: (f) => f === 'go.mod', parser: parseGoMod },
   { test: (f) => f === 'mix.exs', parser: parseMixExs },
   { test: (f) => f === 'pubspec.yaml', parser: parsePubspecYaml },
-  { test: (f) => f === 'Gemfile', parser: parseGemfile },
-  { test: (f) => f === 'build.gradle' || f === 'build.gradle.kts', parser: parseGradle },
+  { test: (f) => f === 'Gemfile' || f === 'gems.rb', parser: parseGemfile },
+  { test: (f) => /^(build|settings)\.gradle(\.kts)?$/.test(f), parser: parseGradle },
 ];
 
 export function lookupManifestParser(filename: string): ManifestParser | undefined {

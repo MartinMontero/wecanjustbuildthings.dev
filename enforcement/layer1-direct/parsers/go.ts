@@ -12,15 +12,21 @@ export function parseGoMod(content: string, file: string): ManifestParseResult {
   const warnings: string[] = [];
   const lines = content.split(/\r?\n/);
   let inRequireBlock = false;
+  let inReplaceBlock = false;
 
-  const add = (modulePath: string, version: string | undefined, indirect: boolean) => {
-    deps.push({
-      name: modulePath,
-      version,
-      ecosystem: 'go',
-      source_file: file,
-      dep_type: indirect ? 'indirect' : 'require',
-    });
+  const add = (modulePath: string, version: string | undefined, depType: string) => {
+    deps.push({ name: modulePath, version, ecosystem: 'go', source_file: file, dep_type: depType });
+  };
+
+  // A `replace X => github.com/openai/Y vN` reroutes the build to the RHS module,
+  // so the replacement target must be screened too. Local-path replacements
+  // (./ ../ /) are not modules and are skipped.
+  const addReplaceTarget = (rhs: string) => {
+    const m = rhs.trim().match(/^([^\s]+)(?:\s+([^\s]+))?/);
+    if (!m) return;
+    const target = m[1]!;
+    if (target.startsWith('.') || target.startsWith('/')) return;
+    add(target, m[2], 'replace');
   };
 
   for (const raw of lines) {
@@ -29,18 +35,38 @@ export function parseGoMod(content: string, file: string): ManifestParseResult {
       inRequireBlock = true;
       continue;
     }
+    if (trimmed.startsWith('replace (')) {
+      inReplaceBlock = true;
+      continue;
+    }
     if (inRequireBlock) {
       if (trimmed === ')') {
         inRequireBlock = false;
         continue;
       }
       const m = trimmed.match(/^([^\s]+)\s+([^\s]+)/);
-      if (m) add(m[1]!, m[2]!, /\/\/\s*indirect/.test(trimmed));
+      if (m) add(m[1]!, m[2]!, /\/\/\s*indirect/.test(trimmed) ? 'indirect' : 'require');
       continue;
     }
-    // single-line: require github.com/foo/bar v1.2.3
+    if (inReplaceBlock) {
+      if (trimmed === ')') {
+        inReplaceBlock = false;
+        continue;
+      }
+      const arrow = trimmed.indexOf('=>');
+      if (arrow >= 0) addReplaceTarget(trimmed.slice(arrow + 2));
+      continue;
+    }
+    // single-line require / replace
     const single = trimmed.match(/^require\s+([^\s]+)\s+([^\s]+)/);
-    if (single) add(single[1]!, single[2]!, /\/\/\s*indirect/.test(trimmed));
+    if (single) {
+      add(single[1]!, single[2]!, /\/\/\s*indirect/.test(trimmed) ? 'indirect' : 'require');
+      continue;
+    }
+    if (trimmed.startsWith('replace ')) {
+      const arrow = trimmed.indexOf('=>');
+      if (arrow >= 0) addReplaceTarget(trimmed.slice(arrow + 2));
+    }
   }
 
   return { deps, warnings };
