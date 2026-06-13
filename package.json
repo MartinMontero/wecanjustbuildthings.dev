@@ -19,6 +19,8 @@
     "data:fetch": "tsx scripts/build-catalog.ts",
     "watch:license": "tsx scripts/license-watch.ts",
     "watch:maintenance": "tsx scripts/maintenance-check.ts",
+    "deploy": "wrangler deploy",
+    "deploy:dry": "wrangler deploy --dry-run",
     "enforce": "tsx enforcement/cli.ts all --catalog src/content/docs/catalog --recipes src/content/docs/recipes",
     "enforce:layer1": "tsx enforcement/cli.ts layer1 --catalog src/content/docs/catalog",
     "enforce:layer2": "tsx enforcement/cli.ts layer2 --catalog src/content/docs/catalog",
@@ -46,6 +48,7 @@
     "playwright": "^1.60.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
+    "wrangler": "^4.100.0",
     "yaml": "^2.9.0"
   }
 }
