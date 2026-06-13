@@ -6,8 +6,23 @@
  * Run: node scripts/a11y-check.mjs
  */
 import { spawn } from 'node:child_process';
+import { existsSync, readdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
+
+/** Use an explicit Chromium if one is provided/preinstalled (CHROME_PATH or
+ *  /opt/pw-browsers), so the gate runs even when the Playwright-managed browser
+ *  build differs. In CI (fresh `playwright install`) this stays undefined and
+ *  Playwright's own browser is used. */
+function findChromium() {
+  if (process.env.CHROME_PATH && existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
+  const base = '/opt/pw-browsers';
+  if (!existsSync(base)) return undefined;
+  const dir = readdirSync(base).find((d) => /^chromium-\d+$/.test(d));
+  if (!dir) return undefined;
+  const bin = `${base}/${dir}/chrome-linux/chrome`;
+  return existsSync(bin) ? bin : undefined;
+}
 
 const PORT = 4399;
 const BASE = `http://localhost:${PORT}`;
@@ -51,9 +66,11 @@ try {
     console.error('preview server did not start');
     process.exit(1);
   }
-  const browser = await chromium.launch();
+  const executablePath = findChromium();
+  const browser = await chromium.launch(executablePath ? { executablePath } : {});
+  const context = await browser.newContext();
   for (const path of PATHS) {
-    const page = await browser.newPage();
+    const page = await context.newPage();
     await page.goto(`${BASE}${path}`, { waitUntil: 'load' });
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

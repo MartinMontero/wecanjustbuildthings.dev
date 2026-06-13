@@ -26,6 +26,10 @@
   gap: 0.4rem;
   margin: 0.75rem 0 1.25rem;
 }
+/* Status is conveyed by the (left) border colour, not the text colour, so the
+   label always uses the theme's high-contrast body colour and passes WCAG AA on
+   both light and dark themes. The text itself ("verified", "active", …) carries
+   the meaning — never colour alone. */
 .wcb-badge {
   display: inline-flex;
   align-items: center;
@@ -36,17 +40,18 @@
   padding: 0.32rem 0.55rem;
   border-radius: 999px;
   border: 1px solid var(--sl-color-gray-5);
+  border-left-width: 4px;
   background: var(--sl-color-gray-6);
-  color: var(--sl-color-white);
+  color: var(--sl-color-text);
 }
-.wcb-badge--verified { border-color: #1a7f37; color: #4ac26b; }
-.wcb-badge--blocked { border-color: #b35900; color: #f0883e; }
-.wcb-badge--under_review { border-color: #9a6700; color: #e3b341; }
-.wcb-badge--active { border-color: #1a7f37; color: #4ac26b; }
-.wcb-badge--minimal { border-color: #9a6700; color: #e3b341; }
-.wcb-badge--dormant { border-color: #b35900; color: #f0883e; }
-.wcb-badge--abandoned { border-color: #b62324; color: #ff7b72; }
-.wcb-badge--advisory { border-color: #b35900; color: #f0883e; }
+.wcb-badge--verified { border-left-color: #2da44e; }
+.wcb-badge--blocked { border-left-color: #cf222e; }
+.wcb-badge--under_review { border-left-color: #bf8700; }
+.wcb-badge--active { border-left-color: #2da44e; }
+.wcb-badge--minimal { border-left-color: #bf8700; }
+.wcb-badge--dormant { border-left-color: #bc4c00; }
+.wcb-badge--abandoned { border-left-color: #cf222e; }
+.wcb-badge--advisory { border-left-color: #bc4c00; }
 
 /* Compact definition grid for catalog entry metadata. */
 .wcb-meta {

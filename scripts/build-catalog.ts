@@ -357,6 +357,12 @@ function yamlString(value: string): string {
   return JSON.stringify(value);
 }
 
+/** Display text for a URL link that won't be re-autolinked by MDX/GFM (which
+ *  turns `http(s)://…` and `www.…` literals into nested anchors → empty links). */
+function displayUrl(u: string): string {
+  return u.replace(/^https?:\/\//, '').replace(/^www\./, '');
+}
+
 /** Return the string only if it's a valid http(s) URL — else undefined. Keeps
  *  malformed registry URLs out of the frontmatter (which requires z.url()). */
 function httpUrl(u: string | undefined): string | undefined {
@@ -514,8 +520,8 @@ ${originAdvisory ? `<span class="wcb-badge wcb-badge--advisory">${originAdvisory
   <dt>Category</dt><dd>${row.category}</dd>
   <dt>License</dt><dd>${spdx ?? 'unknown'}${spdxValid ? '' : ' (unverified SPDX)'}</dd>
   <dt>Latest version</dt><dd>${reg.version ?? 'unknown'}</dd>
-  ${repoUrl ? `<dt>Source</dt><dd><a href="${repoUrl}">${repoUrl}</a></dd>` : ''}
-  ${registryUrl ? `<dt>Registry</dt><dd><a href="${registryUrl}">${registryUrl}</a></dd>` : ''}
+  ${repoUrl ? `<dt>Source</dt><dd><a href="${repoUrl}">${displayUrl(repoUrl)}</a></dd>` : ''}
+  ${registryUrl ? `<dt>Registry</dt><dd><a href="${registryUrl}">${displayUrl(registryUrl)}</a></dd>` : ''}
 </dl>
 
 ${
