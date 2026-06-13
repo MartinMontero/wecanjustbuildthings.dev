@@ -32,6 +32,8 @@ const PATHS = [
   '/start/vs-harness/',
   '/pie/about/',
   '/pie/cooking/',
+  '/build/',
+  '/check/',
   '/policies/',
   '/policies/enforcement/',
   '/privacy/',

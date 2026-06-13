@@ -27,11 +27,22 @@ License: **AGPL-3.0-or-later**
 
 ## What's in here
 
+### Interactive tools (Svelte islands, no React — React is Meta-owned)
+
+| Tool | Route | What it does |
+|---|---|---|
+| **Build Studio** | `/build/` | Describe a project → it assembles a policy-clean stack from the catalog and generates a constitution, spec, agent prompt, and a **downloadable starter repo (.zip)** wired to the enforcement engine. |
+| **Catalog explorer** | `/catalog/` | Live faceted search/filter over all entries (protocol, ecosystem, category, verification), entirely client-side. |
+| **Dependency checker** | `/check/` | Paste a `package.json`/dep list → runs the exclusion policy **in your browser** with live license lookups. |
+| **Edge API** | `/api/license`, `/api/health` | A Cloudflare Worker route (`worker/index.ts`) for live registry license lookups. |
+
+### Foundations
+
 | Piece | Where | What it is |
 |---|---|---|
-| **The catalog** | `src/content/docs/catalog/` | Tools license-checked at a commit and screened against the exclusion policy. |
+| **The catalog data** | `src/content/docs/catalog/` + `/catalog.json` | Tools license-checked at a commit and screened against the exclusion policy; emitted as JSON the tools consume. |
 | **The build flow** | `src/content/docs/pie/` | A guided flow adapted from the PIE PDX accelerator's cookbook. |
-| **The enforcement engine** | `enforcement/` | A three-layer TypeScript engine (direct + transitive + provider-string) that blocks excluded dependencies. |
+| **The enforcement engine** | `enforcement/` | A three-layer TypeScript engine (direct + transitive + provider-string) that blocks excluded dependencies — runs in CI **and** in the browser checker. |
 | **The data pipeline** | `scripts/` | Generates license-verified entries from a registry/GitHub/GitLab; weekly license & maintenance watchers. |
 | **Agent skills** | `skills/`, `goose-recipes/` | The same workflows for Claude Code and Goose. |
 | **The archetype** | `templates/spec-kit/nostr-web-client/` | A Spec Kit scaffold for a Nostr + AT Protocol client whose constitution forbids excluded deps. |

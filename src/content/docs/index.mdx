@@ -7,13 +7,17 @@ hero:
   image:
     file: ../../assets/logo.svg
   actions:
-    - text: Start building
-      link: /start/
-      icon: right-arrow
+    - text: Open the Build Studio
+      link: /build/
+      icon: rocket
       variant: primary
     - text: Browse the catalog
       link: /catalog/
       icon: open-book
+      variant: minimal
+    - text: New here? Start with the basics
+      link: /start/
+      icon: right-arrow
       variant: minimal
 ---
 
@@ -79,12 +83,20 @@ safeguards exist to serve them, never to fence them in.
   />
 </CardGrid>
 
+## Use the tools
+
+<CardGrid>
+  <LinkCard title="Build Studio →" href="/build/" description="Describe your project; get a policy-clean stack, a constitution, an agent prompt, and a downloadable starter repo." />
+  <LinkCard title="Catalog explorer →" href="/catalog/" description="Search and filter 1,300+ verified tools live — by protocol, ecosystem, license, and more." />
+  <LinkCard title="Check a dependency →" href="/check/" description="Paste a package.json; run the exclusion policy in your browser with live license lookups." />
+  <LinkCard title="The build flow →" href="/pie/about/" description="From “my community has a problem” to a shippable plan." />
+</CardGrid>
+
 ## Start where you are
 
 <CardGrid>
   <LinkCard title="What this is →" href="/start/" description="The 3-minute orientation." />
   <LinkCard title="Why not just use Goose? →" href="/start/vs-harness/" description="The harness vs. the layer that gives it judgment." />
-  <LinkCard title="The build flow →" href="/pie/about/" description="From “my community has a problem” to a shippable plan." />
   <LinkCard title="How we keep our promise →" href="/policies/enforcement/" description="The safeguards that protect what you build, in plain language." />
 </CardGrid>
 

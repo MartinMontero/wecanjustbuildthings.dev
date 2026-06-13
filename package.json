@@ -35,10 +35,12 @@
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/starlight": "^0.40.0",
     "astro": "^6.4.6",
+    "fflate": "^0.8.3",
     "sharp": "^0.35.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@astrojs/svelte": "^8.1.2",
     "@axe-core/playwright": "^4.11.3",
     "@iarna/toml": "^2.2.5",
     "@lhci/cli": "^0.15.1",
@@ -46,6 +48,7 @@
     "@yarnpkg/lockfile": "^1.1.0",
     "@yarnpkg/parsers": "^3.0.3",
     "playwright": "^1.60.0",
+    "svelte": "^5.56.3",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "wrangler": "^4.100.0",

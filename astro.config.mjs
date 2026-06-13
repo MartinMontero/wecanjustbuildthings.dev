@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
+import svelte from '@astrojs/svelte';
 
 // The production origin. Override with SITE_URL for preview deploys if desired.
 const site = process.env.SITE_URL ?? 'https://wecanjustbuildthings.dev';
@@ -67,6 +68,13 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Tools',
+          items: [
+            { label: 'Build Studio', link: '/build/', badge: { text: 'new', variant: 'tip' } },
+            { label: 'Check a dependency', link: '/check/' },
+          ],
+        },
+        {
           label: 'The build flow (PIE)',
           items: [{ autogenerate: { directory: 'pie' } }],
         },
@@ -99,5 +107,6 @@ export default defineConfig({
       ],
     }),
     sitemap(),
+    svelte(),
   ],
 });

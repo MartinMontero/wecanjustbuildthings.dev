@@ -1,0 +1,17 @@
+---
+title: Check a dependency
+description: Paste a package.json or a list of dependencies and check them against the exclusion policy live, in your browser, with license lookups from the edge.
+tableOfContents: false
+sidebar:
+  order: 1
+  label: Check a dependency
+---
+
+import PolicyChecker from '../../components/PolicyChecker.svelte';
+
+Already have a stack — or eyeing a new dependency? Paste it here. The exclusion
+policy runs **in your browser** (the same list the CI engine uses), and licenses
+are looked up live. Nothing you paste leaves your device except the package names
+sent to the public registries for the license lookup.
+
+<PolicyChecker client:load />

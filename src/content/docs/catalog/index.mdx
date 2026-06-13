@@ -1,70 +1,35 @@
 ---
 title: Catalog
-description: Every verified tool in the catalog — license-checked at a commit and screened against the exclusion policy. Browse by protocol or category, or search.
+description: A live, filterable catalog of verified freedom-tech tools — search and facet by protocol, ecosystem, category, and verification, all in your browser.
 sidebar:
   order: 0
   label: Browse the catalog
 ---
 
-import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Aside } from '@astrojs/starlight/components';
+import CatalogExplorer from '../../../components/CatalogExplorer.svelte';
 import CatalogList from '../../../components/CatalogList.astro';
 
 A thousand-plus building blocks for the tools your community needs — the same ones
 the And Other Stuff crew ships freedom tech with. Each is **license-checked at a
-commit** and screened so it can't quietly betray the people you build for (the
-[receipts](/policies/enforcement/) are on every entry). Pick with confidence:
-**search (top of the page) is the fastest way to find a specific tool**, and the
-sections below surface the most-used entries per area.
+commit** and screened so it can't quietly betray the people you build for. Filter
+it live below, or hand a shortlist straight to the [Build Studio](/build/).
 
-<Aside type="note" title="Reading the badges">
-**verification** — `verified` (license pinned to a commit), `under_review`
-(declared but not yet machine-confirmed at a commit — often needs a token pass),
-or `blocked`. **status** — `active` (&lt;90d), `minimal` (&lt;12mo), `dormant`
-(&lt;36mo), `abandoned`. Lists are sorted by how many And Other Stuff repos use
-the tool.
+<CatalogExplorer client:load />
+
+<Aside type="tip" title="Turn a shortlist into a project">
+Found your stack? The [Build Studio](/build/) turns a selection of these tools
+into a starter repo, a project constitution, and an agent-ready prompt — all
+policy-clean by construction.
 </Aside>
 
-## By protocol
+## Featured (works without JavaScript)
 
 ### Nostr & Lightning
-<CatalogList protocol="nostr" limit={24} />
+<CatalogList protocol="nostr" limit={12} />
 
 ### AT Protocol
-<CatalogList protocol="atproto" limit={24} />
+<CatalogList protocol="atproto" limit={12} />
 
-## By area (top entries — search for the full set)
-
-### AI & Agents
-A curated set of agentic-AI frameworks and tools (orchestration, memory, eval),
-each screened by repository owner against the policy.
-<CatalogList category="AI & Agents" limit={30} />
-
-### Frameworks & Libraries
-<CatalogList category="Frameworks & Libraries" limit={24} />
-
-### Dev Environment & Tooling
-<CatalogList category="Dev Environment & Tooling" limit={24} />
-
-### Security & Privacy
-<CatalogList category="Security & Privacy" limit={24} />
-
-### Testing & QA
-<CatalogList category="Testing & QA" limit={18} />
-
-### Hosting, Infra & Deploy
-<CatalogList category="Hosting Infra & Deploy" limit={18} />
-
-### Databases & Storage
-<CatalogList category="Databases & Storage" limit={18} />
-
-### Monitoring & Observability
-<CatalogList category="Monitoring & Observability" limit={18} />
-
-### Auth, Identity & Keys
-<CatalogList category="Auth Identity & Keys" limit={18} />
-
-<Aside type="tip" title="Don't see a tool?">
-The catalog is generated from the And Other Stuff dependency audit and a curated
-agentic-AI list. Propose an addition — CI verifies the license and screens it
-against the policy before it can merge. See [Add a tool](/contribute/).
-</Aside>
+### AI &amp; Agents
+<CatalogList category="AI & Agents" limit={12} />
