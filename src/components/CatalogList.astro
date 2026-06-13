@@ -45,6 +45,9 @@ if (limit) entries = entries.slice(0, limit);
           <span class={`wcb-badge wcb-badge--${entry.data.maintenance_status}`}>
             {entry.data.maintenance_status}
           </span>
+          {entry.data.origin_advisory && (
+            <span class="wcb-badge wcb-badge--advisory">{entry.data.origin_advisory}-origin</span>
+          )}
           <br />
           <span class="wcb-catalog-desc">{entry.data.what_it_does}</span>
         </li>

@@ -6,7 +6,7 @@ dependency_name: "@nostr-dev-kit/ndk"
 ecosystem: "js"
 category: "Frameworks & Libraries"
 what_it_does: "A higher-level Nostr Development Kit that manages relay pools, subscriptions, caching, and signers so app developers can work with Nostr data without hand-rolling relay logic."
-protocols: ["nostr"]
+protocols: ["nostr", "lightning"]
 homepage_url: "https://ndk.fyi"
 repo_url: "https://github.com/nostr-dev-kit/ndk"
 registry_url: "https://www.npmjs.com/package/@nostr-dev-kit/ndk"
@@ -15,7 +15,8 @@ license_source_url: "https://github.com/nostr-dev-kit/ndk/tree/ee5bbee02193317e4
 license_source_commit_sha: "ee5bbee02193317e49a4776ac9d183a4c7bde356"
 maintenance_status: "minimal"
 last_release_at: "2026-02-23T18:22:36.191Z"
-aos_repos_using: 0
+aos_repos_using: 1
+aos_repos_list: ["cashubtc/cashu.me"]
 pie_anchor: "§4 Cooking → Recipes"
 provider_agnostic: false
 verification_status: "verified"
@@ -30,6 +31,7 @@ A higher-level Nostr Development Kit that manages relay pools, subscriptions, ca
 <span class="wcb-badge wcb-badge--MIT">license: MIT</span>
 <span class="wcb-badge wcb-badge--minimal">status: minimal</span>
 <span class="wcb-badge wcb-badge--verified">verification: verified</span>
+
 </div>
 
 <dl class="wcb-meta">
@@ -43,8 +45,8 @@ A higher-level Nostr Development Kit that manages relay pools, subscriptions, ca
 
 <Aside type="tip" title="Pinned to a publish commit">Registry declares <code>MIT</code>; pinned to <a href="https://github.com/nostr-dev-kit/ndk/tree/ee5bbee02193317e49a4776ac9d183a4c7bde356">commit <code>ee5bbee02193</code></a>. A maintainer pass with a GitHub token can upgrade this to a verified LICENSE-file read.</Aside>
 
+
 ## Why it's in the catalog
 
-This entry was screened against the [exclusion policy](/policies/): it declares no
-dependency owned by Meta, OpenAI, or xAI at the direct level. See
+This entry was screened against the [exclusion policy](/policies/): it declares no dependency owned by Meta, OpenAI, or xAI at the direct level. See
 [how enforcement works](/policies/enforcement/) for the full three-layer check.

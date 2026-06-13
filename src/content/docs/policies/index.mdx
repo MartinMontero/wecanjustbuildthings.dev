@@ -53,6 +53,29 @@ describes how to verify no traffic reaches an excluded endpoint. This is the
 [Shakespeare BYOK recipe](/recipes/shakespeare-byok-configuration/) and the
 [recipe contract](/policies/enforcement/#the-exception-recipes).
 
+## Origin advisories (Meta-built, permissively licensed)
+
+A narrow, deliberate middle ground exists for libraries that are **built by an
+excluded organization but are permissively licensed and do not route user data**
+to it — most notably **React, React Native, Lexical, and Metro**, which Meta
+authored and open-sourced under MIT.
+
+These are **included** in the catalog, but each carries a visible
+**`meta-origin` advisory** badge and a note, so you make the dependency choice
+with your eyes open. The reasoning:
+
+- The exclusion policy's core concern is data flowing to surveillance-advertising
+  infrastructure. A permissively-licensed library you compile into your own app
+  does not do that.
+- The And Other Stuff crew actually ships on these tools; a catalog that hid them
+  would be less honest about the real stack.
+- Transparency (an advisory) serves the builder better than a silent omission.
+
+This is **not** a loophole for data-routing SDKs: Meta's
+`facebook-nodejs-business-sdk` and similar are still **blocked** by the name
+screen. And it does **not** extend to LLM providers — anything owned by
+**OpenAI or xAI is blocked outright**, advisory or not.
+
 ## The appeals path
 
 Exclusion calls can be contested. If you believe a tool is wrongly excluded — for

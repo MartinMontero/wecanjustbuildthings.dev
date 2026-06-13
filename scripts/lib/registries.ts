@@ -13,11 +13,24 @@ export interface RegistryInfo {
   gitHead?: string;
 }
 
-function normalizeRepo(url: string | undefined): string | undefined {
+export function normalizeRepo(url: string | undefined): string | undefined {
   if (!url) return undefined;
-  let u = url.replace(/^git\+/, '').replace(/^ssh:\/\/git@/, 'https://').replace(/\.git$/, '');
+  let u = url.trim();
+  // npm shorthand "owner/repo" and "host:owner/repo".
+  if (/^[\w.-]+\/[\w.-]+$/.test(u)) return `https://github.com/${u}`;
+  u = u
+    .replace(/^github:/i, 'https://github.com/')
+    .replace(/^gitlab:/i, 'https://gitlab.com/')
+    .replace(/^bitbucket:/i, 'https://bitbucket.org/');
+  u = u
+    .replace(/^git\+/, '')
+    .replace(/^git:\/\//, 'https://')
+    .replace(/^ssh:\/\/git@/, 'https://');
   if (u.startsWith('git@github.com:')) u = u.replace('git@github.com:', 'https://github.com/');
-  return u;
+  u = u.replace(/\.git(?=$|[#?])/, '');
+  // Anything that still isn't an http(s) URL is dropped rather than emitted as
+  // an invalid URL (which would fail the content schema).
+  return /^https?:\/\//.test(u) ? u : undefined;
 }
 
 async function npm(name: string): Promise<RegistryInfo> {

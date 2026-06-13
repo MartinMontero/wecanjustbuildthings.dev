@@ -171,20 +171,59 @@ function normalizeSpdx(raw: string | undefined): string | undefined {
   return map[raw] ?? raw;
 }
 
-function loadRows(): SeedRow[] {
-  if (flag('source') === 'seed') {
+function loadSeed(): SeedRow[] {
+  try {
     return JSON.parse(readFileSync('data/seed-catalog.json', 'utf8')) as SeedRow[];
+  } catch {
+    return [];
   }
-  const rows: SeedRow[] = [];
+}
+
+/** Collapse rows that resolve to the same (ecosystem, name), merging fields so
+ *  the curated seed augments the audit rather than producing duplicate slugs. */
+function dedupeMerge(rows: SeedRow[]): SeedRow[] {
+  const map = new Map<string, SeedRow>();
+  for (const r of rows) {
+    const key = `${r.ecosystem}::${r.name.toLowerCase().replace(/[-_.]+/g, '-')}`;
+    const prev = map.get(key);
+    if (!prev) {
+      map.set(key, { ...r });
+      continue;
+    }
+    map.set(key, {
+      ...prev,
+      ...r,
+      what_it_does: r.what_it_does || prev.what_it_does,
+      category: r.category || prev.category,
+      pie_anchor: r.pie_anchor || prev.pie_anchor,
+      source_url: r.source_url || prev.source_url,
+      license_hint: r.license_hint || prev.license_hint,
+      aos_repos_using: Math.max(prev.aos_repos_using ?? 0, r.aos_repos_using ?? 0) || undefined,
+      aos_repos_list: prev.aos_repos_list?.length ? prev.aos_repos_list : r.aos_repos_list,
+      protocols: [...new Set([...(prev.protocols ?? []), ...(r.protocols ?? [])].filter((p) => p !== 'general'))],
+    });
+  }
+  for (const v of map.values()) {
+    if (!v.protocols || v.protocols.length === 0) v.protocols = ['general'];
+  }
+  return [...map.values()];
+}
+
+function loadRows(): SeedRow[] {
+  if (flag('source') === 'seed') return dedupeMerge(loadSeed());
   const onlyAgentic = flag('source') === 'agentic';
   const onlyAos = flag('source') === 'aos';
 
+  const rows: SeedRow[] = [];
   const csv = 'data/aos-dependency-audit.csv';
   if (!onlyAgentic && existsSync(csv)) rows.push(...parseAuditCsv(readFileSync(csv, 'utf8')));
   if (!onlyAos) rows.push(...loadAgentic());
+  // Always fold in the curated seed (key Nostr / AT Protocol tools the audit may
+  // not list), deduped so it augments rather than duplicates audit entries.
+  if (!onlyAgentic && !onlyAos) rows.push(...loadSeed());
 
-  if (rows.length === 0) rows.push(...(JSON.parse(readFileSync('data/seed-catalog.json', 'utf8')) as SeedRow[]));
-  return rows;
+  if (rows.length === 0) rows.push(...loadSeed());
+  return dedupeMerge(rows);
 }
 
 interface AgenticTool {
@@ -318,6 +357,18 @@ function yamlString(value: string): string {
   return JSON.stringify(value);
 }
 
+/** Return the string only if it's a valid http(s) URL — else undefined. Keeps
+ *  malformed registry URLs out of the frontmatter (which requires z.url()). */
+function httpUrl(u: string | undefined): string | undefined {
+  if (!u) return undefined;
+  try {
+    const parsed = new URL(u);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? u : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function frontmatter(fields: Record<string, unknown>): string {
   const lines: string[] = ['---'];
   for (const [key, value] of Object.entries(fields)) {
@@ -348,16 +399,25 @@ async function buildEntry(row: SeedRow, used: Set<string>, spdxIds: Set<string>)
     : await fetchRegistry(row.name, row.ecosystem);
   const gh = parseGitHubRepo(reg.repoUrl);
 
-  // Ownership screen — strongest signal when we have the repo URL: a repo owned
-  // by an excluded org is blocked regardless of its package name.
+  // Ownership screen — strongest signal when we have the repo URL. An LLM
+  // provider's repo (OpenAI/xAI) is blocked outright. A non-LLM excluded org
+  // (Meta) that ships permissively-licensed, non-data-routing libraries (React,
+  // Lexical, …) is INCLUDED with a visible origin advisory rather than blocked;
+  // its data-routing SDKs are still caught by the name screen below.
+  let originAdvisory: string | undefined;
   if (gh) {
     const ownerHit = matchGitHubOwner(gh.owner, orgs);
     if (ownerHit) {
-      console.warn(`  ✗ ${slug}: blocked — repo owner "${gh.owner}" → ${ownerHit.org_key}`);
-      return { slug, name: row.name, ecosystem: row.ecosystem, verification_status: 'blocked' };
+      const org = orgs.find((o) => o.key === ownerHit.org_key);
+      if (org?.llm_provider) {
+        console.warn(`  ✗ ${slug}: blocked — repo owner "${gh.owner}" → ${ownerHit.org_key}`);
+        return { slug, name: row.name, ecosystem: row.ecosystem, verification_status: 'blocked' };
+      }
+      originAdvisory = ownerHit.org_key;
     }
   }
-  // Name/coordinate screen (catches registry packages owned by excluded orgs).
+  // Name/coordinate screen (catches registry packages owned by excluded orgs,
+  // including Meta's data-routing SDKs like facebook-nodejs-business-sdk).
   if (matchDependency({ name: row.name, ecosystem: row.ecosystem, source_file: 'seed' }, orgs).length > 0) {
     console.warn(`  ✗ ${slug}: blocked — package name matches excluded org`);
     return { slug, name: row.name, ecosystem: row.ecosystem, verification_status: 'blocked' };
@@ -392,24 +452,35 @@ async function buildEntry(row: SeedRow, used: Set<string>, spdxIds: Set<string>)
   const lastActivity = meta?.pushed_at ?? reg.publishedAt;
   const status = maintenanceStatus(lastActivity, meta?.archived);
 
+  // Sanitize every URL field so a malformed registry value can never fail the
+  // content schema (which requires valid URLs).
+  const homepageUrl = httpUrl(reg.homepageUrl);
+  const repoUrl = httpUrl(reg.repoUrl);
+  const registryUrl = httpUrl(reg.registryUrl);
+  const licenseUrl = httpUrl(licenseSourceUrl) ?? registryUrl ?? repoUrl ?? homepageUrl;
+  if (!licenseUrl) {
+    console.warn(`  ~ ${slug}: skipped — no valid source URL`);
+    return { slug, name: row.name, ecosystem: row.ecosystem, verification_status: 'under_review' };
+  }
+
   // "verified" requires a valid SPDX id, a commit pin, and a source repo.
-  const verified = spdxValid && Boolean(sha) && Boolean(reg.repoUrl);
+  const verified = spdxValid && Boolean(sha) && Boolean(repoUrl);
   const verification_status: BuiltEntry['verification_status'] = verified ? 'verified' : 'under_review';
 
   const fm = frontmatter({
     title: row.name,
-    description: row.what_it_does ?? `${row.name} — ${row.category}`,
+    description: row.what_it_does || `${row.name} — ${row.category}`,
     entry_type: row.entry_type,
     dependency_name: row.name,
     ecosystem: row.ecosystem,
     category: row.category,
-    what_it_does: row.what_it_does ?? `${row.name} (${row.ecosystem})`,
+    what_it_does: row.what_it_does || `${row.name} — ${row.category} (${row.ecosystem}).`,
     protocols: row.protocols ?? [],
-    homepage_url: reg.homepageUrl,
-    repo_url: reg.repoUrl,
-    registry_url: reg.registryUrl,
+    homepage_url: homepageUrl,
+    repo_url: repoUrl,
+    registry_url: registryUrl,
     license_spdx: spdx ?? 'NOASSERTION',
-    license_source_url: licenseSourceUrl,
+    license_source_url: licenseUrl,
     license_source_commit_sha: sha,
     maintenance_status: status,
     last_release_at: reg.publishedAt,
@@ -418,9 +489,12 @@ async function buildEntry(row: SeedRow, used: Set<string>, spdxIds: Set<string>)
     pie_anchor: row.pie_anchor,
     provider_agnostic: false,
     verification_status,
+    origin_advisory: originAdvisory,
     verified_at: new Date().toISOString().slice(0, 10),
     sidebar: undefined,
   });
+
+  const advisoryOrg = originAdvisory ? orgs.find((o) => o.key === originAdvisory) : undefined;
 
   const body = `${fm}
 
@@ -432,6 +506,7 @@ ${row.what_it_does ?? ''}
 ${badge('license', spdx ?? 'unknown')}
 ${badge('status', status)}
 ${badge('verification', verification_status)}
+${originAdvisory ? `<span class="wcb-badge wcb-badge--advisory">${originAdvisory}-origin</span>` : ''}
 </div>
 
 <dl class="wcb-meta">
@@ -439,22 +514,26 @@ ${badge('verification', verification_status)}
   <dt>Category</dt><dd>${row.category}</dd>
   <dt>License</dt><dd>${spdx ?? 'unknown'}${spdxValid ? '' : ' (unverified SPDX)'}</dd>
   <dt>Latest version</dt><dd>${reg.version ?? 'unknown'}</dd>
-  ${reg.repoUrl ? `<dt>Source</dt><dd><a href="${reg.repoUrl}">${reg.repoUrl}</a></dd>` : ''}
-  ${reg.registryUrl ? `<dt>Registry</dt><dd><a href="${reg.registryUrl}">${reg.registryUrl}</a></dd>` : ''}
+  ${repoUrl ? `<dt>Source</dt><dd><a href="${repoUrl}">${repoUrl}</a></dd>` : ''}
+  ${registryUrl ? `<dt>Registry</dt><dd><a href="${registryUrl}">${registryUrl}</a></dd>` : ''}
 </dl>
 
 ${
   verifiedBlob
-    ? `<Aside type="tip" title="Verified at a commit">License read as <code>${spdx}</code> from <a href="${licenseSourceUrl}">${meta!.license_path}</a> at commit <code>${sha!.slice(0, 12)}</code>.</Aside>`
+    ? `<Aside type="tip" title="Verified at a commit">License read as <code>${spdx}</code> from <a href="${licenseUrl}">${meta!.license_path}</a> at commit <code>${sha!.slice(0, 12)}</code>.</Aside>`
     : sha
-      ? `<Aside type="tip" title="Pinned to a publish commit">Registry declares <code>${spdx}</code>; pinned to <a href="${licenseSourceUrl}">commit <code>${sha.slice(0, 12)}</code></a>. A maintainer pass with a GitHub token can upgrade this to a verified LICENSE-file read.</Aside>`
+      ? `<Aside type="tip" title="Pinned to a publish commit">Registry declares <code>${spdx}</code>; pinned to <a href="${licenseUrl}">commit <code>${sha.slice(0, 12)}</code></a>. A maintainer pass with a GitHub token can upgrade this to a verified LICENSE-file read.</Aside>`
       : `<Aside type="caution" title="Pending full verification">A pinned license commit could not be retrieved automatically; this entry is <code>under_review</code> until a maintainer confirms the source.</Aside>`
 }
 
+${
+  advisoryOrg
+    ? `<Aside type="caution" title="${advisoryOrg.display_name.split(' (')[0]}-origin">This library is built by ${advisoryOrg.display_name.split(' (')[0]}, an organization the catalog excludes. It is included because it is permissively licensed (<code>${spdx ?? 'see source'}</code>) and does not route user data to ${advisoryOrg.display_name.split(' (')[0]} — but you should make the dependency choice with your eyes open. See the [exclusion policy](/policies/) for how origin advisories work.</Aside>\n`
+    : ''
+}
 ## Why it's in the catalog
 
-This entry was screened against the [exclusion policy](/policies/): it declares no
-dependency owned by Meta, OpenAI, or xAI at the direct level. See
+This entry was screened against the [exclusion policy](/policies/)${originAdvisory ? ' (see the origin advisory above)' : ': it declares no dependency owned by Meta, OpenAI, or xAI at the direct level'}. See
 [how enforcement works](/policies/enforcement/) for the full three-layer check.
 `;
 

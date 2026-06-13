@@ -46,6 +46,7 @@
 .wcb-badge--minimal { border-color: #9a6700; color: #e3b341; }
 .wcb-badge--dormant { border-color: #b35900; color: #f0883e; }
 .wcb-badge--abandoned { border-color: #b62324; color: #ff7b72; }
+.wcb-badge--advisory { border-color: #b35900; color: #f0883e; }
 
 /* Compact definition grid for catalog entry metadata. */
 .wcb-meta {

@@ -110,6 +110,9 @@ export const catalogFields = z.object({
   provider_agnostic: z.boolean().default(false),
   verification_status: z.enum(VERIFICATION_STATUS).default('verified'),
   verification_blocked_reason: z.string().optional(),
+  /** Set when a tool is built by an excluded org but permissively licensed and
+   *  not data-routing (e.g. Meta-origin React) — included with a visible advisory. */
+  origin_advisory: z.string().optional(),
   verified_at: z.string().optional(),
 
   // ---- Recipe contract (required when entry_type === 'recipe') ----
