@@ -1,11 +1,11 @@
 ---
 title: Shakespeare
-description: A browser-based, bring-your-own-key AI app builder for Nostr — admitted only under a binding recipe that forbids OpenAI, xAI, and Google.
+description: A browser-based, bring-your-own-key AI app builder for Nostr — admitted only under a binding recipe that forbids OpenAI and xAI.
 entry_type: service
 dependency_name: shakespeare
 ecosystem: other
 category: AI & Agents
-what_it_does: "Shakespeare is a browser-only AI coding environment from Soapbox for building Nostr apps. It stores your model-provider key in IndexedDB (BYOK) and lets you choose the provider — which is exactly why it is admitted only under a binding provider-lockdown recipe that forbids OpenAI, xAI, and Google."
+what_it_does: "Shakespeare is a browser-only AI coding environment from Soapbox for building Nostr apps. It stores your model-provider key in IndexedDB (BYOK) and lets you choose the provider — which is exactly why it is admitted only under a binding provider-lockdown recipe that forbids OpenAI and xAI."
 protocols: [nostr]
 homepage_url: https://shakespeare.diy
 repo_url: https://gitlab.com/soapbox-pub/shakespeare
@@ -51,9 +51,9 @@ on the <code>main</code> branch at commit <code>a824677fe2d1</code>.
 ## Why Shakespeare must carry a lockdown recipe
 
 Shakespeare's provider picker includes permitted providers (Anthropic, DeepSeek,
-Kimi, OpenRouter, OpenCode Zen, PayPerQ, local Ollama) **and** excluded ones
-(OpenAI, xAI, Google). **Shakespeare is strictly forbidden from using the
-excluded providers** — and because its own UI *could* reach them, it is admitted
+Kimi, OpenRouter, OpenCode Zen, PayPerQ, local Ollama) **and** the excluded ones,
+**OpenAI and xAI**. **Shakespeare is strictly forbidden from using the excluded
+providers** — and because its own UI *could* reach them, it is admitted
 to the catalog only under a binding
 [provider-lockdown recipe](/recipes/shakespeare-byok-configuration/) that pins the
 configuration to permitted providers and machine-verifies the excluded ones are

@@ -1,6 +1,6 @@
 ---
 title: Shakespeare — provider lockdown (BYOK)
-description: The canonical provider-lockdown recipe — Shakespeare is forbidden from using OpenAI/xAI/Google; lock it to permitted providers and verify they're unreachable.
+description: The canonical provider-lockdown recipe — Shakespeare is forbidden from using OpenAI or xAI; lock it to permitted providers and verify they're unreachable.
 entry_type: recipe
 recipe_type: configuration
 target_entry: Shakespeare
@@ -11,12 +11,12 @@ excluded_providers_unreachable_when:
     config_surface: ui_setting
     setting_path: "Settings → AI Provider"
     must_be_one_of: [anthropic, deepseek, kimi, ollama-local, openrouter, opencode-zen, payperq]
-    must_not_be_one_of: [openai, xai, google]
+    must_not_be_one_of: [openai, xai]
 verification_steps:
   - description: "After configuring the provider, exercise the app for 5 minutes and confirm no requests reach the excluded hosts."
     method: network_observation
     duration_minutes: 5
-    blocked_hosts: [api.openai.com, api.x.ai, generativelanguage.googleapis.com]
+    blocked_hosts: [api.openai.com, api.x.ai]
 sidebar:
   label: Shakespeare (BYOK)
 ---
@@ -25,7 +25,7 @@ import { Steps, Aside } from '@astrojs/starlight/components';
 
 [Shakespeare](/catalog/shakespeare/) is **strictly forbidden from using any
 provider owned by Meta, OpenAI, or xAI.** Its bring-your-own-key picker *could*
-be pointed at OpenAI, xAI, or Google — so Shakespeare is allowed in the catalog
+be pointed at OpenAI or xAI — so Shakespeare is allowed in the catalog
 **only** under this binding recipe, which locks the picker to permitted providers
 and machine-verifies that the excluded ones are unreachable. This is enforcement
 of the exclusion, not an exemption from it.
@@ -52,7 +52,7 @@ AGPL-3.0, default branch `main`. Pinned for this recipe at commit
 4. Paste your own API key for that provider (BYOK). It's stored locally in your
    browser's IndexedDB — it is not sent to Shakespeare's servers.
 
-5. **Do not** select OpenAI, xAI, or Google.
+5. **Do not** select OpenAI or xAI.
 
 </Steps>
 
@@ -66,7 +66,6 @@ you use the app:
 # exercise Shakespeare for ~5 minutes and confirm NO requests to:
 #   api.openai.com
 #   api.x.ai
-#   generativelanguage.googleapis.com
 ```
 
 If you picked Anthropic, you should see traffic to `api.anthropic.com` and

@@ -35,7 +35,7 @@ const validFrontmatter = {
       config_surface: 'ui_setting',
       setting_path: 'Settings → AI Provider',
       must_be_one_of: ['anthropic', 'deepseek', 'ollama-local'],
-      must_not_be_one_of: ['openai', 'xai', 'google'],
+      must_not_be_one_of: ['openai', 'xai'],
     },
   ],
   verification_steps: [
