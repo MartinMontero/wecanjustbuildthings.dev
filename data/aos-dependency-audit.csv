@@ -1,0 +1,1162 @@
+Dependency,Ecosystem,Category,Repos Using,What It Does,Used In
+typescript,js,Dev Environment & Tooling,28.0,Statically typed JavaScript (AOS default language),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/nostr-stats, andotherstuff/universes-legacy, cashubtc/cashu-crypto-ts, cashubtc/cashu-redeem, cashubtc/cashu-ts …"
+@types/node,js,Dev Environment & Tooling,21.0,Node.js TypeScript definitions,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, cashubtc/cashu-ts, cashubtc/cashu.me, cashubtc/eNuts, cashubtc/npubcash-server, cashubtc/npubcash-website …"
+tailwindcss,js,Frameworks & Libraries,21.0,Utility-first CSS framework (AOS default styling),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/nostr-stats, andotherstuff/universes-legacy, cashubtc/cashu-redeem, cashubtc/docs.cashu.space, cashubtc/npubcash-website …"
+eslint,js,Dev Environment & Tooling,20.0,JavaScript/TypeScript linter,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-crypto-ts, cashubtc/cashu-redeem, cashubtc/cashu-ts, cashubtc/cashu.me, cashubtc/docs.cashu.space, cashubtc/eNuts …"
+nostr-tools,js,Bitcoin Lightning Nostr,20.0,Original TypeScript Nostr library (being migrated from),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/keycast, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu.me, cashubtc/eNuts, cashubtc/npubcash-server, cashubtc/npubcash-website …"
+react,js,Frameworks & Libraries,19.0,UI library (AOS standard for web clients),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, cashubtc/docs.cashu.space, cashubtc/eNuts, cashubtc/npubcash-website …"
+vite,js,Dev Environment & Tooling,19.0,Frontend build tool and dev server (AOS default),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/nostr-stats, andotherstuff/universes-legacy, andotherstuff/website, cashubtc/cashu-ts, cashubtc/npubcash-website …"
+@types/react,js,Dev Environment & Tooling,18.0,React TypeScript definitions,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, cashubtc/eNuts, cashubtc/npubcash-website, cashubtc/nut-november …"
+react-dom,js,Frameworks & Libraries,18.0,React renderer for the browser,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, cashubtc/docs.cashu.space, cashubtc/npubcash-website, cashubtc/nut-november …"
+@types/react-dom,js,Dev Environment & Tooling,17.0,React-DOM TypeScript definitions,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, cashubtc/npubcash-website, cashubtc/nut-november, marmot-protocol/marmots-web-chat …"
+autoprefixer,js,Frameworks & Libraries,15.0,Auto-adds vendor prefixes to CSS,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu.me, cashubtc/docs.cashu.space, cashubtc/npubcash-website, marmot-protocol/whitenoise-podcast …"
+clsx,js,Frameworks & Libraries,15.0,Tiny className concatenation utility,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, cashubtc/docs.cashu.space, marmot-protocol/marmots-web-chat, marmot-protocol/whitenoise-podcast …"
+serde,rust,Frameworks & Libraries,15.0,Rust serialization framework (AOS Rust default),"andotherstuff/binostr, andotherstuff/funnel, andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/mdk, marmot-protocol/nostr-openmls, marmot-protocol/openmls-lmdb-storage, marmot-protocol/openmls-redb-storage, marmot-protocol/openmls-sled-storage, marmot-protocol/proton-beam …"
+lucide-react,js,Frameworks & Libraries,14.0,Lucide icon set as React components,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-podcast …"
+postcss,js,Frameworks & Libraries,14.0,CSS processor (used by Tailwind),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, cashubtc/npubcash-website, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto …"
+serde_json,rust,Frameworks & Libraries,14.0,JSON serialization for serde,"andotherstuff/binostr, andotherstuff/funnel, andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/mdk, marmot-protocol/openmls-lmdb-storage, marmot-protocol/openmls-redb-storage, marmot-protocol/openmls-sled-storage, marmot-protocol/proton-beam, marmot-protocol/transponder …"
+@eslint/js,js,Dev Environment & Tooling,13.0,ESLint core JavaScript configurations,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, cashubtc/cashu-ts, cashubtc/eNuts, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto …"
+eslint-plugin-react-hooks,js,Dev Environment & Tooling,13.0,ESLint rules for React Hooks,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/eNuts, cashubtc/npubcash-website, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare …"
+globals,js,Dev Environment & Tooling,13.0,ESLint global variables definitions,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-ts, cashubtc/eNuts, marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto …"
+tailwind-merge,js,Frameworks & Libraries,13.0,Deduplicates conflicting Tailwind classes,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, marmot-protocol/marmots-web-chat, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto …"
+thiserror,rust,Frameworks & Libraries,13.0,Library-oriented Rust error types,"andotherstuff/binostr, andotherstuff/funnel, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/mdk, marmot-protocol/nostr-openmls, marmot-protocol/openmls-lmdb-storage, marmot-protocol/openmls-redb-storage, marmot-protocol/openmls-sled-storage, marmot-protocol/proton-beam, marmot-protocol/transponder …"
+vitest,js,Testing & QA,13.0,Vite-native test framework (AOS default),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-ts, cashubtc/cashu.me, cashubtc/npubcash-server, marmot-protocol/marmot-ts, marmot-protocol/whitenoise-podcast, marmot-protocol/whitenoise-web, soapbox-pub/ditto, soapbox-pub/shakespeare …"
+@tailwindcss/typography,js,Frameworks & Libraries,12.0,Tailwind plugin for prose-heavy content,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/nostr-stats, andotherstuff/universes-legacy, cashubtc/docs.cashu.space, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+class-variance-authority,js,Frameworks & Libraries,12.0,Type-safe variant API (core shadcn/ui primitive),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, marmot-protocol/marmots-web-chat, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+react-router-dom,js,Frameworks & Libraries,12.0,Client-side routing for React,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/npubcash-website, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+tracing,rust,Monitoring & Observability,12.0,Structured logging and spans for Rust,"andotherstuff/funnel, andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/mdk, marmot-protocol/nostr-openmls, marmot-protocol/openmls-redb-storage, marmot-protocol/openmls-sled-storage, marmot-protocol/proton-beam, marmot-protocol/transponder, marmot-protocol/whitenoise-rs"
+typescript-eslint,js,Dev Environment & Tooling,12.0,TypeScript integration for ESLint,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-ts, cashubtc/orchard, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@nostrify/nostrify,js,Bitcoin Lightning Nostr,11.0,Modern TypeScript Nostr framework (AOS/Soapbox standard),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+@tanstack/react-query,js,Frameworks & Libraries,11.0,Async state and server-cache management,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+@vitejs/plugin-react-swc,js,Dev Environment & Tooling,11.0,Vite React plugin using SWC compiler,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+eslint-plugin-react-refresh,js,Dev Environment & Tooling,11.0,ESLint rules for Fast Refresh,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/npubcash-website, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+prettier,js,Dev Environment & Tooling,11.0,Opinionated code formatter,"cashubtc/cashu-crypto-ts, cashubtc/cashu-redeem, cashubtc/cashu-ts, cashubtc/cashu.me, cashubtc/coco, cashubtc/docs.cashu.space, cashubtc/eNuts, cashubtc/orchard, marmot-protocol/marmot-ts, marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor"
+tailwindcss-animate,js,Frameworks & Libraries,11.0,Animation plugin for Tailwind,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+tracing-subscriber,rust,Monitoring & Observability,11.0,Tracing subscriber (formatter/filter),"andotherstuff/funnel, andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/mdk, marmot-protocol/openmls-redb-storage, marmot-protocol/openmls-sled-storage, marmot-protocol/proton-beam, marmot-protocol/transponder, marmot-protocol/whitenoise-rs"
+zod,js,Frameworks & Libraries,11.0,Runtime schema validation with TS type inference,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/nostrify, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+@nostrify/react,js,Bitcoin Lightning Nostr,10.0,React bindings for Nostrify,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-checkbox,js,Frameworks & Libraries,10.0,Accessible checkbox primitive (shadcn/ui),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-collapsible,js,Frameworks & Libraries,10.0,Collapsible primitive (shadcn/ui),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-label,js,Frameworks & Libraries,10.0,Accessible form label primitive (shadcn/ui),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu-redeem, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-slot,js,Frameworks & Libraries,10.0,Component composition primitive (shadcn/ui core),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/get-nostr, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+date-fns,js,Frameworks & Libraries,10.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/heynow, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, cashubtc/cashu.me, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto"
+hex,rust,Frameworks & Libraries,10.0,,"andotherstuff/binostr, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, marmot-protocol/mdk, marmot-protocol/nostr-openmls, marmot-protocol/openmls-lmdb-storage, marmot-protocol/openmls-redb-storage, marmot-protocol/openmls-sled-storage, marmot-protocol/transponder, marmot-protocol/whitenoise-rs"
+recharts,js,Frameworks & Libraries,10.0,React charting library,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/marmots-web-chat, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+tokio,rust,Hosting Infra & Deploy,10.0,Rust async runtime (AOS Rust backend default),"andotherstuff/funnel, andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/mdk, marmot-protocol/proton-beam, marmot-protocol/transponder, marmot-protocol/whitenoise-rs, marmot-protocol/wn-tui"
+vaul,js,Frameworks & Libraries,10.0,React drawer component (shadcn/ui ecosystem),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/marmots-web-chat, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@hookform/resolvers,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-accordion,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-alert-dialog,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-aspect-ratio,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-avatar,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-context-menu,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-dialog,js,Frameworks & Libraries,9.0,Modal/dialog primitive (shadcn/ui),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-dropdown-menu,js,Frameworks & Libraries,9.0,Dropdown menu primitive (shadcn/ui),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-hover-card,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-menubar,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-navigation-menu,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-popover,js,Frameworks & Libraries,9.0,Popover primitive (shadcn/ui),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-progress,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-radio-group,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-scroll-area,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-select,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-separator,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-slider,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-switch,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-tabs,js,Frameworks & Libraries,9.0,Tabs primitive (shadcn/ui),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-toast,js,Frameworks & Libraries,9.0,Toast/notification primitive (shadcn/ui),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-toggle,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-toggle-group,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@radix-ui/react-tooltip,js,Frameworks & Libraries,9.0,Tooltip primitive (shadcn/ui),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+cmdk,js,Frameworks & Libraries,9.0,Command menu / command palette (shadcn/ui ecosystem),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+embla-carousel-react,js,Frameworks & Libraries,9.0,Carousel component for React,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+input-otp,js,Frameworks & Libraries,9.0,One-time-password input component,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+qrcode,js,Frameworks & Libraries,9.0,QR code generation library,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/nostr-rs-relay, andotherstuff/universes-legacy, cashubtc/cashu.me, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+react-day-picker,js,Frameworks & Libraries,9.0,Flexible date picker for React,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+react-hook-form,js,Frameworks & Libraries,9.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+react-resizable-panels,js,Frameworks & Libraries,9.0,Resizable split-pane panels for React,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@html-eslint/eslint-plugin,js,Dev Environment & Tooling,8.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@html-eslint/parser,js,Dev Environment & Tooling,8.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@testing-library/jest-dom,js,Testing & QA,8.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+@testing-library/react,js,Testing & QA,8.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+anyhow,rust,Frameworks & Libraries,8.0,Application-oriented flexible Rust error type,"andotherstuff/funnel, andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/proton-beam, marmot-protocol/transponder, marmot-protocol/wn-tui"
+jsdom,js,Testing & QA,8.0,JavaScript DOM implementation for testing,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+tempfile,rust,Testing & QA,8.0,Temporary files/directories for Rust (commonly in tests),"marmot-protocol/mdk, marmot-protocol/nostr-openmls, marmot-protocol/openmls-lmdb-storage, marmot-protocol/openmls-redb-storage, marmot-protocol/openmls-sled-storage, marmot-protocol/proton-beam, marmot-protocol/transponder, marmot-protocol/whitenoise-rs"
+@cashu/cashu-ts,js,Bitcoin Lightning Nostr,7.0,,"andotherstuff/cashu-wallet, andotherstuff/chorus, cashubtc/cashu-redeem, cashubtc/cashu.me, cashubtc/eNuts, cashubtc/npubcash-server, cashubtc/npubcash-website"
+@fontsource-variable/inter,js,Frameworks & Libraries,7.0,Self-hosted Inter variable font,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@getalby/sdk,js,Bitcoin Lightning Nostr,7.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@types/qrcode,js,Dev Environment & Tooling,7.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@typescript-eslint/eslint-plugin,js,Dev Environment & Tooling,7.0,,"cashubtc/cashu-crypto-ts, cashubtc/cashu-redeem, cashubtc/cashu-ts, cashubtc/cashu.me, cashubtc/eNuts, cashubtc/npubcash-website, soapbox-pub/soapbox"
+@unhead/addons,js,Frameworks & Libraries,7.0,Additional functionality for @unhead,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@unhead/react,js,Frameworks & Libraries,7.0,Head/meta-tag management for React (SEO),"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto, soapbox-pub/shakespeare"
+bech32,rust,Security & Privacy,7.0,"Bech32 address encoding for Rust (npub, note, etc.)","andotherstuff/nostr-rs-relay, cashubtc/cashu-redeem, cashubtc/cashu-ui, cashubtc/cashu.me, cashubtc/eNuts, cashubtc/nutshell, marmot-protocol/wn-tui"
+@noble/hashes,js,Security & Privacy,6.0,Audited hash functions for JS (Nostr/Cashu crypto),"andotherstuff/cashu-wallet, cashubtc/cashu-crypto-ts, cashubtc/cashu-ts, cashubtc/npubcash-website, marmot-protocol/marmot-ts, marmot-protocol/marmots-web-chat"
+@typescript-eslint/parser,js,Dev Environment & Tooling,6.0,,"cashubtc/cashu-redeem, cashubtc/cashu-ts, cashubtc/cashu.me, cashubtc/eNuts, cashubtc/npubcash-website, soapbox-pub/soapbox"
+chrono,rust,Frameworks & Libraries,6.0,Date/time library for Rust,"andotherstuff/funnel, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, marmot-protocol/proton-beam, marmot-protocol/whitenoise-rs, marmot-protocol/wn-tui"
+clap,rust,Frameworks & Libraries,6.0,Command-line argument parser for Rust,"andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, cashubtc/cdk, marmot-protocol/proton-beam, marmot-protocol/transponder, marmot-protocol/whitenoise-rs"
+dotenv,js,Dev Environment & Tooling,6.0,Environment-variable loader,"andotherstuff/nostr-compass-podcast, cashubtc/docs.cashu.space, cashubtc/eNuts, cashubtc/npubcash-server, cashubtc/orchard, marmot-protocol/whitenoise-podcast"
+nostr-sdk,rust,Bitcoin Lightning Nostr,6.0,Rust Nostr SDK (rust-nostr),"andotherstuff/groups_relay, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/proton-beam, marmot-protocol/transponder, marmot-protocol/whitenoise-rs"
+rand,rust,Frameworks & Libraries,6.0,,"andotherstuff/binostr, andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, cashubtc/cdk, marmot-protocol/nostr-openmls, marmot-protocol/whitenoise-rs"
+@webbtc/webln-types,js,Bitcoin Lightning Nostr,5.0,TypeScript types for WebLN,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, cashubtc/cashu-redeem, soapbox-pub/ditto, soapbox-pub/soapbox"
+buffer,js,Frameworks & Libraries,5.0,Node Buffer polyfill for browsers,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, cashubtc/cashu-crypto-ts, soapbox-pub/ditto, soapbox-pub/shakespeare"
+eslint-plugin-import,js,Dev Environment & Tooling,5.0,,"cashubtc/cashu-crypto-ts, cashubtc/cashu-redeem, cashubtc/cashu-ts, cashubtc/eNuts, soapbox-pub/soapbox"
+futures,rust,Hosting Infra & Deploy,5.0,,"andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, cashubtc/cdk, marmot-protocol/whitenoise-rs, marmot-protocol/wn-tui"
+idb,js,Databases & Storage,5.0,,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/universes-legacy, marmot-protocol/marmots-web-chat, soapbox-pub/ditto"
+nostr,rust,Bitcoin Lightning Nostr,5.0,Rust Nostr protocol library (rust-nostr core),"andotherstuff/funnel, andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, marmot-protocol/mdk"
+openmls_traits,rust,Security & Privacy,5.0,,"marmot-protocol/mdk, marmot-protocol/nostr-openmls, marmot-protocol/openmls-lmdb-storage, marmot-protocol/openmls-redb-storage, marmot-protocol/openmls-sled-storage"
+prost,rust,Frameworks & Libraries,5.0,Protocol Buffers for Rust,"andotherstuff/binostr, andotherstuff/nostr-rs-relay, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/proton-beam"
+react-intersection-observer,js,Frameworks & Libraries,5.0,Intersection Observer hook for React,"andotherstuff/ai-sovereignty, andotherstuff/aos-convergence, andotherstuff/nostr-compass-podcast, marmot-protocol/whitenoise-podcast, soapbox-pub/ditto"
+ts-node,js,Dev Environment & Tooling,5.0,,"cashubtc/cashu-crypto-ts, cashubtc/cashu-redeem, cashubtc/cashu-ts, cashubtc/eNuts, cashubtc/orchard"
+@tailwindcss/vite,js,Frameworks & Libraries,4.0,,"andotherstuff/nostr-stats, marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-web"
+@vitejs/plugin-react,js,Dev Environment & Tooling,4.0,,"cashubtc/npubcash-website, marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor, soapbox-pub/ditto"
+applesauce-common,js,Bitcoin Lightning Nostr,4.0,,"marmot-protocol/marmot-ts, marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-web"
+applesauce-core,js,Bitcoin Lightning Nostr,4.0,,"marmot-protocol/marmot-ts, marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-web"
+async-trait,rust,Hosting Infra & Deploy,4.0,Async methods in Rust traits,"andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, cashubtc/cdk, marmot-protocol/whitenoise-rs"
+axum,rust,Hosting Infra & Deploy,4.0,,"andotherstuff/funnel, andotherstuff/pensieve, cashubtc/cdk, marmot-protocol/transponder"
+cashu,py,Bitcoin Lightning Nostr,4.0,,"cashubtc/cashu-ui, cashubtc/cdk, cashubtc/xcashu"
+eslint-config-prettier,js,Dev Environment & Tooling,4.0,,"cashubtc/cashu-redeem, cashubtc/cashu-ts, cashubtc/cashu.me, cashubtc/orchard"
+eslint-plugin-promise,js,Dev Environment & Tooling,4.0,,"cashubtc/cashu-crypto-ts, cashubtc/cashu-ts, cashubtc/eNuts, soapbox-pub/soapbox"
+log,rust,Monitoring & Observability,4.0,,"andotherstuff/nostr-rs-relay, marmot-protocol/openmls-lmdb-storage, marmot-protocol/openmls-redb-storage, marmot-protocol/openmls-sled-storage"
+next-themes,js,Frameworks & Libraries,4.0,Dark-mode/theme switcher for React,"andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, marmot-protocol/whitenoise-podcast"
+prometheus,elixir,Monitoring & Observability,4.0,,"andotherstuff/nostr-rs-relay, cashubtc/cdk, marmot-protocol/transponder, soapbox-pub/rebased"
+react-qr-code,js,Frameworks & Libraries,4.0,QR code rendering for React,"andotherstuff/cashu-wallet, andotherstuff/chorus, cashubtc/npubcash-website, cashubtc/nut-november"
+rusqlite,rust,Databases & Storage,4.0,,"andotherstuff/nostr-rs-relay, andotherstuff/pensieve, marmot-protocol/mdk, marmot-protocol/proton-beam"
+rxjs,js,Frameworks & Libraries,4.0,,"cashubtc/orchard, marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-web"
+secp256k1,rust,Security & Privacy,4.0,,"andotherstuff/nostr-rs-relay, cashubtc/cashu-ui, cashubtc/nutshell, marmot-protocol/transponder"
+sonner,js,Frameworks & Libraries,4.0,Toast notifications for React,"andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-compass-podcast, marmot-protocol/whitenoise-podcast"
+tsx,js,Dev Environment & Tooling,4.0,,"andotherstuff/nostr-compass-podcast, cashubtc/cashu-redeem, cashubtc/cashu-ts, marmot-protocol/whitenoise-podcast"
+uuid,rust,Frameworks & Libraries,4.0,UUID generation and parsing for Rust,"andotherstuff/cashu-wallet, andotherstuff/chorus, andotherstuff/nostr-rs-relay, cashubtc/cdk"
+webln,js,Bitcoin Lightning Nostr,4.0,Browser Lightning wallet interface,"andotherstuff/nostr-compass-podcast, andotherstuff/universes-legacy, marmot-protocol/whitenoise-podcast, soapbox-pub/shakespeare"
+ws,js,Hosting Infra & Deploy,4.0,,"andotherstuff/nostr-compass-podcast, cashubtc/cashu-ts, cashubtc/npubcash-server, marmot-protocol/whitenoise-web"
+zustand,js,Frameworks & Libraries,4.0,,"andotherstuff/cashu-wallet, andotherstuff/chorus, cashubtc/docs.cashu.space, soapbox-pub/soapbox"
+@capacitor/android,js,Misc & Everything Else,3.0,,"cashubtc/cashu.me, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@capacitor/cli,js,Misc & Everything Else,3.0,,"cashubtc/cashu.me, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@capacitor/core,js,Misc & Everything Else,3.0,,"cashubtc/cashu.me, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@changesets/cli,js,Dev Environment & Tooling,3.0,,"cashubtc/coco, marmot-protocol/marmot-ts, soapbox-pub/nostrify"
+@dnd-kit/core,js,Frameworks & Libraries,3.0,,"andotherstuff/universes-legacy, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@dnd-kit/sortable,js,Frameworks & Libraries,3.0,,"andotherstuff/universes-legacy, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@dnd-kit/utilities,js,Frameworks & Libraries,3.0,,"andotherstuff/universes-legacy, soapbox-pub/ditto, soapbox-pub/shakespeare"
+@fontsource-variable/outfit,js,Frameworks & Libraries,3.0,,"andotherstuff/ai-sovereignty, andotherstuff/universes-legacy, soapbox-pub/ditto"
+@noble/curves,js,Security & Privacy,3.0,Audited elliptic-curve crypto for JS,"cashubtc/cashu-crypto-ts, cashubtc/cashu-ts, marmot-protocol/marmot-ts"
+@sentry/react,js,Monitoring & Observability,3.0,,"soapbox-pub/ditto, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+@testing-library/user-event,js,Testing & QA,3.0,,"andotherstuff/universes-legacy, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+@types/bun,js,Dev Environment & Tooling,3.0,,"andotherstuff/keycast, cashubtc/coco, marmot-protocol/nostr-doctor"
+@types/jest,js,Dev Environment & Tooling,3.0,,"cashubtc/cashu-crypto-ts, cashubtc/eNuts, cashubtc/orchard"
+@types/ws,js,Dev Environment & Tooling,3.0,,"andotherstuff/nostr-compass-podcast, cashubtc/cashu-ts, marmot-protocol/whitenoise-web"
+applesauce-accounts,js,Misc & Everything Else,3.0,,"marmot-protocol/marmot-ts, marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor"
+applesauce-loaders,js,Bitcoin Lightning Nostr,3.0,,"marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-web"
+applesauce-relay,js,Bitcoin Lightning Nostr,3.0,,"marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor, marmot-protocol/whitenoise-web"
+blurhash,js,Misc & Everything Else,3.0,,"marmot-protocol/mdk, soapbox-pub/ditto, soapbox-pub/soapbox"
+config,rust,Dev Environment & Tooling,3.0,,"andotherstuff/nostr-rs-relay, cashubtc/cdk, marmot-protocol/transponder"
+eslint-config-next,js,Dev Environment & Tooling,3.0,,"cashubtc/cashu-redeem, cashubtc/docs.cashu.space, cashubtc/nut-november"
+eslint-plugin-n,js,Dev Environment & Tooling,3.0,,"cashubtc/cashu-crypto-ts, cashubtc/cashu-ts, soapbox-pub/soapbox"
+express,js,Hosting Infra & Deploy,3.0,,"andotherstuff/chorus, cashubtc/docs.cashu.space, cashubtc/npubcash-server"
+framer-motion,js,Frameworks & Libraries,3.0,,"cashubtc/cashu-redeem, cashubtc/docs.cashu.space, cashubtc/npubcash-website"
+husky,js,Dev Environment & Tooling,3.0,,"cashubtc/cashu-ts, marmot-protocol/marmot-ts, soapbox-pub/soapbox"
+image,rust,Misc & Everything Else,3.0,,"marmot-protocol/mdk, marmot-protocol/whitenoise-rs, marmot-protocol/wn-tui"
+indicatif,rust,Frameworks & Libraries,3.0,,"andotherstuff/nostr-rs-relay, marmot-protocol/proton-beam, marmot-protocol/whitenoise-rs"
+jest,js,Testing & QA,3.0,,"cashubtc/cashu-crypto-ts, cashubtc/eNuts, cashubtc/orchard"
+jsonwebtoken,rust,Security & Privacy,3.0,,"cashubtc/cdk, cashubtc/npubcash-server, marmot-protocol/transponder"
+light-bolt11-decoder,js,Misc & Everything Else,3.0,,"cashubtc/cashu.me, cashubtc/npubcash-server, cashubtc/npubcash-website"
+marked,js,Frameworks & Libraries,3.0,,"andotherstuff/chorus, cashubtc/orchard, marmot-protocol/whitenoise-web"
+metrics,rust,Monitoring & Observability,3.0,,"andotherstuff/funnel, andotherstuff/groups_relay, andotherstuff/pensieve"
+metrics-exporter-prometheus,rust,Monitoring & Observability,3.0,,"andotherstuff/funnel, andotherstuff/groups_relay, andotherstuff/pensieve"
+next,js,Hosting Infra & Deploy,3.0,,"cashubtc/cashu-redeem, cashubtc/docs.cashu.space, cashubtc/nut-november"
+node-fetch,js,Misc & Everything Else,3.0,,"cashubtc/cashu-ts, cashubtc/docs.cashu.space, cashubtc/orchard"
+openmls,rust,Security & Privacy,3.0,,"marmot-protocol/mdk, marmot-protocol/nostr-openmls, marmot-protocol/propose"
+openmls_basic_credential,rust,Security & Privacy,3.0,,"marmot-protocol/mdk, marmot-protocol/nostr-openmls, marmot-protocol/propose"
+openmls_rust_crypto,rust,Security & Privacy,3.0,,"marmot-protocol/mdk, marmot-protocol/nostr-openmls, marmot-protocol/propose"
+python,py,Misc & Everything Else,3.0,,"cashubtc/cashu-ui, cashubtc/nutshell, cashubtc/xcashu"
+react-error-boundary,js,Misc & Everything Else,3.0,,"marmot-protocol/marmots-web-chat, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+react-markdown,js,Frameworks & Libraries,3.0,,"andotherstuff/universes-legacy, soapbox-pub/ditto, soapbox-pub/shakespeare"
+regex,rust,Frameworks & Libraries,3.0,Regular expression engine for Rust,"andotherstuff/nostr-rs-relay, cashubtc/cdk, marmot-protocol/proton-beam"
+remark-gfm,js,Frameworks & Libraries,3.0,,"andotherstuff/universes-legacy, cashubtc/docs.cashu.space, soapbox-pub/shakespeare"
+reqwest,rust,Hosting Infra & Deploy,3.0,HTTP client for Rust,"cashubtc/cdk, marmot-protocol/transponder, marmot-protocol/whitenoise-rs"
+sha2,rust,Frameworks & Libraries,3.0,,"marmot-protocol/mdk, marmot-protocol/transponder, marmot-protocol/whitenoise-rs"
+tokio-tungstenite,rust,Hosting Infra & Deploy,3.0,,"andotherstuff/groups_relay, andotherstuff/nostr-rs-relay, cashubtc/cdk"
+toml,rust,Frameworks & Libraries,3.0,,"andotherstuff/binostr, marmot-protocol/proton-beam, marmot-protocol/transponder"
+tower,rust,Hosting Infra & Deploy,3.0,,"andotherstuff/funnel, andotherstuff/pensieve, cashubtc/cdk"
+tower-http,rust,Hosting Infra & Deploy,3.0,,"andotherstuff/funnel, andotherstuff/pensieve, cashubtc/cdk"
+tracing-appender,rust,Monitoring & Observability,3.0,,"andotherstuff/nostr-rs-relay, cashubtc/cdk, marmot-protocol/whitenoise-rs"
+ts-jest,js,Testing & QA,3.0,,"cashubtc/cashu-crypto-ts, cashubtc/eNuts, cashubtc/orchard"
+vite-plugin-pwa,js,Misc & Everything Else,3.0,,"marmot-protocol/marmots-web-chat, soapbox-pub/shakespeare, soapbox-pub/soapbox"
+@biomejs/biome,js,Dev Environment & Tooling,2.0,,"andotherstuff/nostr-stats, marmot-protocol/whitenoise-web"
+@capacitor/app,js,Misc & Everything Else,2.0,,"soapbox-pub/ditto, soapbox-pub/shakespeare"
+@capacitor/haptics,js,Misc & Everything Else,2.0,,"cashubtc/cashu.me, soapbox-pub/ditto"
+@capacitor/ios,js,Misc & Everything Else,2.0,,"cashubtc/cashu.me, soapbox-pub/ditto"
+@cashu/crypto,js,Bitcoin Lightning Nostr,2.0,,"andotherstuff/cashu-wallet, andotherstuff/chorus"
+@emoji-mart/data,js,Misc & Everything Else,2.0,,"soapbox-pub/ditto, soapbox-pub/soapbox"
+@eslint/eslintrc,js,Dev Environment & Tooling,2.0,,"cashubtc/cashu-redeem, cashubtc/eNuts"
+@flydotio/dockerfile,js,Misc & Everything Else,2.0,,"cashubtc/docs.cashu.space, cashubtc/nut-november"
+@fontsource-variable/jetbrains-mono,js,Frameworks & Libraries,2.0,,"marmot-protocol/marmots-web-chat, soapbox-pub/ditto"
+@fontsource-variable/montserrat,js,Frameworks & Libraries,2.0,,"andotherstuff/ai-sovereignty, soapbox-pub/ditto"
+@gandlaf21/bc-ur,js,Misc & Everything Else,2.0,,"cashubtc/cashu.me, cashubtc/npubcash-website"
+@libs/qrcode,js,Misc & Everything Else,2.0,,"marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor"
+@plausible-analytics/tracker,js,Misc & Everything Else,2.0,,"soapbox-pub/ditto, soapbox-pub/shakespeare"
+@scure/base,js,Security & Privacy,2.0,"Audited base-N encoders (bech32, base58, etc.)","cashubtc/cashu-ts, marmot-protocol/marmot-ts"
+@scure/bip32,js,Security & Privacy,2.0,,"cashubtc/cashu-crypto-ts, cashubtc/cashu-ts"
+@sveltejs/adapter-auto,js,Hosting Infra & Deploy,2.0,,"andotherstuff/nostr-stats, marmot-protocol/whitenoise-web"
+@sveltejs/adapter-vercel,js,Hosting Infra & Deploy,2.0,,"andotherstuff/nostr-stats, marmot-protocol/whitenoise-web"
+@sveltejs/kit,js,Hosting Infra & Deploy,2.0,,"andotherstuff/nostr-stats, marmot-protocol/whitenoise-web"
+@sveltejs/vite-plugin-svelte,js,Frameworks & Libraries,2.0,,"andotherstuff/nostr-stats, marmot-protocol/whitenoise-web"
+@types/compression,js,Dev Environment & Tooling,2.0,,"cashubtc/npubcash-server, cashubtc/orchard"
+@types/express,js,Dev Environment & Tooling,2.0,,"cashubtc/npubcash-server, cashubtc/orchard"
+@types/node-fetch,js,Dev Environment & Tooling,2.0,,"cashubtc/cashu-ts, cashubtc/orchard"
+@types/path-browserify,js,Dev Environment & Tooling,2.0,,"soapbox-pub/shakespeare, soapbox-pub/soapbox"
+@types/supertest,js,Dev Environment & Tooling,2.0,,"cashubtc/npubcash-server, cashubtc/orchard"
+@types/uuid,js,Dev Environment & Tooling,2.0,,"andotherstuff/cashu-wallet, cashubtc/cashu.me"
+@vitest/coverage-v8,js,Testing & QA,2.0,,"cashubtc/cashu-ts, cashubtc/npubcash-server"
+anyio,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+applesauce-react,js,Misc & Everything Else,2.0,,"marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor"
+applesauce-signers,js,Bitcoin Lightning Nostr,2.0,,"marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor"
+asyncio,py,Misc & Everything Else,2.0,,cashubtc/cashu-ui
+base64,rust,Frameworks & Libraries,2.0,,"marmot-protocol/mdk, marmot-protocol/transponder"
+bcrypt,ruby,Security & Privacy,2.0,,"cashubtc/orchard, marmot-protocol/botburrow"
+bitstring,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+blossom-client-sdk,js,Misc & Everything Else,2.0,,"marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor"
+build_runner,dart,Misc & Everything Else,2.0,,"cashubtc/cdk-flutter, marmot-protocol/whitenoise"
+certifi,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+cffi,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+chacha20poly1305,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/transponder"
+chart.js,js,Frameworks & Libraries,2.0,,"andotherstuff/nostr-stats, cashubtc/orchard"
+ciborium,rust,Misc & Everything Else,2.0,,"andotherstuff/binostr, cashubtc/cdk"
+click,py,Frameworks & Libraries,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+clickhouse,rust,Frameworks & Libraries,2.0,,"andotherstuff/funnel, andotherstuff/pensieve"
+colorama,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+compression,js,Misc & Everything Else,2.0,,"cashubtc/npubcash-server, cashubtc/orchard"
+concurrently,js,Misc & Everything Else,2.0,,"andotherstuff/keycast, soapbox-pub/soapbox"
+cors,js,Misc & Everything Else,2.0,,"cashubtc/docs.cashu.space, cashubtc/npubcash-server"
+criterion,rust,Testing & QA,2.0,,"andotherstuff/binostr, cashubtc/cdk"
+debug,js,Monitoring & Observability,2.0,,"marmot-protocol/botburrow, marmot-protocol/marmot-ts"
+dirs,rust,Misc & Everything Else,2.0,,"marmot-protocol/whitenoise-rs, marmot-protocol/wn-tui"
+ecdsa,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+emoji-mart,js,Misc & Everything Else,2.0,,"soapbox-pub/ditto, soapbox-pub/soapbox"
+emoji-picker-react,js,Misc & Everything Else,2.0,,"andotherstuff/chorus, andotherstuff/universes-legacy"
+environs,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+esbuild,js,Dev Environment & Tooling,2.0,,"cashubtc/npubcash-server, soapbox-pub/nostrify"
+eslint-import-resolver-typescript,js,Dev Environment & Tooling,2.0,,"cashubtc/cashu-ts, soapbox-pub/soapbox"
+eslint-plugin-jest,js,Dev Environment & Tooling,2.0,,"cashubtc/cashu-redeem, cashubtc/eNuts"
+eslint-plugin-jsdoc,js,Dev Environment & Tooling,2.0,,"cashubtc/eNuts, soapbox-pub/soapbox"
+eslint-plugin-prettier,js,Dev Environment & Tooling,2.0,,"cashubtc/cashu-redeem, cashubtc/orchard"
+eslint-plugin-react,js,Dev Environment & Tooling,2.0,,"cashubtc/eNuts, soapbox-pub/soapbox"
+fastapi,py,Hosting Infra & Deploy,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+flate2,rust,Misc & Everything Else,2.0,,"andotherstuff/binostr, marmot-protocol/proton-beam"
+flutter,dart,Frameworks & Libraries,2.0,,"cashubtc/cdk-flutter, marmot-protocol/whitenoise"
+flutter_lints,dart,Frameworks & Libraries,2.0,,"cashubtc/cdk-flutter, marmot-protocol/whitenoise"
+flutter_rust_bridge,dart,Frameworks & Libraries,2.0,,"cashubtc/cdk-flutter, marmot-protocol/whitenoise"
+flutter_test,dart,Frameworks & Libraries,2.0,,"cashubtc/cdk-flutter, marmot-protocol/whitenoise"
+freezed,dart,Misc & Everything Else,2.0,,"cashubtc/cdk-flutter, marmot-protocol/whitenoise"
+freezed_annotation,dart,Misc & Everything Else,2.0,,"cashubtc/cdk-flutter, marmot-protocol/whitenoise"
+futures-util,rust,Hosting Infra & Deploy,2.0,,"andotherstuff/groups_relay, andotherstuff/nostr-rs-relay"
+getrandom,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/transponder"
+graphql,js,Frameworks & Libraries,2.0,,"cashubtc/npubcash-server, cashubtc/orchard"
+h11,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+hkdf,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/transponder"
+i18next,js,Misc & Everything Else,2.0,,"cashubtc/eNuts, soapbox-pub/shakespeare"
+idna,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+importlib-metadata,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+keyring-core,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/whitenoise-rs"
+lint-staged,js,Dev Environment & Tooling,2.0,,"cashubtc/cashu-ts, soapbox-pub/soapbox"
+localforage,js,Misc & Everything Else,2.0,,"cashubtc/npubcash-website, marmot-protocol/marmots-web-chat"
+loguru,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+lru,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/transponder"
+marshmallow,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+mdk-core,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/whitenoise-rs"
+mdk-sqlite-storage,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/whitenoise-rs"
+mdk-storage-traits,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/whitenoise-rs"
+mime,js,Misc & Everything Else,2.0,,"marmot-protocol/whitenoise, soapbox-pub/shakespeare"
+mock-socket,js,Misc & Everything Else,2.0,,"cashubtc/cashu-ts, soapbox-pub/nostrify"
+nodemon,js,Misc & Everything Else,2.0,,"cashubtc/npubcash-server, cashubtc/orchard"
+notepack,rust,Misc & Everything Else,2.0,,"andotherstuff/binostr, andotherstuff/pensieve"
+packaging,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+parking_lot,rust,Frameworks & Libraries,2.0,,"andotherstuff/pensieve, marmot-protocol/mdk"
+path-browserify,js,Misc & Everything Else,2.0,,"soapbox-pub/shakespeare, soapbox-pub/soapbox"
+pg,js,Databases & Storage,2.0,,"cashubtc/npubcash-server, cashubtc/orchard"
+playwright,js,Testing & QA,2.0,,"andotherstuff/keycast, cashubtc/cashu-ts"
+plugin_platform_interface,dart,Misc & Everything Else,2.0,,"cashubtc/cdk-flutter, marmot-protocol/whitenoise"
+pycparser,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+pydantic,py,Frameworks & Libraries,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+python-dotenv,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+qrcode.react,js,Frameworks & Libraries,2.0,,"andotherstuff/chorus, soapbox-pub/soapbox"
+react-hot-toast,js,Misc & Everything Else,2.0,,"cashubtc/cashu-redeem, soapbox-pub/soapbox"
+react-i18next,js,Misc & Everything Else,2.0,,"cashubtc/eNuts, soapbox-pub/shakespeare"
+react-router,js,Frameworks & Libraries,2.0,,"marmot-protocol/marmots-web-chat, marmot-protocol/nostr-doctor"
+react-virtuoso,js,Misc & Everything Else,2.0,,"andotherstuff/universes-legacy, soapbox-pub/soapbox"
+rollup-plugin-visualizer,js,Dev Environment & Tooling,2.0,,"soapbox-pub/ditto, soapbox-pub/soapbox"
+rustls,rust,Security & Privacy,2.0,,"cashubtc/cdk, marmot-protocol/whitenoise-rs"
+setuptools,py,Dev Environment & Tooling,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+six,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+sniffio,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+sqlalchemy,py,Frameworks & Libraries,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+sqlx,rust,Databases & Storage,2.0,,"andotherstuff/nostr-rs-relay, marmot-protocol/whitenoise-rs"
+starlette,py,Hosting Infra & Deploy,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+supertest,js,Testing & QA,2.0,,"cashubtc/npubcash-server, cashubtc/orchard"
+svelte,js,Frameworks & Libraries,2.0,,"andotherstuff/nostr-stats, marmot-protocol/whitenoise-web"
+svelte-check,js,Misc & Everything Else,2.0,,"andotherstuff/nostr-stats, marmot-protocol/whitenoise-web"
+tls_codec,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/nostr-openmls"
+tokio-stream,rust,Hosting Infra & Deploy,2.0,,"cashubtc/cdk, marmot-protocol/wn-tui"
+tokio-test,rust,Hosting Infra & Deploy,2.0,,"andotherstuff/funnel, marmot-protocol/transponder"
+tokio-util,rust,Hosting Infra & Deploy,2.0,,"andotherstuff/groups_relay, cashubtc/cdk"
+tonic,rust,Hosting Infra & Deploy,2.0,,"andotherstuff/nostr-rs-relay, cashubtc/cdk"
+ts-jest-resolver,js,Misc & Everything Else,2.0,,"cashubtc/cashu-crypto-ts, cashubtc/eNuts"
+ts-mls,js,Misc & Everything Else,2.0,,"marmot-protocol/marmot-ts, marmot-protocol/marmots-web-chat"
+tsconfig-paths,js,Misc & Everything Else,2.0,,"cashubtc/cashu-redeem, cashubtc/orchard"
+typedoc,js,Misc & Everything Else,2.0,,"cashubtc/cashu-crypto-ts, cashubtc/cashu-ts"
+typing-extensions,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+uri-templates,js,Misc & Everything Else,2.0,,"soapbox-pub/ditto, soapbox-pub/shakespeare"
+url,rust,Frameworks & Libraries,2.0,,"andotherstuff/nostr-rs-relay, cashubtc/cdk"
+uvicorn,py,Hosting Infra & Deploy,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+vue,js,Frameworks & Libraries,2.0,,"cashubtc/cashu.me, marmot-protocol/marmot-web"
+websocket-ts,js,Misc & Everything Else,2.0,,"soapbox-pub/nostrify, soapbox-pub/soapbox"
+win32-setctime,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+wiremock,rust,Testing & QA,2.0,,"andotherstuff/funnel, marmot-protocol/transponder"
+zeroize,rust,Misc & Everything Else,2.0,,"marmot-protocol/mdk, marmot-protocol/transponder"
+zipp,py,Misc & Everything Else,2.0,,"cashubtc/cashu-ui, cashubtc/nutshell"
+@akryum/flexsearch-es,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@algolia/autocomplete-core,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+@algolia/autocomplete-preset-algolia,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+@angular/animations,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/build,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/cdk,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/cli,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/common,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/compiler,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/compiler-cli,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/core,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/forms,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/material,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/material-luxon-adapter,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/platform-browser,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/platform-browser-dynamic,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@angular/router,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@apollo/server,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+@as-integrations/express5,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@babel/core,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+@babel/plugin-proposal-private-methods,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+@base-ui/react,js,Frameworks & Libraries,1.0,,marmot-protocol/marmots-web-chat
+@capacitor/assets,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+@capacitor/clipboard,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+@capacitor/filesystem,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@capacitor/keyboard,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@capacitor/local-notifications,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@capacitor/share,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@capacitor/status-bar,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+@capgo/capacitor-autofill-save-password,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@charkour/react-reactions,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+@chenfengyuan/vue-qrcode,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+@commitlint/cli,js,Dev Environment & Tooling,1.0,,cashubtc/cashu-ts
+@commitlint/config-conventional,js,Dev Environment & Tooling,1.0,,cashubtc/cashu-ts
+@config-plugins/detox,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+@electron/packager,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+@emoji-mart/react,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@eslint/compat,js,Dev Environment & Tooling,1.0,,cashubtc/eNuts
+@floating-ui/react,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@fontsource-variable/comfortaa,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource-variable/dm-sans,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource-variable/fredoka,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource-variable/lora,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource-variable/merriweather,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource-variable/nunito,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource-variable/playfair-display,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/amiri,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@fontsource/bungee-shade,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/cairo,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@fontsource/caveat,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/cherry-bomb-one,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/comic-neue,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/comic-relief,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/courier-prime,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/creepster,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/inter,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@fontsource/luckiest-guy,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/noto-sans-javanese,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@fontsource/noto-sans-nushu,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/pacifico,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/permanent-marker,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/pirata-one,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/playfair-display,js,Frameworks & Libraries,1.0,,andotherstuff/ai-sovereignty
+@fontsource/press-start-2p,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/roboto-mono,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@fontsource/silkscreen,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/special-elite,js,Frameworks & Libraries,1.0,,soapbox-pub/ditto
+@fontsource/tajawal,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@fontsource/vazirmatn,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@formatjs/cli,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@getalby/bitcoin-connect-react,js,Bitcoin Lightning Nostr,1.0,,cashubtc/cashu-redeem
+@getalby/lightning-tools,js,Bitcoin Lightning Nostr,1.0,,cashubtc/cashu-redeem
+@getify/eslint-plugin-proper-arrows,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+@gitbeaker/node,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@graphql-codegen/cli,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@graphql-codegen/typescript,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@grpc/grpc-js,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@grpc/proto-loader,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@headlessui/react,js,Frameworks & Libraries,1.0,,cashubtc/docs.cashu.space
+@hpke/core,js,Misc & Everything Else,1.0,,marmot-protocol/marmot-ts
+@internet-privacy/marmot-ts,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+@isomorphic-git/lightning-fs,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+@jedmao/redux-mock-store,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@jest/globals,js,Testing & QA,1.0,,cashubtc/npubcash-server
+@lexical/clipboard,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@lexical/hashtag,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@lexical/link,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@lexical/react,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@lexical/selection,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@lexical/utils,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@mdx-js/loader,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+@mdx-js/react,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+@microsoft/api-extractor,js,Misc & Everything Else,1.0,,cashubtc/cashu-ts
+@milkdown/core,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/ctx,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/plugin-clipboard,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/plugin-history,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/plugin-listener,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/plugin-upload,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/preset-commonmark,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/preset-gfm,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/prose,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/react,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@milkdown/utils,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@mkljczk/react-hotkeys,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@modelcontextprotocol/sdk,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+@mozilla/readability,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+@nestjs/apollo,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/cli,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/common,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/config,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/core,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/event-emitter,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/graphql,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/jwt,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/passport,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/platform-express,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/schedule,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/schematics,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/serve-static,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/testing,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/throttler,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@nestjs/typeorm,js,Misc & Everything Else,1.0,,cashubtc/orchard
+@next/mdx,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+@noble/ciphers,js,Security & Privacy,1.0,Audited symmetric ciphers for JS,marmot-protocol/marmot-ts
+@nostr-dev-kit/ndk,js,Bitcoin Lightning Nostr,1.0,,cashubtc/cashu.me
+@nostrify/types,js,Bitcoin Lightning Nostr,1.0,,soapbox-pub/ditto
+@opensecret/react,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+@quasar/app-vite,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+@quasar/extras,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+@quasar/icongenie,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+@reach/combobox,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@reach/menu-button,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@reach/popover,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@reach/rect,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@reach/tabs,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@react-native-community/netinfo,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+@react-navigation/core,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+@react-navigation/native,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+@react-navigation/native-stack,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+@react-spring/web,js,Frameworks & Libraries,1.0,,cashubtc/npubcash-website
+@reduxjs/toolkit,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@scure/bip39,js,Security & Privacy,1.0,,cashubtc/cashu.me
+@sentry/browser,js,Monitoring & Observability,1.0,,soapbox-pub/soapbox
+@sentry/react-native,js,Monitoring & Observability,1.0,,cashubtc/eNuts
+@sentry/types,js,Monitoring & Observability,1.0,,soapbox-pub/soapbox
+@shopify/flash-list,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+@sindresorhus/slugify,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+@soapbox/weblock,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@std/encoding,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+@std/semver,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@tabler/icons,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+@tabler/icons-react,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+@tailwindcss/aspect-ratio,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@tailwindcss/cli,js,Frameworks & Libraries,1.0,,marmot-protocol/parres.org
+@tailwindcss/forms,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+@tailwindcss/postcss,js,Frameworks & Libraries,1.0,,cashubtc/nut-november
+@testing-library/dom,js,Testing & QA,1.0,,soapbox-pub/ditto
+@testing-library/react-hooks,js,Testing & QA,1.0,,soapbox-pub/soapbox
+@testing-library/react-native,js,Testing & QA,1.0,,cashubtc/eNuts
+@types/babel__core,js,Dev Environment & Tooling,1.0,,cashubtc/eNuts
+@types/bcrypt,js,Dev Environment & Tooling,1.0,,cashubtc/orchard
+@types/better-sqlite3,js,Dev Environment & Tooling,1.0,,cashubtc/orchard
+@types/chai,js,Dev Environment & Tooling,1.0,,cashubtc/cashu-redeem
+@types/chai-as-promised,js,Dev Environment & Tooling,1.0,,cashubtc/cashu-redeem
+@types/cors,js,Dev Environment & Tooling,1.0,,cashubtc/npubcash-server
+@types/crypto-js,js,Dev Environment & Tooling,1.0,,cashubtc/eNuts
+@types/d3-hierarchy,js,Dev Environment & Tooling,1.0,,marmot-protocol/marmots-web-chat
+@types/debug,js,Dev Environment & Tooling,1.0,,marmot-protocol/marmot-ts
+@types/dompurify,js,Dev Environment & Tooling,1.0,,soapbox-pub/ditto
+@types/escape-html,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/http-link-header,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/jasmine,js,Dev Environment & Tooling,1.0,,cashubtc/orchard
+@types/jsdom,js,Dev Environment & Tooling,1.0,,soapbox-pub/shakespeare
+@types/jsonwebtoken,js,Dev Environment & Tooling,1.0,,cashubtc/npubcash-server
+@types/jszip,js,Dev Environment & Tooling,1.0,,soapbox-pub/shakespeare
+@types/leaflet,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/lodash,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/luxon,js,Dev Environment & Tooling,1.0,,cashubtc/orchard
+@types/matter-js,js,Dev Environment & Tooling,1.0,,cashubtc/nut-november
+@types/mocha,js,Dev Environment & Tooling,1.0,,cashubtc/cashu-redeem
+@types/nunjucks,js,Dev Environment & Tooling,1.0,,soapbox-pub/shakespeare
+@types/object-assign,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/passport-jwt,js,Dev Environment & Tooling,1.0,,cashubtc/orchard
+@types/pg,js,Dev Environment & Tooling,1.0,,cashubtc/npubcash-server
+@types/prismjs,js,Dev Environment & Tooling,1.0,,soapbox-pub/shakespeare
+@types/react-color,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/react-helmet,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/react-motion,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/react-native-onboarding-swiper,js,Dev Environment & Tooling,1.0,,cashubtc/eNuts
+@types/react-router-dom,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/react-sparklines,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/react-swipeable-views,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/react-transition-group,js,Dev Environment & Tooling,1.0,,cashubtc/npubcash-website
+@types/redux-mock-store,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/sanitize-html,js,Dev Environment & Tooling,1.0,,marmot-protocol/whitenoise-web
+@types/semver,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+@types/sinon,js,Dev Environment & Tooling,1.0,,soapbox-pub/nostrify
+@types/turndown,js,Dev Environment & Tooling,1.0,,soapbox-pub/shakespeare
+@types/underscore,js,Dev Environment & Tooling,1.0,,cashubtc/cashu.me
+@types/uri-templates,js,Dev Environment & Tooling,1.0,,soapbox-pub/shakespeare
+@vercel/analytics,js,Monitoring & Observability,1.0,,cashubtc/docs.cashu.space
+@vitejs/plugin-basic-ssl,js,Dev Environment & Tooling,1.0,,andotherstuff/heynow
+@vitest/browser,js,Testing & QA,1.0,,cashubtc/cashu-ts
+@vitest/browser-playwright,js,Testing & QA,1.0,,cashubtc/cashu-ts
+@vitest/ui,js,Testing & QA,1.0,,cashubtc/npubcash-server
+@vue/test-utils,js,Frameworks & Libraries,1.0,,cashubtc/cashu.me
+@vuepress/bundler-vite,js,Misc & Everything Else,1.0,,marmot-protocol/marmot-web
+@vuepress/helper,js,Misc & Everything Else,1.0,,marmot-protocol/marmot-web
+@vuepress/theme-default,js,Misc & Everything Else,1.0,,marmot-protocol/marmot-web
+@vueuse/core,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+@webxdc/types,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+@zxing/browser,js,Misc & Everything Else,1.0,,andotherstuff/chorus
+@zxing/library,js,Misc & Everything Else,1.0,,andotherstuff/chorus
+acorn,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+aiosqlite,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+algoliasearch,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+altgraph,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+androidx.annotation:annotation,kotlin,Frameworks & Libraries,1.0,,marmot-protocol/mdk-kotlin
+applesauce-actions,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+applesauce-content,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+applesauce-extra,js,Misc & Everything Else,1.0,,marmot-protocol/nostr-doctor
+asn1crypto,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+async-std,rust,Hosting Infra & Deploy,1.0,,andotherstuff/nostr-rs-relay
+async-timeout,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+asyncpg,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+attrs,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+audio-recorder-polyfill,js,Misc & Everything Else,1.0,,andotherstuff/heynow
+aws-config,rust,Misc & Everything Else,1.0,,andotherstuff/pensieve
+aws-sdk-s3,rust,Misc & Everything Else,1.0,,andotherstuff/pensieve
+axios,js,Frameworks & Libraries,1.0,,cashubtc/cashu.me
+axum-test,rust,Misc & Everything Else,1.0,,andotherstuff/funnel
+base58,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+base64ct,rust,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-rs
+bbcode_pleroma,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+bcrypt_elixir,elixir,Security & Privacy,1.0,,soapbox-pub/rebased
+benchee,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+better-sqlite3,js,Databases & Storage,1.0,,cashubtc/orchard
+bincode,rust,Misc & Everything Else,1.0,,marmot-protocol/nostr-openmls
+bip32,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+bip39,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+bitcoin,rust,Bitcoin Lightning Nostr,1.0,,cashubtc/cdk
+bitcoin-payment-instructions,rust,Bitcoin Lightning Nostr,1.0,,cashubtc/cdk
+bitcoin_hashes,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+bolt11,py,Bitcoin Lightning Nostr,1.0,,cashubtc/nutshell
+bootsnap,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+bowser,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+brakeman,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+brotli,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+browserslist,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+bundler-audit,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+bytes,rust,Frameworks & Libraries,1.0,,marmot-protocol/transponder
+cached_network_image,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+cachex,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+calendar,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+capacitor-plugin-safe-area,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+capacitor-secure-storage-plugin,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+capnp,rust,Misc & Everything Else,1.0,,andotherstuff/binostr
+capnpc,rust,Misc & Everything Else,1.0,,andotherstuff/binostr
+capybara,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+carbon-icons-svelte,js,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-web
+cashu-address-sdk,js,Bitcoin Lightning Nostr,1.0,,cashubtc/npubcash-website
+castore,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+cbor-diag,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cbor2,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+cdk,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-axum,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-cln,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-common,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-fake-wallet,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-ffi,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-http-client,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-ldk-node,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-lnbits,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-lnd,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-mint-rpc,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-mintd,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-npubcash,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-payment-processor,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-postgres,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-prometheus,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-redb,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-signatory,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-sql-common,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-sqlite,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+cdk-supabase,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+chai,js,Testing & QA,1.0,,cashubtc/cashu-redeem
+chai-as-promised,js,Misc & Everything Else,1.0,,cashubtc/cashu-redeem
+charset-normalizer,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+chartjs-adapter-luxon,js,Misc & Everything Else,1.0,,cashubtc/orchard
+chartjs-plugin-annotation,js,Misc & Everything Else,1.0,,cashubtc/orchard
+cln-rpc,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+coincurve,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+collection,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+comlink,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+concurrent_limiter,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+connectivity_plus,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+console-subscriber,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+const_format,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+core-js,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+cors_plug,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+covertool,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+cowlib,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+credo,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+crossbeam-channel,rust,Misc & Everything Else,1.0,,andotherstuff/pensieve
+crossterm,rust,Misc & Everything Else,1.0,,marmot-protocol/wn-tui
+crypto,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+crypto-js,js,Security & Privacy,1.0,,cashubtc/eNuts
+cryptography,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+cssnano,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+csv,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ctrlc,rust,Misc & Everything Else,1.0,,andotherstuff/pensieve
+cupertino_icons,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+d3-hierarchy,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+daisyui,js,Misc & Everything Else,1.0,,marmot-protocol/nostr-doctor
+dashmap,rust,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-rs
+db-annotate,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+decimal.js,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+deprecated,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+detect-passive-events,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+detox,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+dexie,js,Databases & Storage,1.0,,cashubtc/cashu.me
+dompurify,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+earmark,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ecto_enum,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ecto_psql_extras,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ecto_sql,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ed25519-dalek,rust,Security & Privacy,1.0,,marmot-protocol/nostr-openmls
+electron,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+emoji-regex,js,Misc & Everything Else,1.0,,andotherstuff/universes-legacy
+emoji_picker_flutter,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+emojilib,js,Misc & Everything Else,1.0,,andotherstuff/universes-legacy
+es-toolkit,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+esbuild-wasm,js,Dev Environment & Tooling,1.0,,soapbox-pub/shakespeare
+eslint-plugin-compat,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+eslint-plugin-deprecate,js,Dev Environment & Tooling,1.0,,cashubtc/eNuts
+eslint-plugin-formatjs,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+eslint-plugin-json,js,Dev Environment & Tooling,1.0,,cashubtc/eNuts
+eslint-plugin-jsx-a11y,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+eslint-plugin-node,js,Dev Environment & Tooling,1.0,,cashubtc/eNuts
+eslint-plugin-simple-import-sort,js,Dev Environment & Tooling,1.0,,cashubtc/eNuts
+eslint-plugin-tailwindcss,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+eslint-plugin-tsdoc,js,Dev Environment & Tooling,1.0,,cashubtc/eNuts
+eslint-plugin-vue,js,Dev Environment & Tooling,1.0,,cashubtc/cashu.me
+eventemitter3,js,Misc & Everything Else,1.0,,marmot-protocol/marmot-ts
+ex_aws,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ex_aws_s3,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ex_const,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ex_doc,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ex_machina,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ex_syslogger,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+exceptiongroup,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+exifr,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+expo,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-application,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-camera,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-clipboard,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-constants,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-crypto,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-device,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-file-system,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-image,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-insights,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-localization,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-secure-store,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-splash-screen,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-sqlite,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-status-bar,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+expo-updates,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+fake-indexeddb,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+fast-thumbhash,rust,Misc & Everything Else,1.0,,marmot-protocol/mdk
+fast_sanitize,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ffi,dart,Misc & Everything Else,1.0,,cashubtc/cdk-flutter
+ffigen,dart,Misc & Everything Else,1.0,,cashubtc/cdk-flutter
+fflate,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+finch,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+fix,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+flake_id,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+floki,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+flutter_blurhash,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_foreground_task,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_hooks,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_local_notifications,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_localizations,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_native_splash,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_riverpod,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_screenutil,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_secure_storage,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_secure_storage_platform_interface,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+flutter_svg,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+focus-visible,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+foreman,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+fugit,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+funnel-clickhouse,rust,Misc & Everything Else,1.0,,andotherstuff/funnel
+funnel-observability,rust,Misc & Everything Else,1.0,,andotherstuff/funnel
+funnel-proto,rust,Misc & Everything Else,1.0,,andotherstuff/funnel
+fuse.js,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+future,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+gap,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+gasp,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+gen_smtp,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+geospatial,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+gettext,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+github.com/aead/siphash,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcd,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcd/btcec/v2,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcd/btcutil,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcd/btcutil/psbt,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcd/chaincfg/chainhash,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btclog,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcwallet,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcwallet/wallet/txauthor,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcwallet/wallet/txrules,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcwallet/wallet/txsizes,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcwallet/walletdb,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/btcwallet/wtxmgr,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/go-socks,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/btcsuite/websocket,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/BurntSushi/toml,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/c-bata/go-prompt,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/caarlos0/env/v6,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/davecgh/go-spew,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/decred/dcrd/crypto/blake256,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/decred/dcrd/dcrec/secp256k1/v4,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/decred/dcrd/lru,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/fatih/structs,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/go-errors/errors,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/go-openapi/jsonpointer,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/go-openapi/jsonreference,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/go-openapi/spec,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/go-openapi/swag,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/google/uuid,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/gorilla/mux,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/imroc/req,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/inconshreveable/mousetrap,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/jinzhu/configor,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/jinzhu/inflection,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/jinzhu/now,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/joho/godotenv,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/josharian/intern,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/json-iterator/go,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/kkdai/bstream,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/kr/pretty,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/KyleBanks/depth,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/lightninglabs/gozmq,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/lightninglabs/neutrino,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/lightningnetwork/lnd,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/lightningnetwork/lnd/clock,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/lightningnetwork/lnd/queue,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/lightningnetwork/lnd/ticker,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/lightningnetwork/lnd/tlv,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/lightningnetwork/lnd/tor,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/magefile/mage,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/mailru/easyjson,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/mattn/go-colorable,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/mattn/go-isatty,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/mattn/go-runewidth,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/mattn/go-sqlite3,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/mattn/go-tty,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/miekg/dns,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/modern-go/reflect2,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/nbd-wtf/ln-decodepay,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/pkg/term,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/rivo/uniseg,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/samber/lo,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/sirupsen/logrus,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/spf13/cobra,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/spf13/pflag,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/stretchr/testify,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/swaggo/files,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/swaggo/http-swagger,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+github.com/swaggo/swag,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+glob,js,Misc & Everything Else,1.0,,soapbox-pub/nostrify
+go.elastic.co/ecslogrus,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+go.etcd.io/etcd/api/v3,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+go.etcd.io/etcd/client/pkg/v3,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+go.etcd.io/etcd/client/v2,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+go.etcd.io/etcd/client/v3,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+go_router,dart,Frameworks & Libraries,1.0,,marmot-protocol/whitenoise
+golang.org/x/crypto,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+golang.org/x/exp,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+golang.org/x/net,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+golang.org/x/sys,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+golang.org/x/term,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+golang.org/x/tools,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+golang.org/x/xerrors,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+google.golang.org/genproto,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+google.golang.org/grpc,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+googleapis-common-protos,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+gopkg.in/natefinch/lumberjack.v2,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+gopkg.in/yaml.v2,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+gorm.io/driver/sqlite,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+gorm.io/gorm,go,Misc & Everything Else,1.0,,cashubtc/cashu-feni
+governor,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+grammy,js,Misc & Everything Else,1.0,,cashubtc/orchard
+graphemesplit,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+graphql-request,js,Misc & Everything Else,1.0,,cashubtc/npubcash-server
+graphql-subscriptions,js,Misc & Everything Else,1.0,,cashubtc/orchard
+graphql-tools,js,Misc & Everything Else,1.0,,cashubtc/orchard
+graphql-ws,js,Misc & Everything Else,1.0,,cashubtc/orchard
+gray-matter,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+greenlet,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+grpcio,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+grpcio-tools,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+gsap,js,Frameworks & Libraries,1.0,,cashubtc/docs.cashu.space
+gsap-trial,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+gun,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+hackney,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+happy-dom,js,Testing & QA,1.0,,cashubtc/cashu.me
+heed,rust,Misc & Everything Else,1.0,,marmot-protocol/openmls-lmdb-storage
+hls.js,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+home,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+hooks_riverpod,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+html-react-parser,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+html-to-image,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+html_entities,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+http,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+http-link-header,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+http_signatures,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+httpcore,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+httpx,py,Hosting Infra & Deploy,1.0,,cashubtc/nutshell
+hyper,rust,Hosting Infra & Deploy,1.0,,andotherstuff/nostr-rs-relay
+hyper-rustls,rust,Hosting Infra & Deploy,1.0,,andotherstuff/nostr-rs-relay
+ical,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+ical.js,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+icalendar,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ignore,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+image_picker,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+image_picker_platform_interface,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+image_processing,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+immer,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+immutable,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+importmap-rails,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+indexmap,rust,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-rs
+infer,rust,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-rs
+iniconfig,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+integration_test,dart,Misc & Everything Else,1.0,,cashubtc/cdk-flutter
+intl,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+intl-messageformat,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+intl-pluralrules,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+iso-639-1,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+isomorphic-dompurify,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+isomorphic-git,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+jasmine-core,js,Testing & QA,1.0,,cashubtc/orchard
+jason,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+jbuilder,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+jdenticon,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+jest-expo,js,Testing & QA,1.0,,cashubtc/eNuts
+jinja2,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+joken,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+jsonc-parser,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+jszip,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+junit:junit,kotlin,Misc & Everything Else,1.0,,marmot-protocol/mdk-kotlin
+kamadak-exif,rust,Misc & Everything Else,1.0,,marmot-protocol/mdk
+kamal,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+karma,js,Testing & QA,1.0,,cashubtc/orchard
+karma-chrome-launcher,js,Testing & QA,1.0,,cashubtc/orchard
+karma-coverage,js,Testing & QA,1.0,,cashubtc/orchard
+karma-jasmine,js,Testing & QA,1.0,,cashubtc/orchard
+karma-jasmine-html-reporter,js,Testing & QA,1.0,,cashubtc/orchard
+lazy_static,rust,Frameworks & Libraries,1.0,,andotherstuff/nostr-rs-relay
+ldk-node,rust,Bitcoin Lightning Nostr,1.0,,cashubtc/cdk
+leaflet,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+lerna,js,Dev Environment & Tooling,1.0,,soapbox-pub/nostrify
+lexical,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+libc,rust,Misc & Everything Else,1.0,,marmot-protocol/nostr-openmls
+lightning,rust,Bitcoin Lightning Nostr,1.0,,cashubtc/cdk
+lightning-invoice,rust,Bitcoin Lightning Nostr,1.0,,cashubtc/cdk
+limits,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+line-awesome,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+linkify,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+logging,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+lottie-react-native,js,Frameworks & Libraries,1.0,,cashubtc/eNuts
+lru-cache,js,Misc & Everything Else,1.0,,soapbox-pub/nostrify
+lucide-vue-next,js,Frameworks & Libraries,1.0,,cashubtc/cashu.me
+luxon,js,Frameworks & Libraries,1.0,,cashubtc/orchard
+macholib,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+majic,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+markupsafe,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+match-sorter,js,Misc & Everything Else,1.0,,cashubtc/npubcash-website
+matter-js,js,Misc & Everything Else,1.0,,cashubtc/nut-november
+maud,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+mdast-util-to-string,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+mdk-macros,rust,Misc & Everything Else,1.0,,marmot-protocol/mdk
+mdk-memory-storage,rust,Misc & Everything Else,1.0,,marmot-protocol/mdk
+mdx-annotations,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+metro-config,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+mini-css-extract-plugin,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+mnemonic,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+mobile_scanner,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+mocha,js,Testing & QA,1.0,,cashubtc/cashu-redeem
+mock,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+mockall,rust,Testing & QA,1.0,,andotherstuff/funnel
+mockito,rust,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-rs
+mogrify,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+motion,js,Frameworks & Libraries,1.0,,cashubtc/cashu-redeem
+mox,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+msw,js,Testing & QA,1.0,,cashubtc/cashu-ts
+mypy-protobuf,py,Dev Environment & Tooling,1.0,,cashubtc/nutshell
+net.java.dev.jna:jna,kotlin,Misc & Everything Else,1.0,,marmot-protocol/mdk-kotlin
+ng2-charts,js,Misc & Everything Else,1.0,,cashubtc/orchard
+node-pg-migrate,js,Misc & Everything Else,1.0,,cashubtc/npubcash-server
+nonzero_ext,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+nostr-blossom,rust,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-rs
+nostr-relay-builder,rust,Misc & Everything Else,1.0,,marmot-protocol/transponder
+nostr-wasm,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+nostr_sdk,py,Bitcoin Lightning Nostr,1.0,,marmot-protocol/mdk-python-example
+num_cpus,rust,Frameworks & Libraries,1.0,,andotherstuff/pensieve
+nunjucks,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+oban,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+oembed_providers,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+once_cell,rust,Frameworks & Libraries,1.0,,cashubtc/cdk
+open_api_spex,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+openai,js,AI & Agents,1.0,,soapbox-pub/shakespeare
+openmls-sled-storage,rust,Security & Privacy,1.0,,marmot-protocol/nostr-openmls
+org.jetbrains.kotlinx:kotlinx-coroutines-core,kotlin,Frameworks & Libraries,1.0,,marmot-protocol/mdk-kotlin
+outcome,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+p256,rust,Misc & Everything Else,1.0,,marmot-protocol/nostr-openmls
+package_info_plus,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+parse_duration,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+passport,js,Auth Identity & Keys,1.0,,cashubtc/orchard
+passport-jwt,js,Auth Identity & Keys,1.0,,cashubtc/orchard
+pastey,rust,Misc & Everything Else,1.0,,marmot-protocol/mdk
+path_provider,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+pefile,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+permission_handler,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+phoenix,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+phoenix_ecto,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+phoenix_html,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+phoenix_live_dashboard,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+phoenix_live_reload,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+phoenix_live_view,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+phoenix_pubsub,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+phoenix_swoosh,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+pinia,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+plug_cowboy,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+plug_static_index_html,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+pluggy,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+pluralize,js,Misc & Everything Else,1.0,,andotherstuff/universes-legacy
+poison,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+poolboy,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+postcard,rust,Misc & Everything Else,1.0,,marmot-protocol/mdk
+postcss-focus-visible,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+postgrex,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+pot,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+prettier-plugin-jsdoc,js,Dev Environment & Tooling,1.0,,cashubtc/cashu-ts
+prettier-plugin-tailwindcss,js,Dev Environment & Tooling,1.0,,cashubtc/docs.cashu.space
+prismjs,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+prom_ex,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+prometheus_ecto,elixir,Monitoring & Observability,1.0,,soapbox-pub/rebased
+prometheus_phoenix,elixir,Monitoring & Observability,1.0,,soapbox-pub/rebased
+prometheus_plugs,elixir,Monitoring & Observability,1.0,,soapbox-pub/rebased
+propshaft,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+prost-build,rust,Frameworks & Libraries,1.0,,andotherstuff/binostr
+prost-types,rust,Frameworks & Libraries,1.0,,marmot-protocol/proton-beam
+protobuf,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+provider,dart,Frameworks & Libraries,1.0,,cashubtc/cdk-flutter
+puma,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+punycode,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+py,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+pycryptodomex,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+pyinstaller,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+pyinstaller-hooks-contrib,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+pyjwt,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+pyparsing,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+PyQt6,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+pyqt6,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+pyqt6-qt6,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+pyqt6-sip,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+pytest,py,Testing & QA,1.0,,cashubtc/cashu-ui
+pytest-asyncio,py,Testing & QA,1.0,,cashubtc/cashu-ui
+python-bitcoinlib,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+pywin32-ctypes,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+qr-code-styling,js,Misc & Everything Else,1.0,,cashubtc/orchard
+qr-scanner,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+qr_flutter,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+quasar,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+r2d2,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+r2d2_sqlite,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+radix-ui,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+rails,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+ratatui,rust,Misc & Everything Else,1.0,,marmot-protocol/wn-tui
+ratatui-image,rust,Misc & Everything Else,1.0,,marmot-protocol/wn-tui
+react-big-calendar,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+react-blurhash,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+react-color,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-confetti-explosion,js,Misc & Everything Else,1.0,,cashubtc/npubcash-website
+react-easy-crop,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+react-helmet,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+react-icons,js,Frameworks & Libraries,1.0,,cashubtc/npubcash-website
+react-inlinesvg,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-intl,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-motion,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-native,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-native-gesture-handler,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-native-onboarding-swiper,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-native-popup-menu,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-native-qrcode-svg,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-native-reanimated,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-native-safe-area-context,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-native-screens,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-native-size-matters,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-native-svg,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+react-overlays,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-redux,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-router-dom-v5-compat,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+react-simple-pull-to-refresh,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-sparklines,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-sticky-box,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-swipeable-views,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+react-zoom-pan-pinch,js,Misc & Everything Else,1.0,,andotherstuff/universes-legacy
+recma-nextjs-static-props,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+recon,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+redb,rust,Databases & Storage,1.0,,marmot-protocol/openmls-redb-storage
+redis,py,Databases & Storage,1.0,,cashubtc/nutshell
+redux,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+redux-thunk,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+refinery,rust,Misc & Everything Else,1.0,,marmot-protocol/mdk
+reflect-metadata,js,Misc & Everything Else,1.0,,cashubtc/orchard
+rehype-mdx-title,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+rehype-sanitize,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+replace-in-file,js,Misc & Everything Else,1.0,,cashubtc/cashu-ts
+represent,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+requests,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+reselect,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+rimraf,js,Misc & Everything Else,1.0,,marmot-protocol/marmot-ts
+rocksdb,rust,Databases & Storage,1.0,,andotherstuff/pensieve
+rpassword,rust,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-rs
+rqrcode,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+rubocop-rails-omakase,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+rust_lib_whitenoise,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+sanitize-html,js,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-web
+sass,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+sass-embedded,js,Misc & Everything Else,1.0,,marmot-protocol/marmot-web
+scroll_to_index,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+selenium-webdriver,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+serde_bytes,rust,Frameworks & Libraries,1.0,,andotherstuff/binostr
+serde_with,rust,Frameworks & Libraries,1.0,,cashubtc/cdk
+shadcn,js,Frameworks & Libraries,1.0,,marmot-protocol/marmots-web-chat
+share_plus,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+shiki,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+sinon,js,Misc & Everything Else,1.0,,soapbox-pub/nostrify
+sled,rust,Databases & Storage,1.0,,marmot-protocol/openmls-sled-storage
+slowapi,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+slugify,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+smol-toml,js,Misc & Everything Else,1.0,,soapbox-pub/ditto
+socks-proxy-agent,js,Misc & Everything Else,1.0,,cashubtc/orchard
+socksio,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+solid_cable,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+solid_cache,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+solid_queue,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+sort-by,js,Misc & Everything Else,1.0,,cashubtc/npubcash-website
+source-map-support,js,Misc & Everything Else,1.0,,cashubtc/orchard
+sqlalchemy-aio,py,Frameworks & Libraries,1.0,,cashubtc/cashu-ui
+sqlite3,ruby,Databases & Storage,1.0,,marmot-protocol/botburrow
+stimulus-rails,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+streamdown,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+stringz,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+strum,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+strum_macros,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+stylelint,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+stylelint-config-standard-scss,js,Dev Environment & Tooling,1.0,,soapbox-pub/soapbox
+sweet_xml,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+swiper,js,Frameworks & Libraries,1.0,,soapbox-pub/soapbox
+swoosh,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+tailwindcss-rails,ruby,Frameworks & Libraries,1.0,,marmot-protocol/botburrow
+tailwindcss-safe-area,js,Frameworks & Libraries,1.0,,soapbox-pub/shakespeare
+telemetry,elixir,Monitoring & Observability,1.0,,soapbox-pub/rebased
+telemetry_metrics,elixir,Monitoring & Observability,1.0,,soapbox-pub/rebased
+telemetry_poller,elixir,Monitoring & Observability,1.0,,soapbox-pub/rebased
+tesla,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+testcontainers,rust,Misc & Everything Else,1.0,,andotherstuff/funnel
+testcontainers-modules,rust,Misc & Everything Else,1.0,,andotherstuff/funnel
+text-encoding-polyfill,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+three,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+thruster,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+thumbhash,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+timex,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+tomli,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+tonic-build,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+tonic-prost,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+tonic-prost-build,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+trailing_format_plug,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+ts-loader,js,Misc & Everything Else,1.0,,cashubtc/orchard
+tsdown,js,Misc & Everything Else,1.0,,cashubtc/coco
+tslib,js,Dev Environment & Tooling,1.0,,cashubtc/orchard
+tungstenite,rust,Misc & Everything Else,1.0,,andotherstuff/nostr-rs-relay
+turbo,js,Dev Environment & Tooling,1.0,,soapbox-pub/nostrify
+turbo-rails,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+turndown,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+tw-animate-css,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+type-fest,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+typedoc-plugin-pages,js,Misc & Everything Else,1.0,,cashubtc/cashu-ts
+typeorm,js,Databases & Storage,1.0,,cashubtc/orchard
+types-protobuf,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+tzdata,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+tzinfo-data,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+ueberauth,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+underscore,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+unicode-normalization,rust,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-rs
+unicode-width,rust,Misc & Everything Else,1.0,,marmot-protocol/wn-tui
+uniffi,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+unique-names-generator,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+unique_names_generator,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+unist-util-visit,js,Misc & Everything Else,1.0,,cashubtc/docs.cashu.space
+unplug,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+url_launcher,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+url_launcher_platform_interface,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+urllib3,py,Misc & Everything Else,1.0,,cashubtc/cashu-ui
+use-stick-to-bottom,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+utoipa,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+vite-jsconfig-paths,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+vite-plugin-compile-time,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+vite-plugin-dts,js,Misc & Everything Else,1.0,,cashubtc/cashu-ts
+vite-plugin-html,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+vite-plugin-static-copy,js,Misc & Everything Else,1.0,,soapbox-pub/soapbox
+vitepress,js,Misc & Everything Else,1.0,,cashubtc/coco
+vue-i18n,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+vue-router,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+vuepress,js,Misc & Everything Else,1.0,,marmot-protocol/marmot-web
+web-console,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+web-time,rust,Misc & Everything Else,1.0,,cashubtc/cdk
+web_push_encryption,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+webmock,ruby,Misc & Everything Else,1.0,,marmot-protocol/botburrow
+webpki-roots,rust,Security & Privacy,1.0,,marmot-protocol/whitenoise-rs
+websocket-client,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+websockets,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+websockex,elixir,Misc & Everything Else,1.0,,soapbox-pub/rebased
+websql,js,Misc & Everything Else,1.0,,cashubtc/eNuts
+wheel,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+which,rust,Misc & Everything Else,1.0,,marmot-protocol/wn-tui
+whitenoise-macros,rust,Misc & Everything Else,1.0,,marmot-protocol/whitenoise-rs
+widgetbook,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+widgetbook_annotation,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+widgetbook_generator,dart,Misc & Everything Else,1.0,,marmot-protocol/whitenoise
+window.nostrdb.js,js,Misc & Everything Else,1.0,,marmot-protocol/marmots-web-chat
+workbox-build,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+workbox-cacheable-response,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+workbox-core,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+workbox-expiration,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+workbox-precaching,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+workbox-routing,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+workbox-strategies,js,Misc & Everything Else,1.0,,cashubtc/cashu.me
+workbox-window,js,Misc & Everything Else,1.0,,soapbox-pub/shakespeare
+wrapt,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+zone.js,js,Misc & Everything Else,1.0,,cashubtc/orchard
+zstandard,py,Misc & Everything Else,1.0,,cashubtc/nutshell
+zstd,rust,Misc & Everything Else,1.0,,andotherstuff/binostr

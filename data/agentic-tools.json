@@ -1,0 +1,1562 @@
+[
+  {
+    "name": "LangGraph",
+    "category_label": "Orchestration",
+    "subcategory": "Graph-Based",
+    "language": "Python/TypeScript",
+    "license_hint": "MIT",
+    "backer": "LangChain Inc.",
+    "source_url": "https://github.com/langchain-ai/langgraph",
+    "description": "Stateful, cyclic workflows for complex multi-agent logic using directed graphs"
+  },
+  {
+    "name": "Microsoft Agent Framework",
+    "category_label": "Orchestration",
+    "subcategory": "Graph-Based",
+    "language": "Python/.NET",
+    "license_hint": "MIT",
+    "backer": "Microsoft",
+    "source_url": "https://github.com/microsoft/agent-framework",
+    "description": "Enterprise orchestration merging AutoGen + Semantic Kernel with OTel observability"
+  },
+  {
+    "name": "CrewAI",
+    "category_label": "Orchestration",
+    "subcategory": "Role-Based",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "CrewAI, Inc.",
+    "source_url": "https://github.com/crewAIInc/crewAI",
+    "description": "Collaborative intelligence through task delegation and role-playing agents"
+  },
+  {
+    "name": "AutoGen",
+    "category_label": "Orchestration",
+    "subcategory": "Conversational",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Microsoft",
+    "source_url": "https://github.com/microsoft/autogen",
+    "description": "Multiple agents converse to solve tasks, supporting sync/async tools"
+  },
+  {
+    "name": "PydanticAI",
+    "category_label": "Orchestration",
+    "subcategory": "Type-Safe",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Pydantic",
+    "source_url": "https://github.com/pydantic/pydantic-ai",
+    "description": "Pydantic-driven type safety in tool calls and agent definitions"
+  },
+  {
+    "name": "Ruflo",
+    "category_label": "Orchestration",
+    "subcategory": "Swarm Intelligence",
+    "language": "TypeScript",
+    "license_hint": "MIT-family",
+    "backer": "rUv (individual)",
+    "source_url": "https://github.com/ruvnet/ruflo",
+    "description": "Self-Optimizing Neural Architecture coordinating many specialized agents"
+  },
+  {
+    "name": "OpenAI Agents SDK",
+    "category_label": "Orchestration",
+    "subcategory": "Handoff-Based",
+    "language": "Python/JS",
+    "license_hint": "MIT",
+    "backer": "OpenAI",
+    "source_url": "https://github.com/openai/openai-agents-python",
+    "description": "Production-ready evolution of Swarm with built-in HITL support"
+  },
+  {
+    "name": "Mastra",
+    "category_label": "Orchestration",
+    "subcategory": "Workflow Engine",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Mastra (ex-Gatsby)",
+    "source_url": "https://github.com/mastra-ai/mastra",
+    "description": "Opinionated TypeScript framework for rapid agentic application building"
+  },
+  {
+    "name": "PraisonAI",
+    "category_label": "Orchestration",
+    "subcategory": "Multi-Agent SDK",
+    "language": "Python/JS",
+    "license_hint": "MIT",
+    "backer": "Mervin Praison",
+    "source_url": "https://github.com/MervinPraison/PraisonAI",
+    "description": "Production framework with 100+ LLM support and fast instantiation"
+  },
+  {
+    "name": "LLMling-Agent",
+    "category_label": "Orchestration",
+    "subcategory": "YAML-Based",
+    "language": "Python",
+    "license_hint": "MIT (likely)",
+    "backer": "individual",
+    "source_url": "https://github.com/llmling/llmling-agent",
+    "description": "Workflows defined via YAML or programmatically with HITL integration"
+  },
+  {
+    "name": "AgentVerse",
+    "category_label": "Orchestration",
+    "subcategory": "Simulation",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "OpenBMB",
+    "source_url": "https://github.com/OpenBMB/AgentVerse",
+    "description": "Deployment of multi-agent environments for tasks and simulations"
+  },
+  {
+    "name": "OpenHands",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Full-Stack Agent",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "All Hands AI",
+    "source_url": "https://github.com/OpenHands/OpenHands",
+    "description": "AI-driven software development agent with local GUI and cloud scaling"
+  },
+  {
+    "name": "spec-kit",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Spec-Driven",
+    "language": "Python/Markdown",
+    "license_hint": "MIT",
+    "backer": "GitHub",
+    "source_url": "https://github.com/github/spec-kit",
+    "description": "Toolkit for Spec-Driven Development with executable specifications"
+  },
+  {
+    "name": "Aider",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Pair Programming",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Aider AI LLC",
+    "source_url": "https://github.com/Aider-AI/aider",
+    "description": "AI pair programming directly within the terminal"
+  },
+  {
+    "name": "Plandex",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Context Management",
+    "language": "Go",
+    "license_hint": "MIT",
+    "backer": "Plandex",
+    "source_url": "https://github.com/plandex-ai/plandex",
+    "description": "Complex task management with 2M token context window"
+  },
+  {
+    "name": "GPT Pilot",
+    "category_label": "SDLC & Coding",
+    "subcategory": "VS Code Extension",
+    "language": "Python",
+    "license_hint": "FSL/Elastic (verify)",
+    "backer": "Pythagora",
+    "source_url": "https://github.com/Pythagora-io/gpt-pilot",
+    "description": "First AI developer companion for VS Code"
+  },
+  {
+    "name": "SWE-agent",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Issue Resolution",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Princeton NLP",
+    "source_url": "https://github.com/SWE-agent/SWE-agent",
+    "description": "Fixes GitHub issues automatically using LMs"
+  },
+  {
+    "name": "Claude Engineer",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Interactive CLI",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Pietro Schirano",
+    "source_url": "https://github.com/Doriandarko/claude-engineer",
+    "description": "Interactive CLI simulating a software company with multiple roles"
+  },
+  {
+    "name": "MetaGPT",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Multi-Agent Company",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "FoundationAgents/DeepWisdom",
+    "source_url": "https://github.com/FoundationAgents/MetaGPT",
+    "description": "Multi-agent framework simulating a software company structure"
+  },
+  {
+    "name": "Devika",
+    "category_label": "SDLC & Coding",
+    "subcategory": "AI Software Engineer",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Stition AI",
+    "source_url": "https://github.com/stitionai/devika",
+    "description": "AI software engineer breaking high-level goals into steps"
+  },
+  {
+    "name": "Claude Code",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Terminal Agent",
+    "language": "TypeScript",
+    "license_hint": "Proprietary",
+    "backer": "Anthropic",
+    "source_url": "https://github.com/anthropics/claude-code",
+    "description": "Terminal-based agent executing developer commands natively"
+  },
+  {
+    "name": "RepoAgent",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Documentation",
+    "language": "Python",
+    "license_hint": "Apache-2.0/MIT",
+    "backer": "OpenBMB",
+    "source_url": "https://github.com/OpenBMB/RepoAgent",
+    "description": "Generates docs and helps understand repos quickly"
+  },
+  {
+    "name": "Agentic-SDLC",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Real-time Swarm",
+    "language": "Python",
+    "license_hint": "Permissive (likely)",
+    "backer": "individual",
+    "source_url": "https://github.com/sciro24/Agentic-SDLC",
+    "description": "Swarm of agents for documentation, audits, and optimization"
+  },
+  {
+    "name": "Cline",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Transparent Coding",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Cline",
+    "source_url": "https://github.com/cline/cline",
+    "description": "Open-source agent with full transparency of agent thought"
+  },
+  {
+    "name": "CodeLayer",
+    "category_label": "SDLC & Coding",
+    "subcategory": "Team IDE",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "HumanLayer",
+    "source_url": "https://github.com/humanlayer/humanlayer",
+    "description": "IDE built on Claude Code for team collaboration"
+  },
+  {
+    "name": "AgenticQA",
+    "category_label": "QA & Testing",
+    "subcategory": "Enterprise QA",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "individual",
+    "source_url": "https://github.com/nhomyk/AgenticQA",
+    "description": "Autonomous QA with multiple agents and constitutional governance"
+  },
+  {
+    "name": "Bug0",
+    "category_label": "QA & Testing",
+    "subcategory": "Self-Healing E2E",
+    "language": "Web (SaaS)",
+    "license_hint": "Proprietary",
+    "backer": "Bug0",
+    "source_url": "https://bug0.com/",
+    "description": "Pull request testing with high self-healing via agentic flow discovery"
+  },
+  {
+    "name": "Agentic QE Fleet",
+    "category_label": "QA & Testing",
+    "subcategory": "Quality Engineering",
+    "language": "Python",
+    "license_hint": "MIT-family",
+    "backer": "rUv (individual)",
+    "source_url": "https://github.com/ruvnet/ruflo",
+    "description": "Fleet of agents augmenting Ruflo/Claude-Flow workflows"
+  },
+  {
+    "name": "Tricentis Tosca",
+    "category_label": "QA & Testing",
+    "subcategory": "Enterprise QA",
+    "language": "Proprietary",
+    "license_hint": "Proprietary",
+    "backer": "Tricentis",
+    "source_url": "https://www.tricentis.com/products/automated-software-testing-tosca",
+    "description": "AI-powered test authoring from natural language prompts"
+  },
+  {
+    "name": "Diffblue Cover",
+    "category_label": "QA & Testing",
+    "subcategory": "Unit Testing",
+    "language": "Java",
+    "license_hint": "Proprietary",
+    "backer": "Diffblue",
+    "source_url": "https://www.diffblue.com/products/cover/",
+    "description": "Autonomous JUnit generation for Java codebases"
+  },
+  {
+    "name": "Functionize",
+    "category_label": "QA & Testing",
+    "subcategory": "ML-Based",
+    "language": "Proprietary",
+    "license_hint": "Proprietary",
+    "backer": "Functionize",
+    "source_url": "https://www.functionize.com/",
+    "description": "Predictive maintenance tracking DOM changes over time"
+  },
+  {
+    "name": "Applitools",
+    "category_label": "QA & Testing",
+    "subcategory": "Visual AI",
+    "language": "Multi",
+    "license_hint": "Proprietary",
+    "backer": "Applitools",
+    "source_url": "https://applitools.com/",
+    "description": "Layout-aware visual regression using 'Eyes' AI technology"
+  },
+  {
+    "name": "Syntest",
+    "category_label": "QA & Testing",
+    "subcategory": "HAR Analysis",
+    "language": "JavaScript",
+    "license_hint": "MIT/Apache (likely)",
+    "backer": "Shivam Bharadwaj",
+    "source_url": "https://github.com/shivam-bharadwaj/syntest",
+    "description": "Converts HAR files into smart reports using Playwright"
+  },
+  {
+    "name": "TestRail",
+    "category_label": "QA & Testing",
+    "subcategory": "Test Management",
+    "language": "Proprietary",
+    "license_hint": "Proprietary",
+    "backer": "Gurock/Idera",
+    "source_url": "https://www.testrail.com/",
+    "description": "AI-driven case generation from Jira, Figma, or videos"
+  },
+  {
+    "name": "Playwright",
+    "category_label": "QA & Testing",
+    "subcategory": "Browser Testing",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Microsoft",
+    "source_url": "https://github.com/microsoft/playwright",
+    "description": "AI-enhanced browser automation with codegen"
+  },
+  {
+    "name": "SeleniumSelfHealing.Reqnroll",
+    "category_label": "QA & Testing",
+    "subcategory": "Self-Healing",
+    "language": "C#/.NET",
+    "license_hint": "Not stated",
+    "backer": "aiqualitylab",
+    "source_url": "https://github.com/aiqualitylab/SeleniumSelfHealing.Reqnroll",
+    "description": "BDD self-healing Selenium tests with AI recovery"
+  },
+  {
+    "name": "HumanLayer",
+    "category_label": "HITL & Governance",
+    "subcategory": "Approval Gateway",
+    "language": "Python/TS",
+    "license_hint": "Apache-2.0",
+    "backer": "HumanLayer",
+    "source_url": "https://github.com/humanlayer/humanlayer",
+    "description": "Deterministic oversight with @require_approval decorators"
+  },
+  {
+    "name": "Agent-Gate",
+    "category_label": "HITL & Governance",
+    "subcategory": "Monitoring Gateway",
+    "language": "Python",
+    "license_hint": "Unknown",
+    "backer": "unknown",
+    "source_url": "https://github.com/jlov7/agentgate",
+    "description": "Approval layer to monitor and guide workflows with OPA policies"
+  },
+  {
+    "name": "Extendo-CLI",
+    "category_label": "HITL & Governance",
+    "subcategory": "Mobile HITL",
+    "language": "JS/Shell",
+    "license_hint": "Not stated",
+    "backer": "Eric Gradman",
+    "source_url": "https://github.com/egradman/extendo-cli",
+    "description": "Mobile push notifications for structured JSON decisions"
+  },
+  {
+    "name": "HiClaw",
+    "category_label": "HITL & Governance",
+    "subcategory": "Observable Swarms",
+    "language": "Python",
+    "license_hint": "Open (verify)",
+    "backer": "Alibaba/AgentScope",
+    "source_url": "https://github.com/agentscope-ai/HiClaw",
+    "description": "Agents communicate via Matrix IM rooms; human always in the room"
+  },
+  {
+    "name": "OpenClaw Mission Control",
+    "category_label": "HITL & Governance",
+    "subcategory": "Mission Control",
+    "language": "TypeScript/Python",
+    "license_hint": "MIT",
+    "backer": "abhi1693 (individual)",
+    "source_url": "https://github.com/abhi1693/openclaw-mission-control",
+    "description": "Centralized interface for gateway management and governance"
+  },
+  {
+    "name": "ACP (Agent Control Plane)",
+    "category_label": "HITL & Governance",
+    "subcategory": "Control Plane",
+    "language": "Go",
+    "license_hint": "Apache-2.0",
+    "backer": "HumanLayer",
+    "source_url": "https://github.com/humanlayer/agentcontrolplane",
+    "description": "Kubernetes-native control plane for durable agent execution"
+  },
+  {
+    "name": "Lead-Agent",
+    "category_label": "HITL & Governance",
+    "subcategory": "Slack Integration",
+    "language": "TypeScript",
+    "license_hint": "MIT",
+    "backer": "Vercel",
+    "source_url": "https://github.com/vercel-labs/lead-agent",
+    "description": "Vercel-based workflow using Slack webhooks for approval"
+  },
+  {
+    "name": "Vibe Hacking Agent",
+    "category_label": "HITL & Governance",
+    "subcategory": "Security Auditing",
+    "language": "Python",
+    "license_hint": "n/a",
+    "backer": "ashishpatel26",
+    "source_url": "https://github.com/ashishpatel26/500-AI-Agents-Projects",
+    "description": "Multi-agent red-team testing for security vulnerabilities"
+  },
+  {
+    "name": "Preloop",
+    "category_label": "HITL & Governance",
+    "subcategory": "Safety Layer",
+    "language": "Python",
+    "license_hint": "Open (verify)",
+    "backer": "Preloop",
+    "source_url": "https://github.com/preloop/preloop",
+    "description": "Safety layer for AI agents with YAML policies and mobile HITL"
+  },
+  {
+    "name": "ClawBands",
+    "category_label": "HITL & Governance",
+    "subcategory": "Security Middleware",
+    "language": "TypeScript",
+    "license_hint": "Open (verify)",
+    "backer": "SeyZ (individual)",
+    "source_url": "https://github.com/SeyZ/clawbands",
+    "description": "Safety middleware hooks for OpenClaw AI agents"
+  },
+  {
+    "name": "PoHI Protocol",
+    "category_label": "HITL & Governance",
+    "subcategory": "Cryptographic Proof",
+    "language": "Rust",
+    "license_hint": "Open (verify)",
+    "backer": "individual",
+    "source_url": "https://github.com/pohi-protocol/pohi",
+    "description": "Proof of Human Intent with ZK proofs for verifiable approval"
+  },
+  {
+    "name": "UAIP-Protocol",
+    "category_label": "HITL & Governance",
+    "subcategory": "Payment Protocol",
+    "language": "Python/Solidity",
+    "license_hint": "Open (verify)",
+    "backer": "individual",
+    "source_url": "https://github.com/jahanzaibahmad112-dotcom/UAIP-Protocol",
+    "description": "Universal Agent Interoperability Protocol for agent payments"
+  },
+  {
+    "name": "Ars Contexta",
+    "category_label": "Context & Memory",
+    "subcategory": "Agentic Note-taking",
+    "language": "Markdown/Shell",
+    "license_hint": "Not captured",
+    "backer": "individual",
+    "source_url": "https://github.com/agenticnotetaking/arscontexta",
+    "description": "Cognitive architecture derived from 249 research claims"
+  },
+  {
+    "name": "Context-Engine",
+    "category_label": "Context & Memory",
+    "subcategory": "Retrieval Stack",
+    "language": "Python",
+    "license_hint": "Unknown",
+    "backer": "unknown",
+    "source_url": "https://github.com/context-engine/context-engine",
+    "description": "Hybrid search + AST parsing replacing traditional RAG"
+  },
+  {
+    "name": "Letta",
+    "category_label": "Context & Memory",
+    "subcategory": "Context Repositories",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Letta AI",
+    "source_url": "https://github.com/letta-ai/letta",
+    "description": "Git-backed memory with progressive disclosure (formerly MemGPT)"
+  },
+  {
+    "name": "GraphRAG",
+    "category_label": "Context & Memory",
+    "subcategory": "Knowledge Graphs",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Microsoft",
+    "source_url": "https://github.com/microsoft/graphrag",
+    "description": "Stored, versioned entity relationships for agents"
+  },
+  {
+    "name": "AgenticsJS",
+    "category_label": "Context & Memory",
+    "subcategory": "Search Library",
+    "language": "JavaScript",
+    "license_hint": "MIT-family",
+    "backer": "rUv (individual)",
+    "source_url": "https://github.com/ruvnet/AgenticsJS",
+    "description": "Intelligent search with visualization and plugins"
+  },
+  {
+    "name": "ruVector",
+    "category_label": "Context & Memory",
+    "subcategory": "Vector DB",
+    "language": "Rust",
+    "license_hint": "MIT-family",
+    "backer": "rUv (individual)",
+    "source_url": "https://github.com/ruvnet/ruvector",
+    "description": "Self-learning GNN vector database with fast search"
+  },
+  {
+    "name": "FACT",
+    "category_label": "Context & Memory",
+    "subcategory": "Data Retrieval",
+    "language": "Python",
+    "license_hint": "MIT-family",
+    "backer": "rUv (individual)",
+    "source_url": "https://github.com/ruvnet/fact",
+    "description": "Replaces RAG with deterministic tool execution and prompt caching"
+  },
+  {
+    "name": "GitHub Agentic Workflows (gh-aw)",
+    "category_label": "Platform",
+    "subcategory": "GitHub Native",
+    "language": "Go/Markdown",
+    "license_hint": "MIT (likely)",
+    "backer": "GitHub",
+    "source_url": "https://github.com/github/gh-aw",
+    "description": "Continuous AI with sandboxed execution in GitHub Actions"
+  },
+  {
+    "name": "GitLab Duo Agent Platform",
+    "category_label": "Platform",
+    "subcategory": "GitLab Native",
+    "language": "YAML",
+    "license_hint": "Proprietary (core MIT/EE)",
+    "backer": "GitLab",
+    "source_url": "https://about.gitlab.com/gitlab-duo-agent-platform/",
+    "description": "Intelligent orchestration with BYOM support"
+  },
+  {
+    "name": "agent_session_manager",
+    "category_label": "Infrastructure",
+    "subcategory": "Session Management",
+    "language": "Elixir",
+    "license_hint": "Permissive (likely)",
+    "backer": "nshkr (individual)",
+    "source_url": "https://github.com/nshkrdotcom/agent_session_manager",
+    "description": "Ports-and-adapters architecture for agent session lifecycles"
+  },
+  {
+    "name": "agentic-sdlc-12-factors",
+    "category_label": "Methodology",
+    "subcategory": "Best Practices",
+    "language": "Markdown",
+    "license_hint": "Open docs",
+    "backer": "Tikal",
+    "source_url": "https://github.com/tikalk/agentic-sdlc-12-factors",
+    "description": "Twelve-Factor Agentic SDLC methodology framework"
+  },
+  {
+    "name": "fabricate",
+    "category_label": "Research",
+    "subcategory": "Synthetic Data",
+    "language": "TypeScript",
+    "license_hint": "MIT (likely)",
+    "backer": "Nader Dabit",
+    "source_url": "https://github.com/dabit3/fabricate",
+    "description": "Creates synthetic GitHub activity for research and testing"
+  },
+  {
+    "name": "browser-use",
+    "category_label": "Browser & Computer-Use",
+    "subcategory": "Browser Automation",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Browser Use",
+    "source_url": "https://github.com/browser-use/browser-use",
+    "description": "Makes websites accessible to AI agents via DOM + vision"
+  },
+  {
+    "name": "Skyvern",
+    "category_label": "Browser & Computer-Use",
+    "subcategory": "Browser Automation",
+    "language": "Python",
+    "license_hint": "AGPL-3.0",
+    "backer": "Skyvern AI",
+    "source_url": "https://github.com/Skyvern-AI/skyvern",
+    "description": "Vision-based browser automation for complex workflows"
+  },
+  {
+    "name": "Stagehand",
+    "category_label": "Browser & Computer-Use",
+    "subcategory": "Browser Automation",
+    "language": "TypeScript",
+    "license_hint": "MIT",
+    "backer": "Browserbase",
+    "source_url": "https://github.com/browserbase/stagehand",
+    "description": "AI browser automation framework with act/extract/observe"
+  },
+  {
+    "name": "Bytebot",
+    "category_label": "Browser & Computer-Use",
+    "subcategory": "Computer Use",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Bytebot",
+    "source_url": "https://github.com/bytebot-ai/bytebot",
+    "description": "Self-hosted desktop agent in a containerized virtual desktop"
+  },
+  {
+    "name": "OmniParser",
+    "category_label": "Browser & Computer-Use",
+    "subcategory": "Screen Parsing",
+    "language": "Python",
+    "license_hint": "MIT (code)",
+    "backer": "Microsoft",
+    "source_url": "https://github.com/microsoft/OmniParser",
+    "description": "Screen parsing to structured elements for GUI agents"
+  },
+  {
+    "name": "LaVague",
+    "category_label": "Browser & Computer-Use",
+    "subcategory": "Browser Automation",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "LaVague",
+    "source_url": "https://github.com/lavague-ai/LaVague",
+    "description": "Large Action Model framework for web automation"
+  },
+  {
+    "name": "Self-Operating Computer",
+    "category_label": "Browser & Computer-Use",
+    "subcategory": "Computer Use",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "OthersideAI",
+    "source_url": "https://github.com/OthersideAI/self-operating-computer",
+    "description": "Framework to operate a computer like a human via screenshots"
+  },
+  {
+    "name": "Notte",
+    "category_label": "Browser & Computer-Use",
+    "subcategory": "Browser Automation",
+    "language": "Python",
+    "license_hint": "SSPL",
+    "backer": "Notte Labs",
+    "source_url": "https://github.com/nottelabs/notte",
+    "description": "Full-stack web AI agents framework with perception layer"
+  },
+  {
+    "name": "OpenCode",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Terminal Agent",
+    "language": "TypeScript/Go",
+    "license_hint": "MIT",
+    "backer": "Anomaly Innovations (SST)",
+    "source_url": "https://github.com/anomalyco/opencode",
+    "description": "Model-agnostic terminal coding agent (de-facto open Claude Code)"
+  },
+  {
+    "name": "Goose",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Extensible Agent",
+    "language": "Rust",
+    "license_hint": "Apache-2.0",
+    "backer": "Agentic AI Foundation (LF)",
+    "source_url": "https://github.com/aaif-goose/goose",
+    "description": "Open, extensible AI agent that installs, executes, edits, tests with any LLM"
+  },
+  {
+    "name": "Continue.dev",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "IDE Assistant",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Continue",
+    "source_url": "https://github.com/continuedev/continue",
+    "description": "Open-source autopilot for VS Code and JetBrains"
+  },
+  {
+    "name": "Tabby",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Self-Hosted Copilot",
+    "language": "Rust",
+    "license_hint": "Apache-2.0",
+    "backer": "TabbyML",
+    "source_url": "https://github.com/TabbyML/tabby",
+    "description": "Self-hosted AI coding assistant; Copilot alternative"
+  },
+  {
+    "name": "Roo Code",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "IDE Agent",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Roo",
+    "source_url": "https://github.com/RooCodeInc/Roo-Code",
+    "description": "Autonomous coding agent in your editor (Cline fork)"
+  },
+  {
+    "name": "Kilo Code",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "IDE Agent",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Kilo",
+    "source_url": "https://github.com/Kilo-Org/kilocode",
+    "description": "Open-source AI agent for VS Code and JetBrains (Roo/Cline family)"
+  },
+  {
+    "name": "Codex CLI",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Terminal Agent",
+    "language": "Rust",
+    "license_hint": "Apache-2.0",
+    "backer": "OpenAI",
+    "source_url": "https://github.com/openai/codex",
+    "description": "Lightweight coding agent that runs in the terminal"
+  },
+  {
+    "name": "Gemini CLI",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Terminal Agent",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Google",
+    "source_url": "https://github.com/google-gemini/gemini-cli",
+    "description": "Open-source AI agent bringing Gemini into the terminal"
+  },
+  {
+    "name": "Qwen Code",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Terminal Agent",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Alibaba/Qwen",
+    "source_url": "https://github.com/QwenLM/qwen-code",
+    "description": "Command-line coding agent (living fork of Gemini CLI)"
+  },
+  {
+    "name": "Crush",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Terminal Agent",
+    "language": "Go",
+    "license_hint": "FSL (->MIT after 2y)",
+    "backer": "Charmbracelet",
+    "source_url": "https://github.com/charmbracelet/crush",
+    "description": "Glamourous terminal-based AI coding agent"
+  },
+  {
+    "name": "Void",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "AI Editor",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Void",
+    "source_url": "https://github.com/voideditor/void",
+    "description": "Open-source Cursor alternative (VS Code fork)"
+  },
+  {
+    "name": "bolt.diy",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Web App Builder",
+    "language": "TypeScript",
+    "license_hint": "MIT",
+    "backer": "StackBlitz Labs",
+    "source_url": "https://github.com/stackblitz-labs/bolt.diy",
+    "description": "Prompt, run, edit and deploy full-stack apps in the browser"
+  },
+  {
+    "name": "Warp",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Agentic Terminal",
+    "language": "Rust",
+    "license_hint": "AGPL-3.0 (client)",
+    "backer": "Warp",
+    "source_url": "https://github.com/warpdotdev/warp",
+    "description": "Agentic development environment / terminal"
+  },
+  {
+    "name": "RA.Aid",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Autonomous CLI",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "ai-christianson",
+    "source_url": "https://github.com/ai-christianson/RA.Aid",
+    "description": "Autonomous software development agent (research+implement)"
+  },
+  {
+    "name": "gptme",
+    "category_label": "CLI/IDE Coding Agents",
+    "subcategory": "Terminal Agent",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Erik Bjareholt",
+    "source_url": "https://github.com/gptme/gptme",
+    "description": "Personal AI assistant/agent in your terminal"
+  },
+  {
+    "name": "Agno",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Multi-Agent",
+    "language": "Python",
+    "license_hint": "MPL-2.0 (verify)",
+    "backer": "Agno (ex-Phidata)",
+    "source_url": "https://github.com/agno-agi/agno",
+    "description": "Full-stack framework for multi-agent systems with memory"
+  },
+  {
+    "name": "Google ADK",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Agent SDK",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Google",
+    "source_url": "https://github.com/google/adk-python",
+    "description": "Code-first toolkit for building, evaluating, deploying agents"
+  },
+  {
+    "name": "smolagents",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Minimal Agents",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Hugging Face",
+    "source_url": "https://github.com/huggingface/smolagents",
+    "description": "Minimalist library for code-writing agents (~1k LOC core)"
+  },
+  {
+    "name": "Strands Agents",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Agent SDK",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "AWS",
+    "source_url": "https://github.com/strands-agents/sdk-python",
+    "description": "Model-driven approach to building agents in a few lines"
+  },
+  {
+    "name": "BeeAI Framework",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Agent SDK",
+    "language": "TypeScript/Python",
+    "license_hint": "Apache-2.0",
+    "backer": "IBM / Linux Foundation",
+    "source_url": "https://github.com/i-am-bee/beeai-framework",
+    "description": "Build production-ready multi-agent systems"
+  },
+  {
+    "name": "CAMEL-AI",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Multi-Agent",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "CAMEL-AI.org",
+    "source_url": "https://github.com/camel-ai/camel",
+    "description": "Framework for studying autonomous and communicative agents"
+  },
+  {
+    "name": "OWL",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Multi-Agent",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "CAMEL-AI.org",
+    "source_url": "https://github.com/camel-ai/owl",
+    "description": "Optimized workforce learning for real-world task automation"
+  },
+  {
+    "name": "AgentScope",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Multi-Agent",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Alibaba",
+    "source_url": "https://github.com/agentscope-ai/agentscope",
+    "description": "Developer-centric framework for multi-agent applications"
+  },
+  {
+    "name": "Swarms",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Multi-Agent",
+    "language": "Python",
+    "license_hint": "Apache-2.0 (verify)",
+    "backer": "kyegomez (individual)",
+    "source_url": "https://github.com/kyegomez/swarms",
+    "description": "Enterprise-grade multi-agent orchestration framework"
+  },
+  {
+    "name": "LlamaIndex",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Data/Agent Framework",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "LlamaIndex",
+    "source_url": "https://github.com/run-llama/llama_index",
+    "description": "Data framework + agent workflows for LLM apps"
+  },
+  {
+    "name": "Haystack",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Data/Agent Framework",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "deepset",
+    "source_url": "https://github.com/deepset-ai/haystack",
+    "description": "Orchestration framework for LLM apps and agents"
+  },
+  {
+    "name": "Semantic Kernel",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Agent SDK",
+    "language": "C#/Python",
+    "license_hint": "MIT",
+    "backer": "Microsoft",
+    "source_url": "https://github.com/microsoft/semantic-kernel",
+    "description": "SDK integrating LLMs with conventional code"
+  },
+  {
+    "name": "DSPy",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Prompt Programming",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Stanford NLP",
+    "source_url": "https://github.com/stanfordnlp/dspy",
+    "description": "Framework for programming (not prompting) language models"
+  },
+  {
+    "name": "ElizaOS",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Autonomous Agents",
+    "language": "TypeScript",
+    "license_hint": "MIT",
+    "backer": "ElizaOS (ai16z)",
+    "source_url": "https://github.com/elizaOS/eliza",
+    "description": "Framework for autonomous agents (esp. social/crypto)"
+  },
+  {
+    "name": "AutoGPT",
+    "category_label": "Agent Frameworks",
+    "subcategory": "Autonomous Agents",
+    "language": "Python",
+    "license_hint": "MIT (mixed)",
+    "backer": "Significant Gravitas",
+    "source_url": "https://github.com/Significant-Gravitas/AutoGPT",
+    "description": "Platform to create, deploy, and run continuous AI agents"
+  },
+  {
+    "name": "Langfuse",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "LLM Observability",
+    "language": "TypeScript",
+    "license_hint": "MIT",
+    "backer": "Langfuse",
+    "source_url": "https://github.com/langfuse/langfuse",
+    "description": "Open-source LLM engineering platform: traces, evals, prompts"
+  },
+  {
+    "name": "Arize Phoenix",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "LLM Observability",
+    "language": "Python",
+    "license_hint": "Elastic-2.0",
+    "backer": "Arize AI",
+    "source_url": "https://github.com/Arize-ai/phoenix",
+    "description": "Open-source AI observability and evaluation"
+  },
+  {
+    "name": "AgentOps",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "Agent Observability",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "AgentOps",
+    "source_url": "https://github.com/AgentOps-AI/agentops",
+    "description": "Observability and debugging for AI agents"
+  },
+  {
+    "name": "Helicone",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "LLM Observability",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0",
+    "backer": "Helicone",
+    "source_url": "https://github.com/Helicone/helicone",
+    "description": "Open-source LLM observability via proxy/gateway"
+  },
+  {
+    "name": "OpenLLMetry",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "Tracing Standard",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Traceloop",
+    "source_url": "https://github.com/traceloop/openllmetry",
+    "description": "OpenTelemetry-based observability for LLM apps"
+  },
+  {
+    "name": "Laminar",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "Agent Observability",
+    "language": "Rust/TS",
+    "license_hint": "Apache-2.0",
+    "backer": "Laminar",
+    "source_url": "https://github.com/lmnr-ai/lmnr",
+    "description": "Open-source platform for tracing and evaluating AI agents"
+  },
+  {
+    "name": "LangSmith",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "LLM Observability",
+    "language": "Closed",
+    "license_hint": "Proprietary",
+    "backer": "LangChain",
+    "source_url": "https://www.langchain.com/langsmith",
+    "description": "Platform for debugging, testing, monitoring LLM apps"
+  },
+  {
+    "name": "Weave",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "LLM Observability",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Weights & Biases",
+    "source_url": "https://github.com/wandb/weave",
+    "description": "Toolkit for tracking and evaluating LLM applications"
+  },
+  {
+    "name": "Opik",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "LLM Observability",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Comet",
+    "source_url": "https://github.com/comet-ml/opik",
+    "description": "Open-source platform to debug, evaluate, monitor LLM apps"
+  },
+  {
+    "name": "DeepEval",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "Eval Framework",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Confident AI",
+    "source_url": "https://github.com/confident-ai/deepeval",
+    "description": "Pytest-like LLM evaluation framework"
+  },
+  {
+    "name": "Promptfoo",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "Eval Framework",
+    "language": "TypeScript",
+    "license_hint": "MIT",
+    "backer": "Promptfoo",
+    "source_url": "https://github.com/promptfoo/promptfoo",
+    "description": "Test and evaluate LLM prompts, agents, RAG; red-teaming"
+  },
+  {
+    "name": "Inspect",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "Eval Framework",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "UK AI Safety Institute",
+    "source_url": "https://github.com/UKGovernmentBEIS/inspect_ai",
+    "description": "Framework for large language model evaluations"
+  },
+  {
+    "name": "Ragas",
+    "category_label": "Evaluation & Observability",
+    "subcategory": "RAG Eval",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Exploding Gradients",
+    "source_url": "https://github.com/explodinggradients/ragas",
+    "description": "Evaluation toolkit for RAG and LLM applications"
+  },
+  {
+    "name": "NeMo Guardrails",
+    "category_label": "Guardrails & Safety",
+    "subcategory": "Guardrails",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "NVIDIA",
+    "source_url": "https://github.com/NVIDIA-NeMo/Guardrails",
+    "description": "Toolkit for programmable guardrails on LLM apps"
+  },
+  {
+    "name": "Guardrails AI",
+    "category_label": "Guardrails & Safety",
+    "subcategory": "Guardrails",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Guardrails AI",
+    "source_url": "https://github.com/guardrails-ai/guardrails",
+    "description": "Framework for input/output validation guardrails"
+  },
+  {
+    "name": "LLM Guard",
+    "category_label": "Guardrails & Safety",
+    "subcategory": "Guardrails",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Protect AI",
+    "source_url": "https://github.com/protectai/llm-guard",
+    "description": "Security toolkit for LLM interactions"
+  },
+  {
+    "name": "Presidio",
+    "category_label": "Guardrails & Safety",
+    "subcategory": "PII Protection",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Microsoft",
+    "source_url": "https://github.com/microsoft/presidio",
+    "description": "Context-aware PII detection and anonymization"
+  },
+  {
+    "name": "Rebuff",
+    "category_label": "Guardrails & Safety",
+    "subcategory": "Prompt Injection",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Protect AI",
+    "source_url": "https://github.com/protectai/rebuff",
+    "description": "Self-hardening prompt injection detector"
+  },
+  {
+    "name": "Invariant",
+    "category_label": "Guardrails & Safety",
+    "subcategory": "Agent Security",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Invariant Labs",
+    "source_url": "https://github.com/invariantlabs-ai/invariant",
+    "description": "Security analyzer and guardrails for agent systems"
+  },
+  {
+    "name": "MCP Servers",
+    "category_label": "MCP Ecosystem",
+    "subcategory": "Reference Servers",
+    "language": "TS/Python",
+    "license_hint": "Apache-2.0/MIT",
+    "backer": "Anthropic / LF",
+    "source_url": "https://github.com/modelcontextprotocol/servers",
+    "description": "Reference implementations of Model Context Protocol servers"
+  },
+  {
+    "name": "FastMCP",
+    "category_label": "MCP Ecosystem",
+    "subcategory": "MCP Framework",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Prefect",
+    "source_url": "https://github.com/PrefectHQ/fastmcp",
+    "description": "The fast, Pythonic way to build MCP servers and clients"
+  },
+  {
+    "name": "Composio",
+    "category_label": "MCP Ecosystem",
+    "subcategory": "Tool Integrations",
+    "language": "Python/TS",
+    "license_hint": "MIT",
+    "backer": "Composio",
+    "source_url": "https://github.com/ComposioHQ/composio",
+    "description": "Production-ready toolset / 1000+ integrations for agents"
+  },
+  {
+    "name": "mcp-agent",
+    "category_label": "MCP Ecosystem",
+    "subcategory": "Agent Framework",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "LastMile AI",
+    "source_url": "https://github.com/lastmile-ai/mcp-agent",
+    "description": "Build effective agents using MCP and simple patterns"
+  },
+  {
+    "name": "Toolhive",
+    "category_label": "MCP Ecosystem",
+    "subcategory": "MCP Gateway",
+    "language": "Go",
+    "license_hint": "Apache-2.0",
+    "backer": "Stacklok",
+    "source_url": "https://github.com/stacklok/toolhive",
+    "description": "Run MCP servers securely, simply, anywhere"
+  },
+  {
+    "name": "Smithery",
+    "category_label": "MCP Ecosystem",
+    "subcategory": "MCP Registry",
+    "language": "TypeScript",
+    "license_hint": "Open (mostly)",
+    "backer": "Smithery",
+    "source_url": "https://github.com/smithery-ai/smithery",
+    "description": "Registry and toolchain for MCP servers"
+  },
+  {
+    "name": "LiveKit Agents",
+    "category_label": "Voice/Realtime Agents",
+    "subcategory": "Voice Agents",
+    "language": "Python/Node",
+    "license_hint": "Apache-2.0",
+    "backer": "LiveKit",
+    "source_url": "https://github.com/livekit/agents",
+    "description": "Framework for realtime voice/video AI agents"
+  },
+  {
+    "name": "Pipecat",
+    "category_label": "Voice/Realtime Agents",
+    "subcategory": "Voice Agents",
+    "language": "Python",
+    "license_hint": "BSD-2-Clause",
+    "backer": "Daily",
+    "source_url": "https://github.com/pipecat-ai/pipecat",
+    "description": "Framework for voice and multimodal conversational agents"
+  },
+  {
+    "name": "TEN Framework",
+    "category_label": "Voice/Realtime Agents",
+    "subcategory": "Voice Agents",
+    "language": "C++/Go/Python",
+    "license_hint": "Apache-2.0",
+    "backer": "TEN / Agora",
+    "source_url": "https://github.com/TEN-framework/ten-framework",
+    "description": "Open-source framework for realtime conversational voice agents"
+  },
+  {
+    "name": "Vocode",
+    "category_label": "Voice/Realtime Agents",
+    "subcategory": "Voice Agents",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Vocode",
+    "source_url": "https://github.com/vocodedev/vocode-core",
+    "description": "Library for building voice-based LLM agents"
+  },
+  {
+    "name": "VAPI",
+    "category_label": "Voice/Realtime Agents",
+    "subcategory": "Voice Agents",
+    "language": "Closed SaaS",
+    "license_hint": "Proprietary",
+    "backer": "VAPI",
+    "source_url": "https://vapi.ai/",
+    "description": "Developer platform for building voice AI agents"
+  },
+  {
+    "name": "Dify",
+    "category_label": "No-code/Visual Builders",
+    "subcategory": "LLM App Platform",
+    "language": "Python/TS",
+    "license_hint": "Apache-2.0 (restricted)",
+    "backer": "LangGenius",
+    "source_url": "https://github.com/langgenius/dify",
+    "description": "Open-source platform for agentic LLM app development"
+  },
+  {
+    "name": "n8n",
+    "category_label": "No-code/Visual Builders",
+    "subcategory": "Workflow Automation",
+    "language": "TypeScript",
+    "license_hint": "Sustainable Use (fair-code)",
+    "backer": "n8n",
+    "source_url": "https://github.com/n8n-io/n8n",
+    "description": "Workflow automation with native AI agent nodes"
+  },
+  {
+    "name": "Flowise",
+    "category_label": "No-code/Visual Builders",
+    "subcategory": "Agent Builder",
+    "language": "TypeScript",
+    "license_hint": "Apache-2.0 (clause)",
+    "backer": "FlowiseAI",
+    "source_url": "https://github.com/FlowiseAI/Flowise",
+    "description": "Visual builder for LLM/agent flows"
+  },
+  {
+    "name": "Langflow",
+    "category_label": "No-code/Visual Builders",
+    "subcategory": "Agent Builder",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "DataStax",
+    "source_url": "https://github.com/langflow-ai/langflow",
+    "description": "Visual framework for building multi-agent and RAG apps"
+  },
+  {
+    "name": "Activepieces",
+    "category_label": "No-code/Visual Builders",
+    "subcategory": "Workflow Automation",
+    "language": "TypeScript",
+    "license_hint": "MIT (core)",
+    "backer": "Activepieces",
+    "source_url": "https://github.com/activepieces/activepieces",
+    "description": "Open-source AI automation / Zapier alternative with MCP"
+  },
+  {
+    "name": "SuperAGI",
+    "category_label": "No-code/Visual Builders",
+    "subcategory": "Agent Platform",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "SuperAGI",
+    "source_url": "https://github.com/TransformerOptimus/SuperAGI",
+    "description": "Dev-first framework for autonomous agents"
+  },
+  {
+    "name": "RAGFlow",
+    "category_label": "RAG/Context Frameworks",
+    "subcategory": "RAG Engine",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "InfiniFlow",
+    "source_url": "https://github.com/infiniflow/ragflow",
+    "description": "RAG engine based on deep document understanding"
+  },
+  {
+    "name": "Mem0",
+    "category_label": "RAG/Context Frameworks",
+    "subcategory": "Agent Memory",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Mem0",
+    "source_url": "https://github.com/mem0ai/mem0",
+    "description": "Memory layer for AI agents and assistants"
+  },
+  {
+    "name": "Cognee",
+    "category_label": "RAG/Context Frameworks",
+    "subcategory": "Agent Memory",
+    "language": "Python",
+    "license_hint": "Apache-2.0 (verify)",
+    "backer": "Topoteretes",
+    "source_url": "https://github.com/topoteretes/cognee",
+    "description": "Memory for AI agents with knowledge graphs (local-first)"
+  },
+  {
+    "name": "Graphiti (Zep)",
+    "category_label": "RAG/Context Frameworks",
+    "subcategory": "Temporal Memory",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Zep",
+    "source_url": "https://github.com/getzep/graphiti",
+    "description": "Build real-time temporal knowledge graphs for agents"
+  },
+  {
+    "name": "Onyx",
+    "category_label": "RAG/Context Frameworks",
+    "subcategory": "Enterprise Search",
+    "language": "Python",
+    "license_hint": "MIT/other (verify)",
+    "backer": "Onyx",
+    "source_url": "https://github.com/onyx-dot-app/onyx",
+    "description": "Open-source AI assistant / enterprise search (ex-Danswer)"
+  },
+  {
+    "name": "R2R",
+    "category_label": "RAG/Context Frameworks",
+    "subcategory": "RAG Engine",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "SciPhi",
+    "source_url": "https://github.com/SciPhi-AI/R2R",
+    "description": "Production-ready agentic RAG with REST API"
+  },
+  {
+    "name": "Khoj",
+    "category_label": "RAG/Context Frameworks",
+    "subcategory": "Personal AI",
+    "language": "Python",
+    "license_hint": "AGPL-3.0",
+    "backer": "Khoj",
+    "source_url": "https://github.com/khoj-ai/khoj",
+    "description": "Self-hostable personal AI for your documents (local-first)"
+  },
+  {
+    "name": "txtai",
+    "category_label": "RAG/Context Frameworks",
+    "subcategory": "Embeddings DB",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "NeuML",
+    "source_url": "https://github.com/neuml/txtai",
+    "description": "All-in-one embeddings database for semantic search + agents"
+  },
+  {
+    "name": "Quivr",
+    "category_label": "RAG/Context Frameworks",
+    "subcategory": "RAG Assistant",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "Quivr",
+    "source_url": "https://github.com/QuivrHQ/quivr",
+    "description": "Opinionated RAG to build a second brain / assistants"
+  },
+  {
+    "name": "ChatDev",
+    "category_label": "Agent Simulation/Research",
+    "subcategory": "Multi-Agent Company",
+    "language": "Python",
+    "license_hint": "Apache-2.0",
+    "backer": "OpenBMB/Tsinghua",
+    "source_url": "https://github.com/OpenBMB/ChatDev",
+    "description": "Communicative agents simulating a software company"
+  },
+  {
+    "name": "BabyAGI",
+    "category_label": "Agent Simulation/Research",
+    "subcategory": "Task-Driven Agent",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "Yohei Nakajima",
+    "source_url": "https://github.com/yoheinakajima/babyagi",
+    "description": "Pioneering task-driven autonomous agent loop"
+  },
+  {
+    "name": "Open Interpreter",
+    "category_label": "Agent Simulation/Research",
+    "subcategory": "Code Interpreter",
+    "language": "Python",
+    "license_hint": "AGPL-3.0",
+    "backer": "Open Interpreter",
+    "source_url": "https://github.com/OpenInterpreter/open-interpreter",
+    "description": "Natural-language interface to run code on your computer"
+  },
+  {
+    "name": "GPT-Engineer",
+    "category_label": "Agent Simulation/Research",
+    "subcategory": "Codegen Agent",
+    "language": "Python",
+    "license_hint": "MIT",
+    "backer": "gpt-engineer org",
+    "source_url": "https://github.com/gpt-engineer-org/gpt-engineer",
+    "description": "Specify an app in natural language and have it built"
+  },
+  {
+    "name": "E2B",
+    "category_label": "Sandboxing & Execution",
+    "subcategory": "Code Sandbox",
+    "language": "TypeScript/Rust",
+    "license_hint": "Apache-2.0",
+    "backer": "E2B",
+    "source_url": "https://github.com/e2b-dev/E2B",
+    "description": "Secure cloud sandboxes for AI-generated code"
+  },
+  {
+    "name": "Daytona",
+    "category_label": "Sandboxing & Execution",
+    "subcategory": "Dev Environments",
+    "language": "Go/TS",
+    "license_hint": "AGPL-3.0",
+    "backer": "Daytona",
+    "source_url": "https://github.com/daytonaio/daytona",
+    "description": "Secure, elastic infra for running AI-generated code"
+  },
+  {
+    "name": "microsandbox",
+    "category_label": "Sandboxing & Execution",
+    "subcategory": "Code Sandbox",
+    "language": "Rust",
+    "license_hint": "Apache-2.0",
+    "backer": "microsandbox",
+    "source_url": "https://github.com/microsandbox/microsandbox",
+    "description": "Self-hosted, secure microVM sandbox for untrusted code"
+  },
+  {
+    "name": "agent-sandbox",
+    "category_label": "Sandboxing & Execution",
+    "subcategory": "Code Sandbox",
+    "language": "Go",
+    "license_hint": "Open (E2B-compat)",
+    "backer": "agent-sandbox",
+    "source_url": "https://github.com/agent-sandbox/agent-sandbox",
+    "description": "E2B-compatible enterprise-grade sandboxes for agents"
+  },
+  {
+    "name": "Ollama",
+    "category_label": "Local-First/Decentralized",
+    "subcategory": "Local LLM Runtime",
+    "language": "Go",
+    "license_hint": "MIT",
+    "backer": "Ollama",
+    "source_url": "https://github.com/ollama/ollama",
+    "description": "Run large language models locally with a simple CLI/API"
+  },
+  {
+    "name": "LocalAI",
+    "category_label": "Local-First/Decentralized",
+    "subcategory": "Local LLM Runtime",
+    "language": "Go",
+    "license_hint": "MIT",
+    "backer": "Ettore Di Giacinto/community",
+    "source_url": "https://github.com/mudler/LocalAI",
+    "description": "Free OpenAI/Claude drop-in to run models locally (no GPU needed)"
+  },
+  {
+    "name": "Jan",
+    "category_label": "Local-First/Decentralized",
+    "subcategory": "Local AI App",
+    "language": "TypeScript",
+    "license_hint": "AGPL-3.0",
+    "backer": "Menlo Research",
+    "source_url": "https://github.com/menloresearch/jan",
+    "description": "Offline ChatGPT alternative that runs 100% on your machine"
+  },
+  {
+    "name": "GPT4All",
+    "category_label": "Local-First/Decentralized",
+    "subcategory": "Local AI App",
+    "language": "C++/Python",
+    "license_hint": "MIT",
+    "backer": "Nomic AI",
+    "source_url": "https://github.com/nomic-ai/gpt4all",
+    "description": "Run local LLMs privately on everyday hardware"
+  },
+  {
+    "name": "ClaraVerse",
+    "category_label": "Local-First/Decentralized",
+    "subcategory": "Local AI Workspace",
+    "language": "TypeScript",
+    "license_hint": "MIT (verify)",
+    "backer": "badboysm890 (individual)",
+    "source_url": "https://github.com/badboysm890/ClaraVerse",
+    "description": "Privacy-first local AI superstack: chat, agents, automation"
+  }
+]

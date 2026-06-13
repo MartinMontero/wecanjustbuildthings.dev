@@ -111,3 +111,19 @@ export function matchDependency(dep: DependencyRef, orgs: ExcludedOrg[]): Policy
 export function isExcluded(dep: DependencyRef, orgs: ExcludedOrg[]): boolean {
   return matchDependency(dep, orgs).length > 0;
 }
+
+/**
+ * Screen a GitHub owner (org/user) against the excluded orgs' `github_orgs`.
+ * Used when a source repo URL is known (e.g. the agentic-tools dataset), which
+ * lets us enforce *ownership* directly rather than inferring it from a package
+ * coordinate.
+ */
+export function matchGitHubOwner(owner: string, orgs: ExcludedOrg[]): PolicyMatch | null {
+  const o = owner.toLowerCase();
+  for (const org of orgs) {
+    if (org.github_orgs.some((g) => g.toLowerCase() === o)) {
+      return { org_key: org.key, signal: 'github_org', matched_value: owner };
+    }
+  }
+  return null;
+}

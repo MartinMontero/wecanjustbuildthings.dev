@@ -14,12 +14,12 @@
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { fetchRegistry } from './lib/registries.ts';
+import { fetchRegistry, type RegistryInfo } from './lib/registries.ts';
 import { fetchGitHubMeta, maintenanceStatus, parseGitHubRepo } from './lib/github.ts';
 import { getCached } from './lib/http.ts';
 import { uniqueSlug } from './slugify.ts';
 import { loadExcludedOrgs } from '../enforcement/config.ts';
-import { matchDependency } from '../enforcement/matcher.ts';
+import { matchDependency, matchGitHubOwner } from '../enforcement/matcher.ts';
 import type { Ecosystem } from '../enforcement/types.ts';
 
 interface SeedRow {
@@ -30,6 +30,83 @@ interface SeedRow {
   protocols?: string[];
   pie_anchor?: string;
   what_it_does?: string;
+  aos_repos_using?: number;
+  aos_repos_list?: string[];
+  /** When set, the entry is resolved from this GitHub/GitLab repo, not a registry. */
+  source_url?: string;
+  /** A declared-but-unverified license string (e.g. from the agentic sheet). */
+  license_hint?: string;
+}
+
+/** Category → navigation metadata (Part 3 Step 6 PIE mapping + protocol family). */
+function categoryMeta(category: string): { protocols: string[]; pie_anchor: string } {
+  const c = category.toLowerCase();
+  if (c.includes('nostr') || c.includes('lightning') || c.includes('bitcoin')) {
+    return { protocols: ['nostr', 'lightning'], pie_anchor: '§4 Cooking → Recipes' };
+  }
+  if (c.includes('security') || c.includes('privacy')) {
+    return { protocols: ['general'], pie_anchor: '§4 Cooking → Catalysts / Pressure' };
+  }
+  if (c.includes('auth') || c.includes('identity') || c.includes('keys')) {
+    return { protocols: ['general'], pie_anchor: '§4 Cooking → Catalysts' };
+  }
+  if (c.includes('monitoring') || c.includes('observability') || c.includes('collaboration') || c.includes('comms')) {
+    return { protocols: ['general'], pie_anchor: '§4 Cooking → Pressure' };
+  }
+  if (
+    c.includes('dev environment') ||
+    c.includes('tooling') ||
+    c.includes('hosting') ||
+    c.includes('deploy') ||
+    c.includes('database') ||
+    c.includes('storage') ||
+    c.includes('languages') ||
+    c.includes('runtimes') ||
+    c.includes('ci-cd') ||
+    c.includes('version control')
+  ) {
+    return { protocols: ['general'], pie_anchor: '§4 Cooking → The Oven' };
+  }
+  if (c.includes('misc') || c.includes('planning') || c.includes('design')) {
+    return { protocols: ['general'], pie_anchor: '§3 Kitchen Prep' };
+  }
+  // Frameworks & Libraries, Testing & QA, AI & Agents, default
+  return { protocols: ['general'], pie_anchor: '§4 Cooking → Recipes' };
+}
+
+/** Validate an SPDX id OR a simple SPDX expression ("MIT OR Apache-2.0",
+ *  "(MIT OR Apache-2.0) AND BSD-3-Clause") — every license token must be known. */
+function isValidSpdx(raw: string | undefined, ids: Set<string>): boolean {
+  if (!raw) return false;
+  if (ids.has(raw)) return true;
+  const tokens = raw
+    .replace(/[()]/g, ' ')
+    .split(/\s+(?:OR|AND|WITH)\s+/i)
+    .map((t) => t.trim().replace(/\+$/, '')) // strip "or-later" + suffix for the check
+    .filter(Boolean);
+  if (tokens.length < 2) return false;
+  return tokens.every((t) => ids.has(t) || ids.has(`${t}+`));
+}
+
+/** Infer protocol families from a tool's name, category, and description so
+ *  e.g. `@atproto/api` (in "Frameworks & Libraries") is still tagged `atproto`. */
+function inferProtocols(name: string, category: string, desc: string | undefined): string[] {
+  const hay = `${name} ${category} ${desc ?? ''}`.toLowerCase();
+  const set = new Set<string>();
+  if (/nostr|\bnip-?\d|nostrify|\bndk\b|nip-?\d{2}/.test(hay)) set.add('nostr');
+  if (/atproto|at protocol|bluesky|@atproto|\bbsky\b|lexicon/.test(hay)) set.add('atproto');
+  if (/lightning|lnurl|\blnd\b|\bldk\b|bolt11|breez|nostr wallet connect|\bnwc\b|\bcln\b/.test(hay)) set.add('lightning');
+  if (/cashu|\becash\b/.test(hay)) set.add('cashu');
+  if (set.size === 0) set.add('general');
+  return [...set];
+}
+
+/** Clean a declared license hint ("MIT-family", "MIT (likely)", "Unverified") → SPDX-ish or undefined. */
+function cleanLicenseHint(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  const v = raw.replace(/\s*\(likely\)/i, '').replace(/-family$/i, '').replace(/-licensed$/i, '').trim();
+  if (!v || /^(unverified|unknown|n\/?a|tbd|none)$/i.test(v)) return undefined;
+  return v;
 }
 
 interface BuiltEntry {
@@ -95,11 +172,65 @@ function normalizeSpdx(raw: string | undefined): string | undefined {
 }
 
 function loadRows(): SeedRow[] {
-  const csv = 'data/aos-dependency-audit.csv';
-  if (flag('source') !== 'seed' && existsSync(csv)) {
-    return parseAuditCsv(readFileSync(csv, 'utf8'));
+  if (flag('source') === 'seed') {
+    return JSON.parse(readFileSync('data/seed-catalog.json', 'utf8')) as SeedRow[];
   }
-  return JSON.parse(readFileSync('data/seed-catalog.json', 'utf8')) as SeedRow[];
+  const rows: SeedRow[] = [];
+  const onlyAgentic = flag('source') === 'agentic';
+  const onlyAos = flag('source') === 'aos';
+
+  const csv = 'data/aos-dependency-audit.csv';
+  if (!onlyAgentic && existsSync(csv)) rows.push(...parseAuditCsv(readFileSync(csv, 'utf8')));
+  if (!onlyAos) rows.push(...loadAgentic());
+
+  if (rows.length === 0) rows.push(...(JSON.parse(readFileSync('data/seed-catalog.json', 'utf8')) as SeedRow[]));
+  return rows;
+}
+
+interface AgenticTool {
+  name: string;
+  category_label?: string;
+  subcategory?: string;
+  language?: string;
+  license_hint?: string;
+  backer?: string;
+  source_url?: string;
+  description?: string;
+}
+
+function loadAgentic(): SeedRow[] {
+  const file = 'data/agentic-tools.json';
+  if (!existsSync(file)) return [];
+  const tools = JSON.parse(readFileSync(file, 'utf8')) as AgenticTool[];
+  return tools.map((t) => {
+    const detail = [t.category_label, t.subcategory].filter(Boolean).join(' / ');
+    return {
+      name: t.name,
+      ecosystem: normalizeEcosystem(t.language),
+      entry_type: 'tool',
+      category: 'AI & Agents',
+      what_it_does: t.description || `${t.name}${detail ? ` — ${detail}` : ''}`,
+      protocols: inferProtocols(t.name, `AI & Agents ${detail}`, t.description),
+      pie_anchor: '§4 Cooking → Recipes',
+      source_url: t.source_url || undefined,
+      license_hint: cleanLicenseHint(t.license_hint),
+    };
+  });
+}
+
+function parseReposUsing(raw: string | undefined): number | undefined {
+  if (!raw) return undefined;
+  const n = Math.round(Number.parseFloat(raw));
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
+}
+
+function parseUsedIn(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter((s) => s && s !== '...' && s !== '…')
+    .slice(0, 20);
 }
 
 /** Map human-readable ecosystem labels from the spreadsheet to our codes. */
@@ -121,19 +252,26 @@ function normalizeEcosystem(raw: string | undefined): Ecosystem {
   return 'other';
 }
 
-/** Minimal CSV parse of the AOS "ALL DEPENDENCIES" export. */
+/** CSV parse of the AOS "ALL DEPENDENCIES" export (Dependency, Ecosystem,
+ *  Category, Repos Using, What It Does, Used In). */
 function parseAuditCsv(text: string): SeedRow[] {
   const records = parseCsvRecords(text);
   const rows: SeedRow[] = [];
   for (const cols of records.slice(1)) {
-    const [name, ecosystem, category, , whatItDoes] = cols;
+    const [name, ecosystem, category, reposUsing, whatItDoes, usedIn] = cols;
     if (!name || !name.trim()) continue;
+    const cat = category?.trim() || 'Misc & Everything Else';
+    const meta = categoryMeta(cat);
     rows.push({
       name: name.trim(),
       ecosystem: normalizeEcosystem(ecosystem),
       entry_type: 'library',
-      category: category?.trim() || 'Misc & Everything Else',
+      category: cat,
       what_it_does: whatItDoes?.trim(),
+      aos_repos_using: parseReposUsing(reposUsing),
+      aos_repos_list: parseUsedIn(usedIn),
+      protocols: inferProtocols(name, cat, whatItDoes),
+      pie_anchor: meta.pie_anchor,
     });
   }
   return rows;
@@ -204,13 +342,27 @@ function badge(kind: string, value: string): string {
 async function buildEntry(row: SeedRow, used: Set<string>, spdxIds: Set<string>): Promise<BuiltEntry> {
   const slug = uniqueSlug(row.name, row.ecosystem, used);
 
-  // Policy screen first — an excluded dependency never gets an entry.
+  // Agentic rows carry a repo URL directly; AOS rows resolve via the registry.
+  const reg: RegistryInfo = row.source_url
+    ? { repoUrl: row.source_url, license: row.license_hint }
+    : await fetchRegistry(row.name, row.ecosystem);
+  const gh = parseGitHubRepo(reg.repoUrl);
+
+  // Ownership screen — strongest signal when we have the repo URL: a repo owned
+  // by an excluded org is blocked regardless of its package name.
+  if (gh) {
+    const ownerHit = matchGitHubOwner(gh.owner, orgs);
+    if (ownerHit) {
+      console.warn(`  ✗ ${slug}: blocked — repo owner "${gh.owner}" → ${ownerHit.org_key}`);
+      return { slug, name: row.name, ecosystem: row.ecosystem, verification_status: 'blocked' };
+    }
+  }
+  // Name/coordinate screen (catches registry packages owned by excluded orgs).
   if (matchDependency({ name: row.name, ecosystem: row.ecosystem, source_file: 'seed' }, orgs).length > 0) {
+    console.warn(`  ✗ ${slug}: blocked — package name matches excluded org`);
     return { slug, name: row.name, ecosystem: row.ecosystem, verification_status: 'blocked' };
   }
 
-  const reg = await fetchRegistry(row.name, row.ecosystem);
-  const gh = parseGitHubRepo(reg.repoUrl);
   const meta = gh ? await fetchGitHubMeta(gh.owner, gh.repo) : null;
 
   // A catalog entry needs at least one primary source URL (the schema requires
@@ -223,7 +375,7 @@ async function buildEntry(row: SeedRow, used: Set<string>, spdxIds: Set<string>)
 
   const spdxRaw = meta?.spdx_id ?? normalizeSpdx(reg.license);
   const spdx = spdxRaw;
-  const spdxValid = Boolean(spdxRaw && spdxIds.has(spdxRaw));
+  const spdxValid = isValidSpdx(spdxRaw, spdxIds);
 
   const repo = gh ? `${gh.owner}/${gh.repo}` : undefined;
   // A license is "read at a commit" only when GitHub confirmed both the LICENSE
@@ -261,7 +413,8 @@ async function buildEntry(row: SeedRow, used: Set<string>, spdxIds: Set<string>)
     license_source_commit_sha: sha,
     maintenance_status: status,
     last_release_at: reg.publishedAt,
-    aos_repos_using: 0,
+    aos_repos_using: row.aos_repos_using ?? 0,
+    aos_repos_list: row.aos_repos_list ?? [],
     pie_anchor: row.pie_anchor,
     provider_agnostic: false,
     verification_status,
@@ -310,10 +463,14 @@ dependency owned by Meta, OpenAI, or xAI at the direct level. See
   return { slug, name: row.name, ecosystem: row.ecosystem, license_spdx: spdx, verification_status };
 }
 
+/** Hand-authored catalog files the generator must never overwrite. */
+const PROTECTED_SLUGS = ['index', 'shakespeare'];
+
 async function main(): Promise<void> {
   const spdxIds = await loadSpdxIds();
   const rows = loadRows().slice(0, LIMIT);
-  const used = new Set<string>();
+  // Reserve protected slugs so uniqueSlug never reuses them for a generated entry.
+  const used = new Set<string>(PROTECTED_SLUGS);
   const built: BuiltEntry[] = [];
 
   console.log(`Building ${rows.length} catalog entries into ${OUT_DIR} …\n`);

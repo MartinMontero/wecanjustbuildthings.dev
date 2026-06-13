@@ -65,17 +65,27 @@ Requires **Node ≥ 22.12** (see `.nvmrc`) and, for the data pipeline, `uv`
 
 ### Generate catalog entries
 
-The catalog is generated from primary sources (license verified at a commit via
-npm `gitHead` or the GitHub/GitLab license commit):
+The catalog is generated from two primary sources, with each license verified at
+a commit (via npm `gitHead` or the GitHub/GitLab license commit) and SPDX-checked:
+
+1. **The And Other Stuff dependency audit** (`data/aos-dependency-audit.csv`,
+   ~1,161 rows) — extracted from the audit spreadsheet with
+   `uv run --with openpyxl python scripts/extract_audit.py <audit.xlsx>`.
+2. **A curated agentic-AI tools list** (`data/agentic-tools.json`, ~156 tools) —
+   extracted with `scripts/extract_agentic.py <agentic.xlsx>`. Each is screened by
+   **repository owner** against the policy, so OpenAI/Meta/xAI-owned tools are
+   dropped automatically.
 
 ```sh
-npm run data:fetch              # from data/seed-catalog.json (or the AOS CSV)
+npm run data:fetch                 # both sources (or the seed if neither present)
+npm run data:fetch -- --source aos      # only the AOS audit
+npm run data:fetch -- --source agentic  # only the agentic list
 ```
 
-To scale to the full AOS dependency audit, drop `data/aos-dependency-audit.csv`
-(produced by `scripts/extract_audit.py` from the audit spreadsheet) into `data/`
-and re-run `npm run data:fetch`. Set `GITHUB_TOKEN` to raise rate limits and pin
-licenses for crates/PyPI/Go entries.
+Set `GITHUB_TOKEN` to raise rate limits and upgrade entries from `under_review`
+to a verified LICENSE-file read (crates/PyPI/Go need it for the commit pin). The
+generator is incremental and idempotent: re-running overwrites by slug and never
+touches hand-authored entries (`shakespeare`, the catalog overview).
 
 ## How it stays current
 
@@ -83,6 +93,9 @@ licenses for crates/PyPI/Go entries.
   signals) and reclassifies maintenance status; opens an issue on drift.
 - **Every PR (`verify.yml`)** — schema validation, the engine's own test suite,
   the three layers, a build, and a dead-link check.
+- **Every PR (`quality.yml`)** — an axe-core accessibility gate (zero serious/
+  critical WCAG 2.1 A/AA violations) and Lighthouse CI budgets (performance ≥ 90,
+  accessibility ≥ 95, LCP ≤ 2.5 s, CLS ≤ 0.1) on canonical pages.
 - **Twice a year** — a full re-verification pass. See
   [docs: About & maintenance](https://wecanjustbuildthings.dev/about/).
 
@@ -109,11 +122,12 @@ the CMS at `/admin/`, or a PR. See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ```
 enforcement/   three-layer engine, policy YAML, parsers, tests
-scripts/       catalog generator, license/maintenance watchers, registry libs
+scripts/       catalog generator, license/maintenance watchers, a11y gate, registry libs
 skills/        Claude Code skills   ·   goose-recipes/ Goose equivalents
 templates/     Spec Kit archetypes
 src/           Astro + Starlight site (content, schema, components)
-data/          seed catalog, SPDX list, (optional) AOS audit CSV
+data/          seed + agentic lists, SPDX list, (optional) AOS audit CSV
+lighthouserc.json  Lighthouse CI budgets   ·   lychee.toml  dead-link config
 ```
 
 ## Acknowledgements

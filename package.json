@@ -24,6 +24,8 @@
     "enforce:layer2": "tsx enforcement/cli.ts layer2 --catalog src/content/docs/catalog",
     "enforce:layer3": "tsx enforcement/cli.ts layer3 --catalog src/content/docs/catalog --recipes src/content/docs/recipes",
     "test": "node --import tsx --test \"enforcement/tests/**/*.test.ts\"",
+    "a11y": "node scripts/a11y-check.mjs",
+    "lhci": "lhci autorun",
     "typecheck:tools": "tsc -p enforcement/tsconfig.json",
     "verify:all": "npm run check && npm run typecheck:tools && npm run test && npm run enforce && npm run build"
   },
@@ -35,10 +37,13 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@axe-core/playwright": "^4.11.3",
     "@iarna/toml": "^2.2.5",
+    "@lhci/cli": "^0.15.1",
     "@types/node": "^22.10.0",
     "@yarnpkg/lockfile": "^1.1.0",
     "@yarnpkg/parsers": "^3.0.3",
+    "playwright": "^1.60.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
     "yaml": "^2.9.0"

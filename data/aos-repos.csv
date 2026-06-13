@@ -1,0 +1,107 @@
+Repo,Org,Language,Dep Count,Top 25 Dependencies
+ditto,soapbox-pub,TypeScript,155.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, @eslint/js, eslint-plugin-react-hooks, globals, vitest, class-variance-authority, react-router-dom, @tailwindcss/typography, typescript-eslint, @nostrify/nostrify, @tanstack/react-query"
+soapbox,soapbox-pub,TypeScript,145.0,"typescript, tailwindcss, nostr-tools, eslint, react, vite, @types/react, react-dom, @types/react-dom, autoprefixer, clsx, postcss, eslint-plugin-react-hooks, vitest, @tailwindcss/typography, react-router-dom, @nostrify/nostrify, @tanstack/react-query, zod, @vitejs/plugin-react-swc, @testing-library/jest-dom, @testing-library/react, jsdom, @typescript-eslint/eslint-plugin, @typescript-eslint/parser"
+shakespeare,soapbox-pub,TypeScript,126.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, @eslint/js, eslint-plugin-react-hooks, globals, vitest, class-variance-authority, react-router-dom, @tailwindcss/typography, typescript-eslint, @nostrify/nostrify, @tanstack/react-query"
+universes-legacy,andotherstuff,TypeScript,93.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, @eslint/js, eslint-plugin-react-hooks, globals, vitest, class-variance-authority, react-router-dom, @tailwindcss/typography, typescript-eslint, @nostrify/nostrify, @tanstack/react-query"
+orchard,cashubtc,TypeScript,93.0,"typescript, @types/node, eslint, typescript-eslint, prettier, dotenv, ts-node, rxjs, eslint-config-prettier, marked, node-fetch, @types/jest, jest, ts-jest, bcrypt, chart.js, compression, graphql, pg, @types/compression, @types/express, @types/node-fetch, @types/supertest, eslint-plugin-prettier, nodemon"
+cashu-feni,cashubtc,Go,87.0,"github.com/btcsuite/btcd, github.com/btcsuite/btcd/btcec/v2, github.com/btcsuite/btcd/btcutil, github.com/btcsuite/btcd/chaincfg/chainhash, github.com/c-bata/go-prompt, github.com/caarlos0/env/v6, github.com/decred/dcrd/dcrec/secp256k1/v4, github.com/fatih/structs, github.com/google/uuid, github.com/gorilla/mux, github.com/imroc/req, github.com/jinzhu/configor, github.com/joho/godotenv, github.com/lightningnetwork/lnd, github.com/nbd-wtf/ln-decodepay, github.com/samber/lo, github.com/sirupsen/logrus, github.com/spf13/cobra, github.com/spf13/pflag, github.com/swaggo/http-swagger, github.com/swaggo/swag, go.elastic.co/ecslogrus, golang.org/x/exp, gopkg.in/natefinch/lumberjack.v2, gorm.io/driver/sqlite"
+nostr-compass-podcast,andotherstuff,TypeScript,86.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, @eslint/js, eslint-plugin-react-hooks, globals, vitest, class-variance-authority, react-router-dom, @tailwindcss/typography, typescript-eslint, @nostrify/nostrify, @tanstack/react-query"
+ai-sovereignty,andotherstuff,TypeScript,85.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, @eslint/js, eslint-plugin-react-hooks, globals, vitest, class-variance-authority, react-router-dom, @tailwindcss/typography, typescript-eslint, @nostrify/nostrify, @tanstack/react-query"
+whitenoise-podcast,marmot-protocol,TypeScript,84.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, @eslint/js, eslint-plugin-react-hooks, globals, vitest, class-variance-authority, react-router-dom, @tailwindcss/typography, typescript-eslint, @nostrify/nostrify, @tanstack/react-query"
+aos-convergence,andotherstuff,TypeScript,82.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, @eslint/js, eslint-plugin-react-hooks, globals, vitest, class-variance-authority, react-router-dom, @tailwindcss/typography, typescript-eslint, @nostrify/nostrify, @tanstack/react-query"
+eNuts,cashubtc,TypeScript,82.0,"typescript, @types/node, nostr-tools, eslint, react, @types/react, @eslint/js, eslint-plugin-react-hooks, globals, prettier, @cashu/cashu-ts, bech32, @typescript-eslint/eslint-plugin, @typescript-eslint/parser, dotenv, eslint-plugin-import, ts-node, eslint-plugin-promise, @types/jest, jest, ts-jest, i18next, react-i18next, @eslint/eslintrc, eslint-plugin-jest"
+chorus,andotherstuff,TypeScript,80.0,"typescript, @types/node, tailwindcss, eslint, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, @eslint/js, eslint-plugin-react-hooks, globals, class-variance-authority, react-router-dom, @tailwindcss/typography, typescript-eslint, @nostrify/nostrify, @tanstack/react-query, tailwindcss-animate, zod"
+rebased,soapbox-pub,Elixir,77.0,"prometheus, phoenix, tzdata, plug_cowboy, phoenix_pubsub, phoenix_ecto, ecto_enum, ecto_sql, postgrex, phoenix_html, phoenix_live_reload, phoenix_live_view, phoenix_live_dashboard, telemetry_metrics, telemetry_poller, oban, gettext, bcrypt_elixir, trailing_format_plug, fast_sanitize, html_entities, calendar, cachex, csv, poison"
+cashu-wallet,andotherstuff,TypeScript,75.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, @eslint/js, eslint-plugin-react-hooks, globals, class-variance-authority, react-router-dom, @tailwindcss/typography, typescript-eslint, @nostrify/nostrify, @tanstack/react-query, tailwindcss-animate"
+cdk,cashubtc,Rust,71.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, tokio, anyhow, clap, rand, nostr-sdk, futures, prost, async-trait, axum, cashu, uuid, prometheus, jsonwebtoken, config, tower, tower-http, tokio-tungstenite, tracing-appender, reqwest, regex"
+nutshell,cashubtc,Python,66.0,"bech32, secp256k1, python, anyio, bitstring, certifi, cffi, click, colorama, ecdsa, environs, fastapi, h11, idna, importlib-metadata, loguru, marshmallow, packaging, pycparser, pydantic, python-dotenv, setuptools, six, sniffio, sqlalchemy"
+cashu-ui,cashubtc,Python,58.0,"bech32, cashu, secp256k1, python, asyncio, anyio, bitstring, certifi, cffi, click, colorama, ecdsa, environs, fastapi, h11, idna, importlib-metadata, loguru, marshmallow, packaging, pycparser, pydantic, python-dotenv, setuptools, six"
+cashu.me,cashubtc,TypeScript,57.0,"typescript, @types/node, nostr-tools, eslint, autoprefixer, vitest, prettier, date-fns, qrcode, @cashu/cashu-ts, bech32, @typescript-eslint/eslint-plugin, @typescript-eslint/parser, eslint-config-prettier, @capacitor/core, light-bolt11-decoder, @capacitor/android, @capacitor/cli, @capacitor/haptics, @gandlaf21/bc-ur, vue, @capacitor/ios, @types/uuid, @capacitor/clipboard, @chenfengyuan/vue-qrcode"
+marmots-web-chat,marmot-protocol,TypeScript,53.0,"typescript, tailwindcss, @types/node, react, vite, react-dom, @types/react, @types/react-dom, clsx, lucide-react, tailwind-merge, globals, class-variance-authority, prettier, recharts, vaul, @noble/hashes, idb, applesauce-common, applesauce-core, rxjs, @tailwindcss/vite, @vitejs/plugin-react, applesauce-accounts, applesauce-loaders"
+whitenoise,marmot-protocol,Dart,48.0,"flutter, flutter_rust_bridge, freezed_annotation, mime, flutter_test, plugin_platform_interface, flutter_lints, freezed, build_runner, flutter_localizations, intl, rust_lib_whitenoise, logging, connectivity_plus, cupertino_icons, flutter_screenutil, collection, gap, emoji_picker_flutter, flutter_svg, go_router, flutter_riverpod, flutter_secure_storage, flutter_hooks, hooks_riverpod"
+nostr-rs-relay,andotherstuff,Rust,47.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, tokio, hex, qrcode, anyhow, bech32, clap, rand, chrono, prost, futures, nostr, uuid, secp256k1, rusqlite, async-trait, prometheus, log, tracing-appender, tokio-tungstenite, config"
+cashu-redeem,cashubtc,TypeScript,44.0,"typescript, @types/node, tailwindcss, eslint, react, react-dom, @types/react, @types/react-dom, clsx, lucide-react, postcss, @eslint/js, tailwind-merge, class-variance-authority, prettier, tailwindcss-animate, @radix-ui/react-checkbox, @radix-ui/react-label, @cashu/cashu-ts, bech32, @typescript-eslint/eslint-plugin, @typescript-eslint/parser, @webbtc/webln-types, eslint-plugin-import, ts-node"
+docs.cashu.space,cashubtc,JavaScript,44.0,"tailwindcss, eslint, react, react-dom, autoprefixer, clsx, @tailwindcss/typography, prettier, dotenv, zustand, express, framer-motion, next, node-fetch, remark-gfm, eslint-config-next, cors, @flydotio/dockerfile, @algolia/autocomplete-core, @algolia/autocomplete-preset-algolia, @headlessui/react, @mdx-js/loader, @mdx-js/react, @next/mdx, @sindresorhus/slugify"
+cashu-ts,cashubtc,TypeScript,42.0,"typescript, @types/node, eslint, vite, @eslint/js, globals, vitest, typescript-eslint, prettier, @typescript-eslint/eslint-plugin, @noble/hashes, @typescript-eslint/parser, eslint-plugin-import, ts-node, eslint-config-prettier, eslint-plugin-promise, tsx, ws, @noble/curves, @types/ws, eslint-plugin-n, husky, node-fetch, @scure/base, @scure/bip32"
+mdk,marmot-protocol,Rust,36.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, hex, tokio, tempfile, openmls_traits, nostr, rusqlite, openmls, openmls_basic_credential, openmls_rust_crypto, sha2, image, blurhash, mdk-sqlite-storage, mdk-storage-traits, mdk-core, tls_codec, base64, chacha20poly1305, hkdf, getrandom"
+whitenoise-rs,marmot-protocol,Rust,36.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, hex, tokio, tempfile, chrono, clap, nostr-sdk, rand, futures, async-trait, image, reqwest, sha2, tracing-appender, indicatif, keyring-core, mdk-core, mdk-sqlite-storage, mdk-storage-traits, rustls, sqlx"
+nostr-doctor,marmot-protocol,TypeScript,33.0,"typescript, tailwindcss, @types/node, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, lucide-react, @eslint/js, eslint-plugin-react-hooks, globals, typescript-eslint, eslint-plugin-react-refresh, prettier, @tailwindcss/vite, applesauce-common, applesauce-core, rxjs, @vitejs/plugin-react, applesauce-accounts, applesauce-loaders, applesauce-relay"
+npubcash-website,cashubtc,TypeScript,32.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, vite, react-dom, @types/react, @types/react-dom, autoprefixer, postcss, eslint-plugin-react-hooks, react-router-dom, eslint-plugin-react-refresh, @cashu/cashu-ts, @typescript-eslint/eslint-plugin, @noble/hashes, @typescript-eslint/parser, react-qr-code, @vitejs/plugin-react, framer-motion, light-bolt11-decoder, @gandlaf21/bc-ur, localforage"
+botburrow,marmot-protocol,Ruby,30.0,"bcrypt, debug, rails, propshaft, sqlite3, puma, importmap-rails, turbo-rails, stimulus-rails, jbuilder, rqrcode, fugit, tailwindcss-rails, tzinfo-data, solid_cache, solid_queue, solid_cable, bootsnap, kamal, thruster, image_processing, bundler-audit, brakeman, rubocop-rails-omakase, web-console"
+transponder,marmot-protocol,Rust,29.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, tokio, hex, anyhow, tempfile, nostr-sdk, clap, secp256k1, axum, prometheus, sha2, reqwest, jsonwebtoken, config, toml, chacha20poly1305, hkdf, zeroize, base64, lru, tokio-test"
+npubcash-server,cashubtc,TypeScript,28.0,"typescript, @types/node, nostr-tools, vitest, @cashu/cashu-ts, dotenv, ws, express, jsonwebtoken, light-bolt11-decoder, compression, cors, graphql, pg, @types/compression, @types/express, @types/supertest, @vitest/coverage-v8, esbuild, nodemon, supertest, graphql-request, node-pg-migrate, @jest/globals, @types/cors"
+pensieve,andotherstuff,Rust,27.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, tokio, hex, anyhow, chrono, nostr-sdk, prost, nostr, axum, rusqlite, tower, tower-http, metrics, metrics-exporter-prometheus, clickhouse, parking_lot, notepack, rocksdb, aws-config, aws-sdk-s3, crossbeam-channel"
+funnel,andotherstuff,Rust,24.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, tokio, anyhow, chrono, nostr, axum, tower, tower-http, metrics, metrics-exporter-prometheus, clickhouse, tokio-test, wiremock, axum-test, mockall, testcontainers, testcontainers-modules, funnel-proto, funnel-clickhouse, funnel-observability"
+whitenoise-web,marmot-protocol,Svelte,24.0,"typescript, tailwindcss, nostr-tools, vite, vitest, applesauce-common, applesauce-core, rxjs, ws, @tailwindcss/vite, applesauce-loaders, applesauce-relay, marked, @types/ws, @biomejs/biome, @sveltejs/adapter-auto, @sveltejs/adapter-vercel, @sveltejs/kit, @sveltejs/vite-plugin-svelte, svelte, svelte-check, carbon-icons-svelte, sanitize-html, @types/sanitize-html"
+heynow,andotherstuff,TypeScript,21.0,"typescript, tailwindcss, nostr-tools, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, react-router-dom, @nostrify/nostrify, @tanstack/react-query, @vitejs/plugin-react-swc, @nostrify/react, date-fns, audio-recorder-polyfill, @vitejs/plugin-basic-ssl"
+marmot-ts,marmot-protocol,TypeScript,19.0,"typescript, @types/node, vitest, prettier, @noble/hashes, applesauce-common, applesauce-core, @noble/curves, @changesets/cli, applesauce-accounts, husky, @scure/base, debug, ts-mls, @hpke/core, @noble/ciphers, eventemitter3, @types/debug, rimraf"
+get-nostr,andotherstuff,TypeScript,18.0,"typescript, tailwindcss, nostr-tools, react, vite, react-dom, @types/react, @types/react-dom, clsx, autoprefixer, lucide-react, postcss, tailwind-merge, class-variance-authority, tailwindcss-animate, @vitejs/plugin-react-swc, @radix-ui/react-collapsible, @radix-ui/react-slot"
+proton-beam,marmot-protocol,Rust,18.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, tokio, anyhow, tempfile, nostr-sdk, clap, chrono, prost, rusqlite, indicatif, toml, regex, flate2, prost-types"
+groups_relay,andotherstuff,Rust,17.0,"serde, serde_json, tracing, tracing-subscriber, tokio, anyhow, clap, nostr-sdk, rand, futures, nostr, async-trait, metrics, metrics-exporter-prometheus, tokio-tungstenite, futures-util, tokio-util"
+cashu-crypto-ts,cashubtc,TypeScript,17.0,"typescript, eslint, prettier, @typescript-eslint/eslint-plugin, @noble/hashes, buffer, eslint-plugin-import, ts-node, eslint-plugin-promise, @noble/curves, @types/jest, eslint-plugin-n, jest, ts-jest, @scure/bip32, ts-jest-resolver, typedoc"
+binostr,andotherstuff,Rust,16.0,"serde, serde_json, thiserror, hex, rand, prost, toml, ciborium, flate2, notepack, criterion, serde_bytes, capnp, zstd, prost-build, capnpc"
+nut-november,cashubtc,TypeScript,16.0,"typescript, @types/node, tailwindcss, nostr-tools, eslint, react, react-dom, @types/react, @types/react-dom, react-qr-code, next, eslint-config-next, @flydotio/dockerfile, matter-js, @tailwindcss/postcss, @types/matter-js"
+nostr-openmls,marmot-protocol,Rust,16.0,"serde, thiserror, tracing, hex, tempfile, rand, openmls_traits, openmls, openmls_basic_credential, openmls_rust_crypto, tls_codec, openmls-sled-storage, bincode, p256, ed25519-dalek, libc"
+wn-tui,marmot-protocol,Rust,15.0,"serde, serde_json, tokio, anyhow, bech32, chrono, futures, image, dirs, tokio-stream, ratatui, crossterm, unicode-width, which, ratatui-image"
+nostrify,soapbox-pub,TypeScript,14.0,"typescript, @types/node, nostr-tools, zod, @changesets/cli, esbuild, mock-socket, websocket-ts, @types/sinon, glob, lerna, lru-cache, sinon, turbo"
+nostr-stats,andotherstuff,Svelte,13.0,"typescript, tailwindcss, vite, @tailwindcss/typography, @tailwindcss/vite, chart.js, @biomejs/biome, @sveltejs/adapter-auto, @sveltejs/adapter-vercel, @sveltejs/kit, @sveltejs/vite-plugin-svelte, svelte, svelte-check"
+cdk-flutter,cashubtc,Dart,12.0,"flutter, flutter_rust_bridge, freezed_annotation, plugin_platform_interface, flutter_test, flutter_lints, build_runner, freezed, provider, ffi, ffigen, integration_test"
+openmls-redb-storage,marmot-protocol,Rust,10.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, hex, tempfile, openmls_traits, log, redb"
+openmls-sled-storage,marmot-protocol,Rust,10.0,"serde, serde_json, thiserror, tracing, tracing-subscriber, hex, tempfile, openmls_traits, log, sled"
+openmls-lmdb-storage,marmot-protocol,Rust,8.0,"serde, serde_json, thiserror, hex, tempfile, openmls_traits, log, heed"
+coco,cashubtc,TypeScript,6.0,"typescript, prettier, @changesets/cli, @types/bun, tsdown, vitepress"
+marmot-web,marmot-protocol,—,6.0,"vue, @vuepress/bundler-vite, @vuepress/helper, @vuepress/theme-default, sass-embedded, vuepress"
+keycast,andotherstuff,HTML,4.0,"nostr-tools, @types/bun, concurrently, playwright"
+mdk-kotlin,marmot-protocol,Kotlin,4.0,"net.java.dev.jna:jna, androidx.annotation:annotation, org.jetbrains.kotlinx:kotlinx-coroutines-core, junit:junit"
+propose,marmot-protocol,Rust,3.0,"openmls, openmls_rust_crypto, openmls_basic_credential"
+xcashu,cashubtc,Python,2.0,"cashu, python"
+parres.org,marmot-protocol,HTML,2.0,"tailwindcss, @tailwindcss/cli"
+website,andotherstuff,HTML,1.0,vite
+mdk-python-example,marmot-protocol,Python,1.0,nostr_sdk
+aos-hubs,andotherstuff,—,0.0,
+approve72,andotherstuff,TypeScript,0.0,
+cashu-faucet-worker,andotherstuff,TypeScript,0.0,
+garland,andotherstuff,Kotlin,0.0,
+garland-protocol,andotherstuff,—,0.0,
+hosted_nostr_auth_server,andotherstuff,Rust,0.0,
+nips,andotherstuff,—,0.0,
+nostr-compass,andotherstuff,Markdown,0.0,
+otherstuff-relay,andotherstuff,TypeScript,0.0,
+universes,andotherstuff,—,0.0,
+BTCNutServer,cashubtc,C#,0.0,
+Numo,cashubtc,Kotlin,0.0,
+awesome-cashu,cashubtc,—,0.0,
+cashu-skill,cashubtc,JavaScript,0.0,
+cashurpc,cashubtc,—,0.0,
+cdk-dart,cashubtc,—,0.0,
+cdk-go,cashubtc,Go,0.0,
+cdk-kotlin,cashubtc,Kotlin,0.0,
+cdk-python,cashubtc,Python,0.0,
+cdk-swift,cashubtc,Swift,0.0,
+dev-calls,cashubtc,—,0.0,
+lnbits-cashu,cashubtc,Python,0.0,
+nuts,cashubtc,—,0.0,
+.github,marmot-protocol,—,0.0,
+agent-config,marmot-protocol,TypeScript,0.0,
+dr.marmot,marmot-protocol,JavaScript,0.0,
+ipf.dev,marmot-protocol,HTML,0.0,
+marmot,marmot-protocol,—,0.0,
+mdk-kotlin-example,marmot-protocol,Kotlin,0.0,
+mdk-python,marmot-protocol,Python,0.0,
+mdk-ruby,marmot-protocol,Ruby,0.0,
+mdk-ruby-example,marmot-protocol,Ruby,0.0,
+mdk-swift,marmot-protocol,Swift,0.0,
+mdk-web,marmot-protocol,—,0.0,
+media-assets,marmot-protocol,Cython,0.0,
+mls-ts,marmot-protocol,TypeScript,0.0,
+whitenoise-archive,marmot-protocol,Dart,0.0,
+whitenoise-meta,marmot-protocol,—,0.0,
+docs-legacy,soapbox-pub,Markdown,0.0,
+mkstack,soapbox-pub,TypeScript,0.0,
+mkstack-nsp,soapbox-pub,TypeScript,0.0,
+mostr-uptime,soapbox-pub,Markdown,0.0,
+nostr-skills,soapbox-pub,—,0.0,
+openclaw-skills,soapbox-pub,—,0.0,
+seeded-rsa,soapbox-pub,TypeScript,0.0,
+soapbox-be,soapbox-pub,Elixir,0.0,
+soapbox.pub,soapbox-pub,TypeScript,0.0,

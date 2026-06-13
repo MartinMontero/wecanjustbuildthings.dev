@@ -1,41 +1,68 @@
 ---
 title: Catalog
-description: Every verified tool in the catalog — license-checked at a commit and screened against the exclusion policy.
+description: Every verified tool in the catalog — license-checked at a commit and screened against the exclusion policy. Browse by protocol or category, or search.
 sidebar:
   order: 0
-  label: Overview
+  label: Browse the catalog
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
 import CatalogList from '../../../components/CatalogList.astro';
 
-Every entry here is **license-checked at a specific commit** and screened against
-the [exclusion policy](/policies/). Each shows its verification and maintenance
-status so you can decide with your eyes open.
+Every entry is **license-checked at a commit** and screened against the
+[exclusion policy](/policies/) — direct, transitive, and provider-string. With
+over a thousand entries, **search (top of the page) is the fastest way to find a
+specific tool.** The sections below show the most-used entries per area.
 
 <Aside type="note" title="Reading the badges">
 **verification** — `verified` (license pinned to a commit), `under_review`
-(pending a maintainer/token pass), or `blocked`. **status** — `active` (< 90d),
-`minimal` (< 12mo), `dormant` (< 36mo), `abandoned`.
+(declared but not yet machine-confirmed at a commit — often needs a token pass),
+or `blocked`. **status** — `active` (&lt;90d), `minimal` (&lt;12mo), `dormant`
+(&lt;36mo), `abandoned`. Lists are sorted by how many And Other Stuff repos use
+the tool.
 </Aside>
 
-## Nostr
+## By protocol
 
-<CatalogList protocol="nostr" />
+### Nostr & Lightning
+<CatalogList protocol="nostr" limit={24} />
 
-## AT Protocol
+### AT Protocol
+<CatalogList protocol="atproto" limit={24} />
 
-<CatalogList protocol="atproto" />
+## By area (top entries — search for the full set)
 
-## Build environment, tooling & libraries
+### AI & Agents
+A curated set of agentic-AI frameworks and tools (orchestration, memory, eval),
+each screened by repository owner against the policy.
+<CatalogList category="AI & Agents" limit={30} />
 
-<CatalogList protocol="general" />
+### Frameworks & Libraries
+<CatalogList category="Frameworks & Libraries" limit={24} />
 
-## Everything
+### Dev Environment & Tooling
+<CatalogList category="Dev Environment & Tooling" limit={24} />
 
-<CatalogList />
+### Security & Privacy
+<CatalogList category="Security & Privacy" limit={24} />
+
+### Testing & QA
+<CatalogList category="Testing & QA" limit={18} />
+
+### Hosting, Infra & Deploy
+<CatalogList category="Hosting Infra & Deploy" limit={18} />
+
+### Databases & Storage
+<CatalogList category="Databases & Storage" limit={18} />
+
+### Monitoring & Observability
+<CatalogList category="Monitoring & Observability" limit={18} />
+
+### Auth, Identity & Keys
+<CatalogList category="Auth Identity & Keys" limit={18} />
 
 <Aside type="tip" title="Don't see a tool?">
-Propose it — CI verifies the license and screens it against the policy before it
-can merge. See [Add a tool](/contribute/).
+The catalog is generated from the And Other Stuff dependency audit and a curated
+agentic-AI list. Propose an addition — CI verifies the license and screens it
+against the policy before it can merge. See [Add a tool](/contribute/).
 </Aside>

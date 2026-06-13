@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadExcludedOrgs } from '../config.ts';
-import { matchDependency, isExcluded } from '../matcher.ts';
+import { matchDependency, isExcluded, matchGitHubOwner } from '../matcher.ts';
 import type { Ecosystem } from '../types.ts';
 
 const orgs = loadExcludedOrgs();
@@ -50,6 +50,15 @@ test('matcher does not flag clean packages', () => {
 test('npm scope match is distinct from unrelated scopes', () => {
   assert.equal(isExcluded(ref('@nostr-dev-kit/ndk', 'js'), orgs), false);
   assert.equal(isExcluded(ref('@openai/whatever', 'js'), orgs), true);
+});
+
+test('matchGitHubOwner screens excluded repo owners (used for the agentic list)', () => {
+  assert.equal(matchGitHubOwner('openai', orgs)?.org_key, 'openai');
+  assert.equal(matchGitHubOwner('OpenAI', orgs)?.org_key, 'openai'); // case-insensitive
+  assert.equal(matchGitHubOwner('facebookresearch', orgs)?.org_key, 'meta');
+  assert.equal(matchGitHubOwner('xai-org', orgs)?.org_key, 'xai');
+  assert.equal(matchGitHubOwner('langchain-ai', orgs), null);
+  assert.equal(matchGitHubOwner('microsoft', orgs), null); // not excluded
 });
 
 test('matching is case-insensitive (registries treat names case-insensitively)', () => {
