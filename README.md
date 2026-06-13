@@ -108,12 +108,26 @@ to **outlast its first maintainer**.
 
 ## Deployment
 
-Static site on **Cloudflare Pages** (`deploy.yml`). Set repository secrets
-`CLOUDFLARE_API_TOKEN` (Pages-Edit) and `CLOUDFLARE_ACCOUNT_ID`, create a Pages
-project named `wecanjustbuildthings` (build `npm run build`, output `dist`,
-`NODE_VERSION=22`), then push to `main`. Optional: set `PLAUSIBLE_DOMAIN` at build
-time for cookieless analytics (off by default — see
-[Privacy](https://wecanjustbuildthings.dev/privacy/)).
+Static site on **Cloudflare Pages**, deployed via the dashboard **Git
+integration** (Workers & Pages → Create → Pages → Connect to Git):
+
+- Production branch `main`, build command `npm run build`, output directory
+  `dist`, environment variable `NODE_VERSION=22`.
+- Add the custom domain under the project's **Custom domains** tab (the apex zone
+  must be on the same Cloudflare account). Add a www → apex redirect rule.
+- The build needs no secrets — catalog data is committed. Optionally set
+  `PLAUSIBLE_DOMAIN` for cookieless analytics (off by default — see
+  [Privacy](https://wecanjustbuildthings.dev/privacy/)) and `SITE_URL` to override
+  the origin for preview builds.
+
+Pushes to `main` auto-deploy; pull requests get preview URLs. CI (`verify.yml`,
+`quality.yml`, `license-watch.yml`) runs the checks and weekly maintenance — it
+does not deploy.
+
+> Prefer deploying from GitHub Actions instead of the dashboard? Use
+> `cloudflare/wrangler-action` with a `pages deploy dist --project-name=…` step
+> and the `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` secrets, and don't also
+> connect the dashboard Git integration (to avoid double deploys).
 
 ## Contributing
 
