@@ -1,17 +1,24 @@
 # We Can Just Build Things
 
-**A verified, values-enforced catalog and guided build flow for shipping Nostr,
-AT Protocol, and general open-source tools with AI agents.**
+**Liberation tech for builders: make the tools your community needs — production-grade,
+privacy-respecting freedom tech (Nostr, AT Protocol, and beyond) — with an AI agent
+doing the heavy lifting and safeguards that have your back.**
 
-> A harness gives you hands. This gives you judgment.
+> A harness gives the agent hands. This gives it judgment.
+
+It's built for the organizer, the nonprofit, the collective — people who know what
+their community needs and deserve to ship something professional-grade without
+first becoming developers, and without their work being quietly co-opted by
+surveillance infrastructure.
 
 Goose, Claude Code, and Aider are *harnesses* — they connect an AI model to your
-tools so it can execute. They don't know what you should build, which
+tools so it can execute, but they don't know what you should build, which
 dependencies are safe, or what license changed last week. **We Can Just Build
-Things is the layer above the harness:** a verified dependency catalog, an
-exclusion policy enforced by tooling, a guided decision flow, and reusable agent
-skills — so when an agent runs, it runs inside a frame of decisions that have
-already been made, verified, and documented.
+Things is the layer that gives the agent judgment:** a verified dependency
+catalog, values kept clean by tooling, a guided flow from idea to shipped, and
+reusable agent skills — so when an agent runs, it builds on decisions already
+made, verified, and documented, and what you ship is accountable to the people who
+depend on it.
 
 Live site: **https://wecanjustbuildthings.dev** · Built with Astro + Starlight ·
 License: **AGPL-3.0-or-later**

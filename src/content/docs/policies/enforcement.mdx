@@ -1,6 +1,6 @@
 ---
 title: How enforcement works
-description: The three-layer enforcement engine in plain language — direct dependencies, the transitive tree, and provider strings in source.
+description: How we keep our promise to the communities — the three-layer engine, in plain language, that you can run yourself.
 entry_type: policy
 sidebar:
   order: 2
@@ -9,10 +9,13 @@ sidebar:
 
 import { Aside, Steps } from '@astrojs/starlight/components';
 
-The [exclusion policy](/policies/) is only meaningful because a machine enforces
-it. The engine is a TypeScript CLI (`enforcement/cli.ts`) that runs in CI on
-every pull request and weekly against the whole catalog. It checks three
-independent layers — a thing can hide from one, but not all three.
+A promise you can't verify is just marketing. The
+[values we hold](/policies/) are only worth anything because a machine keeps them
+for us — automatically, in the open — so the people who depend on what you build
+never have to take anyone's word for it, including ours. The engine is a
+TypeScript CLI (`enforcement/cli.ts`) that runs in CI on every pull request and
+weekly against the whole catalog, checking three independent layers — something
+can hide from one, but not all three.
 
 <Aside type="tip" title="Run it yourself">
 ```sh

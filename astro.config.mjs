@@ -29,9 +29,9 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'We Can Just Build Things',
-      tagline: 'Verified open-source tools and a guided flow for building Nostr, AT Protocol, and freedom-tech with AI agents.',
+      tagline: 'Build the tools your community needs — freedom tech, made with an AI agent, grounded in a verified catalog you can trust.',
       description:
-        'A values-enforced catalog and guided build flow: every dependency license-checked at a commit and screened against a Meta/OpenAI/xAI exclusion policy, so anyone can ship production-grade, privacy-respecting tools with an AI agent harness like Goose or Claude Code.',
+        'Liberation tech for builders: a verified catalog of Nostr, AT Protocol, and freedom-tech tools, a guided flow from idea to shipped, and safeguards that keep what you build clean — so organizers, nonprofits, and collectives can ship production-grade, privacy-respecting software with an AI agent like Goose or Claude Code.',
       logo: { src: './src/assets/logo.svg', alt: 'We Can Just Build Things' },
       favicon: '/favicon.svg',
       head: [
