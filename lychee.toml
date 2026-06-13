@@ -1,0 +1,23 @@
+# Polite dead-link checker config (used by lycheeverse/lychee-action in CI).
+max_concurrency = 8
+max_retries = 3
+retry_wait_time = 10
+timeout = 30
+
+# 403/429 are common from GitHub raw and rate-limited hosts; lychee retries them.
+accept = [200, 206, 301, 302, 307, 308, 403, 429]
+
+exclude = [
+  "^mailto:",
+  "^tel:",
+  # SPA that returns 200 but renders content via JS:
+  "^https://shakespeare\\.diy",
+  # Issue/PR "new" template links resolve only when authenticated:
+  "github\\.com/.*/issues/new",
+  "github\\.com/.*/security/advisories/new",
+]
+
+exclude_path = ["node_modules", "dist", "data", ".astro", "reports"]
+
+cache = true
+cache_exclude_status = ["429", "500..=599"]

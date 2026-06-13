@@ -1,0 +1,16 @@
+{
+  "name": "nostr-web-client-archetype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Spec Kit archetype for a Nostr + AT Protocol web client with the exclusion policy baked in.",
+  "license": "AGPL-3.0-or-later",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@atproto/api": "^0.13.0",
+    "@noble/curves": "^1.0.0",
+    "nostr-tools": "^2.0.0"
+  }
+}

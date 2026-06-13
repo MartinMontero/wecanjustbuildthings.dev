@@ -1,0 +1,31 @@
+version: 1.0.0
+title: Catalog entry author
+description: >-
+  Author one accurate, policy-clean catalog entry for wecanjustbuildthings.dev,
+  verifying the license at a commit and running the three-layer enforcement
+  engine before committing.
+
+parameters:
+  - key: name
+    input_type: string
+    requirement: required
+    description: Dependency name (e.g. nostr-tools, @atproto/api)
+  - key: ecosystem
+    input_type: string
+    requirement: required
+    description: One of js, rust, py, go, elixir, dart, ruby, kotlin, other
+
+instructions: |
+  You author catalog entries. Read POLICIES.md and
+  enforcement/excluded-organizations.yaml FIRST. Never speculate about a license
+  or maintainer — read it from the primary source. If a primary source is
+  unreachable, mark the entry under_review and say why. Never invent a commit SHA.
+  Run `npm run enforce` before committing and never bypass a layer.
+
+prompt: |
+  Add a catalog entry for "{{ name }}" ({{ ecosystem }}).
+  1. Screen the name against the exclusion policy; if it's owned by an excluded
+     org, STOP and report.
+  2. Add it to data/seed-catalog.json and run: npm run data:fetch -- --source seed
+  3. Run: npm run check && npm run enforce
+  4. If both pass, commit one entry per commit. If not, fix or stop and ask.

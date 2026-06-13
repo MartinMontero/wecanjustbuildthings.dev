@@ -52,15 +52,16 @@ const orgs = loadExcludedOrgs();
 
 async function loadSpdxIds(): Promise<Set<string>> {
   const cacheFile = 'data/spdx-licenses.json';
-  let json: { licenses?: Array<{ licenseId: string }> } | null = null;
+  type SpdxList = { licenses?: Array<{ licenseId: string }> };
+  let json: SpdxList | null = null;
   if (existsSync(cacheFile)) {
-    json = JSON.parse(readFileSync(cacheFile, 'utf8'));
+    json = JSON.parse(readFileSync(cacheFile, 'utf8')) as SpdxList;
   } else {
     // spdx.org is WAF-blocked from many CI networks; the canonical list is also
     // mirrored in the SPDX license-list-data repo on GitHub.
     const res = await getCached('https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json');
     if (res.ok && res.json) {
-      json = res.json as typeof json;
+      json = res.json as SpdxList;
       mkdirSync('data', { recursive: true });
       writeFileSync(cacheFile, JSON.stringify(json, null, 2));
     }
@@ -93,6 +94,25 @@ function loadRows(): SeedRow[] {
   return JSON.parse(readFileSync('data/seed-catalog.json', 'utf8')) as SeedRow[];
 }
 
+/** Map human-readable ecosystem labels from the spreadsheet to our codes. */
+function normalizeEcosystem(raw: string | undefined): Ecosystem {
+  const v = (raw ?? '').toLowerCase().trim();
+  if (/javascript|typescript|npm|node|deno|bun/.test(v)) return 'js';
+  if (/rust|crate/.test(v)) return 'rust';
+  if (/python|pypi|pip/.test(v)) return 'py';
+  if (/golang|^go\b|go module/.test(v)) return 'go';
+  if (/elixir|erlang|hex/.test(v)) return 'elixir';
+  if (/dart|flutter|pub/.test(v)) return 'dart';
+  if (/ruby|gem/.test(v)) return 'ruby';
+  if (/kotlin|java|maven|gradle|android/.test(v)) return 'kotlin';
+  if (/swift|cocoapods/.test(v)) return 'swift';
+  if (/php|composer/.test(v)) return 'php';
+  if (['js', 'rust', 'py', 'go', 'elixir', 'dart', 'ruby', 'kotlin', 'swift', 'php', 'other'].includes(v)) {
+    return v as Ecosystem;
+  }
+  return 'other';
+}
+
 /** Minimal CSV parse of the AOS "ALL DEPENDENCIES" export. */
 function parseAuditCsv(text: string): SeedRow[] {
   const lines = text.split(/\r?\n/).filter(Boolean);
@@ -103,7 +123,7 @@ function parseAuditCsv(text: string): SeedRow[] {
     if (!name) continue;
     rows.push({
       name: name.trim(),
-      ecosystem: (ecosystem?.trim() as Ecosystem) || 'other',
+      ecosystem: normalizeEcosystem(ecosystem),
       entry_type: 'library',
       category: category?.trim() || 'Misc & Everything Else',
       what_it_does: whatItDoes?.trim(),

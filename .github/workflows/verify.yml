@@ -1,0 +1,50 @@
+name: Enforcement & checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Schema validation (astro check)
+        run: npm run check
+
+      - name: Typecheck the enforcement engine & scripts
+        run: npm run typecheck:tools
+
+      - name: Enforcement engine test suite
+        run: npm test
+
+      - name: Three-layer enforcement (catalog + recipes)
+        run: npm run enforce
+
+      - name: Three-layer enforcement (this repo's own tree — dogfood Layers 1–2)
+        run: npx tsx enforcement/cli.ts layer1 --tree . && npx tsx enforcement/cli.ts layer2 --tree .
+
+      - name: Build
+        run: npm run build
+
+      - name: Dead-link check
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --config lychee.toml ./src
+          fail: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

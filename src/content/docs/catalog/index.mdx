@@ -1,0 +1,41 @@
+---
+title: Catalog
+description: Every verified tool in the catalog — license-checked at a commit and screened against the exclusion policy.
+sidebar:
+  order: 0
+  label: Overview
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import CatalogList from '../../../components/CatalogList.astro';
+
+Every entry here is **license-checked at a specific commit** and screened against
+the [exclusion policy](/policies/). Each shows its verification and maintenance
+status so you can decide with your eyes open.
+
+<Aside type="note" title="Reading the badges">
+**verification** — `verified` (license pinned to a commit), `under_review`
+(pending a maintainer/token pass), or `blocked`. **status** — `active` (< 90d),
+`minimal` (< 12mo), `dormant` (< 36mo), `abandoned`.
+</Aside>
+
+## Nostr
+
+<CatalogList protocol="nostr" />
+
+## AT Protocol
+
+<CatalogList protocol="atproto" />
+
+## Build environment, tooling & libraries
+
+<CatalogList protocol="general" />
+
+## Everything
+
+<CatalogList />
+
+<Aside type="tip" title="Don't see a tool?">
+Propose it — CI verifies the license and screens it against the policy before it
+can merge. See [Add a tool](/contribute/).
+</Aside>

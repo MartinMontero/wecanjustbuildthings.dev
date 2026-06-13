@@ -1,0 +1,54 @@
+backend:
+  name: github
+  repo: martinmontero/wecanjustbuildthings.dev
+  branch: main
+
+# Edits land as pull requests so the enforcement engine gates them in CI.
+publish_mode: editorial_workflow
+media_folder: public/uploads
+public_folder: /uploads
+
+collections:
+  - name: catalog
+    label: Catalog entries
+    label_singular: Catalog entry
+    folder: src/content/docs/catalog
+    extension: mdx
+    format: frontmatter
+    create: true
+    slug: '{{fields.dependency_name}}'
+    summary: '{{title}} — {{license_spdx}} ({{verification_status}})'
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: description, label: Description, widget: text }
+      - { name: entry_type, label: Entry type, widget: select, options: [tool, framework, library, service, protocol] }
+      - { name: dependency_name, label: Dependency name, widget: string }
+      - { name: ecosystem, label: Ecosystem, widget: select, options: [js, rust, py, go, elixir, dart, ruby, kotlin, other] }
+      - { name: category, label: Category, widget: string }
+      - { name: what_it_does, label: What it does (plain language), widget: text }
+      - { name: protocols, label: Protocols, widget: select, multiple: true, options: [nostr, atproto, lightning, cashu, activitypub, matrix, general] }
+      - { name: homepage_url, label: Homepage URL, widget: string, required: false }
+      - { name: repo_url, label: Repository URL, widget: string, required: false }
+      - { name: registry_url, label: Registry URL, widget: string, required: false }
+      - { name: license_spdx, label: License (SPDX id), widget: string, hint: 'e.g. MIT, Apache-2.0, AGPL-3.0-or-later' }
+      - { name: license_source_url, label: License source URL, widget: string }
+      - { name: license_source_commit_sha, label: License commit SHA, widget: string, required: false }
+      - { name: maintenance_status, label: Maintenance status, widget: select, options: [active, minimal, dormant, abandoned, unknown], default: unknown }
+      - { name: verification_status, label: Verification status, widget: select, options: [verified, under_review, blocked], default: under_review }
+      - { name: provider_agnostic, label: Provider-agnostic?, widget: boolean, default: false }
+      - { name: body, label: Body (Markdown), widget: markdown }
+
+  - name: recipes
+    label: Recipes (provider-agnostic exceptions)
+    label_singular: Recipe
+    folder: src/content/docs/recipes
+    extension: mdx
+    format: frontmatter
+    create: true
+    fields:
+      - { name: title, label: Title, widget: string }
+      - { name: description, label: Description, widget: text }
+      - { name: entry_type, label: Entry type, widget: hidden, default: recipe }
+      - { name: recipe_type, label: Recipe type, widget: select, options: [configuration, integration, deployment] }
+      - { name: target_entry_slug, label: Target catalog entry slug, widget: string }
+      - { name: body, label: Body (Markdown), widget: markdown }

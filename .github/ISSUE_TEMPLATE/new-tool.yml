@@ -1,0 +1,64 @@
+name: Propose a new tool
+description: Suggest a tool, library, or service for the catalog. CI will verify its license and screen it against the exclusion policy.
+title: "[tool] <name>"
+labels: ["new-tool"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing! A tool gets in if it **passes the enforcement
+        engine** and is **described accurately**. You don't need to know whether
+        it's "clean" — CI checks that. Just give us the primary sources.
+  - type: input
+    id: name
+    attributes:
+      label: Dependency name
+      description: Exact package/module name (e.g. nostr-tools, @atproto/api, github.com/nbd-wtf/go-nostr).
+      placeholder: nostr-tools
+    validations:
+      required: true
+  - type: dropdown
+    id: ecosystem
+    attributes:
+      label: Ecosystem
+      options: [js, rust, py, go, elixir, dart, ruby, kotlin, other]
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Primary source URL
+      description: The canonical repository (GitHub/GitLab) or registry page.
+      placeholder: https://github.com/nbd-wtf/nostr-tools
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License (your best understanding)
+      description: SPDX id if you know it. CI will verify against the primary source — don't worry if you're unsure.
+      placeholder: MIT
+    validations:
+      required: false
+  - type: dropdown
+    id: protocols
+    attributes:
+      label: Protocol(s) it serves
+      multiple: true
+      options: [nostr, atproto, lightning, cashu, activitypub, matrix, general]
+    validations:
+      required: true
+  - type: textarea
+    id: what_it_does
+    attributes:
+      label: What it does (plain language)
+      description: One paragraph a non-developer could follow. What problem does it solve, and where would someone use it?
+    validations:
+      required: true
+  - type: checkboxes
+    id: policy
+    attributes:
+      label: Exclusion policy
+      options:
+        - label: To my knowledge, this is not owned by Meta, OpenAI, or xAI (CI will confirm).
+          required: true

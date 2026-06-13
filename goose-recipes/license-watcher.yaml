@@ -1,0 +1,19 @@
+version: 1.0.0
+title: License watcher
+description: >-
+  Detect license drift across the wecanjustbuildthings.dev catalog using three
+  independent signals, and open a PR with the diff.
+
+instructions: |
+  Re-verify any flagged entry against its primary source by hand — never trust a
+  single signal. If a license genuinely changed, update license_spdx,
+  license_source_url, and license_source_commit_sha, set verification_status to
+  under_review, and open a PR. NEVER push to main directly.
+
+prompt: |
+  Run the weekly license watch:
+  1. npm run watch:license   (writes reports/license-watch.md)
+  2. For each entry with a signal, re-verify against the primary source.
+  3. Apply confirmed changes, then: npm run enforce && npm run check
+  4. Open a PR titled "license-watch: <date>" with the report in the body.
+     Open a PR only if at least one entry fired a signal.

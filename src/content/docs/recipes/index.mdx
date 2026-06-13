@@ -1,0 +1,35 @@
+---
+title: Recipes
+description: Provider-agnostic configuration recipes — the single sanctioned exception to the exclusion policy.
+sidebar:
+  order: 0
+  label: Overview
+---
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+
+Recipes are the **only** exception mechanism in the catalog. Most tools are either
+clean or not. A few can be configured to use *either* an excluded provider or a
+permitted one — and for those, a recipe documents (and machine-verifies) the
+clean configuration.
+
+<Aside type="note" title="Every recipe is enforced">
+A recipe must target a catalog entry marked `provider_agnostic: true`, name every
+excluded LLM provider in its `must_not_be_one_of` list, and include verification
+steps that block the excluded providers' endpoints. A recipe that forgets to
+exclude OpenAI fails CI. See
+[how enforcement works](/policies/enforcement/#the-exception-recipes).
+</Aside>
+
+## Recipes
+
+<LinkCard
+  title="Shakespeare — provider-agnostic BYOK configuration"
+  href="/recipes/shakespeare-byok-configuration/"
+  description="Configure Shakespeare to use only permitted model providers, and verify no traffic reaches OpenAI, xAI, or Google."
+/>
+
+## Proposing a recipe
+
+If you know a catalog tool that can be configured cleanly, propose a recipe via a
+[pull request](/contribute/). The recipe validator runs on every PR.

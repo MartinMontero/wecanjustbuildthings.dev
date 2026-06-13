@@ -1,0 +1,21 @@
+version: 1.0.0
+title: Maintenance checker
+description: >-
+  Reclassify each wecanjustbuildthings.dev catalog entry as
+  active/minimal/dormant/abandoned from primary-source activity, and open a PR
+  with the status diffs.
+
+instructions: |
+  Status is derived from the latest release/commit timestamp from the
+  appropriate primary source (GitHub pushed_at, GitLab last_activity_at, or the
+  registry timestamp). Never do a registry lookup for ecosystem: other entries.
+  Do not touch license fields — that is the license-watcher's job. Never push to
+  main directly.
+
+prompt: |
+  Run the weekly maintenance check:
+  1. npm run watch:maintenance   (writes reports/maintenance-check.md)
+  2. Apply maintenance_status reclassifications to entry frontmatter.
+  3. npm run check
+  4. Open a PR titled "maintenance-check: <date>" with the table in the body,
+     only if at least one status changed.
