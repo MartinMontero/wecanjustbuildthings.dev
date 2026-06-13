@@ -6,17 +6,19 @@ import { getCollection } from 'astro:content';
  * The interactive Catalog Explorer and Build Studio fetch this and filter it
  * entirely client-side — no server round-trips, instant faceting.
  */
-const CATALOG_TYPES = new Set(['tool', 'framework', 'library', 'service', 'protocol']);
+const TOOL_TYPES = new Set(['tool', 'framework', 'library', 'service', 'protocol']);
+const INDEXED_TYPES = new Set([...TOOL_TYPES, 'dataset']);
 
 export const GET: APIRoute = async () => {
   const entries = await getCollection(
     'docs',
-    ({ data }) => Boolean(data.entry_type) && CATALOG_TYPES.has(data.entry_type as string),
+    ({ data }) => Boolean(data.entry_type) && INDEXED_TYPES.has(data.entry_type as string),
   );
 
   const items = entries.map((e) => ({
     name: (e.data.dependency_name as string) ?? e.data.title,
     url: `/${e.id}/`,
+    kind: e.data.entry_type === 'dataset' ? 'dataset' : 'tool',
     ecosystem: (e.data.ecosystem as string) ?? 'other',
     category: (e.data.category as string) ?? 'Misc & Everything Else',
     protocols: (e.data.protocols as string[]) ?? [],

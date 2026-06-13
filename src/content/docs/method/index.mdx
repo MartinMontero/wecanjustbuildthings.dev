@@ -1,0 +1,87 @@
+---
+title: Socratic Intent Engineering
+description: The thinking discipline that pairs with the PIE build flow — engineer clear intent before the agent runs, so it succeeds at the right thing, not just at something.
+sidebar:
+  order: 1
+  label: The method (intent)
+---
+
+import { Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+> Adapted from **[The Socratic Intent Engineer: Mastery of Intent and the Human
+> Edge](https://www.linkedin.com/in/martinmontero)** by Martin Montero — the field
+> manual this site is the companion system for. PIE is *how you cook*; this is
+> *how you decide what's worth cooking, and keep the agent aimed at it.*
+
+## The mistake that changes the question
+
+In 2024 a fintech announced its AI support agent was doing the work of ~700
+people — 2.3M conversations, resolution time cut from eleven minutes to under two.
+A year later the CEO admitted they'd cut too deep and began rehiring humans. The
+AI hadn't failed. **It succeeded at the wrong thing.** "Resolve tickets fast" was
+a measurable proxy; the real goal was lasting customer relationships.
+
+That gap — between what an AI *can do* and what you actually *need it to do* — is
+where the real work now lives. When capability is abundant, the scarce resource
+isn't compute. It's **wisdom**: clear intent, and the judgment to know what's
+worth building at all.
+
+<Aside type="tip" title="Why this pairs with PIE">
+The [PIE build flow](/pie/about/) gets you from intent to a shipped artifact —
+the *doing*. Socratic Intent Engineering is the *thinking* that runs first and
+alongside it, so what you ship is aimed at the right thing. Start most projects
+here, then cook. The [Build Studio](/build/) walks you through both.
+</Aside>
+
+## The four foundations
+
+<CardGrid>
+  <Card title="The Socratic method" icon="open-book">
+    Ask, examine the assumption, probe for contradiction, refine — *before* you
+    write a single instruction. Nearly every useless deliverable traces to a
+    question that was never asked.
+  </Card>
+  <Card title="First-principles thinking" icon="puzzle">
+    Decompose to fundamental truths instead of copying what others do. Don't
+    start with "I need a report" — start with "three people must understand three
+    risks in five minutes." The format follows.
+  </Card>
+  <Card title="Intent engineering" icon="setting">
+    Encode *what an agent should want*, not just what it should know — goals,
+    trade-off hierarchies, decision boundaries — so it optimizes for the real
+    objective. This is what the Studio bakes into your project constitution.
+  </Card>
+  <Card title="The human edge" icon="heart">
+    Taste, judgment, and the courage to bet on a direction while the map is
+    blank. Output is cheap; choosing is expensive. The AI can't decide what
+    matters — that's your job, and the valuable one.
+  </Card>
+</CardGrid>
+
+## Three eras of AI engineering
+
+| Era | What it does | Enough? |
+|---|---|---|
+| **Prompt** engineering | crafts a single instruction | personal, session-bound |
+| **Context** engineering | tells an agent *what to know* | necessary, not sufficient |
+| **Intent** engineering | tells an agent *what to want* | the layer that makes AI strategically coherent |
+
+The frontier models are all extraordinarily capable; the gap between them matters
+far less than the gap between builders who give an agent clear, structured,
+goal-aligned intent and those who don't. **The race is an intent race.**
+
+## → BUILD: where the method becomes an artifact
+
+<CardGrid>
+  <LinkCard title="The Ten Questions →" href="/method/ten-questions/" description="The integrated method + the complete 8-step workflow — the practical core." />
+  <LinkCard title="Build Studio →" href="/build/" description="The Ten Questions, operationalized: your answers become a constitution, spec, and agent prompt." />
+  <LinkCard title="Kitchen Prep (PIE) →" href="/pie/kitchen-prep/" description="Name the problem before reaching for a tool — the PIE stage this method sharpens." />
+  <LinkCard title="Agent skills →" href="/contribute/" description="Encode judgment, escalation, and intent into reusable skills — not just instructions." />
+</CardGrid>
+
+<Aside type="note" title="The human stays in the driver's seat">
+Use AI for everything that can be systematized, so you can spend yourself on
+everything that can't — your perspective, your values, your read on what your
+community actually needs. *Don't be a cover band. Write your own music; let the
+AI play the instruments.*
+</Aside>

@@ -4,6 +4,7 @@
   interface Item {
     name: string;
     url: string;
+    kind: string;
     ecosystem: string;
     category: string;
     protocols: string[];
@@ -21,6 +22,7 @@
   let failed = $state(false);
 
   let q = $state('');
+  let selKind = $state<Set<string>>(new Set());
   let selProtocol = $state<Set<string>>(new Set());
   let selEcosystem = $state<Set<string>>(new Set());
   let selCategory = $state<Set<string>>(new Set());
@@ -53,6 +55,7 @@
       const hay = `${it.name} ${it.desc} ${it.ecosystem} ${it.category} ${it.license} ${it.protocols.join(' ')}`.toLowerCase();
       if (!hay.includes(text)) return false;
     }
+    if (opts.skip !== 'kind' && selKind.size && !selKind.has(it.kind)) return false;
     if (opts.skip !== 'protocol' && selProtocol.size && !it.protocols.some((p) => selProtocol.has(p))) return false;
     if (opts.skip !== 'ecosystem' && selEcosystem.size && !selEcosystem.has(it.ecosystem)) return false;
     if (opts.skip !== 'category' && selCategory.size && !selCategory.has(it.category)) return false;
@@ -66,7 +69,7 @@
       .sort((a, b) => (sort === 'uses' ? b.uses - a.uses || a.name.localeCompare(b.name) : a.name.localeCompare(b.name))),
   );
 
-  function facet(dim: 'protocol' | 'ecosystem' | 'category' | 'verification', get: (it: Item) => string[]) {
+  function facet(dim: 'kind' | 'protocol' | 'ecosystem' | 'category' | 'verification', get: (it: Item) => string[]) {
     const counts = new Map<string, number>();
     for (const it of items) {
       if (!matches(it, { skip: dim })) continue;
@@ -75,17 +78,19 @@
     return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
   }
 
+  const kindFacet = $derived(facet('kind', (it) => [it.kind]));
   const protocolFacet = $derived(facet('protocol', (it) => it.protocols));
   const ecosystemFacet = $derived(facet('ecosystem', (it) => [it.ecosystem]));
   const categoryFacet = $derived(facet('category', (it) => [it.category]));
   const verificationFacet = $derived(facet('verification', (it) => [it.verification]));
 
   const activeCount = $derived(
-    selProtocol.size + selEcosystem.size + selCategory.size + selVerification.size + (q.trim() ? 1 : 0),
+    selKind.size + selProtocol.size + selEcosystem.size + selCategory.size + selVerification.size + (q.trim() ? 1 : 0),
   );
 
   function clearAll() {
     q = '';
+    selKind = new Set();
     selProtocol = new Set();
     selEcosystem = new Set();
     selCategory = new Set();
@@ -141,6 +146,7 @@
           </fieldset>
         {/snippet}
 
+        {@render group('Kind', kindFacet, selKind, (s) => (selKind = s))}
         {@render group('Protocol', protocolFacet, selProtocol, (s) => (selProtocol = s))}
         {@render group('Ecosystem', ecosystemFacet, selEcosystem, (s) => (selEcosystem = s))}
         {@render group('Verification', verificationFacet, selVerification, (s) => (selVerification = s))}

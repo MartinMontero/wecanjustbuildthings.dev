@@ -1,0 +1,111 @@
+---
+title: The Ten Questions
+description: The integrated Socratic method — ten questions across four lenses (first-principles, intent, agent skills, the human edge) plus the complete 8-step workflow.
+sidebar:
+  order: 2
+  label: The Ten Questions
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+> Adapted from **The Socratic Intent Engineer** by Martin Montero. Each question
+> carries up to four lenses — **First-Principles**, **Intent**, **Agent Skills**,
+> and the **Human Edge** — applied where they earn their place. Run these before
+> you point an agent at anything; the [Build Studio](/build/) turns your answers
+> into a project constitution, spec, and agent prompt.
+
+## I. Understanding the goal
+
+**1 · What exactly do I want the AI to do?**
+Dissect the outcome — creative piece, summary, code, a multi-step workflow, an
+autonomous task? *First-principles:* what's the irreducible problem? (Not "a
+report" but "three people understand three risks in five minutes.") *Intent:* am
+I defining the task, or the goal behind it? *Human edge:* what actually needs to
+exist — the thing nobody asked for but everyone needs?
+
+**2 · Why do I want this output?**
+The *why* illuminates the *what*. *First-principles:* challenge the why itself —
+do they need a weekly report, or to stay informed of changes? *Intent:* this is
+where a measurable proxy and the actual purpose diverge. Connect the work to the
+goal before writing a prompt.
+
+**3 · What are the constraints and success metrics?**
+Audience, prior knowledge, emotional impact, measurable criteria. *First-principles:*
+for each constraint — hard requirement, or "the way it's always been done"?
+*Intent:* set metrics at the right altitude (lifetime value, not resolution time).
+*Agent skills:* build evaluation into the skill — self-checks and escalation rules.
+
+## II. Defining the input
+
+**4 · What essential information does the AI need?**
+Don't assume it shares your knowledge. *Intent:* for agents, context is
+organizational knowledge — values, trade-off hierarchies, decision boundaries,
+not just data. *Human edge:* your lived experience — the launches that flopped —
+is context no training set contains.
+
+**5 · How should I present this information?**
+Structured data as JSON/CSV; long text with clear hierarchy. *Intent:* at agent
+scale this is architecture — goal structures, delegation frameworks with decision
+boundaries, feedback loops that close.
+
+## III. Shaping the output
+
+**6 · What is the ideal format?**
+*First-principles:* not "what format?" but "what does the recipient need to *do*,
+and what removes the most friction from that action?" *Agent skills:* a skill
+might emit a spreadsheet with live formulas, or a dashboard, not a static table.
+
+**7 · What is the precise style and tone?**
+Specific references, not vague descriptors. *Human edge:* style is taste made
+visible — name the exact voice, and recognize it when it arrives.
+
+**8 · What are the non-negotiable success criteria?**
+State them before you run anything. *Intent:* are you measuring the right thing?
+Resolution time looked right until it wasn't. Define success at the level of
+purpose, not task completion.
+
+## IV. Iterative refinement
+
+**9 · Did the output truly meet my criteria?**
+*First-principles:* when it fails, resist tweaking the surface — is the failure in
+the prompt, or in your assumptions? *Human edge:* not "does it meet the criteria"
+but "does this have the aliveness that makes it worth putting into the world?"
+
+**10 · How do I revise to guide the AI toward the outcome?**
+Refine constraints, add examples, switch techniques. *Intent:* close the loop —
+was the agent's decision aligned with intent, and how do you measure drift over time?
+
+<Aside type="tip" title="Operationalized in the Build Studio">
+You don't have to hold all ten in your head. The [Build Studio](/build/) asks the
+ones that shape the build — goal, the *why* behind it, success criteria — and
+folds your answers into the generated constitution, spec, and agent prompt, so the
+agent is aimed at your real intent from the first commit.
+</Aside>
+
+## The complete workflow
+
+A practical sequence whenever you design a prompt, build a skill, or architect an
+agent workflow:
+
+<Steps>
+
+1. **Identify the fundamental problem** — strip away format and convention; write
+   the irreducible need in one sentence.
+2. **Connect to organizational intent** — what goal does this serve? Encode the
+   goal, not just the task (trade-offs, boundaries, escalation).
+3. **Question every inherited assumption** — fundamental truth, or habit?
+4. **Decompose into irreducible components** — smallest units, one purpose each.
+5. **Reconstruct from first principles** — assemble the pieces that solve *your*
+   problem; don't copy a template.
+6. **Apply your taste** — does this reflect your actual intent and your read on
+   what the audience needs?
+7. **Test against reality** — real scenarios, edge cases, adversarial inputs;
+   evaluate against criteria you set beforehand.
+8. **Iterate with discipline and courage** — one gap per pass; sometimes the right
+   move is to throw it away because the direction was wrong. Then close the loop.
+
+</Steps>
+
+Then hand it to the agent — through [PIE](/pie/cooking/) and the
+[Build Studio](/build/) — and keep every change green with the
+[enforcement engine](/policies/enforcement/).

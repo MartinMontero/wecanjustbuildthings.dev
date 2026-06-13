@@ -11,9 +11,11 @@
   let loading = $state(true);
   let step = $state(1);
 
-  // Step 1 — intent
+  // Step 1 — intent (the Socratic Ten Questions, distilled)
   let projectName = $state('');
   let problem = $state('');
+  let goal = $state('');
+  let success = $state('');
   let protocols = $state<Set<string>>(new Set(['nostr']));
   let focus = $state('social');
 
@@ -92,6 +94,12 @@
 Binding on every spec, plan, and task. Agents read this first and do not override
 it without explicit human consent.
 
+## Article 0 — Intent (the goal behind the work)
+This project exists to: ${goal || problem || '<state the real goal>'}.
+Success means: ${success || '<define success at the level of purpose, not task completion>'}.
+Optimize for this intent, never a convenient proxy. When a task conflicts with this
+goal, the goal wins — surface the conflict instead of silently trading it away.
+
 ## Article I — Provider exclusion (non-negotiable)
 No dependency, directly or transitively, may be owned by **Meta, OpenAI, or xAI**,
 and no code may call their endpoints. Enforce before every commit:
@@ -123,6 +131,12 @@ license, and a green enforcement run.
 
 ## Problem
 ${problem || '<describe the community problem in one paragraph a non-developer would recognize>'}
+
+## Goal behind it (intent)
+${goal || '<the real objective — not a convenient proxy>'}
+
+## Success looks like
+${success || '<the non-negotiable success criteria>'}
 
 ## Protocols
 ${protoList.length ? protoList.join(', ') : 'general'}
@@ -158,7 +172,9 @@ ${chosenItems.map((it) => `- ${it.name} (${it.ecosystem}, ${it.license}) — ${i
 
   const agentPrompt = $derived(`You are building "${projectName || slug}".
 
-GOAL: ${problem || '<the community problem>'}
+PROBLEM: ${problem || '<the community problem>'}
+GOAL BEHIND IT (optimize for this, not a proxy): ${goal || problem || '<the real objective>'}
+SUCCESS LOOKS LIKE: ${success || '<the non-negotiable success criteria>'}
 PROTOCOLS: ${protoList.length ? protoList.join(', ') : 'general'}
 
 RULES (binding — see constitution.md):
@@ -226,8 +242,13 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem}) — add via its native p
     <section class="panel">
       <label class="field"><span>Project name</span>
         <input bind:value={projectName} placeholder="escudo-vecinal" /></label>
+      <p class="hint">These are the <a href="/method/ten-questions/">Ten Questions</a>, distilled — answer the <em>intent</em>, not just the task. Your answers shape the constitution, spec, and agent prompt.</p>
       <label class="field"><span>What problem does it solve? (one paragraph)</span>
         <textarea bind:value={problem} rows="3" placeholder="Organizers need to document evictions without exposing tenants…"></textarea></label>
+      <label class="field"><span>Why — the goal behind it? (the real objective, not a convenient proxy)</span>
+        <textarea bind:value={goal} rows="2" placeholder="Protect tenants' safety and build trust in the network — not merely 'store records'."></textarea></label>
+      <label class="field"><span>What does success actually look like?</span>
+        <textarea bind:value={success} rows="2" placeholder="A tenant files evidence in under 2 minutes with no identifying metadata leaked."></textarea></label>
       <div class="field"><span>Protocols</span>
         <div class="chips">
           {#each ALL_PROTOCOLS as p}

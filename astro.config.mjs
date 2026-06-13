@@ -75,6 +75,10 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Socratic Intent (the method)',
+          items: [{ autogenerate: { directory: 'method' } }],
+        },
+        {
           label: 'The build flow (PIE)',
           items: [{ autogenerate: { directory: 'pie' } }],
         },

@@ -31,6 +31,7 @@ export const ENTRY_TYPES = [
   'library',
   'service',
   'protocol',
+  'dataset',
   'recipe',
   'archetype',
   'policy',
