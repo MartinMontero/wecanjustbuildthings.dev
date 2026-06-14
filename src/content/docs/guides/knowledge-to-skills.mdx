@@ -1,0 +1,122 @@
+---
+title: Turn your knowledge into agent skills
+description: Your manuals, field guides, SOPs, and hard-won know-how are the real asset. Turn them into reusable .md "skills" your AI agent follows every time — so it works your way, not a generic guess.
+sidebar:
+  order: 3
+---
+
+import { Steps, Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+You already hold the most valuable thing here: the wisdom in your community and
+your field. The eviction-response checklist. The de-escalation steps. The way
+your collective handles sensitive data. The tone your organization speaks in.
+This page is about turning that — the stuff in your head and your binders — into
+**agent skills** your AI agent follows every single time.
+
+## What's an agent skill?
+
+A **skill** is a short `.md` file that teaches your agent *one of your methods*.
+Instead of the agent guessing how to do something, it reads your skill and does
+it **your way** — consistently, for you and for everyone in your collective.
+
+**A harness like Goose gives the agent hands. The catalog gives it vetted tools.
+A skill gives it *your judgment.*** It's the difference between "an AI wrote
+something" and "an AI applied our actual playbook."
+
+<Aside type="tip" title="This is the whole ethos, made concrete">
+We Can Just Build Things exists to augment your wisdom, not replace it. A skill
+is exactly that: your experience, written once, reused forever — and it stays
+yours.
+</Aside>
+
+## The tool: knowledge-to-skills-pipeline
+
+[**knowledge-to-skills-pipeline**](/catalog/knowledge-to-skills-pipeline/) takes
+your source material — books, guides, toolkits, manuals — and turns it into
+structured `SKILL.md` files: a methodology your agent can apply, plus an
+**attribution** block that credits where the knowledge came from.
+
+It runs on **Anthropic Claude — a permitted provider** (never Meta, OpenAI, or
+xAI), so making skills follows the same values as everything else here. Its own
+reference skills are drawn from *Beautiful Trouble: A Toolbox for Revolution*.
+
+<CardGrid>
+  <Card title="What goes in" icon="open-book">
+    Your manuals, field guides, standard operating procedures, training docs,
+    organizing toolkits — the knowledge you'd hand a new member.
+  </Card>
+  <Card title="What comes out" icon="document">
+    `SKILL.md` files: a clear method your agent follows, with metadata and
+    attribution so credit and licensing travel with the knowledge.
+  </Card>
+</CardGrid>
+
+## What a skill looks like
+
+A `SKILL.md` is just plain text — YAML metadata at the top, then your method in
+plain language:
+
+```markdown
+---
+name: tenant-intake
+description: Take an eviction report safely.
+attribution:
+  source: "Tenants Union field manual"
+  license: CC-BY-SA-4.0
+---
+
+# Taking a tenant intake
+
+1. Use a chosen handle, not a legal name.
+2. Record the building, not the unit, at first.
+3. Encrypt everything; two organizers hold keys.
+4. Confirm what the tenant wants next.
+```
+
+The agent reads this and follows *your* intake process — not a generic one.
+
+## Make your first skill
+
+<Steps>
+
+1. **Gather your source.** A manual, a field guide, an SOP, even good notes.
+   The clearer your source, the better the skill.
+2. **Run the pipeline.** Follow the [repo's
+   instructions](https://github.com/MartinMontero/knowledge-to-skills-pipeline)
+   to install and run it (it uses [Bun](https://bun.sh) and your own Anthropic
+   key). It reads your material and drafts `SKILL.md` files.
+3. **Review it — you're the expert.** Read the draft. Fix anything the model got
+   subtly wrong. Your judgment is the point; the tool just does the typing.
+4. **Keep the attribution honest.** If the method comes from someone's book or
+   toolkit, credit it and respect its license (many movement resources are
+   CC-BY-SA).
+
+</Steps>
+
+## Use your skills in a build
+
+Every starter from the [Build Studio](/build/) already includes a `skills/`
+folder with a template and a README. To put your own skills to work:
+
+<Steps>
+
+1. Drop your `SKILL.md` files into the project's `skills/` folder.
+2. Point your agent at the project (Goose or Claude Code). The generated
+   constitution and agent prompt already tell it to **read `skills/` first and
+   follow your methods.**
+3. Build. The agent now applies your playbook on every task — consistently,
+   and accountable to the people who wrote it.
+
+</Steps>
+
+<Aside type="caution" title="Your method is law, not a suggestion">
+Skills sit alongside the project constitution: the agent treats them as
+instructions to follow, not ideas to improve on. If a skill conflicts with a
+task, the agent should surface it and ask — never quietly do it its own way.
+</Aside>
+
+<LinkCard
+  title="Browse the tool in the catalog →"
+  href="/catalog/knowledge-to-skills-pipeline/"
+  description="License, provenance, and verification for knowledge-to-skills-pipeline."
+/>

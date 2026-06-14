@@ -58,6 +58,7 @@
       refineApply: 'Add to my blueprint', refineApplied: 'Added ✓',
       refineNone: 'Your plan already covers what you described — I wouldn’t add anything. That’s a good sign.',
       refineErr: 'Couldn’t reach the model. Check your key and try again.', refineNeedKey: 'Enter your AI key above first.',
+      skillsHint: 'Have a field guide, manual, or SOP? Turn your own know-how into a skill your agent follows →',
     },
     es: {
       s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo',
@@ -105,6 +106,7 @@
       refineApply: 'Añadir a mi plano', refineApplied: 'Añadido ✓',
       refineNone: 'Tu plan ya cubre lo que describiste — no añadiría nada. Eso es buena señal.',
       refineErr: 'No se pudo contactar al modelo. Revisa tu clave e inténtalo de nuevo.', refineNeedKey: 'Primero ingresa tu clave de IA arriba.',
+      skillsHint: '¿Tienes una guía de campo, un manual o un procedimiento? Convierte tu propio saber en una habilidad que tu agente sigue →',
     },
     ar: {
       s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه',
@@ -152,6 +154,7 @@
       refineApply: 'أضِف إلى مخططي', refineApplied: 'أُضيف ✓',
       refineNone: 'مخططك يغطّي ما وصفته بالفعل — لن أضيف شيئاً. هذه علامة جيدة.',
       refineErr: 'تعذّر الوصول إلى النموذج. تحقّق من مفتاحك وحاول مجدداً.', refineNeedKey: 'أدخل مفتاح الذكاء الاصطناعي أعلاه أولاً.',
+      skillsHint: 'لديك دليل ميداني أو كُتيّب أو إجراء عمل؟ حوّل معرفتك إلى مهارة يتّبعها وكيلك ←',
     },
   };
   let lang = $state<Lang>((['en', 'es', 'ar'].includes(initialLang) ? initialLang : 'en') as Lang);
@@ -346,6 +349,13 @@ ${protoList.length ? protoList.map((p) => `- ${p}: follow its spec/NIPs; surface
 ## Article V — Verifiability
 Ship a stable, auditable artifact: pinned, license-verified dependencies, a real
 license, and a green enforcement run.
+
+## Article VI — The builder's methods (skills)
+Read every \`skills/*.SKILL.md\` before acting. These encode the builder's own
+methods, field guides, and operating procedures — follow them as written; do not
+quietly substitute your own approach. If a skill conflicts with a task, surface
+the conflict and ask. (Generate skills from your own manuals with the
+knowledge-to-skills-pipeline.)
 `);
 
   const spec = $derived(`# Spec: ${projectName || slug}
@@ -379,6 +389,7 @@ PROTOCOLS: ${protoList.length ? protoList.join(', ') : 'general'}
 
 RULES (binding — see constitution.md):
 - Read .specify/memory/constitution.md FIRST and never violate it.
+- Read skills/*.SKILL.md and follow the builder's own methods exactly; if a skill conflicts with a task, surface it and ask.
 - Use ONLY these vetted, policy-clean dependencies:
 ${chosenItems.map((it) => `    - ${it.name} (${it.ecosystem})`).join('\n') || '    - <none selected>'}
 ${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the primary SDK for relays, subscriptions, and signers.\n' : ''}${protocols.has('atproto') ? '- For AT Protocol, use @atproto/api as the primary SDK; prefer OAuth (DPoP) over App Passwords.\n' : ''}- No dependency or provider owned by Meta, OpenAI, or xAI — directly or transitively.
@@ -413,9 +424,52 @@ ${chosenItems.map((it) => `- [${it.name}](${it.repo || it.url}) — ${it.desc}`)
 2. Paste AGENT_PROMPT.txt (or open .specify/).
 3. Keep every change green: \`npx tsx ./enforcement/cli.ts all --tree .\`
 
+## Your methods (skills)
+Put your own know-how in \`skills/*.SKILL.md\` and the agent will follow it.
+Generate skills from your manuals with the knowledge-to-skills-pipeline — see
+https://wecanjustbuildthings.dev/guides/knowledge-to-skills/
+
 ## Non-JS dependencies
 ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none)'}
 `);
+
+  // The skills/ folder turns the builder's own know-how into instructions the
+  // agent follows. Populated from their manuals via the knowledge-to-skills-pipeline.
+  const skillsReadme = `# skills/
+
+Drop your agent skills here as \`*.SKILL.md\` files. Each one teaches your agent
+one of YOUR methods — a field guide, an SOP, a checklist — so it works your way,
+every time, instead of guessing.
+
+Your constitution and AGENT_PROMPT already tell the agent to read this folder
+first and follow these methods.
+
+Generate skills from your own manuals and guides with the knowledge-to-skills-pipeline:
+https://github.com/MartinMontero/knowledge-to-skills-pipeline
+
+See https://wecanjustbuildthings.dev/guides/knowledge-to-skills/ for the full how-to.
+Format: YAML frontmatter (name, description, attribution) + your method in plain
+language. See example.SKILL.md.
+`;
+  const skillExample = `---
+name: example-method
+description: Replace this with one of your own methods — a checklist, an SOP, a field-guide procedure.
+attribution:
+  source: "Where this knowledge comes from (a manual, a person, a toolkit)"
+  license: CC-BY-SA-4.0
+---
+
+# Example: your method, written once
+
+Write your method in plain steps. The agent follows it exactly.
+
+1. State the first step the way you'd tell a new member.
+2. Note anything that must NEVER happen (privacy, safety, trust).
+3. End with how you know it was done right.
+
+Delete this file once you've added your real skills (generate them from your
+manuals with the knowledge-to-skills-pipeline).
+`;
 
   function starterFiles(): Record<string, string> {
     return {
@@ -425,7 +479,9 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
       '.specify/memory/constitution.md': constitution,
       [`specs/001-${slug}/spec.md`]: spec,
       [`${slug}.goose-recipe.yaml`]: gooseRecipe,
-      '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; run the enforcement engine before committing.\n`,
+      '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; run the enforcement engine before committing.\n`,
+      'skills/README.md': skillsReadme,
+      'skills/example.SKILL.md': skillExample,
     };
   }
 
@@ -754,6 +810,7 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
     <section class="panel">
       <h3>{t.handoff}</h3>
       <p class="hint">{t.handoffIntro}</p>
+      <p class="hint"><a href="/guides/knowledge-to-skills/">{t.skillsHint}</a></p>
       <div class="tabs">
         <button class:on={handoff === 'zip'} onclick={() => (handoff = 'zip')}>{t.zip}</button>
         <button class:on={handoff === 'github'} onclick={() => (handoff = 'github')}>{t.github}</button>

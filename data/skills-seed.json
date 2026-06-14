@@ -1,0 +1,13 @@
+[
+  {
+    "name": "knowledge-to-skills-pipeline",
+    "ecosystem": "js",
+    "entry_type": "tool",
+    "category": "AI & Agents",
+    "protocols": ["general"],
+    "what_it_does": "Turns your manuals, field guides, SOPs, and hard-won know-how into reusable AI agent skills — structured SKILL.md files (methodology plus attribution) your agent follows every time, instead of guessing. Uses Anthropic Claude, a permitted provider (no Meta/OpenAI/xAI); its reference skills are drawn from Beautiful Trouble: A Toolbox for Revolution.",
+    "source_url": "https://github.com/MartinMontero/knowledge-to-skills-pipeline",
+    "license_hint": "MIT",
+    "pie_anchor": "§3 Kitchen Prep"
+  }
+]

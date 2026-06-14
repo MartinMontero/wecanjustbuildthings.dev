@@ -40,6 +40,7 @@ const PATHS = [
   '/check/',
   '/guides/get-started-with-goose/',
   '/guides/connect-github/',
+  '/guides/knowledge-to-skills/',
   '/policies/',
   '/policies/enforcement/',
   '/privacy/',
