@@ -1092,12 +1092,13 @@ manuals with the knowledge-to-skills-pipeline).
   .lang.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
   .steps { display: flex; gap: var(--wcb-space-2xs); list-style: none; padding: 0; margin: 0 0 1.25rem; }
   .steps li { flex: 1; }
-  .steps button { width: 100%; padding: var(--wcb-space-2xs); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); border-radius: var(--wcb-radius-sm); cursor: pointer; font-weight: 600; }
-  .steps li.on button { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
-  .panel { display: flex; flex-direction: column; gap: var(--wcb-space-sm); }
+  .steps button { width: 100%; padding: var(--wcb-space-xs); border: 1px solid var(--sl-color-gray-5); background: var(--md-sys-color-surface-container-high); color: var(--sl-color-text); border-radius: var(--wcb-radius-pill); cursor: pointer; font-weight: 700; transition: transform var(--wcb-motion-fast) var(--wcb-easing-standard), box-shadow var(--wcb-motion-fast) var(--wcb-easing-standard); }
+  .steps li.on button { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); box-shadow: var(--wcb-shadow-2); transform: translateY(-1px); }
+  .panel { display: flex; flex-direction: column; gap: var(--wcb-space-sm); background: var(--md-sys-color-surface-container); border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent); border-radius: var(--wcb-radius-md); padding: var(--wcb-space-md); box-shadow: var(--wcb-shadow-1); }
   .field { display: flex; flex-direction: column; gap: 0.35rem; }
   .field > span { font-weight: 600; font-size: 0.9rem; }
-  input, textarea, select { padding: 0.55rem 0.7rem; border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-sm); background: var(--sl-color-black); color: var(--sl-color-white); font: inherit; }
+  input, textarea, select { padding: 0.6rem 0.8rem; border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-sm); background: var(--sl-color-bg); color: var(--sl-color-white); font: inherit; transition: border-color var(--wcb-motion-fast) var(--wcb-easing-standard); }
+  input:focus, textarea:focus, select:focus { border-color: var(--sl-color-accent); }
   .chips, .tabs { display: flex; flex-wrap: wrap; gap: var(--wcb-space-2xs); }
   .chip { padding: 0.35rem 0.8rem; border-radius: var(--wcb-radius-pill); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
   .chip.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
@@ -1168,7 +1169,9 @@ manuals with the knowledge-to-skills-pipeline).
   .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: var(--wcb-radius-sm); background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
   .nav { display: flex; justify-content: space-between; gap: var(--wcb-space-2xs); margin-top: var(--wcb-space-2xs); }
   .nav button { padding: 0.55rem 1rem; border-radius: var(--wcb-radius-sm); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
-  .primary { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: var(--wcb-radius-sm); cursor: pointer; font-weight: 700; }
+  .primary { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 1px solid var(--sl-color-accent); padding: 0.6rem 1.2rem; border-radius: var(--wcb-radius-pill); cursor: pointer; font-weight: 700; box-shadow: var(--wcb-shadow-1); transition: transform var(--wcb-motion-fast) var(--wcb-easing-standard), box-shadow var(--wcb-motion-fast) var(--wcb-easing-standard); }
+  .primary:hover { transform: translateY(-2px); box-shadow: var(--wcb-shadow-2); }
+  .primary:active { transform: translateY(0); box-shadow: var(--wcb-shadow-1); }
   .big { font-size: 1.05rem; padding: 0.7rem 1.3rem; }
   .hint { color: var(--sl-color-gray-2); font-size: 0.9rem; }
   .err { color: var(--wcb-danger-text); font-size: 0.9rem; }
