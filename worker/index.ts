@@ -29,7 +29,7 @@ const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';
 
 // Permitted model providers only — OpenAI/xAI are excluded by policy and are not
 // reachable through this endpoint, even with a key.
-const PROVIDERS: Record<string, { url: string; build: (model: string, prompt: string, key: string) => RequestInit; pick: (j: any) => string; defaultModel: string }> = {
+export const PROVIDERS: Record<string, { url: string; build: (model: string, prompt: string, key: string) => RequestInit; pick: (j: any) => string; defaultModel: string }> = {
   anthropic: {
     url: 'https://api.anthropic.com/v1/messages',
     defaultModel: 'claude-3-5-sonnet-latest',
@@ -78,7 +78,7 @@ async function getJson(url: string): Promise<any | null> {
   }
 }
 
-function normalizeRepo(url?: string): string | undefined {
+export function normalizeRepo(url?: string): string | undefined {
   if (!url) return undefined;
   let u = String(url).replace(/^git\+/, '').replace(/^git:\/\//, 'https://').replace(/\.git($|[#?])/, '$1');
   if (/^[\w.-]+\/[\w.-]+$/.test(u)) u = `https://github.com/${u}`;
@@ -137,20 +137,29 @@ async function kickoffHandler(request: Request): Promise<Response> {
 }
 
 // ---- GitHub one-click ----
-function cookie(request: Request, name: string): string | undefined {
+export function cookie(request: Request, name: string): string | undefined {
   const raw = request.headers.get('cookie') || '';
   for (const part of raw.split(';')) { const [k, ...v] = part.trim().split('='); if (k === name) return decodeURIComponent(v.join('=')); }
   return undefined;
 }
 
+/** Same-origin path only — never an absolute, scheme, or protocol-relative URL.
+ *  The post-OAuth redirect target is attacker-influenceable (?redirect= → cookie),
+ *  so anything that isn't a single-slash local path is rejected to the fallback.
+ *  This is what prevents the OAuth flow from becoming an open redirect. */
+export function safeLocalPath(p: string | null | undefined, fallback = '/build/'): string {
+  if (!p || !p.startsWith('/') || p.startsWith('//') || p.startsWith('/\\')) return fallback;
+  return p;
+}
+
 function backTo(origin: string, back: string, params: string): Response {
-  const sep = back.includes('?') ? '&' : '?';
-  const target = /^https?:\/\//.test(back) ? back : `${origin}${back.startsWith('/') ? '' : '/'}${back}`;
-  return new Response(null, { status: 302, headers: [['location', `${target}${sep}${params}`]] as any });
+  const path = safeLocalPath(back);
+  const sep = path.includes('?') ? '&' : '?';
+  return new Response(null, { status: 302, headers: [['location', `${origin}${path}${sep}${params}`]] as any });
 }
 
 function githubStart(url: URL, env: Env): Response {
-  const redirectBack = url.searchParams.get('redirect') || '/build/';
+  const redirectBack = safeLocalPath(url.searchParams.get('redirect'));
   // Not configured: bounce back to the Studio with a friendly flag instead of
   // dumping JSON, since this endpoint is reached by a full-page navigation.
   if (!env.GITHUB_OAUTH_CLIENT_ID) return backTo(url.origin, redirectBack, 'gh=unconfigured');
@@ -171,7 +180,7 @@ function githubStart(url: URL, env: Env): Response {
 async function githubCallback(request: Request, url: URL, env: Env): Promise<Response> {
   // Always return to the Studio (not raw JSON): the user lands here via a
   // browser redirect from GitHub, so failures should surface in the UI.
-  const back = cookie(request, 'gh_back') || '/build/';
+  const back = safeLocalPath(cookie(request, 'gh_back'));
   const fail = (reason: string) => backTo(url.origin, back, `gh=error&reason=${reason}`);
   if (!env.GITHUB_OAUTH_CLIENT_ID || !env.GITHUB_OAUTH_CLIENT_SECRET) return fail('unconfigured');
   if (url.searchParams.get('error')) return fail('denied'); // user declined authorization

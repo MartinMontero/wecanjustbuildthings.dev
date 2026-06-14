@@ -17,7 +17,11 @@
     desc: string;
   }
 
-  let items = $state<Item[]>([]);
+  // `_hay` is a precomputed lowercase search string so live filtering doesn't
+  // rebuild it for every item on every keystroke (~2k items × 6 reactive passes).
+  type IndexedItem = Item & { _hay: string };
+
+  let items = $state<IndexedItem[]>([]);
   let loading = $state(true);
   let failed = $state(false);
 
@@ -34,7 +38,11 @@
     try {
       const res = await fetch('/catalog.json');
       if (!res.ok) throw new Error(String(res.status));
-      items = await res.json();
+      const raw = (await res.json()) as Item[];
+      items = raw.map((it) => ({
+        ...it,
+        _hay: `${it.name} ${it.desc} ${it.ecosystem} ${it.category} ${it.license} ${it.protocols.join(' ')}`.toLowerCase(),
+      }));
     } catch {
       failed = true;
     } finally {
@@ -49,12 +57,9 @@
     return next;
   }
 
-  function matches(it: Item, opts: { skip?: string } = {}): boolean {
+  function matches(it: IndexedItem, opts: { skip?: string } = {}): boolean {
     const text = q.trim().toLowerCase();
-    if (text) {
-      const hay = `${it.name} ${it.desc} ${it.ecosystem} ${it.category} ${it.license} ${it.protocols.join(' ')}`.toLowerCase();
-      if (!hay.includes(text)) return false;
-    }
+    if (text && !it._hay.includes(text)) return false;
     if (opts.skip !== 'kind' && selKind.size && !selKind.has(it.kind)) return false;
     if (opts.skip !== 'protocol' && selProtocol.size && !it.protocols.some((p) => selProtocol.has(p))) return false;
     if (opts.skip !== 'ecosystem' && selEcosystem.size && !selEcosystem.has(it.ecosystem)) return false;

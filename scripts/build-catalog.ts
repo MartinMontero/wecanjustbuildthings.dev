@@ -368,6 +368,14 @@ function yamlString(value: string): string {
   return JSON.stringify(value);
 }
 
+/** Normalize out the volatile verified_at datestamp so a regen can detect when
+ *  an entry differs ONLY by its stamp — and skip rewriting it. Without this,
+ *  every run rewrites all ~1,300 files (stamp = today), producing a useless
+ *  whole-catalog diff that buries the entries that actually changed. */
+function stripVolatile(s: string): string {
+  return s.replace(/^verified_at: .*$/m, 'verified_at: <stamp>');
+}
+
 /** Display text for a URL link that won't be re-autolinked by MDX/GFM (which
  *  turns `http(s)://…` and `www.…` literals into nested anchors → empty links). */
 function displayUrl(u: string): string {
@@ -555,7 +563,12 @@ This entry was screened against the [exclusion policy](/policies/)${originAdviso
 `;
 
   mkdirSync(OUT_DIR, { recursive: true });
-  writeFileSync(join(OUT_DIR, `${slug}.mdx`), body, 'utf8');
+  const outPath = join(OUT_DIR, `${slug}.mdx`);
+  // Only write when something other than the datestamp changed, so regens stay
+  // reviewable (the existing file keeps its prior verified_at when unchanged).
+  if (!(existsSync(outPath) && stripVolatile(readFileSync(outPath, 'utf8')) === stripVolatile(body))) {
+    writeFileSync(outPath, body, 'utf8');
+  }
   return { slug, name: row.name, ecosystem: row.ecosystem, license_spdx: spdx, verification_status };
 }
 

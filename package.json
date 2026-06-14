@@ -25,7 +25,7 @@
     "enforce:layer1": "tsx enforcement/cli.ts layer1 --catalog src/content/docs/catalog",
     "enforce:layer2": "tsx enforcement/cli.ts layer2 --catalog src/content/docs/catalog",
     "enforce:layer3": "tsx enforcement/cli.ts layer3 --catalog src/content/docs/catalog --recipes src/content/docs/recipes",
-    "test": "node --import tsx --test \"enforcement/tests/**/*.test.ts\"",
+    "test": "node --import tsx --test \"enforcement/tests/**/*.test.ts\" \"worker/tests/**/*.test.ts\"",
     "a11y": "node scripts/a11y-check.mjs",
     "lhci": "lhci autorun",
     "typecheck:tools": "tsc -p enforcement/tsconfig.json",
