@@ -212,6 +212,7 @@
 
 <style>
   .explorer { margin: 1rem 0 2rem; }
+  .explorer :focus-visible { outline: var(--wcb-focus-width) solid var(--wcb-focus-color); outline-offset: var(--wcb-focus-offset); border-radius: var(--wcb-radius-sm); }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
   .cat-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; text-decoration: none; color: var(--sl-color-text); background: color-mix(in srgb, var(--sl-color-accent) 9%, transparent); border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.8rem 1rem; margin-bottom: 1.1rem; }
   .cat-cta span:first-child { flex: 1 1 18rem; font-size: 0.92rem; }
@@ -251,9 +252,9 @@
   .card-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
   .badge { font-size: 0.72rem; font-weight: 600; padding: 0.18rem 0.45rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 4px; background: var(--sl-color-gray-6); color: var(--sl-color-text); }
-  .badge--verified, .badge--active { border-left-color: #2da44e; }
-  .badge--under_review, .badge--minimal { border-left-color: #bf8700; }
-  .badge--blocked, .badge--abandoned { border-left-color: #cf222e; }
-  .badge--dormant, .badge--advisory { border-left-color: #bc4c00; }
+  .badge--verified, .badge--active { border-left-color: var(--wcb-success-edge); }
+  .badge--under_review, .badge--minimal { border-left-color: var(--wcb-warning-edge); }
+  .badge--blocked, .badge--abandoned { border-left-color: var(--wcb-danger-edge); }
+  .badge--dormant, .badge--advisory { border-left-color: var(--wcb-caution-edge); }
   .more { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
 </style>

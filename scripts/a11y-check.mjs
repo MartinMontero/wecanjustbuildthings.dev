@@ -82,7 +82,7 @@ try {
     const page = await context.newPage();
     await page.goto(`${BASE}${path}`, { waitUntil: 'load' });
     const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
     const serious = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
     if (serious.length > 0) {

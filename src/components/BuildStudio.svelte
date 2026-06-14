@@ -968,20 +968,23 @@ manuals with the knowledge-to-skills-pipeline).
 
 <style>
   .studio { margin: 1rem 0 2rem; }
+  /* WCAG 2.2: a visible focus ring on every control; small pills clear the 24px target floor. */
+  .studio :focus-visible { outline: var(--wcb-focus-width) solid var(--wcb-focus-color); outline-offset: var(--wcb-focus-offset); border-radius: var(--wcb-radius-sm); }
+  .studio .toggle, .studio .apply, .studio .lang { min-height: var(--wcb-target-min); }
   .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; margin-bottom: 0.5rem; }
   .lang { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
-  .lang.on { background: var(--sl-color-accent); color: #fff; border-color: var(--sl-color-accent); }
+  .lang.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
   .steps { display: flex; gap: 0.5rem; list-style: none; padding: 0; margin: 0 0 1.25rem; }
   .steps li { flex: 1; }
   .steps button { width: 100%; padding: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); border-radius: 0.5rem; cursor: pointer; font-weight: 600; }
-  .steps li.on button { background: var(--sl-color-accent); color: #fff; border-color: var(--sl-color-accent); }
+  .steps li.on button { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
   .panel { display: flex; flex-direction: column; gap: 1rem; }
   .field { display: flex; flex-direction: column; gap: 0.35rem; }
   .field > span { font-weight: 600; font-size: 0.9rem; }
   input, textarea, select { padding: 0.55rem 0.7rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; background: var(--sl-color-black); color: var(--sl-color-white); font: inherit; }
   .chips, .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .chip { padding: 0.35rem 0.8rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
-  .chip.on { background: var(--sl-color-accent); color: #fff; border-color: var(--sl-color-accent); }
+  .chip.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
   .tabs button { padding: 0.45rem 0.8rem; border-radius: 0.5rem 0.5rem 0 0; border: 1px solid var(--sl-color-gray-6); background: transparent; color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
   .tabs button.on { background: var(--sl-color-gray-6); border-color: var(--sl-color-gray-5); }
   .hpanel { border: 1px solid var(--sl-color-gray-5); border-radius: 0 0.5rem 0.5rem 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
@@ -993,9 +996,9 @@ manuals with the knowledge-to-skills-pipeline).
   .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
   .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
-  .vbadge--verified { border-left-color: #2da44e; }
-  .vbadge--under_review { border-left-color: #bf8700; }
-  .vbadge--blocked { border-left-color: #cf222e; }
+  .vbadge--verified { border-left-color: var(--wcb-success-edge); }
+  .vbadge--under_review { border-left-color: var(--wcb-warning-edge); }
+  .vbadge--blocked { border-left-color: var(--wcb-danger-edge); }
   .examples { display: flex; flex-direction: column; gap: 0.4rem; }
   .chip.ex { text-align: start; font-size: 0.82rem; max-width: 100%; white-space: normal; line-height: 1.3; }
   .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
@@ -1009,8 +1012,8 @@ manuals with the knowledge-to-skills-pipeline).
   .proposal { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.6rem 0.8rem; }
   .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
   .prop-name { font-weight: 700; }
-  .apply { background: var(--sl-color-accent); color: #fff; border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-  .applied { font-size: 0.78rem; font-weight: 700; color: #2da44e; }
+  .apply { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+  .applied { font-size: 0.78rem; font-weight: 700; color: var(--wcb-success-text); }
   .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
   .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .skillsbox > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 600; }
@@ -1044,10 +1047,10 @@ manuals with the knowledge-to-skills-pipeline).
   .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: 0.5rem; background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
   .nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; }
   .nav button { padding: 0.55rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
-  .primary { background: var(--sl-color-accent); color: #fff; border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }
+  .primary { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }
   .big { font-size: 1.05rem; padding: 0.7rem 1.3rem; }
   .hint { color: var(--sl-color-gray-2); font-size: 0.9rem; }
-  .err { color: #ff7b72; font-size: 0.9rem; }
+  .err { color: var(--wcb-danger-text); font-size: 0.9rem; }
   .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; text-decoration: underline; font: inherit; }
   .copyp { align-self: flex-start; }
   details { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; }

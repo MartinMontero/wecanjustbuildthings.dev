@@ -1,6 +1,15 @@
-/* We Can Just Build Things — Starlight theme overrides.
-   Purple accent (freedom-tech / Nostr lineage), high-contrast, no web fonts
-   (system stack only) to keep the site fast and tracker-free. */
+/* We Can Just Build Things — design system for Starlight.
+
+   Built against the project's Design Field Manual (Apple HIG × Material 3):
+   - TOKENS ARE THE SOURCE OF TRUTH. Components reference these custom
+     properties; they never hard-code hex values or pixel literals.
+   - Material's token discipline + Apple's restraint (subtle depth, deference).
+   - WCAG 2.2 AA is the floor: 4.5:1 body text, 3:1 large/non-text, a visible
+     :focus-visible ring on every control, honored reduced-motion. Status is
+     never colour alone — a text label always carries the meaning.
+
+   Purple accent (freedom-tech / Nostr lineage); system font stack only, so the
+   site stays fast and tracker-free (no web fonts). */
 
 :root {
   --sl-color-accent-low: #241152;
@@ -11,54 +20,112 @@
     Roboto, Helvetica, Arial, sans-serif;
   --sl-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
     'Liberation Mono', monospace;
+
+  /* --- Spacing — 8px grid (4px sub-grid for fine work) --- */
+  --wcb-space-3xs: 0.25rem; /* 4px  */
+  --wcb-space-2xs: 0.5rem;  /* 8px  */
+  --wcb-space-xs: 0.75rem;  /* 12px */
+  --wcb-space-sm: 1rem;     /* 16px */
+  --wcb-space-md: 1.5rem;   /* 24px */
+  --wcb-space-lg: 2rem;     /* 32px */
+  --wcb-space-xl: 3rem;     /* 48px */
+
+  /* --- Radius — continuous-ish corners (Apple), Material scale --- */
+  --wcb-radius-sm: 0.5rem;  /* 8px  */
+  --wcb-radius-md: 1rem;    /* 16px */
+  --wcb-radius-pill: 999px;
+
+  /* --- Motion — purposeful; standard easing (M3) --- */
+  --wcb-motion-fast: 120ms;
+  --wcb-motion-standard: 200ms;
+  --wcb-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* --- Interaction --- */
+  --wcb-target-min: 1.75rem;            /* 28px — clears the WCAG 2.2 24px floor */
+  --wcb-focus-width: 2px;
+  --wcb-focus-offset: 2px;
+  --wcb-focus-color: var(--sl-color-accent-high); /* accent-high flips per theme, so it shows on both */
+
+  /* On a filled accent surface, white text clears 4.5:1 on the purple in both themes. */
+  --wcb-on-accent: #ffffff;
+
+  /* --- Feedback / status colours ---
+     "-edge"  = decorative indicator (left borders, dots, rings) — kept ≥3:1.
+     "-text"  = used AS text — ≥4.5:1 against the page background.
+     These are the dark-theme defaults; light overrides below. */
+  --wcb-success-edge: #2da44e;
+  --wcb-success-text: #3fb950;
+  --wcb-warning-edge: #bf8700;
+  --wcb-warning-text: #d29922;
+  --wcb-danger-edge: #cf222e;
+  --wcb-danger-text: #ff7b72;
+  --wcb-caution-edge: #bc4c00;
+  --wcb-caution-text: #db6d28;
 }
 
 :root[data-theme='light'] {
   --sl-color-accent-low: #d7c7f7;
   --sl-color-accent: #5a2db8;
   --sl-color-accent-high: #2a1259;
+
+  /* Darker text variants so feedback text clears 4.5:1 on light surfaces. */
+  --wcb-success-text: #1a7f37;
+  --wcb-warning-text: #9a6700;
+  --wcb-danger-text: #cf222e;
+  --wcb-caution-text: #9a4d00;
 }
 
-/* Status pills used across catalog entries and PIE pages. */
+/* Motion should clarify, not perform — honor the user's reduced-motion choice. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Status pills used across catalog entries and PIE pages. Status is conveyed by
+   the (left) border colour AND the text label — never colour alone — so the
+   label always uses the theme's high-contrast body colour (WCAG AA on both
+   themes). */
 .wcb-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0.75rem 0 1.25rem;
+  gap: var(--wcb-space-3xs);
+  margin: var(--wcb-space-xs) 0 var(--wcb-space-md);
 }
-/* Status is conveyed by the (left) border colour, not the text colour, so the
-   label always uses the theme's high-contrast body colour and passes WCAG AA on
-   both light and dark themes. The text itself ("verified", "active", …) carries
-   the meaning — never colour alone. */
 .wcb-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: var(--wcb-space-3xs);
   font-size: 0.78rem;
   font-weight: 600;
   line-height: 1;
   padding: 0.32rem 0.55rem;
-  border-radius: 999px;
+  border-radius: var(--wcb-radius-pill);
   border: 1px solid var(--sl-color-gray-5);
   border-left-width: 4px;
   background: var(--sl-color-gray-6);
   color: var(--sl-color-text);
 }
-.wcb-badge--verified { border-left-color: #2da44e; }
-.wcb-badge--blocked { border-left-color: #cf222e; }
-.wcb-badge--under_review { border-left-color: #bf8700; }
-.wcb-badge--active { border-left-color: #2da44e; }
-.wcb-badge--minimal { border-left-color: #bf8700; }
-.wcb-badge--dormant { border-left-color: #bc4c00; }
-.wcb-badge--abandoned { border-left-color: #cf222e; }
-.wcb-badge--advisory { border-left-color: #bc4c00; }
+.wcb-badge--verified { border-left-color: var(--wcb-success-edge); }
+.wcb-badge--blocked { border-left-color: var(--wcb-danger-edge); }
+.wcb-badge--under_review { border-left-color: var(--wcb-warning-edge); }
+.wcb-badge--active { border-left-color: var(--wcb-success-edge); }
+.wcb-badge--minimal { border-left-color: var(--wcb-warning-edge); }
+.wcb-badge--dormant { border-left-color: var(--wcb-caution-edge); }
+.wcb-badge--abandoned { border-left-color: var(--wcb-danger-edge); }
+.wcb-badge--advisory { border-left-color: var(--wcb-caution-edge); }
 
 /* Compact definition grid for catalog entry metadata. */
 .wcb-meta {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 0.35rem 1rem;
-  margin: 1rem 0 1.5rem;
+  gap: var(--wcb-space-3xs) var(--wcb-space-sm);
+  margin: var(--wcb-space-sm) 0 var(--wcb-space-md);
   font-size: 0.9rem;
 }
 .wcb-meta dt { font-weight: 600; color: var(--sl-color-gray-2); }
