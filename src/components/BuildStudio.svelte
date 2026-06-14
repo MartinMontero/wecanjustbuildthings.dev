@@ -60,6 +60,7 @@
       refineErr: 'Couldn’t reach the model. Check your key and try again.', refineNeedKey: 'Enter your AI key above first.',
       skillsHint: 'Have a field guide, manual, or SOP? Turn your own know-how into a skill your agent follows →',
       designHint: 'New to design? The Design Field Guide teaches you to direct the look — in plain words, no jargon →',
+      designHintShort: 'the five moves', cardCopy: 'Copy', cardCopyAsk: 'Copy the ask',
       skillsDraft: 'Skills I can scaffold from what you told me', skillsReady: 'Or drop in a ready-made skill',
       skillAdd: 'Add to my project', skillAdded: 'Added ✓',
       skillReview: 'A draft in your words — review and refine it; you’re the expert.',
@@ -113,6 +114,7 @@
       refineErr: 'No se pudo contactar al modelo. Revisa tu clave e inténtalo de nuevo.', refineNeedKey: 'Primero ingresa tu clave de IA arriba.',
       skillsHint: '¿Tienes una guía de campo, un manual o un procedimiento? Convierte tu propio saber en una habilidad que tu agente sigue →',
       designHint: '¿Nuevo en diseño? La Guía de Diseño te enseña a dirigir el aspecto — en palabras claras, sin jerga →',
+      designHintShort: 'los cinco movimientos', cardCopy: 'Copiar', cardCopyAsk: 'Copiar la frase',
       skillsDraft: 'Habilidades que puedo crear a partir de lo que me contaste', skillsReady: 'O agrega una habilidad lista para usar',
       skillAdd: 'Añadir a mi proyecto', skillAdded: 'Añadida ✓',
       skillReview: 'Un borrador en tus palabras — revísalo y ajústalo; tú eres quien sabe.',
@@ -166,6 +168,7 @@
       refineErr: 'تعذّر الوصول إلى النموذج. تحقّق من مفتاحك وحاول مجدداً.', refineNeedKey: 'أدخل مفتاح الذكاء الاصطناعي أعلاه أولاً.',
       skillsHint: 'لديك دليل ميداني أو كُتيّب أو إجراء عمل؟ حوّل معرفتك إلى مهارة يتّبعها وكيلك ←',
       designHint: 'جديد على التصميم؟ دليل التصميم يعلّمك توجيه المظهر — بكلمات واضحة بلا مصطلحات ←',
+      designHintShort: 'الحركات الخمس', cardCopy: 'نسخ', cardCopyAsk: 'انسخ الجملة',
       skillsDraft: 'مهارات يمكنني إنشاؤها مما أخبرتني به', skillsReady: 'أو أضِف مهارة جاهزة',
       skillAdd: 'أضِف إلى مشروعي', skillAdded: 'أُضيفت ✓',
       skillReview: 'مسودة بكلماتك — راجعها وحسّنها؛ أنت صاحب الخبرة.',
@@ -175,6 +178,70 @@
   let lang = $state<Lang>((['en', 'es', 'ar'].includes(initialLang) ? initialLang : 'en') as Lang);
   const t = $derived(STR[lang]);
   const rtl = $derived(lang === 'ar');
+
+  // ---------- Design Field Card (pocket quick-reference, localized) ----------
+  // The five craft moves with copy-ready "ask your agent" prompts, the two
+  // pocket prompts, and the pre-ship checklist. Companion to the full guide.
+  interface CardMove { title: string; spot: string; ask: string }
+  interface FieldCard {
+    title: string; intro: string; moves: CardMove[];
+    accessLabel: string; accessPrompt: string; optionsLabel: string; optionsPrompt: string;
+    shipLabel: string; ship: string[]; full: string;
+  }
+  const CARD: Record<Lang, FieldCard> = {
+    en: {
+      title: 'Design Field Card', intro: 'Start with your people. Then make these five moves on every screen.',
+      moves: [
+        { title: 'Make the important thing obvious', spot: 'Squint — does the right thing stand out?', ask: 'Strengthen the hierarchy: make the main action stand out, quiet the rest.' },
+        { title: 'Less, but better', spot: 'Remove first, then add room. Cramped reads amateur; space reads pro.', ask: "This feels cluttered — add whitespace and cut what isn't essential." },
+        { title: 'Decide once, repeat everywhere', spot: 'One set of colours, spacing, and buttons — reused on every screen.', ask: 'Make buttons, spacing, and styles consistent across every screen.' },
+        { title: 'Clear what to do, and what happened', spot: 'Tappable things look tappable. Every action gets a response.', ask: 'Make actions obviously tappable and add feedback for every one.' },
+        { title: 'Smooth the path', spot: 'Map the journey. Cut steps. Always show the next step.', ask: 'Map this flow, cut steps, and make the next step obvious.' },
+      ],
+      accessLabel: 'Paste every build — accessibility',
+      accessPrompt: 'Make this meet WCAG 2.2 AA: readable contrast, large tap targets, full keyboard navigation with visible focus, screen-reader support, and respect for reduced-motion and dark-mode settings.',
+      optionsLabel: 'For any decision — options',
+      optionsPrompt: 'Show me 2–3 different versions so I can compare, pick, and show the community.',
+      shipLabel: 'Before you ship',
+      ship: ['Squint — does the right thing stand out?', 'Breathe — does it feel roomy, not cramped?', 'Match — are colours, spacing, and buttons consistent?', 'Stranger — could a first-timer do the main task in silence?', 'Welcome — can someone with low vision, a screen reader, or an old phone use it?', 'Belong — would your community feel this was made by us, for us?'],
+      full: 'Read the full Design Field Guide →',
+    },
+    es: {
+      title: 'Tarjeta de diseño', intro: 'Empieza por tu gente. Luego haz estos cinco movimientos en cada pantalla.',
+      moves: [
+        { title: 'Haz obvio lo importante', spot: 'Entrecierra los ojos — ¿resalta lo correcto?', ask: 'Refuerza la jerarquía: que la acción principal destaque y lo demás quede más callado.' },
+        { title: 'Menos, pero mejor', spot: 'Primero quita, luego da espacio. Lo apretado parece amateur; el espacio, profesional.', ask: 'Esto se siente saturado — añade espacio en blanco y quita lo que no es esencial.' },
+        { title: 'Decide una vez, repite en todas partes', spot: 'Un solo set de colores, espaciado y botones — reutilizado en cada pantalla.', ask: 'Haz que botones, espaciado y estilos sean consistentes en todas las pantallas.' },
+        { title: 'Claro qué hacer y qué pasó', spot: 'Lo tocable parece tocable. Cada acción recibe respuesta.', ask: 'Haz que las acciones se vean claramente tocables y añade respuesta a cada una.' },
+        { title: 'Suaviza el camino', spot: 'Mapea el recorrido. Recorta pasos. Muestra siempre el siguiente.', ask: 'Mapea este flujo, recorta pasos y deja claro el siguiente paso.' },
+      ],
+      accessLabel: 'Pega en cada build — accesibilidad',
+      accessPrompt: 'Haz que esto cumpla WCAG 2.2 AA: contraste legible, áreas de toque grandes, navegación completa por teclado con foco visible, soporte de lector de pantalla, y respeto a las preferencias de movimiento reducido y modo oscuro.',
+      optionsLabel: 'Para cualquier decisión — opciones',
+      optionsPrompt: 'Muéstrame 2–3 versiones distintas para comparar, elegir y enseñar a la comunidad.',
+      shipLabel: 'Antes de publicar',
+      ship: ['Entrecierra — ¿resalta lo correcto?', 'Respira — ¿se siente amplio, no apretado?', 'Coincide — ¿colores, espaciado y botones son consistentes?', 'Desconocido — ¿podría alguien nuevo hacer la tarea en silencio?', 'Bienvenida — ¿puede usarlo alguien con baja visión, lector de pantalla o un teléfono viejo?', 'Pertenencia — ¿sentiría tu comunidad que se hizo por nosotros, para nosotros?'],
+      full: 'Lee la Guía de Diseño completa →',
+    },
+    ar: {
+      title: 'بطاقة التصميم', intro: 'ابدأ بناسك. ثم نفّذ هذه الحركات الخمس في كل شاشة.',
+      moves: [
+        { title: 'اجعل المهم واضحاً', spot: 'حدّق بعينين نصف مغمضتين — هل يبرز الشيء الصحيح؟', ask: 'قوِّ التسلسل البصري: اجعل الإجراء الرئيسي يبرز، واخفض البقية.' },
+        { title: 'أقل، لكن أفضل', spot: 'احذف أولاً ثم أضِف مساحة. الازدحام يبدو هاوياً؛ المساحة تبدو احترافية.', ask: 'هذا يبدو مزدحماً — أضِف مساحة بيضاء واحذف ما ليس ضرورياً.' },
+        { title: 'قرّر مرة، وكرّر في كل مكان', spot: 'مجموعة واحدة من الألوان والمسافات والأزرار — تُعاد في كل شاشة.', ask: 'اجعل الأزرار والمسافات والأنماط متسقة في كل الشاشات.' },
+        { title: 'وضّح ماذا تفعل وماذا حدث', spot: 'القابل للنقر يبدو قابلاً للنقر. كل إجراء يحصل على استجابة.', ask: 'اجعل الإجراءات واضحة القابلية للنقر وأضِف استجابة لكل منها.' },
+        { title: 'مهّد الطريق', spot: 'ارسم الرحلة. اختصر الخطوات. أظهِر دائماً الخطوة التالية.', ask: 'ارسم هذا المسار، واختصر الخطوات، ووضّح الخطوة التالية.' },
+      ],
+      accessLabel: 'الصقها في كل build — إمكانية الوصول',
+      accessPrompt: 'اجعل هذا يحقق WCAG 2.2 AA: تباين مقروء، أهداف لمس كبيرة، تنقّل كامل بلوحة المفاتيح مع تركيز مرئي، دعم قارئ الشاشة، واحترام إعدادات تقليل الحركة والوضع الداكن.',
+      optionsLabel: 'لأي قرار — خيارات',
+      optionsPrompt: 'أرني ٢–٣ نسخ مختلفة لأقارن وأختار وأعرضها على المجتمع.',
+      shipLabel: 'قبل الإطلاق',
+      ship: ['حدّق — هل يبرز الشيء الصحيح؟', 'تنفّس — هل يبدو فسيحاً لا مزدحماً؟', 'تطابق — هل الألوان والمسافات والأزرار متسقة؟', 'غريب — هل يستطيع مستخدم جديد إنجاز المهمة بصمت؟', 'ترحيب — هل يستطيع استخدامه شخص ضعيف البصر أو بقارئ شاشة أو بهاتف قديم؟', 'انتماء — هل سيشعر مجتمعك أنه صُنع بأيدينا، لنا؟'],
+      full: 'اقرأ دليل التصميم الكامل ←',
+    },
+  };
+  const card = $derived(CARD[lang]);
 
   // ---------- state ----------
   let items = $state<Item[]>([]);
@@ -505,13 +572,23 @@ manuals with the knowledge-to-skills-pipeline).
       '.specify/memory/constitution.md': constitution,
       [`specs/001-${slug}/spec.md`]: spec,
       [`${slug}.goose-recipe.yaml`]: gooseRecipe,
-      '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; run the enforcement engine before committing.\n`,
+      '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; keep DESIGN-CARD.md in mind for every screen; run the enforcement engine before committing.\n`,
+      'DESIGN-CARD.md': designCardMd(),
       'skills/README.md': skillsReadme,
       // The example is just a placeholder; once the builder has real skills, ship those instead.
       ...(skillCount ? {} : { 'skills/example.SKILL.md': skillExample }),
       ...customSkills,
     };
     return files;
+  }
+
+  // The Design Field Card, as a Markdown file that travels with the project — a
+  // pocket reference for the builder and a design checklist the agent can follow.
+  function designCardMd(): string {
+    const c = CARD.en; // the file ships in English alongside the (English) constitution
+    const moves = c.moves.map((m, i) => `${i + 1}. **${m.title}** — ${m.spot}\n   _Ask:_ ${m.ask}`).join('\n');
+    const ship = c.ship.map((s) => `- ${s}`).join('\n');
+    return `# Design Field Card\n\n${c.intro}\n\n## The five moves\n${moves}\n\n## ${c.accessLabel}\n\n    ${c.accessPrompt}\n\n## ${c.optionsLabel}\n\n    ${c.optionsPrompt}\n\n## ${c.shipLabel}\n${ship}\n\n---\nFull guide: https://wecanjustbuildthings.dev/guides/design-for-your-community/\n`;
   }
 
   let copied = $state('');
@@ -976,6 +1053,33 @@ manuals with the knowledge-to-skills-pipeline).
       {@render artifact('The plan (spec.md)', 's', spec)}
       {@render artifact('The tools list (package.json)', 'pkg', packageJson)}
 
+      <details class="card">
+        <summary>{card.title} — {t.designHintShort}</summary>
+        <p class="hint">{card.intro}</p>
+        <ol class="moves card-moves">
+          {#each card.moves as m, i}
+            <li class="piece">
+              <div class="piece-head"><span class="role">{m.title}</span>
+                <button class="apply" onclick={() => copy(`cm${i}`, m.ask)}>{copied === `cm${i}` ? '✓' : t.cardCopyAsk}</button>
+              </div>
+              <p class="piece-why">{m.spot}</p>
+              <p class="piece-connects"><em>{m.ask}</em></p>
+            </li>
+          {/each}
+        </ol>
+        <div class="card-prompt">
+          <div class="prop-head"><span class="prop-name">{card.accessLabel}</span><button class="apply" onclick={() => copy('ca', card.accessPrompt)}>{copied === 'ca' ? '✓' : t.cardCopy}</button></div>
+          <pre><code>{card.accessPrompt}</code></pre>
+        </div>
+        <div class="card-prompt">
+          <div class="prop-head"><span class="prop-name">{card.optionsLabel}</span><button class="apply" onclick={() => copy('co', card.optionsPrompt)}>{copied === 'co' ? '✓' : t.cardCopy}</button></div>
+          <pre><code>{card.optionsPrompt}</code></pre>
+        </div>
+        <p class="bp-sub">{card.shipLabel}</p>
+        <ul class="ship">{#each card.ship as s}<li>{s}</li>{/each}</ul>
+        <p class="hint"><a href="/guides/design-for-your-community/">{card.full}</a></p>
+      </details>
+
       <div class="nav"><button onclick={() => (step = 2)}>{t.backStack}</button></div>
     </section>
   {/if}
@@ -1030,6 +1134,11 @@ manuals with the knowledge-to-skills-pipeline).
   .apply { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 0; border-radius: var(--wcb-radius-pill); padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
   .applied { font-size: 0.78rem; font-weight: 700; color: var(--wcb-success-text); }
   .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
+  .card { border: 1px solid var(--sl-color-accent); border-radius: var(--wcb-radius-sm); padding: 0.6rem 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent); }
+  .card > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 700; }
+  .card-prompt { border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.7rem; }
+  .card-prompt pre { margin: var(--wcb-space-3xs) 0 0; }
+  .ship { margin: 0; padding-inline-start: 1.1rem; display: grid; gap: var(--wcb-space-3xs); font-size: 0.88rem; color: var(--sl-color-text); }
   .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .skillsbox > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 600; }
   .skilllist { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--wcb-space-2xs); }
