@@ -11,6 +11,14 @@ The [Build Studio](/build/)'s **Create GitHub repo** option pushes your generate
 starter (constitution, spec, agent prompt, recipe, `package.json`) straight to a
 brand-new repository — no zip, no terminal.
 
+<Aside type="tip" title="It's your account, your repo">
+Every builder connects **their own** GitHub account. When you click *Connect
+GitHub*, you sign in as you, the repo is created in **your** account, and the
+access token lives only in your browser for a few minutes — never on our server,
+never shared with anyone else. The maintainer registers the app once (step
+below); after that, each builder authorizes it for themselves.
+</Aside>
+
 ## For builders
 
 <Steps>
@@ -35,8 +43,11 @@ held only for the moment of creation.
 
 ## For the maintainer (one-time setup)
 
-The one-click needs a GitHub OAuth app and two Worker secrets. Until these are
-set, the Studio shows a "not configured" message and offers the `.zip` instead.
+The one-click needs **one** GitHub OAuth app and two Worker secrets — registered
+once, for the whole deployment. This is the app's *identity* (the name builders
+see on GitHub's authorization screen), not a personal access token: it simply
+lets any builder authorize with their own account. Until these are set, the
+Studio shows a "not configured" message and offers the `.zip` instead.
 
 <Steps>
 

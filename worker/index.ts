@@ -15,9 +15,14 @@
  */
 export interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
-  GITHUB_TOKEN?: string;
+  // The OAuth *app* identity — registered once by the maintainer. This is NOT a
+  // per-user credential: every builder authorizes with their own GitHub account,
+  // and repos are created with that builder's own token (see githubCreate).
   GITHUB_OAUTH_CLIENT_ID?: string;
   GITHUB_OAUTH_CLIENT_SECRET?: string;
+  // NOTE: deliberately no shared GITHUB_TOKEN. Repo creation MUST use each
+  // builder's own OAuth token (the gh_token cookie) so repos land in their
+  // account, not the maintainer's. Do not add a server token fallback here.
 }
 
 const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';
