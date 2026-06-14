@@ -105,12 +105,28 @@
 </script>
 
 <div class="explorer">
+  <div class="cat-intro">
+    <p>
+      Think of this as a vetted shelf of <strong>building blocks</strong> — ready-made tools,
+      libraries, and services your project (and your AI agent) can use instead of building from
+      scratch. Every entry here has already been checked two ways: nothing owned by Meta, OpenAI,
+      or xAI gets in, and each one’s license was confirmed. Search by what it does, or use the
+      filters to narrow things down. Not sure what something is? Open it — each page explains it in
+      plain terms.
+    </p>
+    <ul class="cat-legend">
+      <li><span class="badge badge--verified">verified</span> license confirmed at a specific version</li>
+      <li><span class="badge badge--under_review">under review</span> looks right, not yet fully confirmed</li>
+      <li><span class="badge badge--active">active</span> recently kept up to date</li>
+      <li><span class="badge badge--advisory">origin</span> made by an excluded company but safe &amp; freely licensed — your call</li>
+    </ul>
+  </div>
   <div class="toolbar">
     <label class="search">
       <span class="sr-only">Search the catalog</span>
       <input
         type="search"
-        placeholder="Search {items.length || ''} tools — name, purpose, ecosystem…"
+        placeholder="Search {items.length || ''} tools by name or what they do…"
         bind:value={q}
         oninput={() => (limit = 60)}
       />
@@ -127,7 +143,7 @@
   {#if loading}
     <p class="status">Loading the catalog…</p>
   {:else if failed}
-    <p class="status">Couldn’t load <code>/catalog.json</code>. Try a hard refresh.</p>
+    <p class="status">Couldn’t load the catalog. Try refreshing the page.</p>
   {:else}
     <div class="layout">
       <aside class="facets" aria-label="Filters">
@@ -151,10 +167,10 @@
           </fieldset>
         {/snippet}
 
-        {@render group('Kind', kindFacet, selKind, (s) => (selKind = s))}
-        {@render group('Protocol', protocolFacet, selProtocol, (s) => (selProtocol = s))}
-        {@render group('Ecosystem', ecosystemFacet, selEcosystem, (s) => (selEcosystem = s))}
-        {@render group('Verification', verificationFacet, selVerification, (s) => (selVerification = s))}
+        {@render group('Type', kindFacet, selKind, (s) => (selKind = s))}
+        {@render group('Network', protocolFacet, selProtocol, (s) => (selProtocol = s))}
+        {@render group('Language / platform', ecosystemFacet, selEcosystem, (s) => (selEcosystem = s))}
+        {@render group('How thoroughly checked', verificationFacet, selVerification, (s) => (selVerification = s))}
         {@render group('Category', categoryFacet, selCategory, (s) => (selCategory = s))}
       </aside>
 
@@ -168,7 +184,7 @@
               <div class="card-top">
                 <a class="card-name" href={it.url}>{it.name}</a>
                 <span class="badges">
-                  <span class="badge badge--{it.verification}">{it.verification}</span>
+                  <span class="badge badge--{it.verification}">{it.verification.replace('_', ' ')}</span>
                   <span class="badge badge--{it.maintenance}">{it.maintenance}</span>
                   {#if it.advisory}<span class="badge badge--advisory">{it.advisory}-origin</span>{/if}
                 </span>
@@ -176,7 +192,7 @@
               <p class="card-desc">{it.desc}</p>
               <div class="card-meta">
                 <span>{it.ecosystem}</span> · <span>{it.license}</span> · <span>{it.category}</span>
-                {#if it.uses > 0}· <span>{it.uses} AOS repo{it.uses === 1 ? '' : 's'}</span>{/if}
+                {#if it.uses > 0}· <span>used in {it.uses} audited project{it.uses === 1 ? '' : 's'}</span>{/if}
               </div>
             </li>
           {/each}
@@ -192,6 +208,10 @@
 <style>
   .explorer { margin: 1rem 0 2rem; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .cat-intro { border-inline-start: 3px solid var(--sl-color-accent); padding: 0.1rem 0 0.1rem 0.9rem; margin-bottom: 1.1rem; }
+  .cat-intro p { margin: 0 0 0.6rem; color: var(--sl-color-text); font-size: 0.95rem; max-width: 60ch; }
+  .cat-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; font-size: 0.82rem; color: var(--sl-color-gray-2); }
+  .cat-legend li { display: flex; align-items: center; gap: 0.4rem; }
   .toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end; margin-bottom: 1rem; }
   .search { flex: 1 1 18rem; }
   .search input {

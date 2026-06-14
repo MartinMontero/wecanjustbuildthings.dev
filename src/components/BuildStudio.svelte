@@ -13,76 +13,103 @@
   type Lang = 'en' | 'es' | 'ar';
   const STR: Record<Lang, Record<string, string>> = {
     en: {
-      s1: '1 · Describe', s2: '2 · Choose stack', s3: '3 · Generate',
-      name: 'Project name', problem: 'What problem does it solve? (one paragraph)',
-      why: 'Why — the goal behind it? (the real objective, not a convenient proxy)',
-      success: 'What does success actually look like?', protocols: 'Protocols', focus: 'Focus',
-      tenq: 'These are the Ten Questions, distilled — answer the intent, not just the task.',
-      choose: 'Choose your stack →', back: '← Back', gen: 'Generate →', backStack: '← Back to stack',
-      suggested: 'Suggested from the catalog — toggle what you want; every option is policy-clean.',
-      add: 'Add another tool', selected: 'tools selected', loading: 'Loading catalog…',
-      handoff: 'How do you want to start?', zip: 'Download .zip', github: 'Create GitHub repo',
-      goose: 'Run with Goose', kickoff: 'Kickoff with AI (BYOK)',
-      dlzip: '⬇ Download starter repo (.zip)', copyPrompt: 'Copy agent prompt',
-      runLocal: 'Get started with Goose →', ghGuide: 'How to connect GitHub →',
-      apikey: 'Your API key (BYOK — sent only to the provider, never stored)',
-      provider: 'Provider (permitted only)', run: 'Run kickoff', running: 'Running…',
-      ghError: 'GitHub authorization didn’t complete. Try again, or download the .zip below.',
-      stackIntro: 'A starting stack, scored to the intent you described. Every option below already passed the exclusion policy — nothing here is owned by Meta, OpenAI, or xAI. Toggle what fits; you can search for more, and nothing is locked in.',
-      legendPrimary: '★ recommended primary SDK for your protocol',
-      legendClean: 'every option is policy-clean & license-checked',
+      s1: '1 · Describe', s2: '2 · Pick tools', s3: '3 · Your starter',
+      name: 'Project name (a short nickname is fine)',
+      problem: 'What problem does it solve, and for whom? Say it like you would out loud — one short paragraph.',
+      why: 'Why does this matter? The real change you want — not just “ship an app.”',
+      success: 'How will you know it’s working? What’s different for your community when it does.',
+      protocols: 'Which network does it live on?', focus: 'What kind of thing are you building?',
+      tenq: 'Start with the why. Answer these the way you’d explain the project to a friend — the clearer you are, the better your AI agent builds.',
+      protoHelp: 'A “network” (protocol) is the shared, open rulebook your tool plugs into — owned by no single company. Nostr and AT Protocol (Bluesky) are open social networks; pick “general” if it isn’t a social tool.',
+      choose: 'Pick your tools →', back: '← Back', gen: 'Get my starter →', backStack: '← Back to tools',
+      suggested: '',
+      add: 'Need something specific? Search the full catalog', selected: 'building blocks chosen', loading: 'Loading the catalog…',
+      handoff: 'How do you want to get started?', zip: 'Download a starter folder', github: 'Save it to GitHub',
+      goose: 'Run it with Goose', kickoff: 'Try a step with AI',
+      dlzip: '⬇ Download your starter folder (.zip)', copyPrompt: 'Copy the instructions for your AI agent',
+      runLocal: 'New to Goose? Start here →', ghGuide: 'How to connect GitHub →',
+      apikey: 'Your AI key (sent straight to the model, never stored by us)',
+      provider: 'Who makes the model', run: 'Run it', running: 'Working…',
+      ghError: 'Connecting to GitHub didn’t finish. Try again, or download the folder below.',
+      stackIntro: 'Your “stack” is just the set of ready-made building blocks — tools other people have already built and tested — that your project is made from. Choosing good ones means you and your AI agent don’t start from scratch: you assemble proven parts instead of reinventing them, which saves months and avoids dead ends. Below is a starting set picked for what you described. Not sure? Keep the ones marked ★ and the defaults — you can’t pick “wrong” here, because everything listed is already safe and checked. Add or remove anything; nothing is final.',
+      legendPrimary: '★ the recommended starting point for your network',
+      legendClean: 'every option is safe to use (no Meta/OpenAI/xAI) and license-checked',
       showMore: 'Show more tools', showFewer: 'Show fewer', showing: 'Showing', of: 'of',
       modelTitle: 'Choose your AI model',
-      modelIntro: 'You bring the key; your work never routes through Meta, OpenAI, or xAI. These options are chosen for that: accountable training, open weights you can self-host, or a neutral router locked to permitted models.',
+      modelIntro: 'This runs one planning step with your own AI key, so you can feel it work before you commit. Your key and your project go straight to the model — never stored by us, and never routed through Meta, OpenAI, or xAI. The options below are chosen for that: models trained accountably, open models you can run yourself, or a neutral router locked to allowed models.',
       modelLabel: 'Model',
+      handoffIntro: 'Your starter is ready — everything your AI agent needs to begin, with the rules and safe tools already baked in. Pick how you’d like to take it:',
+      zipDesc: 'A ready-to-open folder with everything inside: the project’s rules, the plan, the build instructions, and the list of safe tools. Hand it to Goose or Claude Code and start building.',
+      gooseDl: '⬇ Download the Goose recipe', gooseCopy: 'Copy the run command',
+      gooseDesc: 'A recipe is a one-file set of instructions Goose follows to build your project. Download it, then run the command below.',
+      ghNotReady: 'Saving straight to GitHub isn’t switched on for this site yet — download the folder instead, or read',
+      ghConnectBtn: 'Connect GitHub & save my project', ghSuccess: '✓ Your project is on GitHub:', copyPlan: 'Copy the plan',
     },
     es: {
-      s1: '1 · Describe', s2: '2 · Elige stack', s3: '3 · Genera',
-      name: 'Nombre del proyecto', problem: '¿Qué problema resuelve? (un párrafo)',
-      why: '¿Por qué — el objetivo real detrás? (no un sustituto conveniente)',
-      success: '¿Cómo se ve el éxito realmente?', protocols: 'Protocolos', focus: 'Enfoque',
-      tenq: 'Estas son las Diez Preguntas, destiladas — responde la intención, no solo la tarea.',
-      choose: 'Elige tu stack →', back: '← Atrás', gen: 'Generar →', backStack: '← Volver al stack',
-      suggested: 'Sugerido del catálogo — activa lo que quieras; todo cumple la política.',
-      add: 'Añadir otra herramienta', selected: 'herramientas elegidas', loading: 'Cargando catálogo…',
-      handoff: '¿Cómo quieres empezar?', zip: 'Descargar .zip', github: 'Crear repo en GitHub',
-      goose: 'Usar con Goose', kickoff: 'Arranque con IA (tu clave)',
-      dlzip: '⬇ Descargar repo inicial (.zip)', copyPrompt: 'Copiar prompt del agente',
-      runLocal: 'Empezar con Goose →', ghGuide: 'Cómo conectar GitHub →',
-      apikey: 'Tu clave API (solo se envía al proveedor, nunca se guarda)',
-      provider: 'Proveedor (solo permitidos)', run: 'Ejecutar arranque', running: 'Ejecutando…',
-      ghError: 'La autorización de GitHub no se completó. Inténtalo de nuevo o descarga el .zip abajo.',
-      stackIntro: 'Un stack inicial, ajustado a la intención que describiste. Cada opción ya pasó la política de exclusión — nada aquí es propiedad de Meta, OpenAI o xAI. Activa lo que encaje; puedes buscar más y nada queda fijado.',
-      legendPrimary: '★ SDK principal recomendado para tu protocolo',
-      legendClean: 'cada opción cumple la política y tiene licencia verificada',
+      s1: '1 · Describe', s2: '2 · Elige', s3: '3 · Tu kit',
+      name: 'Nombre del proyecto (un apodo corto vale)',
+      problem: '¿Qué problema resuelve y para quién? Dilo como lo dirías en voz alta — un párrafo corto.',
+      why: '¿Por qué importa? El cambio real que buscas — no solo “lanzar una app.”',
+      success: '¿Cómo sabrás que funciona? Qué cambia para tu comunidad cuando lo logra.',
+      protocols: '¿En qué red vive?', focus: '¿Qué tipo de cosa estás construyendo?',
+      tenq: 'Empieza por el porqué. Responde como si le explicaras el proyecto a un amigo — cuanto más claro seas, mejor construye tu agente de IA.',
+      protoHelp: 'Una “red” (protocolo) es el reglamento abierto y compartido al que se conecta tu herramienta — sin dueño único. Nostr y AT Protocol (Bluesky) son redes sociales abiertas; elige “general” si no es una herramienta social.',
+      choose: 'Elige tus herramientas →', back: '← Atrás', gen: 'Obtener mi kit →', backStack: '← Volver',
+      suggested: '',
+      add: '¿Necesitas algo específico? Busca en todo el catálogo', selected: 'bloques elegidos', loading: 'Cargando el catálogo…',
+      handoff: '¿Cómo quieres empezar?', zip: 'Descargar una carpeta inicial', github: 'Guardarlo en GitHub',
+      goose: 'Ejecutarlo con Goose', kickoff: 'Probar un paso con IA',
+      dlzip: '⬇ Descargar tu carpeta inicial (.zip)', copyPrompt: 'Copiar las instrucciones para tu agente de IA',
+      runLocal: '¿Nuevo en Goose? Empieza aquí →', ghGuide: 'Cómo conectar GitHub →',
+      apikey: 'Tu clave de IA (se envía directo al modelo, nunca la guardamos)',
+      provider: 'Quién hace el modelo', run: 'Ejecutar', running: 'Trabajando…',
+      ghError: 'La conexión con GitHub no terminó. Inténtalo de nuevo o descarga la carpeta abajo.',
+      stackIntro: 'Tu “stack” es simplemente el conjunto de bloques ya hechos — herramientas que otras personas ya construyeron y probaron — con los que se arma tu proyecto. Elegir buenos bloques significa que tú y tu agente de IA no empiezan de cero: ensamblas piezas probadas en vez de reinventarlas, lo que ahorra meses y evita callejones sin salida. Abajo hay un conjunto inicial elegido para lo que describiste. ¿No estás seguro? Deja los marcados con ★ y los predeterminados — aquí no puedes elegir “mal”, porque todo lo listado ya es seguro y está verificado. Agrega o quita lo que quieras; nada es definitivo.',
+      legendPrimary: '★ el punto de partida recomendado para tu red',
+      legendClean: 'cada opción es segura de usar (sin Meta/OpenAI/xAI) y con licencia verificada',
       showMore: 'Mostrar más herramientas', showFewer: 'Mostrar menos', showing: 'Mostrando', of: 'de',
       modelTitle: 'Elige tu modelo de IA',
-      modelIntro: 'Tú traes la clave; tu trabajo nunca pasa por Meta, OpenAI o xAI. Estas opciones se eligen por eso: entrenamiento responsable, pesos abiertos que puedes auto-alojar, o un enrutador neutral limitado a modelos permitidos.',
+      modelIntro: 'Esto ejecuta un paso de planificación con tu propia clave de IA, para que lo sientas funcionar antes de comprometerte. Tu clave y tu proyecto van directo al modelo — nunca los guardamos, y nunca pasan por Meta, OpenAI o xAI. Las opciones de abajo se eligen por eso: modelos entrenados de forma responsable, modelos abiertos que puedes ejecutar tú mismo, o un enrutador neutral limitado a modelos permitidos.',
       modelLabel: 'Modelo',
+      handoffIntro: 'Tu kit está listo — todo lo que tu agente de IA necesita para empezar, con las reglas y las herramientas seguras ya incluidas. Elige cómo quieres llevarlo:',
+      zipDesc: 'Una carpeta lista para abrir con todo dentro: las reglas del proyecto, el plan, las instrucciones de construcción y la lista de herramientas seguras. Entrégala a Goose o Claude Code y empieza a construir.',
+      gooseDl: '⬇ Descargar la receta de Goose', gooseCopy: 'Copiar el comando',
+      gooseDesc: 'Una receta es un archivo con instrucciones que Goose sigue para construir tu proyecto. Descárgala y ejecuta el comando de abajo.',
+      ghNotReady: 'Guardar directo en GitHub aún no está activado en este sitio — descarga la carpeta, o lee',
+      ghConnectBtn: 'Conectar GitHub y guardar mi proyecto', ghSuccess: '✓ Tu proyecto está en GitHub:', copyPlan: 'Copiar el plan',
     },
     ar: {
-      s1: '١ · صِف', s2: '٢ · اختر الأدوات', s3: '٣ · وَلِّد',
-      name: 'اسم المشروع', problem: 'ما المشكلة التي يحلها؟ (فقرة واحدة)',
-      why: 'لماذا — الهدف الحقيقي وراءه؟ (وليس بديلاً سهلاً)',
-      success: 'كيف يبدو النجاح فعلاً؟', protocols: 'البروتوكولات', focus: 'التركيز',
-      tenq: 'هذه هي الأسئلة العشرة، مُلخّصة — أجب عن النية، لا المهمة فقط.',
-      choose: 'اختر أدواتك ←', back: '→ رجوع', gen: 'وَلِّد ←', backStack: '→ العودة للأدوات',
-      suggested: 'مقترح من الكتالوج — فعّل ما تريد؛ كل خيار متوافق مع السياسة.',
-      add: 'أضف أداة أخرى', selected: 'أدوات مختارة', loading: 'جارٍ تحميل الكتالوج…',
-      handoff: 'كيف تريد أن تبدأ؟', zip: 'تنزيل .zip', github: 'إنشاء مستودع GitHub',
-      goose: 'التشغيل مع Goose', kickoff: 'انطلاقة بالذكاء الاصطناعي (مفتاحك)',
-      dlzip: '⬇ تنزيل المستودع المبدئي (.zip)', copyPrompt: 'نسخ موجّه الوكيل',
-      runLocal: 'ابدأ مع Goose ←', ghGuide: 'كيفية ربط GitHub ←',
-      apikey: 'مفتاح API الخاص بك (يُرسل للمزوّد فقط، ولا يُخزَّن أبداً)',
-      provider: 'المزوّد (المسموح فقط)', run: 'تشغيل الانطلاقة', running: 'جارٍ التشغيل…',
-      ghError: 'لم تكتمل عملية ربط GitHub. حاول مرة أخرى، أو نزّل ملف .zip أدناه.',
-      stackIntro: 'حزمة بداية، مُرتّبة وفق النية التي وصفتها. كل خيار أدناه اجتاز سياسة الاستبعاد — لا شيء هنا مملوك لـ Meta أو OpenAI أو xAI. فعّل ما يناسبك؛ يمكنك البحث عن المزيد، ولا شيء مُلزِم.',
-      legendPrimary: '★ حزمة SDK الأساسية الموصى بها لبروتوكولك',
-      legendClean: 'كل خيار متوافق مع السياسة ومُتحقَّق من ترخيصه',
+      s1: '١ · صِف', s2: '٢ · اختر', s3: '٣ · حزمتك',
+      name: 'اسم المشروع (يكفي اسم مختصر)',
+      problem: 'ما المشكلة التي يحلها، ولمن؟ قُلها كما تقولها بصوتك — فقرة قصيرة.',
+      why: 'لماذا يهمّ هذا؟ التغيير الحقيقي الذي تريده — وليس مجرد «إطلاق تطبيق».',
+      success: 'كيف ستعرف أنه ينجح؟ ما الذي يتغيّر لمجتمعك عندما ينجح.',
+      protocols: 'على أي شبكة يعمل؟', focus: 'ما نوع الشيء الذي تبنيه؟',
+      tenq: 'ابدأ بالـ«لماذا». أجب كأنك تشرح المشروع لصديق — كلما كنت أوضح، بنى وكيل الذكاء الاصطناعي بشكل أفضل.',
+      protoHelp: 'الـ«شبكة» (البروتوكول) هي القواعد المفتوحة المشتركة التي تتصل بها أداتك — لا يملكها طرف واحد. Nostr وAT Protocol (Bluesky) شبكات اجتماعية مفتوحة؛ اختر «general» إن لم تكن أداة اجتماعية.',
+      choose: 'اختر أدواتك ←', back: '→ رجوع', gen: 'احصل على حزمتي ←', backStack: '→ رجوع',
+      suggested: '',
+      add: 'تحتاج شيئاً محدداً؟ ابحث في الكتالوج كاملاً', selected: 'لبنات مختارة', loading: 'جارٍ تحميل الكتالوج…',
+      handoff: 'كيف تريد أن تبدأ؟', zip: 'تنزيل مجلد بداية', github: 'احفظه في GitHub',
+      goose: 'شغّله مع Goose', kickoff: 'جرّب خطوة بالذكاء الاصطناعي',
+      dlzip: '⬇ نزّل مجلد البداية (.zip)', copyPrompt: 'انسخ تعليمات وكيل الذكاء الاصطناعي',
+      runLocal: 'جديد على Goose؟ ابدأ هنا ←', ghGuide: 'كيفية ربط GitHub ←',
+      apikey: 'مفتاح الذكاء الاصطناعي الخاص بك (يُرسل مباشرة إلى النموذج، ولا نخزّنه أبداً)',
+      provider: 'من يصنع النموذج', run: 'شغّل', running: 'جارٍ العمل…',
+      ghError: 'لم يكتمل الاتصال بـ GitHub. حاول مرة أخرى، أو نزّل المجلد أدناه.',
+      stackIntro: '«الحزمة» (stack) هي ببساطة مجموعة اللبنات الجاهزة — أدوات بناها واختبرها آخرون — التي يتكوّن منها مشروعك. اختيار لبنات جيدة يعني أنك ووكيل الذكاء الاصطناعي لا تبدآن من الصفر: تجمّع قطعاً مُجرَّبة بدل إعادة اختراعها، ما يوفّر شهوراً ويتجنّب الطرق المسدودة. في الأسفل مجموعة بداية مُختارة لما وصفته. غير متأكد؟ اترك المعلّمة بـ ★ والافتراضية — لا يمكنك الاختيار «الخطأ» هنا، فكل المُدرَج آمن ومُتحقَّق منه. أضِف أو احذف ما تشاء؛ لا شيء نهائي.',
+      legendPrimary: '★ نقطة البداية الموصى بها لشبكتك',
+      legendClean: 'كل خيار آمن للاستخدام (بلا Meta/OpenAI/xAI) ومُتحقَّق من ترخيصه',
       showMore: 'عرض أدوات أكثر', showFewer: 'عرض أقل', showing: 'عرض', of: 'من',
       modelTitle: 'اختر نموذج الذكاء الاصطناعي',
-      modelIntro: 'أنت تحضر المفتاح؛ عملك لا يمر أبداً عبر Meta أو OpenAI أو xAI. هذه الخيارات مُختارة لذلك: تدريب مسؤول، أوزان مفتوحة يمكنك استضافتها بنفسك، أو موجّه محايد مقصور على النماذج المسموح بها.',
+      modelIntro: 'هذا يشغّل خطوة تخطيط واحدة باستخدام مفتاحك الخاص، لتشعر به يعمل قبل أن تلتزم. مفتاحك ومشروعك يذهبان مباشرة إلى النموذج — لا نخزّنهما أبداً، ولا يمران عبر Meta أو OpenAI أو xAI. الخيارات أدناه مُختارة لذلك: نماذج مُدرَّبة بمسؤولية، نماذج مفتوحة يمكنك تشغيلها بنفسك، أو موجّه محايد مقصور على النماذج المسموح بها.',
       modelLabel: 'النموذج',
+      handoffIntro: 'حزمتك جاهزة — كل ما يحتاجه وكيل الذكاء الاصطناعي للبدء، مع القواعد والأدوات الآمنة مُضمّنة سلفاً. اختر كيف تريد أخذها:',
+      zipDesc: 'مجلد جاهز للفتح يحوي كل شيء: قواعد المشروع، والخطة، وتعليمات البناء، وقائمة الأدوات الآمنة. سلّمه لـ Goose أو Claude Code وابدأ البناء.',
+      gooseDl: '⬇ تنزيل وصفة Goose', gooseCopy: 'انسخ أمر التشغيل',
+      gooseDesc: 'الوصفة ملف واحد فيه تعليمات يتبعها Goose لبناء مشروعك. نزّلها ثم شغّل الأمر أدناه.',
+      ghNotReady: 'الحفظ المباشر إلى GitHub غير مُفعّل في هذا الموقع بعد — نزّل المجلد بدلاً من ذلك، أو اقرأ',
+      ghConnectBtn: 'اربط GitHub واحفظ مشروعي', ghSuccess: '✓ مشروعك على GitHub:', copyPlan: 'انسخ الخطة',
     },
   };
   let lang = $state<Lang>((['en', 'es', 'ar'].includes(initialLang) ? initialLang : 'en') as Lang);
@@ -105,11 +132,11 @@
 
   const ALL_PROTOCOLS = ['nostr', 'atproto', 'lightning', 'cashu', 'general'];
   const FOCI: Record<string, { label: string; categories: string[] }> = {
-    social: { label: 'Social / feed client', categories: ['Frameworks & Libraries', 'Dev Environment & Tooling'] },
-    relay: { label: 'Relay / backend service', categories: ['Hosting Infra & Deploy', 'Databases & Storage', 'Monitoring & Observability'] },
-    wallet: { label: 'Wallet / payments', categories: ['Bitcoin Lightning Nostr', 'Security & Privacy'] },
-    safety: { label: 'Moderation / safety', categories: ['Security & Privacy', 'Auth Identity & Keys'] },
-    general: { label: 'General app', categories: ['Frameworks & Libraries', 'Dev Environment & Tooling', 'Testing & QA'] },
+    social: { label: 'A social app or feed people post and read in', categories: ['Frameworks & Libraries', 'Dev Environment & Tooling'] },
+    relay: { label: 'A server other apps or people connect to', categories: ['Hosting Infra & Deploy', 'Databases & Storage', 'Monitoring & Observability'] },
+    wallet: { label: 'A wallet or payments tool', categories: ['Bitcoin Lightning Nostr', 'Security & Privacy'] },
+    safety: { label: 'A moderation or safety tool', categories: ['Security & Privacy', 'Auth Identity & Keys'] },
+    general: { label: 'Something else / a general app', categories: ['Frameworks & Libraries', 'Dev Environment & Tooling', 'Testing & QA'] },
   };
   // Recommended primary SDK per protocol (listed first, starred, pre-selected).
   const PROTO_PRIORITY: Record<string, string[]> = {
@@ -392,14 +419,15 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
   {#if step === 1}
     <section class="panel">
       <p class="hint">{t.tenq} <a href="/method/ten-questions/">↗</a></p>
-      <label class="field"><span>{t.name}</span><input bind:value={projectName} placeholder="escudo-vecinal" /></label>
-      <label class="field"><span>{t.problem}</span><textarea bind:value={problem} rows="3"></textarea></label>
+      <label class="field"><span>{t.name}</span><input bind:value={projectName} placeholder="e.g. neighborhood-shield" /></label>
+      <label class="field"><span>{t.problem}</span><textarea bind:value={problem} rows="3" placeholder="e.g. Tenants need to document evictions without exposing who they are."></textarea></label>
       <label class="field"><span>{t.why}</span><textarea bind:value={goal} rows="2"></textarea></label>
       <label class="field"><span>{t.success}</span><textarea bind:value={success} rows="2"></textarea></label>
       <div class="field"><span>{t.protocols}</span>
         <div class="chips">{#each ALL_PROTOCOLS as p}<button class="chip" class:on={protocols.has(p)} onclick={() => toggleProto(p)} aria-pressed={protocols.has(p)}>{p}</button>{/each}</div>
-        {#if protocols.has('nostr')}<p class="hint">★ Nostr selected — the Nostr Dev Kit (<a href="/catalog/nostr-dev-kit-ndk/">@nostr-dev-kit/ndk</a>) is suggested first as the primary SDK.</p>{/if}
-        {#if protocols.has('atproto')}<p class="hint">★ AT Protocol selected — <a href="/catalog/atproto-api/">@atproto/api</a> is suggested first as the primary SDK. See also the <a href="/catalog/">BlackSky community services</a> for AT Protocol infrastructure.</p>{/if}
+        <p class="hint">{t.protoHelp}</p>
+        {#if protocols.has('nostr')}<p class="hint">★ Nostr chosen — we’ll suggest the <a href="/catalog/nostr-dev-kit-ndk/">Nostr Dev Kit (NDK)</a> first. It’s the most complete starting point for building on Nostr, so your agent won’t have to wire up the basics by hand.</p>{/if}
+        {#if protocols.has('atproto')}<p class="hint">★ AT Protocol (Bluesky) chosen — we’ll suggest <a href="/catalog/atproto-api/">@atproto/api</a> first as the main starting point. The <a href="/catalog/">BlackSky community services</a> are also there if you need the underlying infrastructure.</p>{/if}
       </div>
       <label class="field"><span>{t.focus}</span><select bind:value={focus}>{#each Object.entries(FOCI) as [k, v]}<option value={k}>{v.label}</option>{/each}</select></label>
       <div class="nav"><button class="primary" onclick={() => (step = 2)} disabled={loading}>{loading ? t.loading : t.choose}</button></div>
@@ -439,6 +467,7 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
   {:else}
     <section class="panel">
       <h3>{t.handoff}</h3>
+      <p class="hint">{t.handoffIntro}</p>
       <div class="tabs">
         <button class:on={handoff === 'zip'} onclick={() => (handoff = 'zip')}>{t.zip}</button>
         <button class:on={handoff === 'github'} onclick={() => (handoff = 'github')}>{t.github}</button>
@@ -448,29 +477,29 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
 
       {#if handoff === 'zip'}
         <div class="hpanel"><button class="primary big" onclick={downloadZip}>{t.dlzip}</button>
-          <p class="hint">A complete starter (constitution, spec, package.json, agent prompt, Goose recipe). Open it with your agent.</p></div>
+          <p class="hint">{t.zipDesc}</p></div>
       {:else if handoff === 'github'}
         <div class="hpanel">
           {#if ghConfigured === null}<p class="hint">Checking…</p>
           {:else if !ghConfigured}
-            <p class="hint">GitHub one-click isn't configured on this deployment yet. <a href="/guides/connect-github/">{t.ghGuide}</a></p>
+            <p class="hint">{t.ghNotReady} <a href="/guides/connect-github/">{t.ghGuide}</a></p>
             <button onclick={downloadZip}>{t.dlzip}</button>
           {:else if ghResult.startsWith('created:')}
-            <p>✓ Repo created: <a href={ghResult.slice(8)}>{ghResult.slice(8)}</a></p>
+            <p>{t.ghSuccess} <a href={ghResult.slice(8)}>{ghResult.slice(8)}</a></p>
           {:else if ghConnected}
-            <button class="primary big" onclick={ghCreate} disabled={ghBusy}>{ghBusy ? '…' : `Create “${slug}” on GitHub`}</button>
+            <button class="primary big" onclick={ghCreate} disabled={ghBusy}>{ghBusy ? '…' : `Save “${slug}” to GitHub`}</button>
             {#if ghResult.startsWith('error:')}<p class="err">{ghResult.slice(6)}</p>{/if}
           {:else}
-            <button class="primary big" onclick={ghConnect}>Connect GitHub & create repo</button>
+            <button class="primary big" onclick={ghConnect}>{t.ghConnectBtn}</button>
             <p class="hint"><a href="/guides/connect-github/">{t.ghGuide}</a></p>
           {/if}
         </div>
       {:else if handoff === 'goose'}
         <div class="hpanel">
-          <button class="primary big" onclick={() => blobDownload(`${slug}.goose-recipe.yaml`, gooseRecipe, 'text/yaml')}>⬇ Download Goose recipe</button>
-          <button onclick={() => copy('cmd', `goose run --recipe ${slug}.goose-recipe.yaml`)}>{copied === 'cmd' ? '✓' : 'Copy run command'}</button>
+          <button class="primary big" onclick={() => blobDownload(`${slug}.goose-recipe.yaml`, gooseRecipe, 'text/yaml')}>{t.gooseDl}</button>
+          <button onclick={() => copy('cmd', `goose run --recipe ${slug}.goose-recipe.yaml`)}>{copied === 'cmd' ? '✓' : t.gooseCopy}</button>
           <pre><code>goose run --recipe {slug}.goose-recipe.yaml</code></pre>
-          <p class="hint">New to Goose? <a href="/guides/get-started-with-goose/">{t.runLocal}</a></p>
+          <p class="hint">{t.gooseDesc} <a href="/guides/get-started-with-goose/">{t.runLocal}</a></p>
         </div>
       {:else}
         <div class="hpanel">
@@ -484,18 +513,19 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
           <label class="field"><span>{t.apikey}</span><input type="password" bind:value={kKey} placeholder="sk-…" /></label>
           <button class="primary" onclick={kickoffRun} disabled={kBusy || !kKey}>{kBusy ? t.running : t.run}</button>
           {#if kError}<p class="err">{kError}</p>{/if}
-          {#if kOutput}<pre class="out"><code>{kOutput}</code></pre><button onclick={() => copy('ko', kOutput)}>{copied === 'ko' ? '✓ copied' : 'Copy plan'}</button>{/if}
+          {#if kOutput}<pre class="out"><code>{kOutput}</code></pre><button onclick={() => copy('ko', kOutput)}>{copied === 'ko' ? '✓ copied' : t.copyPlan}</button>{/if}
         </div>
       {/if}
 
       <button class="link copyp" onclick={() => copy('prompt', agentPrompt)}>{copied === 'prompt' ? '✓ copied' : t.copyPrompt}</button>
 
+      <p class="hint">Want to look inside first? These are the files in your starter — the plain-English rules and plan your agent will follow:</p>
       {#snippet artifact(title: string, key: string, text: string)}
         <details><summary>{title} <button class="link" onclick={(e) => { e.preventDefault(); copy(key, text); }}>{copied === key ? '✓' : 'copy'}</button></summary><pre><code>{text}</code></pre></details>
       {/snippet}
-      {@render artifact('constitution.md', 'c', constitution)}
-      {@render artifact('spec.md', 's', spec)}
-      {@render artifact('package.json', 'pkg', packageJson)}
+      {@render artifact('The project’s rules (constitution.md)', 'c', constitution)}
+      {@render artifact('The plan (spec.md)', 's', spec)}
+      {@render artifact('The tools list (package.json)', 'pkg', packageJson)}
 
       <div class="nav"><button onclick={() => (step = 2)}>{t.backStack}</button></div>
     </section>
