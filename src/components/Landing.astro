@@ -1,41 +1,35 @@
 ---
 /**
- * Homepage — built to be living proof of the Design Field Guide, not a docs page.
+ * Homepage — the project's own front door, set in its own voice.
  *
- * Design Field Guide / Field Card / Field Manual, applied to our own front door:
- *  - Move 0 — start with the people: the hero leads with the builder and their
- *    community, and the illustration literally shows real people (an elder, a
- *    child, a wheelchair user, a headscarf) — "everyone's invited" made visible.
- *  - Move 1 — one obvious thing: a single primary action (Open the Build Studio).
- *  - Move 2 — less, but better: roomy, restrained; substance over fragments.
- *  - Move 3 — decide once: every colour, space, radius, motion is a token.
- *  - Move 5 — smooth the path: the page reads as one narrative — who you are →
- *    how it works → why you can do this → why you can trust it → start.
- *  - Voice: the way a trusted neighbour would say it. Not a robot, not hype.
- *  - All inline SVG (themeable via tokens, no web fonts, no deps, no trackers).
+ * Design Field Card identity, applied to ourselves: warm paper + ink, forest
+ * green primary, a single coral accent; monospace editorial eyebrows, numbered
+ * moves, hairline rules. Manual §0 (deference — the words lead, no spectacle),
+ * §7.3 (colour only via tokens), §7.4 (no glass off-chrome), §7.5 (calm motion),
+ * §7.6 (WCAG 2.2 AA). Voice: the way a trusted neighbour would say it.
+ *
+ * The hero's right column is a "blueprint specimen" — a static artifact that
+ * shows the Studio thinking, in our own type system. That is the illustration;
+ * there is no clip-art, no stock people, no gradient glow.
  */
 ---
 
 <style is:global>
-  /* Splash home only (these rules ship with <Landing>, which renders just on /).
-     The visible page heading is the hero headline below; keep Starlight's
-     PageTitle as the skip-link target (#_top) but collapse its panel so the home
-     page reads as a landing, not a docs article with a title + hairline divider. */
+  /* Splash home only. Collapse Starlight's docs PageTitle so the page reads as a
+     landing, not an article; keep #_top as the skip-link target. */
   .main-pane > main > .content-panel:first-child { padding: 0; border: 0; }
   .main-pane > main > .content-panel:first-child h1#_top {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
   }
   .main-pane > main > .content-panel + .content-panel { border-top: 0; }
-  /* Let the landing govern its own width instead of the narrow docs measure. */
   .main-pane > main > .content-panel .sl-container { max-width: none; }
-  /* A landing front door, not a docs search page: hide the header search box on
-     home (search stays available on every other page, and via Ctrl/Cmd-K here). */
+  /* A front door, not a docs search page: hide the header search on home only
+     (search stays on every other page, and Ctrl/Cmd-K still works here). */
   .header button[data-open-modal] { display: none; }
 </style>
 
 <div class="wcb-landing">
-  {/* Structured data so agents + crawlers understand the product (Field Manual §5). */}
   <script is:inline type="application/ld+json" set:html={JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -45,16 +39,16 @@
       'A verified, values-enforced catalog and guided build flow for shipping community tools with AI agents — never on Meta, OpenAI, or xAI.',
   })} />
 
-  {/* ===================== HERO — start with the people ===================== */}
+  {/* ============================= HERO ============================= */}
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-copy">
-      <p class="eyebrow">For people who know their community — not how to code</p>
-      <h1 id="hero-title">We can just build things —<br /><span class="accent">for the people who need them.</span></h1>
+      <p class="wcb-eyebrow">For people who know their community — not how to code</p>
+      <h1 id="hero-title">We can just build things — for the people who need them.</h1>
       <p class="lead">
-        Tell the Build Studio what your community needs, the way you'd explain it
-        to a neighbour. An AI agent builds it on foundations we've already checked
-        and locked to your values — never Meta, OpenAI, or xAI.
-        <b>You bring the wisdom. It brings the hands.</b>
+        You know your people, and what they need. Tell the Build Studio in plain
+        words, and an AI agent builds it — only on foundations we've already
+        checked and locked to your values. <b>You bring the wisdom; it brings the
+        hands.</b>
       </p>
       <div class="actions">
         <a class="btn btn-primary" href="/build/">
@@ -63,251 +57,142 @@
         </a>
         <a class="btn btn-quiet" href="#how">See how it works</a>
       </div>
-      <ul class="trust">
-        <li><span class="dot" aria-hidden="true">◆</span> No Meta · OpenAI · xAI</li>
-        <li><span class="dot" aria-hidden="true">✓</span> Every tool license-checked at a real commit</li>
-        <li><span class="dot" aria-hidden="true">★</span> 1,300+ tools, already vetted</li>
-        <li><span class="dot" aria-hidden="true">♥</span> Built with communities, to last</li>
+      <ul class="trust" aria-label="What you can count on">
+        <li><span class="mk" aria-hidden="true">◆</span> No Meta · OpenAI · xAI</li>
+        <li><span class="mk" aria-hidden="true">✓</span> License-verified at a commit</li>
+        <li><span class="mk" aria-hidden="true">★</span> 1,300+ vetted tools</li>
       </ul>
     </div>
 
-    <div class="hero-art" aria-hidden="true">
-      <svg viewBox="0 0 520 440" role="img" xmlns="http://www.w3.org/2000/svg">
-        <title>A community building something together on a solid foundation</title>
-        {/* soft warm depth */}
-        <defs>
-          <radialGradient id="glowA" cx="30%" cy="22%" r="60%">
-            <stop offset="0%" stop-color="var(--md-sys-color-primary)" stop-opacity="0.30"/>
-            <stop offset="100%" stop-color="var(--md-sys-color-primary)" stop-opacity="0"/>
-          </radialGradient>
-          <radialGradient id="glowB" cx="82%" cy="40%" r="55%">
-            <stop offset="0%" stop-color="var(--md-sys-color-tertiary)" stop-opacity="0.28"/>
-            <stop offset="100%" stop-color="var(--md-sys-color-tertiary)" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect x="0" y="0" width="520" height="440" rx="28" fill="var(--md-sys-color-surface-container)"/>
-        <rect x="0" y="0" width="520" height="440" rx="28" fill="url(#glowA)"/>
-        <rect x="0" y="0" width="520" height="440" rx="28" fill="url(#glowB)"/>
-
-        {/* network of connections — freedom-tech lineage */}
-        <g stroke="var(--md-sys-color-primary)" stroke-width="2" stroke-linecap="round" opacity="0.55" fill="none">
-          <path d="M150 150 L250 96"/>
-          <path d="M250 96 L360 140"/>
-          <path d="M150 150 L300 196"/>
-          <path d="M360 140 L300 196"/>
-          <path d="M120 250 L150 150"/>
-          <path d="M300 196 L360 250"/>
-        </g>
-
-        {/* the thing being built — rounded blocks assembling */}
-        <g class="float">
-          <rect x="216" y="64" width="64" height="64" rx="16" fill="var(--md-sys-color-primary)"/>
-          <rect x="232" y="84" width="14" height="14" rx="4" fill="var(--md-sys-color-on-primary)" opacity="0.85"/>
-          <rect x="252" y="84" width="14" height="14" rx="4" fill="var(--md-sys-color-on-primary)" opacity="0.85"/>
-        </g>
-        <rect x="116" y="118" width="58" height="58" rx="15" fill="var(--md-sys-color-tertiary)"/>
-        <rect x="330" y="108" width="58" height="58" rx="15" fill="var(--md-sys-color-secondary)"/>
-        <rect x="266" y="166" width="62" height="62" rx="16" fill="var(--md-sys-color-primary-container)" stroke="var(--md-sys-color-primary)" stroke-width="2"/>
-        {/* a block still floating into place + spark */}
-        <g class="float2">
-          <rect x="372" y="186" width="40" height="40" rx="12" fill="var(--md-sys-color-tertiary)" opacity="0.85"/>
-          <path d="M150 92 l4 10 10 4 -10 4 -4 10 -4 -10 -10 -4 10 -4 z" fill="var(--md-sys-color-primary)"/>
-        </g>
-
-        {/* connection nodes */}
-        <g fill="var(--md-sys-color-primary)">
-          <circle cx="150" cy="150" r="5"/>
-          <circle cx="250" cy="96" r="5"/>
-          <circle cx="360" cy="140" r="5"/>
-          <circle cx="300" cy="196" r="5"/>
-        </g>
-
-        {/* the verified foundation everything stands on */}
-        <rect x="40" y="356" width="440" height="40" rx="20" fill="var(--md-sys-color-primary-container)"/>
-        <g transform="translate(64 360)" fill="none" stroke="var(--md-sys-color-on-primary-container)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="16" r="11" stroke-opacity="0.9"/>
-          <path d="M6 16 l4 4 6 -8"/>
-        </g>
-        <text x="92" y="381" fill="var(--md-sys-color-on-primary-container)" font-size="14" font-weight="700" font-family="inherit">verified, values-locked foundation</text>
-
-        {/* the people — different ages, bodies, ways of being. Everyone's invited. */}
-        {/* 1 · the director: arm raised toward what's being built */}
-        <g>
-          <path d="M86 356 q0 -34 22 -34 q22 0 22 34 z" fill="var(--md-sys-color-primary)"/>
-          <path d="M108 322 l16 -20" stroke="var(--md-sys-color-primary)" stroke-width="9" stroke-linecap="round"/>
-          <circle cx="108" cy="300" r="13" fill="var(--md-sys-color-primary)"/>
-        </g>
-        {/* 2 · a child, shorter */}
-        <g>
-          <path d="M150 356 q0 -24 15 -24 q15 0 15 24 z" fill="var(--md-sys-color-tertiary)"/>
-          <circle cx="165" cy="324" r="10" fill="var(--md-sys-color-tertiary)"/>
-        </g>
-        {/* 3 · an elder, with a cane */}
-        <g>
-          <path d="M206 356 q0 -32 19 -32 q19 0 19 32 z" fill="var(--md-sys-color-secondary)"/>
-          <circle cx="225" cy="318" r="12" fill="var(--md-sys-color-secondary)"/>
-          <path d="M246 330 l0 26" stroke="var(--md-sys-color-on-surface-variant)" stroke-width="3" stroke-linecap="round"/>
-        </g>
-        {/* 4 · a person using a wheelchair */}
-        <g>
-          <path d="M286 340 q0 -30 18 -30 q18 0 18 22 l0 8 z" fill="var(--md-sys-color-primary)"/>
-          <circle cx="304" cy="304" r="12" fill="var(--md-sys-color-primary)"/>
-          <circle cx="300" cy="350" r="16" fill="none" stroke="var(--md-sys-color-on-surface-variant)" stroke-width="3"/>
-          <path d="M286 340 l28 0" stroke="var(--md-sys-color-on-surface-variant)" stroke-width="3" stroke-linecap="round"/>
-        </g>
-        {/* 5 · a person wearing a headscarf */}
-        <g>
-          <path d="M356 356 q0 -32 19 -32 q19 0 19 32 z" fill="var(--md-sys-color-tertiary)"/>
-          <path d="M362 316 a13 13 0 0 1 26 0 q0 14 -13 14 q-13 0 -13 -14 z" fill="var(--md-sys-color-tertiary)"/>
-        </g>
-        {/* 6 · another adult */}
-        <g>
-          <path d="M414 356 q0 -34 21 -34 q21 0 21 34 z" fill="var(--md-sys-color-secondary)"/>
-          <circle cx="435" cy="320" r="13" fill="var(--md-sys-color-secondary)"/>
-        </g>
-      </svg>
-    </div>
+    {/* Blueprint specimen — a Studio artifact, in our own type system. */}
+    <figure class="specimen" aria-label="An example of what the Build Studio gives back">
+      <figcaption class="spec-head">
+        <span class="wcb-eyebrow">Build Studio</span>
+        <span class="spec-dot" aria-hidden="true"></span>
+      </figcaption>
+      <div class="spec-row">
+        <span class="spec-label">You said</span>
+        <p class="spec-said">“A map of the free fridges in our neighbourhood — in Spanish and English.”</p>
+      </div>
+      <div class="spec-row">
+        <span class="spec-label">Your blueprint</span>
+        <ul class="spec-stack">
+          <li><span class="ok" aria-hidden="true">✓</span> <b>Leaflet</b> — the map <span class="lic">MIT</span></li>
+          <li><span class="ok" aria-hidden="true">✓</span> <b>MapLibre</b> — open tiles <span class="lic">BSD-3</span></li>
+          <li><span class="ok" aria-hidden="true">✓</span> <b>Nostr</b> — sync across phones <span class="lic">MIT</span></li>
+        </ul>
+      </div>
+      <p class="spec-foot"><span aria-hidden="true">✓</span> Values-locked — nothing from Meta, OpenAI, or xAI</p>
+    </figure>
   </section>
 
-  {/* ===================== HOW IT WORKS — smooth the path ===================== */}
-  <section class="how" id="how" aria-labelledby="how-title">
-    <header class="band-head">
-      <h2 id="how-title">How it works</h2>
-      <p>Three steps, no jargon — and you stay in charge the whole way.</p>
-    </header>
-
-    <ol class="steps">
-      <li class="step">
-        <span class="step-art">
-          <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="6" y="9" width="36" height="26" rx="9" fill="var(--md-sys-color-primary-container)"/>
-            <path d="M16 25h16M16 19h12" stroke="var(--md-sys-color-on-primary-container)" stroke-width="3"/>
-            <path d="M18 35l-4 6v-6z" fill="var(--md-sys-color-primary-container)"/>
-          </svg>
-        </span>
-        <h3><span class="num">1</span> Say it in plain words</h3>
-        <p>Describe what your community needs to do — talk like you'd talk to a friend who's good with computers. No tech vocabulary required.</p>
+  {/* ========================= HOW IT WORKS ========================= */}
+  <section class="band" id="how" aria-labelledby="how-title">
+    <p class="wcb-eyebrow">From your words to a working tool</p>
+    <h2 id="how-title" class="band-title">Three moves, and you stay the director</h2>
+    <ol class="moves">
+      <li class="move">
+        <span class="num" aria-hidden="true">01</span>
+        <div class="move-body">
+          <h3>Describe it</h3>
+          <p>Tell the Studio what you're building, the way you'd explain it to a
+            friend. No tech words, no jargon — just what your community needs to do.</p>
+        </div>
       </li>
-      <li class="step">
-        <span class="step-art">
-          <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="7" width="30" height="34" rx="7" fill="var(--md-sys-color-tertiary-container)"/>
-            <path d="M16 16h16M16 23h16M16 30h10" stroke="var(--md-sys-color-on-tertiary-container)" stroke-width="3"/>
-            <circle cx="33" cy="33" r="9" fill="var(--md-sys-color-tertiary)"/>
-            <path d="M29.5 33l2.5 2.5 4.5-5" stroke="var(--md-sys-color-on-tertiary)" stroke-width="2.6"/>
-          </svg>
-        </span>
-        <h3><span class="num">2</span> Get a plan you can read</h3>
-        <p>The Studio hands back the exact tools and a plan in plain language — so you can see it, question it, and change it before anything is built.</p>
+      <li class="move">
+        <span class="num" aria-hidden="true">02</span>
+        <div class="move-body">
+          <h3>Get the blueprint</h3>
+          <p>It comes back with the exact tools for the job and a plan in plain
+            language — every piece license-checked, nothing owned by Meta, OpenAI,
+            or xAI.</p>
+        </div>
       </li>
-      <li class="step">
-        <span class="step-art">
-          <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="7" y="20" width="34" height="9" rx="4.5" fill="var(--md-sys-color-primary-container)"/>
-            <rect x="13" y="9" width="10" height="10" rx="3" fill="var(--md-sys-color-primary)"/>
-            <rect x="25" y="9" width="10" height="10" rx="3" fill="var(--md-sys-color-tertiary)"/>
-            <circle cx="16" cy="37" r="6" fill="var(--md-sys-color-secondary)"/>
-            <circle cx="32" cy="37" r="6" fill="var(--md-sys-color-primary)"/>
-          </svg>
-        </span>
-        <h3><span class="num">3</span> Hand it to your agent</h3>
-        <p>Your AI agent does the building on a verified, values-locked foundation. You stay the director, start to finish.</p>
+      <li class="move">
+        <span class="num" aria-hidden="true">03</span>
+        <div class="move-body">
+          <h3>Build it together</h3>
+          <p>Hand the plan to your AI agent. You direct; it does the work — and you
+            ship something your community will feel was made <em>by us, for us</em>.</p>
+        </div>
       </li>
     </ol>
   </section>
 
-  {/* ===================== THE MENTOR TRUTH — the soul ===================== */}
+  {/* =========================== MENTOR ============================ */}
   <section class="mentor" aria-labelledby="mentor-title">
-    <div class="mentor-inner">
-      <h2 id="mentor-title">You don't need to be a developer. Or a designer.</h2>
-      <p>
-        You have something rarer: you know your people — the elders, the kids, the
-        crew, the folks on five-year-old phones in bright sun. That knowledge is the
-        most important design input there is, and no big-tech default has it.
-        The Studio carries the technical rules and the accessibility floor for you.
-        You bring the judgment.
-      </p>
-      <blockquote>
-        You bring the wisdom. The agent brings the hands.
-        <strong>Together, that's how someone who isn't a developer ships work their community will love.</strong>
-      </blockquote>
-      <a class="link-arrow" href="/guides/design-for-your-community/">
-        Read the Design Field Guide
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </a>
+    <p class="wcb-eyebrow">You don't have to be a developer. Or a designer.</p>
+    <h2 id="mentor-title">You have something rarer: you know your people.</h2>
+    <p>
+      The elders, the kids, the crew, the folks on five-year-old phones in bright
+      sun — that knowledge is the most important design input there is, and no
+      big-tech default has it. The Studio carries the technical rules and the
+      accessibility floor; you bring the judgment.
+    </p>
+    <p class="pull">You bring the wisdom. The agent brings the hands.</p>
+    <a class="link-arrow" href="/guides/design-for-your-community/">
+      Read the Design Field Guide
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+  </section>
+
+  {/* ====================== WHY YOU CAN TRUST IT ==================== */}
+  <section class="band" aria-labelledby="trust-title">
+    <p class="wcb-eyebrow">Why this is different</p>
+    <h2 id="trust-title" class="band-title">Built to be trusted — and to last</h2>
+    <div class="points">
+      <div class="point">
+        <h3><span class="lead-word">Values, enforced</span> — not promised.</h3>
+        <p>Nothing in your stack is owned by Meta, OpenAI, or xAI. You don't have
+          to take our word for it — we re-check it on every single build.</p>
+      </div>
+      <div class="point">
+        <h3><span class="lead-word">Trust you can see.</span></h3>
+        <p>Every tool is license-verified at a real commit, with the receipt
+          attached. The catalog, the method, and the enforcement are all open.</p>
+      </div>
+      <div class="point">
+        <h3><span class="lead-word">Everyone's invited.</span></h3>
+        <p>Every build starts at the WCAG 2.2 AA floor — readable, tappable,
+          screen-reader friendly — so no one in your community is left out.</p>
+      </div>
+      <div class="point">
+        <h3><span class="lead-word">Built to outlast.</span></h3>
+        <p>Open methodology, open catalog, open enforcement — made with
+          communities, so it keeps working when people move on.</p>
+      </div>
     </div>
   </section>
 
-  {/* ===================== WHY YOU CAN TRUST IT ===================== */}
-  <section class="trust-section" aria-labelledby="trust-title">
-    <header class="band-head">
-      <h2 id="trust-title">Built to be trusted — and to last</h2>
-      <p>Not promises. Things you can check yourself.</p>
-    </header>
-
-    <div class="cards">
-      <article class="tcard">
-        <span class="tcard-ico ico-shield" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
-        </span>
-        <h3>Values, enforced — not promised</h3>
-        <p>Nothing owned by Meta, OpenAI, or xAI. It's checked on every single build, automatically. Receipts included.</p>
-      </article>
-      <article class="tcard">
-        <span class="tcard-ico ico-check" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
-        </span>
-        <h3>Trust you can verify yourself</h3>
-        <p>Every tool's license is checked at a real commit — not taken on faith. The proof travels with it.</p>
-      </article>
-      <article class="tcard">
-        <span class="tcard-ico ico-welcome" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 7.5a3 3 0 0 1 0 6M17.5 20a5.5 5.5 0 0 0-3-4.9"/></svg>
-        </span>
-        <h3>Everyone's invited</h3>
-        <p>Every build starts at the WCAG 2.2 AA floor — readable, tappable, screen-reader friendly — so no one in your community is left out.</p>
-      </article>
-      <article class="tcard">
-        <span class="tcard-ico ico-roots" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v8"/><path d="M12 11c0 4-3 6-7 7M12 11c0 4 3 6 7 7"/><circle cx="12" cy="11" r="2.4"/></svg>
-        </span>
-        <h3>Made to outlive any maintainer</h3>
-        <p>Open methodology, open catalog, open enforcement — built with communities, so it keeps working when people move on.</p>
-      </article>
-    </div>
-  </section>
-
-  {/* ===================== CLOSING — clear next step ===================== */}
+  {/* =========================== CLOSING =========================== */}
   <section class="closing" aria-label="Where to go next">
-    <div class="paths">
-      <a class="path" href="/start/">
-        <span class="path-kicker">New here?</span>
-        <span class="path-main">Start in 3 minutes</span>
-        <span class="path-sub">A gentle walk from idea to your first build.</span>
+    <div class="doors">
+      <a class="door" href="/start/">
+        <span class="wcb-eyebrow">New here?</span>
+        <b>Start in three minutes <span aria-hidden="true">→</span></b>
+        <span class="door-sub">A gentle walk from idea to your first build.</span>
       </a>
-      <a class="path" href="/catalog/">
-        <span class="path-kicker">Already ship?</span>
-        <span class="path-main">Browse 1,300+ vetted tools</span>
-        <span class="path-sub">Every one license-checked and values-clean.</span>
+      <a class="door" href="/catalog/">
+        <span class="wcb-eyebrow">Know your stack?</span>
+        <b>Browse 1,300+ vetted tools <span aria-hidden="true">→</span></b>
+        <span class="door-sub">Every one license-checked and values-clean.</span>
       </a>
     </div>
-    <p class="signoff">We can just build things — <span class="accent">well.</span></p>
+    <p class="signoff">We can just build things — <span class="well">well.</span></p>
   </section>
 </div>
 
 <style>
   .wcb-landing {
-    --maxw: 64rem;
-    max-width: var(--maxw);
+    max-width: 64rem;
     margin-inline: auto;
-    /* generous rhythm between movements of the page (Move 2: room to breathe) */
     display: flex;
     flex-direction: column;
-    gap: clamp(var(--wcb-space-xl), 8vw, 5.5rem);
+    gap: clamp(var(--wcb-space-xl), 7vw, 5rem);
+    color: var(--wcb-ink);
   }
-  .accent { color: var(--sl-color-text-accent); }
 
-  /* ---------- HERO ---------- */
+  /* ---------------------------- HERO ---------------------------- */
   .hero {
     display: grid;
     grid-template-columns: 1.05fr 0.95fr;
@@ -315,277 +200,214 @@
     gap: clamp(var(--wcb-space-lg), 4vw, var(--wcb-space-xl));
     padding-top: clamp(var(--wcb-space-md), 4vw, var(--wcb-space-xl));
   }
-  .eyebrow {
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: var(--wcb-text-sm);
-    font-weight: 700;
-    color: var(--sl-color-text-accent);
-    margin: 0 0 var(--wcb-space-xs);
-  }
+  .hero-copy .wcb-eyebrow { margin: 0 0 var(--wcb-space-sm); display: block; }
   .hero h1 {
-    font-size: clamp(2.1rem, 5.2vw, 3.4rem);
-    line-height: 1.06;
+    font-size: clamp(2.2rem, 5.2vw, 3.5rem);
+    line-height: 1.05;
     letter-spacing: -0.02em;
     font-weight: 800;
     margin: 0;
+    color: var(--wcb-ink);
+    text-wrap: balance;
   }
   .lead {
-    font-size: clamp(1.05rem, 1.6vw, 1.2rem);
-    line-height: 1.6;
-    color: var(--sl-color-text);
-    max-width: 34rem;
+    font-size: clamp(1.05rem, 1.7vw, 1.25rem);
+    line-height: 1.55;
+    color: var(--wcb-ink-soft);
+    max-width: 38ch;
     margin: var(--wcb-space-md) 0 0;
   }
-  .lead b { color: var(--sl-color-text-accent); font-weight: 700; }
+  .lead b { color: var(--wcb-ink); font-weight: 700; }
 
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--wcb-space-sm);
-    margin-top: var(--wcb-space-lg);
-  }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--wcb-space-sm); margin-top: var(--wcb-space-lg); }
   .btn {
     display: inline-flex;
     align-items: center;
     gap: var(--wcb-space-2xs);
-    min-height: 2.875rem; /* 46px — comfortable tap target */
+    min-height: 2.875rem; /* 46px tap target */
     padding: 0 var(--wcb-space-md);
-    border-radius: var(--wcb-radius-pill);
+    border-radius: var(--wcb-radius-sm);
     font-weight: 700;
     font-size: var(--wcb-text-base);
     text-decoration: none;
     transition:
       transform var(--wcb-motion-fast) var(--wcb-easing-standard),
-      box-shadow var(--wcb-motion-fast) var(--wcb-easing-standard),
-      background var(--wcb-motion-fast) var(--wcb-easing-standard);
+      background var(--wcb-motion-fast) var(--wcb-easing-standard),
+      border-color var(--wcb-motion-fast) var(--wcb-easing-standard);
   }
-  .btn svg { width: 1.1rem; height: 1.1rem; }
-  .btn-primary {
-    background: var(--sl-color-accent);
-    color: var(--wcb-on-accent);
-    box-shadow: var(--wcb-shadow-1);
-  }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--wcb-shadow-2); }
-  .btn-primary:active { transform: translateY(0); box-shadow: var(--wcb-shadow-1); }
-  .btn-quiet {
-    color: var(--sl-color-text);
-    border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 55%, transparent);
-    background: transparent;
-  }
-  .btn-quiet:hover {
-    background: color-mix(in srgb, var(--sl-color-accent) 12%, transparent);
-    border-color: color-mix(in srgb, var(--sl-color-accent) 50%, transparent);
-  }
+  .btn svg { width: 1.05rem; height: 1.05rem; }
+  .btn-primary { background: var(--wcb-green); color: var(--wcb-on-accent); }
+  .btn-primary:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--wcb-green) 88%, black); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-quiet { color: var(--wcb-ink); border: 1px solid var(--wcb-line); background: transparent; }
+  .btn-quiet:hover { background: color-mix(in srgb, var(--wcb-green) 9%, transparent); border-color: var(--wcb-green); }
 
   .trust {
     list-style: none;
     margin: var(--wcb-space-lg) 0 0;
-    padding: 0;
+    padding: var(--wcb-space-sm) 0 0;
+    border-top: 1px solid var(--wcb-line);
     display: flex;
     flex-wrap: wrap;
     gap: var(--wcb-space-2xs) var(--wcb-space-md);
     font-size: var(--wcb-text-sm);
-    color: var(--sl-color-gray-2);
+    color: var(--wcb-ink-soft);
   }
-  .trust li { display: inline-flex; align-items: center; gap: var(--wcb-space-3xs); font-weight: 600; }
-  .trust .dot { color: var(--sl-color-text-accent); }
+  .trust li { display: inline-flex; align-items: center; gap: var(--wcb-space-3xs); }
+  .trust .mk { color: var(--wcb-green); font-weight: 700; }
 
-  .hero-art svg { width: 100%; height: auto; display: block; filter: drop-shadow(var(--wcb-shadow-1)); }
-  .float { animation: floatY 6s var(--wcb-easing-standard) infinite; transform-origin: center; }
-  .float2 { animation: floatY 5s var(--wcb-easing-standard) infinite; animation-delay: -2s; }
-  @keyframes floatY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-
-  /* ---------- shared band heading ---------- */
-  .band-head { text-align: center; max-width: 40rem; margin-inline: auto; }
-  .band-head h2 {
-    font-size: clamp(1.6rem, 3vw, 2.1rem);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    font-weight: 800;
+  /* Blueprint specimen */
+  .specimen {
     margin: 0;
-    /* override the docs-style top rule Starlight gives h2 */
-    border: 0;
-    padding: 0;
-  }
-  .band-head p { margin: var(--wcb-space-2xs) 0 0; color: var(--sl-color-gray-2); font-size: var(--wcb-text-lg); }
-
-  /* ---------- HOW IT WORKS ---------- */
-  .steps {
-    list-style: none;
-    margin: var(--wcb-space-xl) 0 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--wcb-space-md);
-    counter-reset: step;
-    position: relative;
-  }
-  /* the connecting thread of the journey */
-  .steps::before {
-    content: "";
-    position: absolute;
-    top: 1.9rem;
-    left: 16%;
-    right: 16%;
-    height: 2px;
-    background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--sl-color-accent) 55%, transparent) 0 8px, transparent 8px 16px);
-    z-index: 0;
-  }
-  .step { position: relative; z-index: 1; text-align: center; padding: 0 var(--wcb-space-2xs); }
-  .step-art {
-    display: inline-flex;
-    width: 3.75rem;
-    height: 3.75rem;
-    align-items: center;
-    justify-content: center;
+    background: var(--wcb-card);
+    border: 1px solid var(--wcb-line);
     border-radius: var(--wcb-radius-md);
-    background: var(--md-sys-color-surface-container-high);
-    border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent);
-    box-shadow: var(--wcb-shadow-1);
+    padding: var(--wcb-space-md);
   }
-  .step-art svg { width: 2.25rem; height: 2.25rem; }
-  .step h3 {
-    margin: var(--wcb-space-sm) 0 var(--wcb-space-2xs);
-    font-size: var(--wcb-text-lg);
-    font-weight: 700;
+  .spec-head {
     display: flex;
-    gap: var(--wcb-space-2xs);
-    align-items: baseline;
-    justify-content: center;
-  }
-  .step h3 .num {
-    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
-    flex: 0 0 auto;
-    border-radius: var(--wcb-radius-pill);
-    background: var(--sl-color-accent);
-    color: var(--wcb-on-accent);
+    justify-content: space-between;
+    padding-bottom: var(--wcb-space-2xs);
+    border-bottom: 2px solid var(--wcb-ink);
+  }
+  .spec-dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--wcb-green); box-shadow: 0 0 0 3px color-mix(in srgb, var(--wcb-green) 22%, transparent); }
+  .spec-row { padding: var(--wcb-space-sm) 0; border-bottom: 1px solid var(--wcb-line); }
+  .spec-label {
+    font-family: var(--sl-font-mono);
+    font-size: var(--wcb-text-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--wcb-ink-soft);
+    display: block;
+    margin-bottom: var(--wcb-space-3xs);
+  }
+  .spec-said { margin: 0; font-size: var(--wcb-text-base); color: var(--wcb-ink); line-height: 1.45; }
+  .spec-stack { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--wcb-space-2xs); }
+  .spec-stack li { display: flex; align-items: baseline; gap: var(--wcb-space-2xs); font-size: var(--wcb-text-sm); color: var(--wcb-ink-soft); }
+  .spec-stack b { color: var(--wcb-ink); font-weight: 700; }
+  .spec-stack .ok { color: var(--wcb-green); font-weight: 800; }
+  .spec-stack .lic { margin-left: auto; font-family: var(--sl-font-mono); font-size: var(--wcb-text-xs); color: var(--wcb-ink-soft); }
+  .spec-foot {
+    margin: var(--wcb-space-sm) 0 0;
     font-size: var(--wcb-text-sm);
-    font-weight: 800;
-    align-self: center;
+    font-weight: 700;
+    color: var(--wcb-green);
+    display: flex;
+    gap: var(--wcb-space-3xs);
+    align-items: center;
   }
-  .step p { margin: 0; color: var(--sl-color-gray-2); font-size: var(--wcb-text-base); line-height: 1.55; }
 
-  /* ---------- MENTOR ---------- */
-  .mentor {
-    border-radius: var(--wcb-radius-md);
-    padding: clamp(var(--wcb-space-lg), 5vw, 3.5rem);
-    background:
-      radial-gradient(80% 120% at 0% 0%, color-mix(in srgb, var(--md-sys-color-primary) 16%, transparent), transparent 60%),
-      radial-gradient(80% 120% at 100% 100%, color-mix(in srgb, var(--md-sys-color-tertiary) 14%, transparent), transparent 60%),
-      var(--md-sys-color-surface-container);
-    border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 35%, transparent);
-  }
-  .mentor-inner { max-width: 46rem; margin-inline: auto; text-align: center; }
-  .mentor h2 {
+  /* --------------------- shared band heading -------------------- */
+  .band-title, .mentor h2 {
     font-size: clamp(1.6rem, 3.2vw, 2.2rem);
-    line-height: 1.15;
+    line-height: 1.12;
     letter-spacing: -0.02em;
     font-weight: 800;
-    margin: 0 0 var(--wcb-space-md);
-    border: 0; padding: 0;
-  }
-  .mentor p { margin: 0 auto; font-size: var(--wcb-text-lg); line-height: 1.6; color: var(--sl-color-text); }
-  .mentor blockquote {
-    margin: var(--wcb-space-lg) auto 0;
-    padding: 0;
+    margin: var(--wcb-space-2xs) 0 0;
     border: 0;
-    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
-    line-height: 1.4;
-    font-weight: 600;
-    font-style: normal;
-    color: var(--sl-color-text);
+    padding: 0;
+    color: var(--wcb-ink);
+    max-width: 24ch;
   }
-  .mentor blockquote strong { display: block; margin-top: var(--wcb-space-2xs); color: var(--sl-color-text-accent); }
+  .band > .wcb-eyebrow, .mentor > .wcb-eyebrow { display: block; }
+
+  /* ------------------------ HOW IT WORKS ------------------------ */
+  .moves {
+    list-style: none;
+    padding: 0;
+    margin: var(--wcb-space-lg) 0 0;
+    border-top: 2px solid var(--wcb-ink);
+  }
+  .move {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: var(--wcb-space-md);
+    padding: var(--wcb-space-md) 0;
+    border-bottom: 1px solid var(--wcb-line);
+    align-items: baseline;
+  }
+  .move .num { font-family: var(--sl-font-mono); font-size: 1.6rem; font-weight: 700; color: var(--wcb-green); line-height: 1; }
+  .move h3 { font-size: 1.2rem; font-weight: 800; margin: 0 0 var(--wcb-space-3xs); color: var(--wcb-ink); }
+  .move p { margin: 0; color: var(--wcb-ink-soft); max-width: 56ch; line-height: 1.55; }
+  .move em { font-style: italic; color: var(--wcb-ink); }
+
+  /* --------------------------- MENTOR --------------------------- */
+  .mentor {
+    padding: clamp(var(--wcb-space-lg), 4vw, 2.5rem);
+    background: var(--wcb-card);
+    border: 1px solid var(--wcb-line);
+    border-left: 4px solid var(--wcb-green);
+    border-radius: var(--wcb-radius-sm);
+  }
+  .mentor p { margin: var(--wcb-space-md) 0 0; font-size: var(--wcb-text-lg); line-height: 1.55; color: var(--wcb-ink-soft); max-width: 60ch; }
+  .mentor .pull {
+    font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+    line-height: 1.35;
+    font-weight: 700;
+    color: var(--wcb-ink);
+    max-width: none;
+  }
   .link-arrow {
     display: inline-flex;
     align-items: center;
     gap: var(--wcb-space-3xs);
-    margin-top: var(--wcb-space-lg);
+    margin-top: var(--wcb-space-md);
     font-weight: 700;
     text-decoration: none;
-    color: var(--sl-color-text-accent);
+    color: var(--wcb-coral-text);
   }
   .link-arrow svg { width: 1.05rem; height: 1.05rem; transition: transform var(--wcb-motion-standard) var(--wcb-easing-standard); }
+  .link-arrow:hover { text-decoration: underline; }
   .link-arrow:hover svg { transform: translateX(4px); }
 
-  /* ---------- TRUST CARDS ---------- */
-  .cards {
-    margin-top: var(--wcb-space-xl);
+  /* ----------------------- TRUST POINTS ------------------------ */
+  .points {
+    margin-top: var(--wcb-space-lg);
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--wcb-space-md);
+    gap: var(--wcb-space-lg) var(--wcb-space-xl);
   }
-  .tcard {
-    background: var(--md-sys-color-surface-container-high);
-    border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent);
-    border-radius: var(--wcb-radius-md);
-    padding: var(--wcb-space-md);
-    box-shadow: var(--wcb-shadow-1);
+  .point h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0 0 var(--wcb-space-2xs);
+    padding-top: var(--wcb-space-2xs);
+    border-top: 2px solid var(--wcb-coral);
+    color: var(--wcb-ink);
   }
-  .tcard h3 { margin: var(--wcb-space-sm) 0 var(--wcb-space-2xs); font-size: var(--wcb-text-lg); font-weight: 700; }
-  .tcard p { margin: 0; color: var(--sl-color-gray-2); line-height: 1.55; }
-  .tcard-ico {
-    display: inline-flex;
-    width: 2.75rem;
-    height: 2.75rem;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--wcb-radius-sm);
-    color: var(--wcb-on-vivid);
-    box-shadow: var(--wcb-shadow-1);
-  }
-  .tcard-ico svg { width: 1.5rem; height: 1.5rem; }
-  .ico-shield { background: var(--sl-color-accent); color: var(--wcb-on-accent); }
-  .ico-check { background: var(--wcb-success-edge); }
-  .ico-welcome { background: var(--md-sys-color-tertiary); color: var(--md-sys-color-on-tertiary); }
-  .ico-roots { background: var(--wcb-caution-edge); }
+  .point .lead-word { color: var(--wcb-coral-text); }
+  .point p { margin: 0; color: var(--wcb-ink-soft); line-height: 1.55; }
 
-  /* ---------- CLOSING ---------- */
-  .paths { display: grid; grid-template-columns: 1fr 1fr; gap: var(--wcb-space-md); }
-  .path {
+  /* -------------------------- CLOSING -------------------------- */
+  .doors { display: grid; grid-template-columns: 1fr 1fr; gap: var(--wcb-space-sm); }
+  .door {
     display: flex;
     flex-direction: column;
     gap: var(--wcb-space-3xs);
     text-decoration: none;
-    padding: var(--wcb-space-md) var(--wcb-space-lg);
-    border-radius: var(--wcb-radius-md);
-    background: var(--md-sys-color-surface-container-high);
-    border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent);
-    box-shadow: var(--wcb-shadow-1);
+    padding: var(--wcb-space-md);
+    background: var(--wcb-card);
+    border: 1px solid var(--wcb-line);
+    border-radius: var(--wcb-radius-sm);
     transition:
       transform var(--wcb-motion-standard) var(--wcb-easing-standard),
-      box-shadow var(--wcb-motion-standard) var(--wcb-easing-standard),
       border-color var(--wcb-motion-standard) var(--wcb-easing-standard);
   }
-  .path:hover { transform: translateY(-3px); box-shadow: var(--wcb-shadow-2); border-color: color-mix(in srgb, var(--sl-color-accent) 60%, transparent); }
-  .path-kicker { font-size: var(--wcb-text-sm); color: var(--sl-color-gray-2); font-weight: 600; }
-  .path-main { font-size: var(--wcb-text-xl); font-weight: 800; color: var(--sl-color-text-accent); line-height: 1.1; }
-  .path-sub { font-size: var(--wcb-text-sm); color: var(--sl-color-gray-2); }
-  .signoff {
-    text-align: center;
-    margin: var(--wcb-space-md) 0 0;
-    font-size: clamp(1.3rem, 3vw, 1.9rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-  }
+  .door:hover { transform: translateY(-2px); border-color: var(--wcb-green); }
+  .door b { color: var(--wcb-ink); font-size: 1.15rem; }
+  .door-sub { font-size: var(--wcb-text-sm); color: var(--wcb-ink-soft); }
+  .signoff { text-align: center; margin: var(--wcb-space-md) 0 0; font-size: clamp(1.3rem, 3vw, 1.9rem); font-weight: 800; letter-spacing: -0.02em; color: var(--wcb-ink); }
+  .signoff .well { color: var(--wcb-coral-text); }
 
-  /* ---------- responsive ---------- */
+  /* ------------------------ responsive ------------------------ */
   @media (max-width: 50rem) {
     .hero { grid-template-columns: 1fr; }
-    .hero-art { order: -1; max-width: 24rem; margin-inline: auto; }
-    .steps { grid-template-columns: 1fr; gap: var(--wcb-space-lg); }
-    .steps::before { display: none; }
-    .cards { grid-template-columns: 1fr; }
-    .paths { grid-template-columns: 1fr; }
+    .specimen { order: 2; }
+    .points { grid-template-columns: 1fr; gap: var(--wcb-space-md); }
+    .doors { grid-template-columns: 1fr; }
   }
-
   @media (prefers-reduced-motion: reduce) {
-    .float, .float2 { animation: none; }
-    .btn, .path, .link-arrow svg { transition: none; }
+    .btn, .door, .link-arrow svg { transition: none; }
   }
 </style>

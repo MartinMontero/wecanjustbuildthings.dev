@@ -8,8 +8,11 @@
      :focus-visible ring on every control, honored reduced-motion. Status is
      never colour alone — a text label always carries the meaning.
 
-   Purple accent (freedom-tech / Nostr lineage); system font stack only, so the
-   site stays fast and tracker-free (no web fonts). */
+   Brand identity (Design Field Card): warm paper + ink, forest-green primary,
+   coral accent, monospace editorial labels. System font stack only — no web
+   fonts — so the site stays fast and tracker-free. Restraint over spectacle
+   (Manual §0): flat paper surfaces + hairline rules, glass reserved for chrome
+   (§7.4), motion that clarifies not performs (§7.5). */
 
 :root {
   /* The accent + full --md-sys-color-* palette are generated from one seed by
@@ -141,127 +144,128 @@
 .wcb-meta dd { margin: 0; }
 
 /* ============================================================================
-   Surface craft — the visible layer (Design Field Manual §0, §7.4, §7.5, §7.7).
-   Apple's restraint over Material's structure: glass reserved for chrome, tonal
-   elevation + a gentle lift for cards, purposeful motion. All depth is subtle.
+   Editorial brand layer — the visible identity (Design Field Card + Manual §0).
+   Warm paper + ink, forest green, coral; monospace labels and hairline rules.
+   Restraint over spectacle: flat surfaces, glass only on chrome, gentle motion.
    ============================================================================ */
 
-/* --- Type: bigger, tighter, more confident headings --- */
+/* --- Type: confident, tight, editorial. Body stays calm and readable. --- */
 .sl-markdown-content :is(h1, h2, h3),
 .hero h1 { letter-spacing: -0.02em; }
-.sl-markdown-content h1, .hero h1 { font-weight: 800; line-height: 1.05; }
+.sl-markdown-content h1, .hero h1 {
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--wcb-ink);
+}
 .sl-markdown-content h2 {
   font-weight: 700;
   margin-top: var(--wcb-space-xl);
   padding-top: var(--wcb-space-sm);
-  border-top: 1px solid color-mix(in srgb, var(--sl-color-gray-5) 45%, transparent);
+  border-top: 2px solid var(--wcb-ink);
 }
 
-/* Liquid Glass, responsibly — ONE glass layer on the sticky top chrome, with a
-   solid fallback and a hairline edge (§7.4). */
+/* The signature: a monospace, uppercase eyebrow in forest green. Used across the
+   homepage, the Studio, and section heads to set the editorial tone. */
+.wcb-eyebrow {
+  font-family: var(--sl-font-mono);
+  font-size: var(--wcb-text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--wcb-green);
+}
+
+/* Liquid Glass, responsibly — the ONE place glass is allowed is the sticky top
+   chrome, with a solid paper fallback and a hairline edge (Manual §7.4). */
 .header {
-  background: color-mix(in srgb, var(--sl-color-bg) 70%, transparent);
-  -webkit-backdrop-filter: blur(var(--wcb-glass-blur)) saturate(1.6);
-  backdrop-filter: blur(var(--wcb-glass-blur)) saturate(1.6);
-  border-bottom: 1px solid color-mix(in srgb, var(--sl-color-gray-5) 55%, transparent);
+  background: color-mix(in srgb, var(--wcb-paper) 78%, transparent);
+  -webkit-backdrop-filter: blur(var(--wcb-glass-blur)) saturate(1.4);
+  backdrop-filter: blur(var(--wcb-glass-blur)) saturate(1.4);
+  border-bottom: 1px solid var(--wcb-line);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .header { background: var(--sl-color-bg); }
+  .header { background: var(--wcb-paper); }
 }
 
-/* Designed cards: a real filled tonal surface (Material elevation-by-tone), a
-   generous radius, true depth, a confident hover lift, and a bold colour-coded
-   icon badge (§0 structure, §7.5 motion). */
+/* Cards: flat paper with a hairline rule — not floating glass. A quiet hover
+   (border warms to green, a 1px lift) signals "tappable" without spectacle. */
 .card,
 .sl-link-card {
-  background: var(--md-sys-color-surface-container-high);
-  border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent);
-  border-radius: var(--wcb-radius-md);
+  background: var(--wcb-card);
+  border: 1px solid var(--wcb-line);
+  border-radius: var(--wcb-radius-sm);
   padding: var(--wcb-space-md);
-  box-shadow: var(--wcb-shadow-1);
+  box-shadow: none;
   transition:
     transform var(--wcb-motion-standard) var(--wcb-easing-standard),
-    box-shadow var(--wcb-motion-standard) var(--wcb-easing-standard),
     border-color var(--wcb-motion-standard) var(--wcb-easing-standard);
 }
 .card:hover,
 .sl-link-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--wcb-shadow-2);
-  border-color: color-mix(in srgb, var(--sl-color-accent) 60%, transparent);
+  transform: translateY(-2px);
+  border-color: var(--wcb-green);
 }
-.sl-link-card:focus-within { border-color: var(--sl-color-accent); }
+.sl-link-card:focus-within { border-color: var(--wcb-green); }
 
-/* Card icon → a bold, rounded colour badge using Starlight's per-card hue. */
+/* Card icon → a small squared green badge (matches the editorial, not a glossy
+   pill). Coral is reserved for the single most important accent per view. */
 .card .icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--sl-card-border);
-  color: var(--wcb-on-vivid);
+  background: var(--wcb-green);
+  color: var(--wcb-on-accent);
   border: 0;
   border-radius: var(--wcb-radius-sm);
   padding: 0;
-  font-size: 1.2rem;
-  box-shadow: var(--wcb-shadow-1);
+  font-size: 1.1rem;
 }
 .card .title { gap: var(--wcb-space-2xs); align-items: center; }
 
-/* Actions: pill shape + real, tactile lift (§7.7). We keep Starlight's computed
-   fill/text pairing (it's contrast-correct per theme) and add the motion. */
+/* Actions: editorial buttons — squared, not pill. Primary is filled green; the
+   minimal/secondary reads as a quiet text action. One primary per view (§7.7).
+   Starlight's computed fill/text pairing is contrast-correct, so we keep it. */
 .sl-link-button {
-  border-radius: var(--wcb-radius-pill);
+  border-radius: var(--wcb-radius-sm);
+  font-weight: 700;
   transition:
     transform var(--wcb-motion-fast) var(--wcb-easing-standard),
-    box-shadow var(--wcb-motion-fast) var(--wcb-easing-standard),
-    background var(--wcb-motion-fast) var(--wcb-easing-standard);
+    background var(--wcb-motion-fast) var(--wcb-easing-standard),
+    border-color var(--wcb-motion-fast) var(--wcb-easing-standard);
 }
-.sl-link-button.primary { box-shadow: var(--wcb-shadow-1); }
-.sl-link-button.primary:hover { transform: translateY(-2px); box-shadow: var(--wcb-shadow-2); }
-.sl-link-button.primary:active { transform: translateY(0); box-shadow: var(--wcb-shadow-1); }
-.sl-link-button.minimal:hover { background: color-mix(in srgb, var(--sl-color-accent) 12%, transparent); }
+.sl-link-button.primary:hover { transform: translateY(-1px); }
+.sl-link-button.primary:active { transform: translateY(0); }
+.sl-link-button.minimal {
+  border-color: var(--wcb-line);
+}
+.sl-link-button.minimal:hover {
+  background: color-mix(in srgb, var(--wcb-green) 10%, transparent);
+  border-color: var(--wcb-green);
+}
 
-/* Pagination prev/next read as cards too. */
+/* Pagination prev/next read as flat cards too. */
 .pagination-links a {
-  border-radius: var(--wcb-radius-md);
-  transition: transform var(--wcb-motion-standard) var(--wcb-easing-standard), box-shadow var(--wcb-motion-standard) var(--wcb-easing-standard);
+  border-radius: var(--wcb-radius-sm);
+  transition: transform var(--wcb-motion-standard) var(--wcb-easing-standard), border-color var(--wcb-motion-standard) var(--wcb-easing-standard);
 }
-.pagination-links a:hover { transform: translateY(-3px); box-shadow: var(--wcb-shadow-2); }
+.pagination-links a:hover { transform: translateY(-2px); border-color: var(--wcb-green); }
 
-/* A designed splash hero: a soft gradient-mesh panel + a large display headline. */
+/* The splash hero: clean paper, a top ink rule, a large editorial headline —
+   no gradient mesh, no glow. The content leads (deference, Manual §0). */
 .hero {
   position: relative;
-  padding: clamp(var(--wcb-space-lg), 5vw, 3.5rem) clamp(var(--wcb-space-md), 4vw, 3.5rem);
-  border-radius: var(--wcb-radius-md);
-  background:
-    radial-gradient(62% 80% at 10% 6%, color-mix(in srgb, var(--md-sys-color-primary) 28%, transparent), transparent 60%),
-    radial-gradient(55% 70% at 94% 96%, color-mix(in srgb, var(--md-sys-color-tertiary) 24%, transparent), transparent 60%),
-    var(--md-sys-color-surface-container);
-  overflow: hidden;
+  padding: clamp(var(--wcb-space-md), 4vw, var(--wcb-space-xl)) 0 var(--wcb-space-lg);
 }
-.hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); }
-
-/* Trust strip under the hero — designed, on-brand proof at a glance. */
-.wcb-trust {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--wcb-space-2xs);
-  margin: var(--wcb-space-md) 0 var(--wcb-space-lg);
-  list-style: none;
-  padding: 0;
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  max-width: 14ch;
 }
-.wcb-trust li {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--wcb-space-3xs);
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: var(--wcb-space-3xs) var(--wcb-space-sm);
-  border-radius: var(--wcb-radius-pill);
-  background: var(--md-sys-color-surface-container-high);
-  border: 1px solid color-mix(in srgb, var(--sl-color-accent) 35%, transparent);
-  color: var(--sl-color-text);
+.hero .tagline {
+  color: var(--wcb-ink-soft);
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+  max-width: 46ch;
 }
-.wcb-trust b { color: var(--sl-color-text-accent); font-weight: 800; }
+/* The hero logo shouldn't dominate the words — keep it modest, ink-toned. */
+.hero img { max-height: 5rem; width: auto; }
