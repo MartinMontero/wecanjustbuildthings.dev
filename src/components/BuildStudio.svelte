@@ -59,6 +59,10 @@
       refineNone: 'Your plan already covers what you described — I wouldn’t add anything. That’s a good sign.',
       refineErr: 'Couldn’t reach the model. Check your key and try again.', refineNeedKey: 'Enter your AI key above first.',
       skillsHint: 'Have a field guide, manual, or SOP? Turn your own know-how into a skill your agent follows →',
+      skillsDraft: 'Skills I can scaffold from what you told me', skillsReady: 'Or drop in a ready-made skill',
+      skillAdd: 'Add to my project', skillAdded: 'Added ✓',
+      skillReview: 'A draft in your words — review and refine it; you’re the expert.',
+      skillsIncluded: 'skill(s) will be included in your starter',
     },
     es: {
       s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo',
@@ -107,6 +111,10 @@
       refineNone: 'Tu plan ya cubre lo que describiste — no añadiría nada. Eso es buena señal.',
       refineErr: 'No se pudo contactar al modelo. Revisa tu clave e inténtalo de nuevo.', refineNeedKey: 'Primero ingresa tu clave de IA arriba.',
       skillsHint: '¿Tienes una guía de campo, un manual o un procedimiento? Convierte tu propio saber en una habilidad que tu agente sigue →',
+      skillsDraft: 'Habilidades que puedo crear a partir de lo que me contaste', skillsReady: 'O agrega una habilidad lista para usar',
+      skillAdd: 'Añadir a mi proyecto', skillAdded: 'Añadida ✓',
+      skillReview: 'Un borrador en tus palabras — revísalo y ajústalo; tú eres quien sabe.',
+      skillsIncluded: 'habilidad(es) se incluirán en tu kit inicial',
     },
     ar: {
       s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه',
@@ -155,6 +163,10 @@
       refineNone: 'مخططك يغطّي ما وصفته بالفعل — لن أضيف شيئاً. هذه علامة جيدة.',
       refineErr: 'تعذّر الوصول إلى النموذج. تحقّق من مفتاحك وحاول مجدداً.', refineNeedKey: 'أدخل مفتاح الذكاء الاصطناعي أعلاه أولاً.',
       skillsHint: 'لديك دليل ميداني أو كُتيّب أو إجراء عمل؟ حوّل معرفتك إلى مهارة يتّبعها وكيلك ←',
+      skillsDraft: 'مهارات يمكنني إنشاؤها مما أخبرتني به', skillsReady: 'أو أضِف مهارة جاهزة',
+      skillAdd: 'أضِف إلى مشروعي', skillAdded: 'أُضيفت ✓',
+      skillReview: 'مسودة بكلماتك — راجعها وحسّنها؛ أنت صاحب الخبرة.',
+      skillsIncluded: 'مهارة ستُضمَّن في حزمتك المبدئية',
     },
   };
   let lang = $state<Lang>((['en', 'es', 'ar'].includes(initialLang) ? initialLang : 'en') as Lang);
@@ -472,7 +484,7 @@ manuals with the knowledge-to-skills-pipeline).
 `;
 
   function starterFiles(): Record<string, string> {
-    return {
+    const files: Record<string, string> = {
       'README.md': readme,
       'package.json': packageJson,
       'AGENT_PROMPT.txt': agentPrompt,
@@ -481,8 +493,11 @@ manuals with the knowledge-to-skills-pipeline).
       [`${slug}.goose-recipe.yaml`]: gooseRecipe,
       '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; run the enforcement engine before committing.\n`,
       'skills/README.md': skillsReadme,
-      'skills/example.SKILL.md': skillExample,
+      // The example is just a placeholder; once the builder has real skills, ship those instead.
+      ...(skillCount ? {} : { 'skills/example.SKILL.md': skillExample }),
+      ...customSkills,
     };
+    return files;
   }
 
   let copied = $state('');
@@ -587,6 +602,43 @@ manuals with the knowledge-to-skills-pipeline).
   let aiProposals = $state<Proposal[]>([]);
   let aiApplied = $state<Set<number>>(new Set());
 
+  // Pipeline output, wired into the loop: skills drafted from the builder's own
+  // described methods, plus a couple of ready-made starter skills. Adding one
+  // writes a SKILL.md (the knowledge-to-skills-pipeline format) into the starter.
+  interface DraftSkill { name: string; description: string; method: string[]; source?: string }
+  let aiSkills = $state<DraftSkill[]>([]);
+  let customSkills = $state<Record<string, string>>({});
+  const STARTER_SKILLS: DraftSkill[] = [
+    { name: 'tenant-intake', description: 'Take a housing or eviction report without exposing the tenant.', source: 'Tenant-organizing field practice',
+      method: [
+        'Use a chosen handle, never a legal name, until trust is established.',
+        'Record the building and the issue — not the unit number — at first contact.',
+        'Encrypt every record; only two named organizers hold the key.',
+        'Ask, in the tenant’s own words, what they want to happen next.',
+        'Never share identifying details outside the two key-holders without consent.',
+      ] },
+    { name: 'safe-data-handling', description: 'Hold sensitive community data so it can’t be turned against people.', source: 'Movement data-minimization practice',
+      method: [
+        'Collect the minimum — if you don’t need it, don’t store it.',
+        'Encrypt at rest and in transit; keep keys client-side, never on a shared server.',
+        'Name exactly who can access what, and review that list regularly.',
+        'Support deletion on request and on a schedule.',
+        'Assume anything you keep could be subpoenaed — design as if it will be.',
+      ] },
+  ];
+  function slugifySkill(name: string): string {
+    return (name || 'skill').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'skill';
+  }
+  function skillToMd(s: DraftSkill): string {
+    const title = slugifySkill(s.name).replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    const steps = s.method.map((m, i) => `${i + 1}. ${m}`).join('\n');
+    return `---\nname: ${slugifySkill(s.name)}\ndescription: ${s.description}\nattribution:\n  source: "${s.source || 'Described by the builder in the Build Studio'}"\n  license: CC-BY-SA-4.0\n---\n\n# ${title}\n\n${steps}\n`;
+  }
+  function addSkill(s: DraftSkill) {
+    customSkills = { ...customSkills, [`skills/${slugifySkill(s.name)}.SKILL.md`]: skillToMd(s) };
+  }
+  const skillCount = $derived(Object.keys(customSkills).length);
+
   // The constrained menu the model may choose from: the current pieces and their
   // alternatives, plus the strongest tools in each relevant capability category.
   // Everything here is already in the verified, policy-screened catalog.
@@ -620,7 +672,7 @@ manuals with the knowledge-to-skills-pipeline).
   function proposalPrompt(): string {
     const qa = aiQuestions.map((q, i) => `Q: ${q}\nA: ${aiAnswers[i]?.trim() || '(skipped)'}`).join('\n');
     const cands = aiCandidates.map((c) => `- ${c.name} | ${c.category} | ${c.license} | ${c.verification} | ${(c.desc || '').slice(0, 90)}`).join('\n');
-    return `${MENTOR} The builder answered your questions. Suggest concrete refinements to their plan — but only what genuinely helps.\n\n${intentBlock()}\n\nCURRENT PLAN:\n${planBlock()}\n\nTHEIR ANSWERS:\n${qa}\n\nYou may ONLY recommend tools from this CANDIDATES list, by their exact name. Never invent a tool, and never propose anything owned by Meta, OpenAI, or xAI.\nCANDIDATES:\n${cands}\n\nRules:\n- Prefer fewer tools. It is good to suggest nothing if the plan is already right (return an empty array).\n- For each suggestion: a plain-language reason a non-developer understands, and an honest trade-off or thing to watch.\n- You advise; the builder decides. Be honest over agreeable.\n\nRespond in ${LANG_NAME[lang]}. Output ONLY a JSON object:\n{"proposals": [{"action": "add" | "swap" | "remove", "name": "<exact candidate name>", "from": "<name being replaced, swap only>", "why": "...", "tradeoff": "..."}]}`;
+    return `${MENTOR} The builder answered your questions. Suggest concrete refinements to their plan — but only what genuinely helps.\n\n${intentBlock()}\n\nCURRENT PLAN:\n${planBlock()}\n\nTHEIR ANSWERS:\n${qa}\n\nYou may ONLY recommend tools from this CANDIDATES list, by their exact name. Never invent a tool, and never propose anything owned by Meta, OpenAI, or xAI.\nCANDIDATES:\n${cands}\n\nALSO: if the builder described a repeatable method, process, or checklist OF THEIR OWN (an intake process, a moderation flow, a safety protocol, a verification routine), draft it as a "skill" — a short name, a one-line description, and 3 to 7 plain steps in THEIR words. Only capture methods they actually described or clearly implied; never invent domain procedures you don't have. If none, return an empty array. Example skill: {"name":"tenant-intake","description":"Take a housing report without exposing the tenant.","method":["Use a chosen handle, not a legal name.","Record the building, not the unit, at first.","Encrypt everything; two organizers hold keys."]}\n\nRules:\n- Prefer fewer tools. It is good to suggest nothing if the plan is already right (return empty arrays).\n- For each tool suggestion: a plain-language reason a non-developer understands, and an honest trade-off.\n- You advise; the builder decides. Be honest over agreeable.\n\nRespond in ${LANG_NAME[lang]}. Output ONLY a JSON object:\n{"proposals": [{"action": "add" | "swap" | "remove", "name": "<exact candidate name>", "from": "<name being replaced, swap only>", "why": "...", "tradeoff": "..."}], "skills": [{"name": "kebab-case-name", "description": "...", "method": ["step", "step"]}]}`;
   }
 
   async function callModel(prompt: string): Promise<string> {
@@ -636,7 +688,7 @@ manuals with the knowledge-to-skills-pipeline).
 
   async function aiAsk() {
     if (!kKey) { aiError = t.refineNeedKey; return; }
-    aiBusy = true; aiError = ''; aiProposals = []; aiApplied = new Set();
+    aiBusy = true; aiError = ''; aiProposals = []; aiSkills = []; aiApplied = new Set();
     try {
       const j = parseObj(await callModel(socraticPrompt()));
       aiQuestions = (Array.isArray(j.questions) ? j.questions : []).map(String).slice(0, 5);
@@ -660,6 +712,12 @@ manuals with the knowledge-to-skills-pipeline).
         })
         .filter((p): p is Proposal => p !== null)
         .slice(0, 6);
+      // Pipeline output: skills the model drafted from the builder's own words.
+      const rawSkills: any[] = Array.isArray(j.skills) ? j.skills : [];
+      aiSkills = rawSkills
+        .filter((s) => s && s.name && Array.isArray(s.method) && s.method.length)
+        .map((s) => ({ name: String(s.name), description: String(s.description || ''), method: s.method.map(String).slice(0, 8) }))
+        .slice(0, 3);
       aiPhase = 'proposals';
     } catch { aiError = t.refineErr; } finally { aiBusy = false; }
   }
@@ -778,9 +836,10 @@ manuals with the knowledge-to-skills-pipeline).
         {/if}
 
         {#if aiPhase === 'proposals'}
-          {#if aiProposals.length === 0}
+          {#if aiProposals.length === 0 && aiSkills.length === 0}
             <p class="hint">{t.refineNone}</p>
-          {:else}
+          {/if}
+          {#if aiProposals.length}
             <ul class="proposals">
               {#each aiProposals as p, i (i)}
                 {@const it = items.find((x) => x.name === p.name)}
@@ -795,7 +854,39 @@ manuals with the knowledge-to-skills-pipeline).
               {/each}
             </ul>
           {/if}
+          {#if aiSkills.length}
+            <p class="bp-sub">{t.skillsDraft}</p>
+            <ul class="skilllist">
+              {#each aiSkills as s (s.name)}
+                {@const key = `skills/${slugifySkill(s.name)}.SKILL.md`}
+                <li class="skillcard">
+                  <div class="skill-head"><span class="skill-name">{s.name}.SKILL.md</span>
+                    {#if customSkills[key]}<span class="applied">{t.skillAdded}</span>{:else}<button class="apply" onclick={() => addSkill(s)}>{t.skillAdd}</button>{/if}
+                  </div>
+                  <p class="skill-desc">{s.description}</p>
+                  <ol class="skill-steps">{#each s.method as m}<li>{m}</li>{/each}</ol>
+                </li>
+              {/each}
+            </ul>
+            <p class="hint">{t.skillReview}</p>
+          {/if}
         {/if}
+      </details>
+
+      <details class="skillsbox">
+        <summary>{t.skillsReady}{skillCount ? ` · ${skillCount} ${t.skillsIncluded}` : ''}</summary>
+        <ul class="skilllist">
+          {#each STARTER_SKILLS as s (s.name)}
+            {@const key = `skills/${slugifySkill(s.name)}.SKILL.md`}
+            <li class="skillcard">
+              <div class="skill-head"><span class="skill-name">{s.name}.SKILL.md</span>
+                {#if customSkills[key]}<span class="applied">{t.skillAdded}</span>{:else}<button class="apply" onclick={() => addSkill(s)}>{t.skillAdd}</button>{/if}
+              </div>
+              <p class="skill-desc">{s.description}</p>
+            </li>
+          {/each}
+        </ul>
+        <p class="hint"><a href="/guides/knowledge-to-skills/">{t.skillsHint}</a></p>
       </details>
 
       <details class="advanced">
@@ -921,6 +1012,14 @@ manuals with the knowledge-to-skills-pipeline).
   .apply { background: var(--sl-color-accent); color: #fff; border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
   .applied { font-size: 0.78rem; font-weight: 700; color: #2da44e; }
   .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
+  .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .skillsbox > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 600; }
+  .skilllist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+  .skillcard { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.55rem 0.8rem; }
+  .skill-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+  .skill-name { font-weight: 700; font-family: var(--sl-font-mono); font-size: 0.92rem; }
+  .skill-desc { margin: 0.25rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
+  .skill-steps { margin: 0.4rem 0 0; padding-inline-start: 1.2rem; font-size: 0.85rem; color: var(--sl-color-gray-2); display: grid; gap: 0.15rem; }
   .deeper summary, .advanced summary, .swap summary { cursor: pointer; color: var(--sl-color-text-accent); font-size: 0.9rem; font-weight: 600; }
   .bp-head h3 { margin: 0 0 0.3rem; }
   .bp-sub { margin: 0.4rem 0 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--sl-color-gray-2); }
