@@ -75,6 +75,10 @@ export default defineConfig({
           ],
         },
         {
+          label: 'Guides',
+          items: [{ autogenerate: { directory: 'guides' } }],
+        },
+        {
           label: 'Socratic Intent (the method)',
           items: [{ autogenerate: { directory: 'method' } }],
         },

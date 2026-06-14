@@ -1,0 +1,73 @@
+---
+title: Get started with Goose
+description: Download and install Goose, configure a permitted bring-your-own-key provider, and run a recipe exported from the Build Studio — one command to start locally.
+sidebar:
+  order: 1
+---
+
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+[Goose](https://block.github.io/goose/) is a free, open-source AI agent that runs
+on **your** machine — so it can actually create files and run code, which a web
+app can't. The [Build Studio](/build/) exports a **Goose recipe** that configures
+it with your project's constitution, vetted stack, and intent.
+
+<Aside type="caution" title="Bring a permitted provider">
+Configure Goose with a permitted, bring-your-own-key model provider — **Anthropic,
+DeepSeek, Kimi, OpenRouter, or local Ollama**. Do **not** use OpenAI or xAI; that
+would break the very policy you're building under.
+</Aside>
+
+## 1. Install Goose
+
+<Tabs>
+  <TabItem label="macOS / Linux">
+    ```sh
+    curl -fsSL https://block.github.io/goose/install.sh | bash
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    Use WSL, then run the macOS/Linux command above. (See the
+    [official docs](https://block.github.io/goose/docs/getting-started/installation/)
+    for the latest installer.)
+  </TabItem>
+</Tabs>
+
+## 2. Configure a permitted provider (BYOK)
+
+<Steps>
+
+1. Get an API key from a permitted provider (e.g. an Anthropic, DeepSeek, or
+   OpenRouter account). You pay the provider directly — your key stays on your
+   machine.
+2. Run the configurator and pick that provider:
+   ```sh
+   goose configure
+   ```
+   Choose **Anthropic / OpenRouter / DeepSeek / Ollama** — *not* OpenAI or xAI.
+
+</Steps>
+
+## 3. Run your project's recipe
+
+<Steps>
+
+1. In the [Build Studio](/build/), pick **Run with Goose** on the Generate step
+   and **Download Goose recipe** (a `.goose-recipe.yaml`).
+2. From your project folder, run:
+   ```sh
+   goose run --recipe my-app.goose-recipe.yaml
+   ```
+3. Goose reads the recipe's constitution and intent, uses only the vetted stack,
+   and starts building. Keep every change clean:
+   ```sh
+   npx tsx ./enforcement/cli.ts all --tree .
+   ```
+
+</Steps>
+
+<Aside type="tip" title="Prefer not to install anything?">
+You can also **Download .zip** (open it with any agent), use **Create GitHub
+repo** for a one-click remote start, or **Kickoff with AI (BYOK)** to generate a
+plan from the browser. The Studio lets you choose.
+</Aside>

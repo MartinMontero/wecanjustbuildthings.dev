@@ -1,0 +1,63 @@
+---
+title: Connect GitHub (one-click repo)
+description: Create a GitHub account and use the Build Studio's one-click to push your generated starter straight to a new repository — plus the maintainer setup.
+sidebar:
+  order: 2
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+The [Build Studio](/build/)'s **Create GitHub repo** option pushes your generated
+starter (constitution, spec, agent prompt, recipe, `package.json`) straight to a
+brand-new repository — no zip, no terminal.
+
+## For builders
+
+<Steps>
+
+1. **Make a GitHub account** (free): go to
+   [github.com/signup](https://github.com/signup), enter an email, password, and
+   username, and verify your email. That's it.
+2. In the [Build Studio](/build/), finish steps 1–2, then on **Generate** pick
+   **Create GitHub repo**.
+3. Click **Connect GitHub & create repo**. GitHub asks you to authorize the app
+   with permission to create a public repository — review and approve.
+4. You're returned to the Studio; click **Create**. Your new repo opens with all
+   the starter files in it. Clone it and point your agent at it.
+
+</Steps>
+
+<Aside type="note" title="What it can access">
+The authorization requests only `public_repo` — enough to create one public repo
+and add files. It can't touch your private repos. The token is short-lived and
+held only for the moment of creation.
+</Aside>
+
+## For the maintainer (one-time setup)
+
+The one-click needs a GitHub OAuth app and two Worker secrets. Until these are
+set, the Studio shows a "not configured" message and offers the `.zip` instead.
+
+<Steps>
+
+1. **Register an OAuth app:** GitHub → Settings → Developer settings →
+   **OAuth Apps → New OAuth App**.
+   - Homepage URL: `https://wecanjustbuildthings.dev`
+   - Authorization callback URL: `https://wecanjustbuildthings.dev/api/github/callback`
+2. Copy the **Client ID** and generate a **Client secret**.
+3. Add them as Worker secrets (Cloudflare dashboard → your Worker → Settings →
+   Variables and Secrets), or via CLI:
+   ```sh
+   npx wrangler secret put GITHUB_OAUTH_CLIENT_ID
+   npx wrangler secret put GITHUB_OAUTH_CLIENT_SECRET
+   ```
+4. Redeploy. `/api/github/status` will report `configured: true` and the one-click
+   activates.
+
+</Steps>
+
+<Aside type="tip" title="No setup? Still fully usable">
+Without the OAuth app, every other handoff works: **Download .zip**, **Run with
+Goose**, and **Kickoff with AI (BYOK)**. The one-click is a convenience, not a
+requirement.
+</Aside>

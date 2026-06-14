@@ -36,6 +36,8 @@ const PATHS = [
   '/pie/cooking/',
   '/build/',
   '/check/',
+  '/guides/get-started-with-goose/',
+  '/guides/connect-github/',
   '/policies/',
   '/policies/enforcement/',
   '/privacy/',
