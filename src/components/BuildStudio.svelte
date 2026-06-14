@@ -183,32 +183,49 @@
   // of real catalog tools — the few pieces a project like this actually needs,
   // each with a role, a reason, and how it connects. The builder never has to
   // know the tools by name or browse thousands of entries.
-  interface CapDef { id: string; role: string; always?: boolean; protoOnly?: boolean; detect?: RegExp; names?: (p: Set<string>) => string[]; category?: string; why: string; connects: string; }
+  interface CapDef { id: string; always?: boolean; protoOnly?: boolean; detect?: RegExp; names?: (p: Set<string>) => string[]; category?: string; }
   const CAP_DEFS: CapDef[] = [
-    { id: 'connect', role: 'Connects to the network', protoOnly: true,
-      names: (p) => [...(p.has('nostr') ? ['@nostr-dev-kit/ndk', 'nostr-tools'] : []), ...(p.has('atproto') ? ['@atproto/api', '@atcute/client'] : [])],
-      why: 'How your app talks to the open network — so your community isn’t locked inside one company’s walls.',
-      connects: 'Everything else plugs into this; it carries the posts, messages, and updates in and out.' },
-    { id: 'app', role: 'The app people see and use', always: true,
-      names: () => ['@sveltejs/kit', 'astro', 'vue', 'solid-js', 'svelte', 'react', 'next'], category: 'Frameworks & Libraries',
-      why: 'The screens and buttons your community actually touches. We default to Svelte — fast, simple, and not owned by a Big Tech platform.',
-      connects: 'Shows what comes back from the network and sends people’s actions to it.' },
-    { id: 'identity', role: 'Logins & identity', detect: /\b(log ?in|login|sign[- ]?in|account|identit|profile|member|auth|\bkey)/i, category: 'Auth Identity & Keys',
-      why: 'Lets people prove who they are and keeps their accounts truly theirs.',
-      connects: 'Signs each action so the network knows it really came from them.' },
-    { id: 'privacy', role: 'Privacy & encryption', detect: /\b(privat|anonym|secure|encrypt|confidential|protect|sensitive|expos|surveil)/i, category: 'Security & Privacy',
-      why: 'Keeps sensitive information unreadable to anyone it isn’t meant for.',
-      connects: 'Scrambles data before it’s stored or sent, and unscrambles it only for the right people.' },
-    { id: 'storage', role: 'Remembers your data', detect: /\b(store|saved?|database|record|archive|document|history|track|list|directory|inventory)\b/i, category: 'Databases & Storage',
-      why: 'Keeps things between visits — posts, records, settings — so nothing is lost.',
-      connects: 'The app reads from and writes to this.' },
-    { id: 'payments', role: 'Payments & tips', detect: /\b(pay|paid|tip|donat|fund|wallet|money|invoice|sats|bitcoin|lightning|zap|support)\b/i, category: 'Bitcoin Lightning Nostr',
-      why: 'Lets people send and receive money or tips directly, with no middleman taking a cut.',
-      connects: 'Adds a pay/tip button and settles it on the Lightning network.' },
-    { id: 'hosting', role: 'Runs the server side', detect: /\b(server|back ?end|backend|relay|host|deploy|\bapi\b|self-host|infrastructure)\b/i, category: 'Hosting Infra & Deploy',
-      why: 'If your tool needs its own server — like running a relay or an API — this is what runs it. Many community apps don’t need one: the network does the heavy lifting.',
-      connects: 'Serves the app and handles anything that can’t happen in the browser alone.' },
+    { id: 'connect', protoOnly: true,
+      names: (p) => [...(p.has('nostr') ? ['@nostr-dev-kit/ndk', 'nostr-tools'] : []), ...(p.has('atproto') ? ['@atproto/api', '@atcute/client'] : [])] },
+    { id: 'app', always: true, names: () => ['@sveltejs/kit', 'astro', 'vue', 'solid-js', 'svelte', 'react', 'next'], category: 'Frameworks & Libraries' },
+    { id: 'identity', detect: /\b(log ?in|login|sign[- ]?in|account|identit|profile|member|auth|\bkey)/i, category: 'Auth Identity & Keys' },
+    { id: 'privacy', detect: /\b(privat|anonym|secure|encrypt|confidential|protect|sensitive|expos|surveil)/i, category: 'Security & Privacy' },
+    { id: 'storage', detect: /\b(store|saved?|database|record|archive|document|history|track|list|directory|inventory)\b/i, category: 'Databases & Storage' },
+    { id: 'payments', detect: /\b(pay|paid|tip|donat|fund|wallet|money|invoice|sats|bitcoin|lightning|zap|support)\b/i, category: 'Bitcoin Lightning Nostr' },
+    { id: 'hosting', detect: /\b(server|back ?end|backend|relay|host|deploy|\bapi\b|self-host|infrastructure)\b/i, category: 'Hosting Infra & Deploy' },
   ];
+  // Plain-language role / why / how-it-connects for each piece, localized so the
+  // blueprint rationale reads fully in the builder's language.
+  interface CapText { role: string; why: string; connects: string }
+  const CAP_TEXT: Record<Lang, Record<string, CapText>> = {
+    en: {
+      connect: { role: 'Connects to the network', why: 'How your app talks to the open network — so your community isn’t locked inside one company’s walls.', connects: 'Everything else plugs into this; it carries the posts, messages, and updates in and out.' },
+      app: { role: 'The app people see and use', why: 'The screens and buttons your community actually touches. We default to Svelte — fast, simple, and not owned by a Big Tech platform.', connects: 'Shows what comes back from the network and sends people’s actions to it.' },
+      identity: { role: 'Logins & identity', why: 'Lets people prove who they are and keeps their accounts truly theirs.', connects: 'Signs each action so the network knows it really came from them.' },
+      privacy: { role: 'Privacy & encryption', why: 'Keeps sensitive information unreadable to anyone it isn’t meant for.', connects: 'Scrambles data before it’s stored or sent, and unscrambles it only for the right people.' },
+      storage: { role: 'Remembers your data', why: 'Keeps things between visits — posts, records, settings — so nothing is lost.', connects: 'The app reads from and writes to this.' },
+      payments: { role: 'Payments & tips', why: 'Lets people send and receive money or tips directly, with no middleman taking a cut.', connects: 'Adds a pay/tip button and settles it on the Lightning network.' },
+      hosting: { role: 'Runs the server side', why: 'If your tool needs its own server — like running a relay or an API — this is what runs it. Many community apps don’t need one: the network does the heavy lifting.', connects: 'Serves the app and handles anything that can’t happen in the browser alone.' },
+    },
+    es: {
+      connect: { role: 'Se conecta a la red', why: 'Cómo tu app habla con la red abierta — para que tu comunidad no quede encerrada en los muros de una sola empresa.', connects: 'Todo lo demás se conecta a esto; lleva y trae las publicaciones, los mensajes y las actualizaciones.' },
+      app: { role: 'La app que la gente ve y usa', why: 'Las pantallas y botones que tu comunidad realmente toca. Usamos Svelte por defecto — rápido, simple y sin dueño Big Tech.', connects: 'Muestra lo que vuelve de la red y le envía las acciones de la gente.' },
+      identity: { role: 'Acceso e identidad', why: 'Permite que las personas demuestren quiénes son y mantengan sus cuentas realmente suyas.', connects: 'Firma cada acción para que la red sepa que de verdad vino de ellas.' },
+      privacy: { role: 'Privacidad y cifrado', why: 'Mantiene la información sensible ilegible para cualquiera a quien no esté destinada.', connects: 'Cifra los datos antes de guardarlos o enviarlos, y los descifra solo para las personas correctas.' },
+      storage: { role: 'Recuerda tus datos', why: 'Conserva las cosas entre visitas — publicaciones, registros, ajustes — para que nada se pierda.', connects: 'La app lee y escribe aquí.' },
+      payments: { role: 'Pagos y propinas', why: 'Permite que la gente envíe y reciba dinero o propinas directamente, sin que un intermediario se lleve una parte.', connects: 'Añade un botón de pago/propina y lo liquida en la red Lightning.' },
+      hosting: { role: 'Ejecuta el lado del servidor', why: 'Si tu herramienta necesita su propio servidor — como ejecutar un relay o una API — esto es lo que lo ejecuta. Muchas apps comunitarias no lo necesitan: la red hace el trabajo pesado.', connects: 'Sirve la app y maneja todo lo que no puede ocurrir solo en el navegador.' },
+    },
+    ar: {
+      connect: { role: 'يتّصل بالشبكة', why: 'كيف يتحدّث تطبيقك مع الشبكة المفتوحة — حتى لا يبقى مجتمعك حبيس جدران شركة واحدة.', connects: 'كل شيء آخر يتّصل بهذا؛ فهو ينقل المنشورات والرسائل والتحديثات ذهاباً وإياباً.' },
+      app: { role: 'التطبيق الذي يراه الناس ويستخدمونه', why: 'الشاشات والأزرار التي يلمسها مجتمعك فعلاً. نعتمد Svelte افتراضياً — سريع وبسيط ولا تملكه شركة تقنية كبرى.', connects: 'يعرض ما يعود من الشبكة ويُرسل إليها تصرّفات الناس.' },
+      identity: { role: 'الدخول والهوية', why: 'يتيح للناس إثبات هويتهم ويبقي حساباتهم مِلكاً لهم حقاً.', connects: 'يوقّع كل إجراء حتى تعرف الشبكة أنه صدر منهم فعلاً.' },
+      privacy: { role: 'الخصوصية والتشفير', why: 'يُبقي المعلومات الحسّاسة غير مقروءة لأي شخص ليست موجَّهة إليه.', connects: 'يشفّر البيانات قبل تخزينها أو إرسالها، ويفكّ تشفيرها فقط للأشخاص المناسبين.' },
+      storage: { role: 'يحفظ بياناتك', why: 'يحتفظ بالأشياء بين الزيارات — المنشورات والسجلات والإعدادات — حتى لا يضيع شيء.', connects: 'يقرأ منه التطبيق ويكتب إليه.' },
+      payments: { role: 'المدفوعات والإكراميات', why: 'يتيح للناس إرسال واستقبال المال أو الإكراميات مباشرة، دون وسيط يقتطع حصّة.', connects: 'يضيف زرّ دفع/إكرامية ويُسوّيه على شبكة Lightning.' },
+      hosting: { role: 'يُشغّل جانب الخادم', why: 'إذا احتاجت أداتك خادمها الخاص — مثل تشغيل relay أو واجهة API — فهذا ما يُشغّله. كثير من تطبيقات المجتمع لا تحتاجه: الشبكة تقوم بالعمل الثقيل.', connects: 'يخدم التطبيق ويتولّى كل ما لا يمكن أن يحدث في المتصفح وحده.' },
+    },
+  };
 
   function protoMatch(it: Item): number { let n = 0; for (const p of protocols) if (it.protocols.includes(p)) n += 1; return n; }
   function pickPool(names: string[] | undefined, category: string | undefined, taken: Set<string>): Item[] {
@@ -241,7 +258,8 @@
       if (sw) { const s = pool.find((x) => x.name === sw) ?? items.find((x) => x.name === sw); if (s) item = s; }
       const alts = pool.filter((x) => x.name !== item.name).slice(0, 3);
       taken.add(item.name);
-      pieces.push({ capId: def.id, role: def.role, why: def.why, connects: def.connects, item, alts });
+      const txt = (CAP_TEXT[lang] ?? CAP_TEXT.en)[def.id] ?? CAP_TEXT.en[def.id]!;
+      pieces.push({ capId: def.id, role: txt.role, why: txt.why, connects: txt.connects, item, alts });
     }
     return pieces;
   });
