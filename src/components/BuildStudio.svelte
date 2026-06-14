@@ -13,7 +13,7 @@
   type Lang = 'en' | 'es' | 'ar';
   const STR: Record<Lang, Record<string, string>> = {
     en: {
-      s1: '1 · Describe', s2: '2 · Pick tools', s3: '3 · Your starter',
+      s1: '1 · Describe', s2: '2 · Your blueprint', s3: '3 · Build it',
       name: 'Project name (a short nickname is fine)',
       problem: 'What problem does it solve, and for whom? Say it like you would out loud — one short paragraph.',
       why: 'Why does this matter? The real change you want — not just “ship an app.”',
@@ -21,7 +21,12 @@
       protocols: 'Which network does it live on?', focus: 'What kind of thing are you building?',
       tenq: 'Start with the why. Answer these the way you’d explain the project to a friend — the clearer you are, the better your AI agent builds.',
       protoHelp: 'A “network” (protocol) is the shared, open rulebook your tool plugs into — owned by no single company. Nostr and AT Protocol (Bluesky) are open social networks; pick “general” if it isn’t a social tool.',
-      choose: 'Pick your tools →', back: '← Back', gen: 'Get my starter →', backStack: '← Back to tools',
+      choose: 'Show me the blueprint →', back: '← Back', gen: 'Build it →', backStack: '← Back to the blueprint',
+      bpHead: 'Here’s how I’d build', bpPieces: 'The pieces you’ll need', bpWhyFor: 'Why this, for you:', bpConnects: 'How it fits in:',
+      bpSwap: 'Swap', bpUse: 'Use this instead', bpRemove: 'Remove', bpKeep: 'Add back', bpFits: 'How it all comes together',
+      bpAdvanced: 'Power user? Browse and add tools yourself', bpEmpty: 'Tell me what you want to build first — go back and describe it in a sentence or two.',
+      bpLead: 'You don’t need to know any of these by name. I picked a small, proven set for what you described and wired them together. Keep it as-is, or swap any piece — every option is safe and license-checked.',
+      examples: 'Not sure where to start? Try one:',
       suggested: '',
       add: 'Need something specific? Search the full catalog', selected: 'building blocks chosen', loading: 'Loading the catalog…',
       handoff: 'How do you want to get started?', zip: 'Download a starter folder', github: 'Save it to GitHub',
@@ -46,7 +51,7 @@
       ghConnectBtn: 'Connect GitHub & save my project', ghSuccess: '✓ Your project is on GitHub:', copyPlan: 'Copy the plan',
     },
     es: {
-      s1: '1 · Describe', s2: '2 · Elige', s3: '3 · Tu kit',
+      s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo',
       name: 'Nombre del proyecto (un apodo corto vale)',
       problem: '¿Qué problema resuelve y para quién? Dilo como lo dirías en voz alta — un párrafo corto.',
       why: '¿Por qué importa? El cambio real que buscas — no solo “lanzar una app.”',
@@ -54,7 +59,12 @@
       protocols: '¿En qué red vive?', focus: '¿Qué tipo de cosa estás construyendo?',
       tenq: 'Empieza por el porqué. Responde como si le explicaras el proyecto a un amigo — cuanto más claro seas, mejor construye tu agente de IA.',
       protoHelp: 'Una “red” (protocolo) es el reglamento abierto y compartido al que se conecta tu herramienta — sin dueño único. Nostr y AT Protocol (Bluesky) son redes sociales abiertas; elige “general” si no es una herramienta social.',
-      choose: 'Elige tus herramientas →', back: '← Atrás', gen: 'Obtener mi kit →', backStack: '← Volver',
+      choose: 'Muéstrame el plano →', back: '← Atrás', gen: 'Construirlo →', backStack: '← Volver al plano',
+      bpHead: 'Así lo construiría', bpPieces: 'Las piezas que necesitarás', bpWhyFor: 'Por qué esta, para ti:', bpConnects: 'Cómo encaja:',
+      bpSwap: 'Cambiar', bpUse: 'Usar esta', bpRemove: 'Quitar', bpKeep: 'Volver a añadir', bpFits: 'Cómo se une todo',
+      bpAdvanced: '¿Experto? Explora y añade herramientas tú mismo', bpEmpty: 'Primero dime qué quieres construir — vuelve y descríbelo en una o dos frases.',
+      bpLead: 'No necesitas conocer ninguna de estas por su nombre. Elegí un conjunto pequeño y probado para lo que describiste y las conecté entre sí. Déjalo así, o cambia cualquier pieza — cada opción es segura y con licencia verificada.',
+      examples: '¿No sabes por dónde empezar? Prueba una:',
       suggested: '',
       add: '¿Necesitas algo específico? Busca en todo el catálogo', selected: 'bloques elegidos', loading: 'Cargando el catálogo…',
       handoff: '¿Cómo quieres empezar?', zip: 'Descargar una carpeta inicial', github: 'Guardarlo en GitHub',
@@ -79,7 +89,7 @@
       ghConnectBtn: 'Conectar GitHub y guardar mi proyecto', ghSuccess: '✓ Tu proyecto está en GitHub:', copyPlan: 'Copiar el plan',
     },
     ar: {
-      s1: '١ · صِف', s2: '٢ · اختر', s3: '٣ · حزمتك',
+      s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه',
       name: 'اسم المشروع (يكفي اسم مختصر)',
       problem: 'ما المشكلة التي يحلها، ولمن؟ قُلها كما تقولها بصوتك — فقرة قصيرة.',
       why: 'لماذا يهمّ هذا؟ التغيير الحقيقي الذي تريده — وليس مجرد «إطلاق تطبيق».',
@@ -87,7 +97,12 @@
       protocols: 'على أي شبكة يعمل؟', focus: 'ما نوع الشيء الذي تبنيه؟',
       tenq: 'ابدأ بالـ«لماذا». أجب كأنك تشرح المشروع لصديق — كلما كنت أوضح، بنى وكيل الذكاء الاصطناعي بشكل أفضل.',
       protoHelp: 'الـ«شبكة» (البروتوكول) هي القواعد المفتوحة المشتركة التي تتصل بها أداتك — لا يملكها طرف واحد. Nostr وAT Protocol (Bluesky) شبكات اجتماعية مفتوحة؛ اختر «general» إن لم تكن أداة اجتماعية.',
-      choose: 'اختر أدواتك ←', back: '→ رجوع', gen: 'احصل على حزمتي ←', backStack: '→ رجوع',
+      choose: 'أرني المخطط ←', back: '→ رجوع', gen: 'ابنِه ←', backStack: '→ العودة للمخطط',
+      bpHead: 'هكذا سأبنيه', bpPieces: 'القطع التي ستحتاجها', bpWhyFor: 'لماذا هذه، لك:', bpConnects: 'كيف تتكامل:',
+      bpSwap: 'تبديل', bpUse: 'استخدم هذه', bpRemove: 'إزالة', bpKeep: 'إعادة الإضافة', bpFits: 'كيف يتكامل كل شيء',
+      bpAdvanced: 'خبير؟ تصفّح وأضف الأدوات بنفسك', bpEmpty: 'أخبرني أولاً بما تريد بناءه — ارجع وصِفه في جملة أو جملتين.',
+      bpLead: 'لا حاجة لأن تعرف أيّاً منها بالاسم. اخترتُ مجموعة صغيرة ومُجرَّبة لما وصفته وربطتها معاً. اتركها كما هي، أو بدّل أي قطعة — كل خيار آمن ومُتحقَّق من ترخيصه.',
+      examples: 'لا تعرف من أين تبدأ؟ جرّب واحدة:',
       suggested: '',
       add: 'تحتاج شيئاً محدداً؟ ابحث في الكتالوج كاملاً', selected: 'لبنات مختارة', loading: 'جارٍ تحميل الكتالوج…',
       handoff: 'كيف تريد أن تبدأ؟', zip: 'تنزيل مجلد بداية', github: 'احفظه في GitHub',
@@ -125,24 +140,26 @@
   let goal = $state('');
   let success = $state('');
   let protocols = $state<Set<string>>(new Set(['nostr']));
-  let focus = $state('social');
-  let chosen = $state<Set<string>>(new Set());
   let addQuery = $state('');
   let handoff = $state<'zip' | 'github' | 'goose' | 'kickoff'>('zip');
+  // Builder's adjustments to the recommended blueprint: a swapped alternative per
+  // piece, pieces switched off, and any extra tools added by hand (advanced).
+  let swaps = $state<Record<string, string>>({});
+  let removed = $state<Set<string>>(new Set());
+  let extra = $state<Set<string>>(new Set());
 
   const ALL_PROTOCOLS = ['nostr', 'atproto', 'lightning', 'cashu', 'general'];
-  const FOCI: Record<string, { label: string; categories: string[] }> = {
-    social: { label: 'A social app or feed people post and read in', categories: ['Frameworks & Libraries', 'Dev Environment & Tooling'] },
-    relay: { label: 'A server other apps or people connect to', categories: ['Hosting Infra & Deploy', 'Databases & Storage', 'Monitoring & Observability'] },
-    wallet: { label: 'A wallet or payments tool', categories: ['Bitcoin Lightning Nostr', 'Security & Privacy'] },
-    safety: { label: 'A moderation or safety tool', categories: ['Security & Privacy', 'Auth Identity & Keys'] },
-    general: { label: 'Something else / a general app', categories: ['Frameworks & Libraries', 'Dev Environment & Tooling', 'Testing & QA'] },
-  };
-  // Recommended primary SDK per protocol (listed first, starred, pre-selected).
   const PROTO_PRIORITY: Record<string, string[]> = {
     nostr: ['@nostr-dev-kit/ndk', 'nostr-tools'],
     atproto: ['@atproto/api', '@atcute/client'],
   };
+  // Plain-language starting points for a builder who isn't sure how to phrase it.
+  const EXAMPLES = [
+    'A private way for tenants to report problems without exposing who they are.',
+    'A community bulletin board that no company can shut down or sell.',
+    'A tip jar so people can support our organizers directly.',
+    'A members-only space where our collective can talk and share files.',
+  ];
 
   onMount(async () => {
     // Follow the page's locale so /es/build/ and /ar/build/ open in that language
@@ -158,46 +175,97 @@
   });
 
   const slug = $derived((projectName || 'my-app').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '') || 'my-app');
+  const protoList = $derived([...protocols].filter((p) => p !== 'general'));
+  const primaryNames = $derived(new Set([...protocols].map((p) => PROTO_PRIORITY[p]?.[0]).filter(Boolean)));
 
-  const suggested = $derived.by(() => {
-    if (!items.length) return [] as Item[];
-    const cats = new Set(FOCI[focus]?.categories ?? []);
-    const wantProto = protocols.size > 0;
-    return items
-      .map((it) => {
-        let score = it.uses;
-        if (wantProto && it.protocols.some((p) => protocols.has(p))) score += 1000;
-        if (cats.has(it.category)) score += 200;
-        if (it.verification === 'verified') score += 50;
-        for (const proto of protocols) {
-          const list = PROTO_PRIORITY[proto];
-          if (list) { const i = list.indexOf(it.name); if (i >= 0) score += 100000 - i * 1000; } // primary SDK first
-        }
-        return { it, score };
-      })
-      .filter((s) => s.score > 0 && (!wantProto || s.it.protocols.some((p) => protocols.has(p)) || cats.has(s.it.category)))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 60)
-      .map((s) => s.it);
+  // ---------- the recommendation engine (the "blueprint") ----------
+  // Reads the plain-English description and assembles a small, wired-together set
+  // of real catalog tools — the few pieces a project like this actually needs,
+  // each with a role, a reason, and how it connects. The builder never has to
+  // know the tools by name or browse thousands of entries.
+  interface CapDef { id: string; role: string; always?: boolean; protoOnly?: boolean; detect?: RegExp; names?: (p: Set<string>) => string[]; category?: string; why: string; connects: string; }
+  const CAP_DEFS: CapDef[] = [
+    { id: 'connect', role: 'Connects to the network', protoOnly: true,
+      names: (p) => [...(p.has('nostr') ? ['@nostr-dev-kit/ndk', 'nostr-tools'] : []), ...(p.has('atproto') ? ['@atproto/api', '@atcute/client'] : [])],
+      why: 'How your app talks to the open network — so your community isn’t locked inside one company’s walls.',
+      connects: 'Everything else plugs into this; it carries the posts, messages, and updates in and out.' },
+    { id: 'app', role: 'The app people see and use', always: true,
+      names: () => ['@sveltejs/kit', 'astro', 'vue', 'solid-js', 'svelte', 'react', 'next'], category: 'Frameworks & Libraries',
+      why: 'The screens and buttons your community actually touches. We default to Svelte — fast, simple, and not owned by a Big Tech platform.',
+      connects: 'Shows what comes back from the network and sends people’s actions to it.' },
+    { id: 'identity', role: 'Logins & identity', detect: /\b(log ?in|login|sign[- ]?in|account|identit|profile|member|auth|\bkey)/i, category: 'Auth Identity & Keys',
+      why: 'Lets people prove who they are and keeps their accounts truly theirs.',
+      connects: 'Signs each action so the network knows it really came from them.' },
+    { id: 'privacy', role: 'Privacy & encryption', detect: /\b(privat|anonym|secure|encrypt|confidential|protect|sensitive|expos|surveil)/i, category: 'Security & Privacy',
+      why: 'Keeps sensitive information unreadable to anyone it isn’t meant for.',
+      connects: 'Scrambles data before it’s stored or sent, and unscrambles it only for the right people.' },
+    { id: 'storage', role: 'Remembers your data', detect: /\b(store|saved?|database|record|archive|document|history|track|list|directory|inventory)\b/i, category: 'Databases & Storage',
+      why: 'Keeps things between visits — posts, records, settings — so nothing is lost.',
+      connects: 'The app reads from and writes to this.' },
+    { id: 'payments', role: 'Payments & tips', detect: /\b(pay|paid|tip|donat|fund|wallet|money|invoice|sats|bitcoin|lightning|zap|support)\b/i, category: 'Bitcoin Lightning Nostr',
+      why: 'Lets people send and receive money or tips directly, with no middleman taking a cut.',
+      connects: 'Adds a pay/tip button and settles it on the Lightning network.' },
+    { id: 'hosting', role: 'Runs the server side', detect: /\b(server|back ?end|backend|relay|host|deploy|\bapi\b|self-host|infrastructure)\b/i, category: 'Hosting Infra & Deploy',
+      why: 'If your tool needs its own server — like running a relay or an API — this is what runs it. Many community apps don’t need one: the network does the heavy lifting.',
+      connects: 'Serves the app and handles anything that can’t happen in the browser alone.' },
+  ];
+
+  function protoMatch(it: Item): number { let n = 0; for (const p of protocols) if (it.protocols.includes(p)) n += 1; return n; }
+  function pickPool(names: string[] | undefined, category: string | undefined, taken: Set<string>): Item[] {
+    const pool: Item[] = [];
+    if (names) for (const nm of names) { const it = items.find((x) => x.name.toLowerCase() === nm.toLowerCase()); if (it && !taken.has(it.name) && !pool.includes(it)) pool.push(it); }
+    if (category) {
+      const cat = items
+        .filter((x) => x.category === category && !taken.has(x.name) && !pool.includes(x))
+        .sort((a, b) => protoMatch(b) - protoMatch(a) || (b.verification === 'verified' ? 1 : 0) - (a.verification === 'verified' ? 1 : 0) || b.uses - a.uses || a.name.localeCompare(b.name));
+      pool.push(...cat);
+    }
+    return pool;
+  }
+
+  interface Piece { capId: string; role: string; why: string; connects: string; item: Item; alts: Item[]; }
+  const blueprint = $derived.by<Piece[]>(() => {
+    if (!items.length) return [];
+    const tx = `${problem} ${goal} ${success}`.toLowerCase();
+    const taken = new Set<string>();
+    const pieces: Piece[] = [];
+    for (const def of CAP_DEFS) {
+      if (pieces.length >= 6) break;
+      if (def.protoOnly && !protoList.length) continue;
+      const want = def.always || (def.protoOnly && protoList.length > 0) || (def.detect ? def.detect.test(tx) : false);
+      if (!want) continue;
+      const pool = pickPool(def.names?.(protocols), def.category, taken);
+      if (!pool.length) continue;
+      let item = pool[0]!;
+      const sw = swaps[def.id];
+      if (sw) { const s = pool.find((x) => x.name === sw) ?? items.find((x) => x.name === sw); if (s) item = s; }
+      const alts = pool.filter((x) => x.name !== item.name).slice(0, 3);
+      taken.add(item.name);
+      pieces.push({ capId: def.id, role: def.role, why: def.why, connects: def.connects, item, alts });
+    }
+    return pieces;
   });
 
-  // How many suggestions to show before "Show more" (the rest stay one click away).
-  let stackLimit = $state(12);
-  const visibleSuggested = $derived(suggested.slice(0, stackLimit));
+  // The final tool set (drives every generated artifact): the blueprint pieces
+  // still switched on, plus anything added by hand.
+  const chosen = $derived.by(() => {
+    const s = new Set<string>();
+    for (const p of blueprint) if (!removed.has(p.capId)) s.add(p.item.name);
+    for (const n of extra) s.add(n);
+    return s;
+  });
+  const chosenItems = $derived(items.filter((it) => chosen.has(it.name)));
 
-  let seeded = false;
-  $effect(() => { if (step === 2 && items.length && !seeded) { chosen = new Set(suggested.slice(0, 6).map((i) => i.name)); seeded = true; } });
-
+  // Advanced escape hatch: search the full catalog by hand.
   const addResults = $derived.by(() => {
     const q = addQuery.trim().toLowerCase();
     return q ? items.filter((it) => `${it.name} ${it.desc}`.toLowerCase().includes(q)).slice(0, 8) : ([] as Item[]);
   });
-  const chosenItems = $derived(items.filter((it) => chosen.has(it.name)));
-  const protoList = $derived([...protocols].filter((p) => p !== 'general'));
-  const primaryNames = $derived(new Set([...protocols].map((p) => PROTO_PRIORITY[p]?.[0]).filter(Boolean)));
 
-  function toggleProto(p: string) { const n = new Set(protocols); n.has(p) ? n.delete(p) : n.add(p); protocols = n; seeded = false; stackLimit = 12; }
-  function toggleTool(name: string) { const n = new Set(chosen); n.has(name) ? n.delete(name) : n.add(name); chosen = n; }
+  function toggleProto(p: string) { const n = new Set(protocols); n.has(p) ? n.delete(p) : n.add(p); protocols = n; swaps = {}; removed = new Set(); }
+  function togglePiece(capId: string) { const n = new Set(removed); n.has(capId) ? n.delete(capId) : n.add(capId); removed = n; }
+  function swapPiece(capId: string, name: string) { swaps = { ...swaps, [capId]: name }; const n = new Set(removed); n.delete(capId); removed = n; }
+  function toggleTool(name: string) { const n = new Set(extra); n.has(name) ? n.delete(name) : n.add(name); extra = n; }
 
   // ---------- generated artifacts ----------
   const constitution = $derived(`# Project constitution — ${projectName || slug}
@@ -419,50 +487,71 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
   {#if step === 1}
     <section class="panel">
       <p class="hint">{t.tenq} <a href="/method/ten-questions/">↗</a></p>
-      <label class="field"><span>{t.name}</span><input bind:value={projectName} placeholder="e.g. neighborhood-shield" /></label>
       <label class="field"><span>{t.problem}</span><textarea bind:value={problem} rows="3" placeholder="e.g. Tenants need to document evictions without exposing who they are."></textarea></label>
-      <label class="field"><span>{t.why}</span><textarea bind:value={goal} rows="2"></textarea></label>
-      <label class="field"><span>{t.success}</span><textarea bind:value={success} rows="2"></textarea></label>
+      <div class="examples">
+        <span class="hint">{t.examples}</span>
+        <div class="chips">{#each EXAMPLES as ex}<button class="chip ex" onclick={() => (problem = ex)}>{ex}</button>{/each}</div>
+      </div>
       <div class="field"><span>{t.protocols}</span>
         <div class="chips">{#each ALL_PROTOCOLS as p}<button class="chip" class:on={protocols.has(p)} onclick={() => toggleProto(p)} aria-pressed={protocols.has(p)}>{p}</button>{/each}</div>
         <p class="hint">{t.protoHelp}</p>
-        {#if protocols.has('nostr')}<p class="hint">★ Nostr chosen — we’ll suggest the <a href="/catalog/nostr-dev-kit-ndk/">Nostr Dev Kit (NDK)</a> first. It’s the most complete starting point for building on Nostr, so your agent won’t have to wire up the basics by hand.</p>{/if}
-        {#if protocols.has('atproto')}<p class="hint">★ AT Protocol (Bluesky) chosen — we’ll suggest <a href="/catalog/atproto-api/">@atproto/api</a> first as the main starting point. The <a href="/catalog/">BlackSky community services</a> are also there if you need the underlying infrastructure.</p>{/if}
       </div>
-      <label class="field"><span>{t.focus}</span><select bind:value={focus}>{#each Object.entries(FOCI) as [k, v]}<option value={k}>{v.label}</option>{/each}</select></label>
-      <div class="nav"><button class="primary" onclick={() => (step = 2)} disabled={loading}>{loading ? t.loading : t.choose}</button></div>
+      <details class="deeper">
+        <summary>Want a sharper blueprint? Add the why &amp; what success looks like (optional)</summary>
+        <label class="field"><span>{t.name}</span><input bind:value={projectName} placeholder="e.g. neighborhood-shield" /></label>
+        <label class="field"><span>{t.why}</span><textarea bind:value={goal} rows="2"></textarea></label>
+        <label class="field"><span>{t.success}</span><textarea bind:value={success} rows="2"></textarea></label>
+      </details>
+      <div class="nav"><span></span><button class="primary big" onclick={() => (step = 2)} disabled={loading}>{loading ? t.loading : t.choose}</button></div>
     </section>
   {:else if step === 2}
     <section class="panel">
-      <div class="intro">
-        <p>{t.stackIntro}</p>
-        <ul class="legend">
-          <li><span class="star">★</span> {t.legendPrimary}</li>
-          <li><span class="dot"></span> {t.legendClean}</li>
-        </ul>
+      <div class="bp-head">
+        <h3>{t.bpHead} {projectName || 'your project'}</h3>
+        <p class="hint">{t.bpLead}</p>
       </div>
-      <ul class="picklist">
-        {#each visibleSuggested as it (it.name)}
-          <li class="pick" class:on={chosen.has(it.name)} class:primary={primaryNames.has(it.name)}>
-            <label><input type="checkbox" checked={chosen.has(it.name)} onchange={() => toggleTool(it.name)} />
-              <span class="pick-name">{it.name}{primaryNames.has(it.name) ? ' ★' : ''}</span>
-              <span class="pick-meta">{it.ecosystem} · {it.license} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span></span>
-              <span class="pick-desc">{it.desc}</span></label>
+      {#if !problem.trim()}
+        <p class="hint">{t.bpEmpty}</p>
+      {/if}
+      <h4 class="bp-sub">{t.bpPieces}</h4>
+      <ol class="pieces">
+        {#each blueprint as p (p.capId)}
+          <li class="piece" class:off={removed.has(p.capId)}>
+            <div class="piece-head">
+              <span class="role">{p.role}</span>
+              <button class="toggle" onclick={() => togglePiece(p.capId)} aria-pressed={!removed.has(p.capId)}>{removed.has(p.capId) ? t.bpKeep : t.bpRemove}</button>
+            </div>
+            <div class="piece-tool">
+              <a class="tool-name" href={p.item.url}>{p.item.name}</a>
+              <span class="vbadge vbadge--{p.item.verification}">{p.item.verification.replace('_', ' ')}</span>
+              <span class="tool-meta">{p.item.ecosystem} · {p.item.license}</span>
+            </div>
+            <p class="piece-why"><strong>{t.bpWhyFor}</strong> {p.why}</p>
+            <p class="piece-connects"><strong>{t.bpConnects}</strong> {p.connects}</p>
+            {#if p.alts.length}
+              <details class="swap">
+                <summary>{t.bpSwap} ▾</summary>
+                <ul>
+                  {#each p.alts as alt (alt.name)}
+                    <li><button class="link" onclick={() => swapPiece(p.capId, alt.name)}>{t.bpUse}: <strong>{alt.name}</strong></button> <span class="tool-meta">{alt.ecosystem} · {alt.license}</span></li>
+                  {/each}
+                </ul>
+              </details>
+            {/if}
           </li>
         {/each}
-      </ul>
-      <div class="stackbar">
-        <span class="hint">{t.showing} <strong>{visibleSuggested.length}</strong> {t.of} {suggested.length}</span>
-        {#if suggested.length > stackLimit}
-          <button class="link" onclick={() => (stackLimit += 12)}>{t.showMore} ↓</button>
-        {:else if stackLimit > 12}
-          <button class="link" onclick={() => (stackLimit = 12)}>{t.showFewer} ↑</button>
-        {/if}
+      </ol>
+      <div class="fits">
+        <strong>{t.bpFits}</strong>
+        <p>{#each blueprint.filter((p) => !removed.has(p.capId)) as p, i}{i > 0 ? ' → ' : ''}<a href={p.item.url}>{p.item.name}</a> ({p.role.toLowerCase()}){/each}.</p>
       </div>
-      <label class="field"><span>{t.add}</span><input bind:value={addQuery} placeholder="search the full catalog…" /></label>
-      {#if addResults.length}<ul class="picklist">{#each addResults as it (it.name)}<li class="pick" class:on={chosen.has(it.name)}><label><input type="checkbox" checked={chosen.has(it.name)} onchange={() => toggleTool(it.name)} /><span class="pick-name">{it.name}</span><span class="pick-meta">{it.ecosystem} · {it.license} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span></span></label></li>{/each}</ul>{/if}
-      <p class="hint"><strong>{chosen.size}</strong> {t.selected}.</p>
-      <div class="nav"><button onclick={() => (step = 1)}>{t.back}</button><button class="primary" onclick={() => (step = 3)}>{t.gen}</button></div>
+      <details class="advanced">
+        <summary>{t.bpAdvanced}</summary>
+        <label class="field"><span>{t.add}</span><input bind:value={addQuery} placeholder="search the full catalog…" /></label>
+        {#if addResults.length}<ul class="picklist">{#each addResults as it (it.name)}<li class="pick" class:on={chosen.has(it.name)}><label><input type="checkbox" checked={chosen.has(it.name)} onchange={() => toggleTool(it.name)} /><span class="pick-name">{it.name}{primaryNames.has(it.name) ? ' ★' : ''}</span><span class="pick-meta">{it.ecosystem} · {it.license} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span></span></label></li>{/each}</ul>{/if}
+        <p class="hint"><strong>{chosen.size}</strong> {t.selected}.</p>
+      </details>
+      <div class="nav"><button onclick={() => (step = 1)}>{t.back}</button><button class="primary big" onclick={() => (step = 3)} disabled={chosen.size === 0}>{t.gen}</button></div>
     </section>
   {:else}
     <section class="panel">
@@ -558,18 +647,31 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
   .pick-name { font-weight: 700; }
   .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
-  .pick.primary { border-color: var(--sl-color-accent); background: color-mix(in srgb, var(--sl-color-accent) 7%, transparent); }
-  .intro { border-inline-start: 3px solid var(--sl-color-accent); padding: 0.1rem 0 0.1rem 0.85rem; }
-  .intro p { margin: 0 0 0.5rem; color: var(--sl-color-text); font-size: 0.92rem; }
-  .legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; font-size: 0.82rem; color: var(--sl-color-gray-2); }
-  .legend li { display: flex; align-items: center; gap: 0.35rem; }
-  .legend .star { color: var(--sl-color-accent); font-weight: 700; }
-  .legend .dot { width: 0.7rem; height: 0.7rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-4); border-left: 4px solid #2da44e; display: inline-block; }
   .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
   .vbadge--verified { border-left-color: #2da44e; }
   .vbadge--under_review { border-left-color: #bf8700; }
   .vbadge--blocked { border-left-color: #cf222e; }
-  .stackbar { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
+  .examples { display: flex; flex-direction: column; gap: 0.4rem; }
+  .chip.ex { text-align: start; font-size: 0.82rem; max-width: 100%; white-space: normal; line-height: 1.3; }
+  .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .deeper summary, .advanced summary, .swap summary { cursor: pointer; color: var(--sl-color-text-accent); font-size: 0.9rem; font-weight: 600; }
+  .bp-head h3 { margin: 0 0 0.3rem; }
+  .bp-sub { margin: 0.4rem 0 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--sl-color-gray-2); }
+  .pieces { list-style: none; counter-reset: piece; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
+  .piece { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.7rem 0.9rem; }
+  .piece.off { opacity: 0.55; border-inline-start-color: var(--sl-color-gray-5); }
+  .piece-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; }
+  .role { counter-increment: piece; font-weight: 700; }
+  .role::before { content: counter(piece) '. '; color: var(--sl-color-text-accent); }
+  .toggle { background: none; border: 1px solid var(--sl-color-gray-5); border-radius: 999px; padding: 0.1rem 0.65rem; font-size: 0.74rem; color: var(--sl-color-text); cursor: pointer; }
+  .piece-tool { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; margin: 0.35rem 0; }
+  .tool-name { font-weight: 700; font-size: 1.02rem; }
+  .tool-meta { color: var(--sl-color-gray-2); font-size: 0.8rem; }
+  .piece-why, .piece-connects { margin: 0.25rem 0; font-size: 0.9rem; color: var(--sl-color-text); }
+  .swap { margin-top: 0.45rem; }
+  .swap ul { list-style: none; padding: 0.4rem 0 0; margin: 0; display: grid; gap: 0.3rem; }
+  .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.6rem 0.85rem; }
+  .fits p { margin: 0.3rem 0 0; font-size: 0.92rem; }
   .mtitle { margin: 0; font-size: 1.05rem; }
   .modelgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
   @media (max-width: 34rem) { .modelgrid { grid-template-columns: 1fr; } }

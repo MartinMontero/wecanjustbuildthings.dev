@@ -105,6 +105,11 @@
 </script>
 
 <div class="explorer">
+  <a class="cat-cta" href="/build/">
+    <span><strong>New here? Don’t browse — let the Build Studio choose for you.</strong> Tell it what you
+    want to build in a sentence, and it picks the few tools you need and shows how they fit together.</span>
+    <span class="cat-cta-go">Open the Build Studio →</span>
+  </a>
   <div class="cat-intro">
     <p>
       Think of this as a vetted shelf of <strong>building blocks</strong> — ready-made tools,
@@ -208,6 +213,9 @@
 <style>
   .explorer { margin: 1rem 0 2rem; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .cat-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; text-decoration: none; color: var(--sl-color-text); background: color-mix(in srgb, var(--sl-color-accent) 9%, transparent); border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.8rem 1rem; margin-bottom: 1.1rem; }
+  .cat-cta span:first-child { flex: 1 1 18rem; font-size: 0.92rem; }
+  .cat-cta-go { font-weight: 700; color: var(--sl-color-text-accent); white-space: nowrap; }
   .cat-intro { border-inline-start: 3px solid var(--sl-color-accent); padding: 0.1rem 0 0.1rem 0.9rem; margin-bottom: 1.1rem; }
   .cat-intro p { margin: 0 0 0.6rem; color: var(--sl-color-text); font-size: 0.95rem; max-width: 60ch; }
   .cat-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; font-size: 0.82rem; color: var(--sl-color-gray-2); }
