@@ -220,10 +220,21 @@ function loadRows(): SeedRow[] {
   if (!onlyAos) rows.push(...loadAgentic());
   // Always fold in the curated seed (key Nostr / AT Protocol tools the audit may
   // not list), deduped so it augments rather than duplicates audit entries.
-  if (!onlyAgentic && !onlyAos) rows.push(...loadSeed());
+  if (!onlyAgentic && !onlyAos) {
+    rows.push(...loadSeed());
+    rows.push(...loadJsonRows('data/atproto-seed.json'));
+  }
 
   if (rows.length === 0) rows.push(...loadSeed());
   return dedupeMerge(rows);
+}
+
+function loadJsonRows(file: string): SeedRow[] {
+  try {
+    return existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as SeedRow[]) : [];
+  } catch {
+    return [];
+  }
 }
 
 interface AgenticTool {

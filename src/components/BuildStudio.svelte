@@ -87,8 +87,11 @@
     safety: { label: 'Moderation / safety', categories: ['Security & Privacy', 'Auth Identity & Keys'] },
     general: { label: 'General app', categories: ['Frameworks & Libraries', 'Dev Environment & Tooling', 'Testing & QA'] },
   };
-  // For Nostr, the Nostr Dev Kit (NDK) is the recommended primary SDK.
-  const NOSTR_PRIORITY = ['@nostr-dev-kit/ndk', 'nostr-tools'];
+  // Recommended primary SDK per protocol (listed first, starred, pre-selected).
+  const PROTO_PRIORITY: Record<string, string[]> = {
+    nostr: ['@nostr-dev-kit/ndk', 'nostr-tools'],
+    atproto: ['@atproto/api', '@atcute/client'],
+  };
 
   onMount(async () => {
     try { const res = await fetch('/catalog.json'); items = (await res.json()).filter((i: Item & { kind?: string }) => (i as any).kind !== 'dataset'); } catch { /* offline */ }
@@ -102,14 +105,16 @@
     if (!items.length) return [] as Item[];
     const cats = new Set(FOCI[focus]?.categories ?? []);
     const wantProto = protocols.size > 0;
-    const nostr = protocols.has('nostr');
     return items
       .map((it) => {
         let score = it.uses;
         if (wantProto && it.protocols.some((p) => protocols.has(p))) score += 1000;
         if (cats.has(it.category)) score += 200;
         if (it.verification === 'verified') score += 50;
-        if (nostr) { const idx = NOSTR_PRIORITY.indexOf(it.name); if (idx >= 0) score += 100000 - idx * 1000; } // NDK first
+        for (const proto of protocols) {
+          const list = PROTO_PRIORITY[proto];
+          if (list) { const i = list.indexOf(it.name); if (i >= 0) score += 100000 - i * 1000; } // primary SDK first
+        }
         return { it, score };
       })
       .filter((s) => s.score > 0 && (!wantProto || s.it.protocols.some((p) => protocols.has(p)) || cats.has(s.it.category)))
@@ -127,6 +132,7 @@
   });
   const chosenItems = $derived(items.filter((it) => chosen.has(it.name)));
   const protoList = $derived([...protocols].filter((p) => p !== 'general'));
+  const primaryNames = $derived(new Set([...protocols].map((p) => PROTO_PRIORITY[p]?.[0]).filter(Boolean)));
 
   function toggleProto(p: string) { const n = new Set(protocols); n.has(p) ? n.delete(p) : n.add(p); protocols = n; seeded = false; }
   function toggleTool(name: string) { const n = new Set(chosen); n.has(name) ? n.delete(name) : n.add(name); chosen = n; }
@@ -154,7 +160,7 @@ DeepSeek, Kimi, OpenRouter, or local Ollama).
 Every dependency carries an OSI-approved license, verified at a commit.
 
 ## Article III — Protocol correctness
-${protoList.length ? protoList.map((p) => `- ${p}: follow its spec/NIPs; surface auth failures; use audited crypto.${p === 'nostr' ? ' Use @nostr-dev-kit/ndk (NDK) as the primary SDK.' : ''}`).join('\n') : "- Follow each protocol's spec; surface auth failures; use audited crypto."}
+${protoList.length ? protoList.map((p) => `- ${p}: follow its spec/NIPs; surface auth failures; use audited crypto.${p === 'nostr' ? ' Use @nostr-dev-kit/ndk (NDK) as the primary SDK.' : ''}${p === 'atproto' ? ' Use @atproto/api as the primary SDK; prefer OAuth (DPoP) over App Passwords.' : ''}`).join('\n') : "- Follow each protocol's spec; surface auth failures; use audited crypto."}
 
 ## Article IV — Operational discipline (the long-tail rules)
 - Rate limiting on every public endpoint, from day one.
@@ -200,7 +206,7 @@ RULES (binding — see constitution.md):
 - Read .specify/memory/constitution.md FIRST and never violate it.
 - Use ONLY these vetted, policy-clean dependencies:
 ${chosenItems.map((it) => `    - ${it.name} (${it.ecosystem})`).join('\n') || '    - <none selected>'}
-${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the primary SDK for relays, subscriptions, and signers.\n' : ''}- No dependency or provider owned by Meta, OpenAI, or xAI — directly or transitively.
+${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the primary SDK for relays, subscriptions, and signers.\n' : ''}${protocols.has('atproto') ? '- For AT Protocol, use @atproto/api as the primary SDK; prefer OAuth (DPoP) over App Passwords.\n' : ''}- No dependency or provider owned by Meta, OpenAI, or xAI — directly or transitively.
 - Run \`npx tsx ./enforcement/cli.ts all --tree .\` before every commit. Add rate
   limiting, test auth paths, and never swallow trust-path errors.
 
@@ -331,6 +337,7 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
       <div class="field"><span>{t.protocols}</span>
         <div class="chips">{#each ALL_PROTOCOLS as p}<button class="chip" class:on={protocols.has(p)} onclick={() => toggleProto(p)} aria-pressed={protocols.has(p)}>{p}</button>{/each}</div>
         {#if protocols.has('nostr')}<p class="hint">★ Nostr selected — the Nostr Dev Kit (<a href="/catalog/nostr-dev-kit-ndk/">@nostr-dev-kit/ndk</a>) is suggested first as the primary SDK.</p>{/if}
+        {#if protocols.has('atproto')}<p class="hint">★ AT Protocol selected — <a href="/catalog/atproto-api/">@atproto/api</a> is suggested first as the primary SDK. See also the <a href="/catalog/">BlackSky community services</a> for AT Protocol infrastructure.</p>{/if}
       </div>
       <label class="field"><span>{t.focus}</span><select bind:value={focus}>{#each Object.entries(FOCI) as [k, v]}<option value={k}>{v.label}</option>{/each}</select></label>
       <div class="nav"><button class="primary" onclick={() => (step = 2)} disabled={loading}>{loading ? t.loading : t.choose}</button></div>
@@ -342,7 +349,7 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
         {#each suggested as it (it.name)}
           <li class="pick" class:on={chosen.has(it.name)}>
             <label><input type="checkbox" checked={chosen.has(it.name)} onchange={() => toggleTool(it.name)} />
-              <span class="pick-name">{it.name}{it.name === '@nostr-dev-kit/ndk' ? ' ★' : ''}</span>
+              <span class="pick-name">{it.name}{primaryNames.has(it.name) ? ' ★' : ''}</span>
               <span class="pick-meta">{it.ecosystem} · {it.license}</span><span class="pick-desc">{it.desc}</span></label>
           </li>
         {/each}
