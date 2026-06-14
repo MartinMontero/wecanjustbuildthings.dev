@@ -1,6 +1,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeRepo, safeLocalPath, cookie, PROVIDERS } from '../index.ts';
+import { normalizeRepo, safeLocalPath, cookie, PROVIDERS, isExcludedRouterModel } from '../index.ts';
+
+test('isExcludedRouterModel blocks Meta/OpenAI/xAI models via OpenRouter', () => {
+  // Excluded vendors are unreachable through the router.
+  assert.ok(isExcludedRouterModel('openrouter', 'openai/gpt-4o'));
+  assert.ok(isExcludedRouterModel('openrouter', 'meta-llama/llama-3.1-70b-instruct'));
+  assert.ok(isExcludedRouterModel('openrouter', 'x-ai/grok-2'));
+  assert.ok(isExcludedRouterModel('openrouter', 'XAI/grok'));
+  // Permitted models pass; Google is NOT excluded by policy.
+  assert.ok(!isExcludedRouterModel('openrouter', 'anthropic/claude-sonnet-4.6'));
+  assert.ok(!isExcludedRouterModel('openrouter', 'deepseek/deepseek-chat'));
+  assert.ok(!isExcludedRouterModel('openrouter', 'google/gemini-2.0-flash'));
+  // The guard only applies to the router; direct providers are already constrained.
+  assert.ok(!isExcludedRouterModel('anthropic', 'openai/gpt-4o'));
+});
 
 test('PROVIDERS allowlist excludes Meta/OpenAI/xAI by policy', () => {
   const keys = Object.keys(PROVIDERS);

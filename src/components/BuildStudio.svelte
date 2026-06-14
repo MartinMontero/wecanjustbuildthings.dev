@@ -28,6 +28,13 @@
       apikey: 'Your API key (BYOK — sent only to the provider, never stored)',
       provider: 'Provider (permitted only)', run: 'Run kickoff', running: 'Running…',
       ghError: 'GitHub authorization didn’t complete. Try again, or download the .zip below.',
+      stackIntro: 'A starting stack, scored to the intent you described. Every option below already passed the exclusion policy — nothing here is owned by Meta, OpenAI, or xAI. Toggle what fits; you can search for more, and nothing is locked in.',
+      legendPrimary: '★ recommended primary SDK for your protocol',
+      legendClean: 'every option is policy-clean & license-checked',
+      showMore: 'Show more tools', showFewer: 'Show fewer', showing: 'Showing', of: 'of',
+      modelTitle: 'Choose your AI model',
+      modelIntro: 'You bring the key; your work never routes through Meta, OpenAI, or xAI. These options are chosen for that: accountable training, open weights you can self-host, or a neutral router locked to permitted models.',
+      modelLabel: 'Model',
     },
     es: {
       s1: '1 · Describe', s2: '2 · Elige stack', s3: '3 · Genera',
@@ -45,6 +52,13 @@
       apikey: 'Tu clave API (solo se envía al proveedor, nunca se guarda)',
       provider: 'Proveedor (solo permitidos)', run: 'Ejecutar arranque', running: 'Ejecutando…',
       ghError: 'La autorización de GitHub no se completó. Inténtalo de nuevo o descarga el .zip abajo.',
+      stackIntro: 'Un stack inicial, ajustado a la intención que describiste. Cada opción ya pasó la política de exclusión — nada aquí es propiedad de Meta, OpenAI o xAI. Activa lo que encaje; puedes buscar más y nada queda fijado.',
+      legendPrimary: '★ SDK principal recomendado para tu protocolo',
+      legendClean: 'cada opción cumple la política y tiene licencia verificada',
+      showMore: 'Mostrar más herramientas', showFewer: 'Mostrar menos', showing: 'Mostrando', of: 'de',
+      modelTitle: 'Elige tu modelo de IA',
+      modelIntro: 'Tú traes la clave; tu trabajo nunca pasa por Meta, OpenAI o xAI. Estas opciones se eligen por eso: entrenamiento responsable, pesos abiertos que puedes auto-alojar, o un enrutador neutral limitado a modelos permitidos.',
+      modelLabel: 'Modelo',
     },
     ar: {
       s1: '١ · صِف', s2: '٢ · اختر الأدوات', s3: '٣ · وَلِّد',
@@ -62,6 +76,13 @@
       apikey: 'مفتاح API الخاص بك (يُرسل للمزوّد فقط، ولا يُخزَّن أبداً)',
       provider: 'المزوّد (المسموح فقط)', run: 'تشغيل الانطلاقة', running: 'جارٍ التشغيل…',
       ghError: 'لم تكتمل عملية ربط GitHub. حاول مرة أخرى، أو نزّل ملف .zip أدناه.',
+      stackIntro: 'حزمة بداية، مُرتّبة وفق النية التي وصفتها. كل خيار أدناه اجتاز سياسة الاستبعاد — لا شيء هنا مملوك لـ Meta أو OpenAI أو xAI. فعّل ما يناسبك؛ يمكنك البحث عن المزيد، ولا شيء مُلزِم.',
+      legendPrimary: '★ حزمة SDK الأساسية الموصى بها لبروتوكولك',
+      legendClean: 'كل خيار متوافق مع السياسة ومُتحقَّق من ترخيصه',
+      showMore: 'عرض أدوات أكثر', showFewer: 'عرض أقل', showing: 'عرض', of: 'من',
+      modelTitle: 'اختر نموذج الذكاء الاصطناعي',
+      modelIntro: 'أنت تحضر المفتاح؛ عملك لا يمر أبداً عبر Meta أو OpenAI أو xAI. هذه الخيارات مُختارة لذلك: تدريب مسؤول، أوزان مفتوحة يمكنك استضافتها بنفسك، أو موجّه محايد مقصور على النماذج المسموح بها.',
+      modelLabel: 'النموذج',
     },
   };
   let lang = $state<Lang>((['en', 'es', 'ar'].includes(initialLang) ? initialLang : 'en') as Lang);
@@ -129,9 +150,13 @@
       })
       .filter((s) => s.score > 0 && (!wantProto || s.it.protocols.some((p) => protocols.has(p)) || cats.has(s.it.category)))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 14)
+      .slice(0, 60)
       .map((s) => s.it);
   });
+
+  // How many suggestions to show before "Show more" (the rest stay one click away).
+  let stackLimit = $state(12);
+  const visibleSuggested = $derived(suggested.slice(0, stackLimit));
 
   let seeded = false;
   $effect(() => { if (step === 2 && items.length && !seeded) { chosen = new Set(suggested.slice(0, 6).map((i) => i.name)); seeded = true; } });
@@ -144,7 +169,7 @@
   const protoList = $derived([...protocols].filter((p) => p !== 'general'));
   const primaryNames = $derived(new Set([...protocols].map((p) => PROTO_PRIORITY[p]?.[0]).filter(Boolean)));
 
-  function toggleProto(p: string) { const n = new Set(protocols); n.has(p) ? n.delete(p) : n.add(p); protocols = n; seeded = false; }
+  function toggleProto(p: string) { const n = new Set(protocols); n.has(p) ? n.delete(p) : n.add(p); protocols = n; seeded = false; stackLimit = 12; }
   function toggleTool(name: string) { const n = new Set(chosen); n.has(name) ? n.delete(name) : n.add(name); chosen = n; }
 
   // ---------- generated artifacts ----------
@@ -307,8 +332,35 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
     } catch (e) { ghResult = `error:${e}`; } finally { ghBusy = false; }
   }
 
+  // ---------- AI model picker (BYOK kickoff) ----------
+  // Each option is framed in the project's ethos: accountable training, open
+  // weights you can self-host, or a neutral router constrained to permitted
+  // models. No Meta / OpenAI / xAI model is offered or reachable.
+  interface ModelOpt { id: string; label: string; note: string }
+  const MODELS: Record<string, ModelOpt[]> = {
+    anthropic: [
+      { id: 'claude-opus-4-8', label: 'Claude Opus 4.8 — most capable', note: 'Top capability for hard planning and refactors. Trained with Constitutional AI — a published, inspectable value set — which fits a tool built to be accountable by default. Your key, your data, no middle layer.' },
+      { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 — balanced (recommended)', note: 'The everyday default: fast and strong for building, at lower cost than Opus. Same values alignment.' },
+      { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 — fastest', note: 'Cheapest and quickest — ideal for tight edit/run loops and small teams watching their budget.' },
+    ],
+    deepseek: [
+      { id: 'deepseek-chat', label: 'DeepSeek V3 — open weights', note: 'Open-weight: you can download and self-host it, so you are never locked to one vendor. The strongest sovereignty story here — own your whole stack.' },
+      { id: 'deepseek-reasoner', label: 'DeepSeek R1 — open-weight reasoner', note: 'Open-weight reasoning model for harder planning steps. Self-hostable, same independence from any platform.' },
+    ],
+    openrouter: [
+      { id: 'anthropic/claude-sonnet-4.6', label: 'Claude Sonnet 4.6 (via OpenRouter)', note: 'A neutral router so you avoid single-vendor lock-in. We constrain it to permitted models — Meta, OpenAI, and xAI are refused even if requested.' },
+      { id: 'deepseek/deepseek-chat', label: 'DeepSeek V3 (via OpenRouter)', note: 'Open-weight model through the router — pay-as-you-go without a separate account per provider.' },
+      { id: 'qwen/qwen-2.5-72b-instruct', label: 'Qwen 2.5 72B (via OpenRouter)', note: 'Open-weight alternative; routing stays within permitted, non-excluded providers.' },
+    ],
+  };
+
   // ---------- BYOK kickoff ----------
   let kProvider = $state('anthropic');
+  let kModel = $state<string>(MODELS.anthropic[0]!.id);
+  const kModels = $derived(MODELS[kProvider] ?? []);
+  // Keep the selected model valid when the provider changes.
+  $effect(() => { if (!kModels.some((m) => m.id === kModel)) kModel = kModels[0]?.id ?? ''; });
+  const kModelNote = $derived(kModels.find((m) => m.id === kModel)?.note ?? '');
   let kKey = $state('');
   let kBusy = $state(false);
   let kOutput = $state('');
@@ -317,7 +369,7 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
     kBusy = true; kOutput = ''; kError = '';
     const prompt = `${constitution}\n\n---\n\n${spec}\n\n---\n\nProduce specs/001-${slug}/plan.md: a concrete, step-by-step implementation plan honoring the constitution above (especially Article 0 intent and Article I exclusions). Then list the first 5 implementation tasks. Output Markdown only.`;
     try {
-      const res = await fetch('/api/agent/kickoff', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ provider: kProvider, apiKey: kKey, prompt }) });
+      const res = await fetch('/api/agent/kickoff', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ provider: kProvider, model: kModel, apiKey: kKey, prompt }) });
       const d = await res.json();
       if (d.output) kOutput = d.output; else kError = d.error + (d.detail ? `: ${JSON.stringify(d.detail).slice(0, 200)}` : '');
     } catch (e) { kError = String(e); } finally { kBusy = false; }
@@ -354,18 +406,33 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
     </section>
   {:else if step === 2}
     <section class="panel">
-      <p class="hint">{t.suggested}</p>
+      <div class="intro">
+        <p>{t.stackIntro}</p>
+        <ul class="legend">
+          <li><span class="star">★</span> {t.legendPrimary}</li>
+          <li><span class="dot"></span> {t.legendClean}</li>
+        </ul>
+      </div>
       <ul class="picklist">
-        {#each suggested as it (it.name)}
-          <li class="pick" class:on={chosen.has(it.name)}>
+        {#each visibleSuggested as it (it.name)}
+          <li class="pick" class:on={chosen.has(it.name)} class:primary={primaryNames.has(it.name)}>
             <label><input type="checkbox" checked={chosen.has(it.name)} onchange={() => toggleTool(it.name)} />
               <span class="pick-name">{it.name}{primaryNames.has(it.name) ? ' ★' : ''}</span>
-              <span class="pick-meta">{it.ecosystem} · {it.license}</span><span class="pick-desc">{it.desc}</span></label>
+              <span class="pick-meta">{it.ecosystem} · {it.license} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span></span>
+              <span class="pick-desc">{it.desc}</span></label>
           </li>
         {/each}
       </ul>
-      <label class="field"><span>{t.add}</span><input bind:value={addQuery} placeholder="search…" /></label>
-      {#if addResults.length}<ul class="picklist">{#each addResults as it (it.name)}<li class="pick" class:on={chosen.has(it.name)}><label><input type="checkbox" checked={chosen.has(it.name)} onchange={() => toggleTool(it.name)} /><span class="pick-name">{it.name}</span><span class="pick-meta">{it.ecosystem} · {it.license}</span></label></li>{/each}</ul>{/if}
+      <div class="stackbar">
+        <span class="hint">{t.showing} <strong>{visibleSuggested.length}</strong> {t.of} {suggested.length}</span>
+        {#if suggested.length > stackLimit}
+          <button class="link" onclick={() => (stackLimit += 12)}>{t.showMore} ↓</button>
+        {:else if stackLimit > 12}
+          <button class="link" onclick={() => (stackLimit = 12)}>{t.showFewer} ↑</button>
+        {/if}
+      </div>
+      <label class="field"><span>{t.add}</span><input bind:value={addQuery} placeholder="search the full catalog…" /></label>
+      {#if addResults.length}<ul class="picklist">{#each addResults as it (it.name)}<li class="pick" class:on={chosen.has(it.name)}><label><input type="checkbox" checked={chosen.has(it.name)} onchange={() => toggleTool(it.name)} /><span class="pick-name">{it.name}</span><span class="pick-meta">{it.ecosystem} · {it.license} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span></span></label></li>{/each}</ul>{/if}
       <p class="hint"><strong>{chosen.size}</strong> {t.selected}.</p>
       <div class="nav"><button onclick={() => (step = 1)}>{t.back}</button><button class="primary" onclick={() => (step = 3)}>{t.gen}</button></div>
     </section>
@@ -407,8 +474,13 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
         </div>
       {:else}
         <div class="hpanel">
-          <p class="hint">Runs one kickoff step on the edge using <strong>your own key</strong> — permitted providers only (no Meta/OpenAI/xAI). Your key is sent to the provider, never stored.</p>
-          <label class="field"><span>{t.provider}</span><select bind:value={kProvider}><option value="anthropic">Anthropic</option><option value="openrouter">OpenRouter</option><option value="deepseek">DeepSeek</option></select></label>
+          <h4 class="mtitle">{t.modelTitle}</h4>
+          <p class="hint">{t.modelIntro}</p>
+          <div class="modelgrid">
+            <label class="field"><span>{t.provider}</span><select bind:value={kProvider}><option value="anthropic">Anthropic</option><option value="deepseek">DeepSeek</option><option value="openrouter">OpenRouter</option></select></label>
+            <label class="field"><span>{t.modelLabel}</span><select bind:value={kModel}>{#each kModels as m (m.id)}<option value={m.id}>{m.label}</option>{/each}</select></label>
+          </div>
+          {#if kModelNote}<p class="modelnote">{kModelNote}</p>{/if}
           <label class="field"><span>{t.apikey}</span><input type="password" bind:value={kKey} placeholder="sk-…" /></label>
           <button class="primary" onclick={kickoffRun} disabled={kBusy || !kKey}>{kBusy ? t.running : t.run}</button>
           {#if kError}<p class="err">{kError}</p>{/if}
@@ -456,6 +528,22 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
   .pick-name { font-weight: 700; }
   .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
+  .pick.primary { border-color: var(--sl-color-accent); background: color-mix(in srgb, var(--sl-color-accent) 7%, transparent); }
+  .intro { border-inline-start: 3px solid var(--sl-color-accent); padding: 0.1rem 0 0.1rem 0.85rem; }
+  .intro p { margin: 0 0 0.5rem; color: var(--sl-color-text); font-size: 0.92rem; }
+  .legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; font-size: 0.82rem; color: var(--sl-color-gray-2); }
+  .legend li { display: flex; align-items: center; gap: 0.35rem; }
+  .legend .star { color: var(--sl-color-accent); font-weight: 700; }
+  .legend .dot { width: 0.7rem; height: 0.7rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-4); border-left: 4px solid #2da44e; display: inline-block; }
+  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
+  .vbadge--verified { border-left-color: #2da44e; }
+  .vbadge--under_review { border-left-color: #bf8700; }
+  .vbadge--blocked { border-left-color: #cf222e; }
+  .stackbar { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
+  .mtitle { margin: 0; font-size: 1.05rem; }
+  .modelgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+  @media (max-width: 34rem) { .modelgrid { grid-template-columns: 1fr; } }
+  .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: 0.5rem; background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
   .nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; }
   .nav button { padding: 0.55rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
   .primary { background: var(--sl-color-accent); color: #fff; border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }

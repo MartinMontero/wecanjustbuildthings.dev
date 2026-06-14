@@ -12,7 +12,7 @@
  * Run: npm run data:fetch     (alias for `tsx scripts/build-catalog.ts`)
  * Flags: --limit <n>  --out <dir>  --source <csv|seed>
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fetchRegistry, type RegistryInfo } from './lib/registries.ts';
 import { fetchGitHubMeta, maintenanceStatus, parseGitHubRepo } from './lib/github.ts';
@@ -210,6 +210,12 @@ function dedupeMerge(rows: SeedRow[]): SeedRow[] {
 }
 
 function loadRows(): SeedRow[] {
+  // --add <file>: build ONLY the rows in <file> into the catalog, leaving every
+  // existing entry untouched. Lets us integrate a handful of new tools without a
+  // full regen (which, without a GitHub token, would drop verified entries back
+  // to under_review and churn the whole catalog).
+  const addFile = flag('add');
+  if (addFile) return dedupeMerge(loadJsonRows(addFile));
   if (flag('source') === 'seed') return dedupeMerge(loadSeed());
   const onlyAgentic = flag('source') === 'agentic';
   const onlyAos = flag('source') === 'aos';
@@ -580,6 +586,11 @@ async function main(): Promise<void> {
   const rows = loadRows().slice(0, LIMIT);
   // Reserve protected slugs so uniqueSlug never reuses them for a generated entry.
   const used = new Set<string>(PROTECTED_SLUGS);
+  // In --add mode, also reserve every existing catalog slug so a new entry can
+  // never silently overwrite one already on disk.
+  if (flag('add') && existsSync(OUT_DIR)) {
+    for (const f of readdirSync(OUT_DIR)) if (f.endsWith('.mdx')) used.add(f.replace(/\.mdx$/, ''));
+  }
   const built: BuiltEntry[] = [];
 
   console.log(`Building ${rows.length} catalog entries into ${OUT_DIR} …\n`);

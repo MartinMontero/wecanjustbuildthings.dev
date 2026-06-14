@@ -1,0 +1,24 @@
+[
+  {
+    "name": "continual-harness",
+    "ecosystem": "py",
+    "entry_type": "framework",
+    "category": "AI & Agents",
+    "protocols": ["general"],
+    "what_it_does": "Online-adaptation framework for self-improving foundation agents — at run time the agent refines its own prompts, sub-agents, skills, and memory instead of staying frozen after deployment. Official implementation of Karten et al., 2026.",
+    "source_url": "https://github.com/sethkarten/continual-harness",
+    "license_hint": "MIT",
+    "pie_anchor": "§4 Cooking → Recipes"
+  },
+  {
+    "name": "OpenMythos",
+    "ecosystem": "py",
+    "entry_type": "framework",
+    "category": "AI & Agents",
+    "protocols": ["general"],
+    "what_it_does": "Open, community implementation of a recurrent-depth Transformer — looped processing layers, switchable MLA/GQA attention, and a sparse mixture-of-experts — for researching compute-adaptive, depth-variable reasoning. Independent and not affiliated with any model vendor.",
+    "source_url": "https://github.com/kyegomez/OpenMythos",
+    "license_hint": "MIT",
+    "pie_anchor": "§4 Cooking → Recipes"
+  }
+]

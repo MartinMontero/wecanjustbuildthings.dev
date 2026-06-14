@@ -32,7 +32,7 @@ const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';
 export const PROVIDERS: Record<string, { url: string; build: (model: string, prompt: string, key: string) => RequestInit; pick: (j: any) => string; defaultModel: string }> = {
   anthropic: {
     url: 'https://api.anthropic.com/v1/messages',
-    defaultModel: 'claude-3-5-sonnet-latest',
+    defaultModel: 'claude-sonnet-4-6',
     build: (model, prompt, key) => ({
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
@@ -61,6 +61,14 @@ export const PROVIDERS: Record<string, { url: string; build: (model: string, pro
     pick: (j) => j?.choices?.[0]?.message?.content ?? '',
   },
 };
+
+/** OpenRouter is a gateway to every vendor — including excluded ones — so a BYOK
+ *  caller could otherwise route to a Meta/OpenAI/xAI model through it. Block model
+ *  ids whose vendor segment is owned by an excluded org. (Google is NOT excluded.) */
+export function isExcludedRouterModel(provider: string, model: string): boolean {
+  if (provider !== 'openrouter') return false;
+  return /^(openai|meta-llama|meta|x-ai|xai)\//i.test(model.trim());
+}
 
 function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(data), {
@@ -125,6 +133,9 @@ async function kickoffHandler(request: Request): Promise<Response> {
   if (!prompt) return json({ error: 'missing prompt' }, 400);
   const p = PROVIDERS[provider];
   const model = String(body.model || p.defaultModel);
+  if (isExcludedRouterModel(provider, model)) {
+    return json({ error: 'That model is owned by Meta, OpenAI, or xAI — excluded by policy. Pick a permitted model.' }, 400);
+  }
   try {
     const res = await fetch(p.url, { ...p.build(model, prompt, apiKey), signal: AbortSignal.timeout(60000) });
     const text = await res.text();
