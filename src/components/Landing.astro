@@ -1,0 +1,125 @@
+---
+/**
+ * Homepage visual sections — the guided "builder OS" journey, copy-light and
+ * illustrated. Inline SVG (themeable via tokens, no deps); replaces the prose-
+ * heavy splash body. Show the path, don't lecture it.
+ */
+---
+
+<ul class="wcb-trust">
+  <li>◆ No <b>Meta · OpenAI · xAI</b></li>
+  <li>✓ <b>License-verified</b> at a commit</li>
+  <li>★ <b>1,300+</b> vetted tools</li>
+  <li>♥ Built <b>with the community</b></li>
+</ul>
+
+<p class="eyebrow">From idea to shipped — three moves</p>
+<ol class="journey">
+  <li class="step">
+    <span class="ico" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.7A8.4 8.4 0 1 1 21 11.5Z"/><path d="M8.5 11h7M8.5 14h4"/></svg>
+    </span>
+    <h3>Describe</h3>
+    <p>Say what your community needs — in plain words.</p>
+  </li>
+  <li class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></li>
+  <li class="step">
+    <span class="ico" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-2.5 6 2.5 6-2.5v15L15 21l-6-2.5L3 21Z"/><path d="M9 3.5v15M15 6v15"/></svg>
+    </span>
+    <h3>Blueprint</h3>
+    <p>Get the exact tools — and a plan with no jargon.</p>
+  </li>
+  <li class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></li>
+  <li class="step">
+    <span class="ico" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15c-2-1-3-3-3-6 0-4 3-7 3-7s3 3 3 7c0 3-1 5-3 6Z"/><path d="M9 13c-1.5.5-2.5 2-2.5 5C9.5 17.5 11 17 12 17s2.5.5 5.5 1c0-3-1-4.5-2.5-5"/><path d="M12 17v4"/></svg>
+    </span>
+    <h3>Build</h3>
+    <p>Hand it to your agent. Ship it.</p>
+  </li>
+</ol>
+
+<p class="mentor">You bring the wisdom. The agent brings the hands.<br /><b>This gives it judgment.</b></p>
+
+<p class="eyebrow">Why it’s different</p>
+<div class="tiles">
+  <div class="tile">
+    <span class="tico a" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+    <p><b>Values, enforced.</b> Nothing owned by Meta, OpenAI, or xAI — checked on every build, not just promised.</p>
+  </div>
+  <div class="tile">
+    <span class="tico b" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span>
+    <p><b>Trust you can verify.</b> Every tool license-checked at a real commit. Receipts included.</p>
+  </div>
+  <div class="tile">
+    <span class="tico c" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.5 5.5 0 0 0-7.8 0L12 6.6l-1-1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.8-7.6a5.5 5.5 0 0 0 0-7.8Z"/></svg></span>
+    <p><b>Built to last.</b> Made with communities, to outlive any one maintainer.</p>
+  </div>
+</div>
+
+<div class="paths">
+  <a class="path" href="/start/"><span>New here?</span><b>Start in 3 minutes →</b></a>
+  <a class="path" href="/catalog/"><span>Already ship?</span><b>Browse 1,300+ tools →</b></a>
+</div>
+
+<style>
+  .eyebrow {
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--sl-color-text-accent);
+    margin: var(--wcb-space-xl) 0 var(--wcb-space-sm);
+  }
+
+  .journey { list-style: none; padding: 0; margin: 0; display: flex; align-items: stretch; justify-content: center; gap: var(--wcb-space-sm); flex-wrap: wrap; }
+  .step { flex: 1 1 14rem; max-width: 18rem; text-align: center; background: var(--md-sys-color-surface-container-high); border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent); border-radius: var(--wcb-radius-md); padding: var(--wcb-space-md); box-shadow: var(--wcb-shadow-1); }
+  .step h3 { margin: var(--wcb-space-2xs) 0 var(--wcb-space-3xs); font-size: 1.15rem; }
+  .step p { margin: 0; color: var(--sl-color-text); font-size: 0.95rem; }
+  .ico { display: inline-flex; align-items: center; justify-content: center; width: 3.25rem; height: 3.25rem; border-radius: var(--wcb-radius-md); background: var(--sl-color-accent); color: var(--wcb-on-accent); box-shadow: var(--wcb-shadow-1); }
+  .ico svg { width: 1.6rem; height: 1.6rem; }
+  .arrow { display: flex; align-items: center; color: var(--sl-color-accent); flex: 0 0 auto; }
+  .arrow svg { width: 1.5rem; height: 1.5rem; }
+  @media (max-width: 50rem) {
+    .arrow { transform: rotate(90deg); align-self: center; }
+    .step { flex-basis: 100%; max-width: none; }
+  }
+
+  .mentor {
+    text-align: center;
+    font-size: clamp(1.25rem, 3vw, 1.6rem);
+    line-height: 1.4;
+    font-weight: 600;
+    margin: var(--wcb-space-lg) auto;
+    max-width: 44rem;
+    padding: var(--wcb-space-md);
+    border-radius: var(--wcb-radius-md);
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--md-sys-color-primary) 14%, transparent), color-mix(in srgb, var(--md-sys-color-tertiary) 12%, transparent)),
+      var(--md-sys-color-surface-container);
+  }
+  .mentor b { color: var(--sl-color-text-accent); }
+
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--wcb-space-sm); }
+  @media (max-width: 50rem) { .tiles { grid-template-columns: 1fr; } }
+  .tile { display: flex; gap: var(--wcb-space-2xs); align-items: flex-start; background: var(--md-sys-color-surface-container-high); border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent); border-radius: var(--wcb-radius-md); padding: var(--wcb-space-md); box-shadow: var(--wcb-shadow-1); }
+  .tile p { margin: 0; font-size: 0.95rem; }
+  .tico { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: var(--wcb-radius-sm); color: var(--wcb-on-vivid); box-shadow: var(--wcb-shadow-1); }
+  .tico svg { width: 1.3rem; height: 1.3rem; }
+  .tico.a { background: var(--sl-color-accent); }
+  .tico.b { background: var(--wcb-success-edge); }
+  .tico.c { background: var(--wcb-danger-edge); }
+
+  .paths { display: grid; grid-template-columns: 1fr 1fr; gap: var(--wcb-space-sm); margin-top: var(--wcb-space-lg); }
+  @media (max-width: 50rem) { .paths { grid-template-columns: 1fr; } }
+  .path { display: flex; flex-direction: column; gap: var(--wcb-space-3xs); text-decoration: none; background: var(--md-sys-color-surface-container-high); border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent); border-radius: var(--wcb-radius-md); padding: var(--wcb-space-md); box-shadow: var(--wcb-shadow-1); transition: transform var(--wcb-motion-standard) var(--wcb-easing-standard), box-shadow var(--wcb-motion-standard) var(--wcb-easing-standard), border-color var(--wcb-motion-standard) var(--wcb-easing-standard); }
+  .path:hover { transform: translateY(-3px); box-shadow: var(--wcb-shadow-2); border-color: color-mix(in srgb, var(--sl-color-accent) 60%, transparent); }
+  .path span { color: var(--sl-color-gray-2); font-size: 0.9rem; }
+  .path b { color: var(--sl-color-text-accent); font-size: 1.1rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .path { transition: none; }
+  }
+</style>

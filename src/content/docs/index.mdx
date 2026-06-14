@@ -1,9 +1,9 @@
 ---
 title: We Can Just Build Things
-description: Build the tools your community needs — production-grade, privacy-respecting freedom tech, made with an AI agent and grounded in a verified, values-aligned catalog (Nostr, AT Protocol, and beyond).
+description: Tell the Build Studio what your community needs — an AI agent builds it on a verified, values-locked foundation (Nostr, AT Protocol, and beyond). Never Meta, OpenAI, or xAI.
 template: splash
 hero:
-  tagline: You can just build things. Tools that protect your community — made with an AI agent, grounded in verified freedom tech, and accountable to the people who depend on them.
+  tagline: Tell it what your community needs. An AI agent builds it — on verified, values-locked foundations.
   image:
     file: ../../assets/logo.svg
   actions:
@@ -15,95 +15,8 @@ hero:
       link: /catalog/
       icon: open-book
       variant: minimal
-    - text: New here? Start with the basics
-      link: /start/
-      icon: right-arrow
-      variant: minimal
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import Landing from '../../components/Landing.astro';
 
-<ul class="wcb-trust">
-  <li>◆ No <b>Meta · OpenAI · xAI</b></li>
-  <li>✓ <b>License-verified</b> at a commit</li>
-  <li>★ <b>1,300+</b> vetted tools</li>
-  <li>♥ Built <b>with the community</b></li>
-</ul>
-
-## For the people who build to protect their communities
-
-An organizer who needs to document evictions without exposing tenants. A
-collective building a tool their members can actually trust. A nonprofit shipping
-something real with a tiny team. You bring the intent and the knowledge of what
-your community needs — an AI agent and this project bring everything else, so what
-you ship is indistinguishable from the work of a professional team.
-
-**A harness like Goose or Claude Code gives the agent hands. This gives it
-judgment:** a verified catalog of freedom-tech tools, a guided flow from idea to
-shipped, reusable agent skills, and safeguards that have your back — so when the
-agent runs, it builds on decisions already made, verified, and documented.
-
-<CardGrid stagger>
-  <Card title="Build what your community needs" icon="rocket">
-    You don't need a CS degree — only to know the problem. The
-    [guided flow](/pie/about/) and an agent take you from "my community needs
-    this" to a shipped, production-grade tool for Nostr, AT Protocol, or whatever
-    you're creating.
-  </Card>
-  <Card title="Trust you can verify yourself" icon="approve-check">
-    Every tool is license-checked **at a specific commit**, its provenance on
-    display. You never have to take a vendor's — or a README's — word for what
-    you're depending on. The receipts are right there.
-  </Card>
-  <Card title="Your values, kept by default" icon="heart">
-    The tools you build to protect your people can't be quietly wired into the
-    surveillance-ad stacks they're trying to route around. Anything owned by
-    Meta, OpenAI, or xAI is kept out — [automatically](/policies/enforcement/),
-    so solidarity is the default, not a chore.
-  </Card>
-  <Card title="Built to outlast its makers" icon="seti:clock">
-    Designed for month six, not demo day. Weekly automation keeps the catalog
-    honest, and anyone can fork it and keep going — so the infrastructure belongs
-    to the movement, not to one maintainer. Bring any agent: Goose, Claude Code,
-    Aider.
-  </Card>
-</CardGrid>
-
-## Built for you, not for the platform
-
-This is **not** built for the founder who already owns the agent network and sets
-the norms. It's built for the organizer, the nonprofit, the collective — the
-people who have to *trust* a system without being able to see inside it, and who
-deserve to make the calls about what they depend on with their eyes open. The
-safeguards exist to serve them, never to fence them in.
-
-<CardGrid>
-  <LinkCard
-    title="The first-time builder"
-    href="/start/"
-    description="You have an idea and a community problem, not a CS degree. Follow the guided flow from intent to a shortlist of vetted tools — and on to something shipped."
-  />
-  <LinkCard
-    title="The builder-operator"
-    href="/catalog/"
-    description="You already ship. Use the catalog like a curated bookshelf — check a license, find adjacent libraries, grab a configuration recipe, and save an afternoon of due diligence."
-  />
-</CardGrid>
-
-## Use the tools
-
-<CardGrid>
-  <LinkCard title="Build Studio →" href="/build/" description="Describe your project; get a policy-clean stack, a constitution, an agent prompt, and a downloadable starter repo." />
-  <LinkCard title="Catalog explorer →" href="/catalog/" description="Search and filter 1,300+ verified tools live — by protocol, ecosystem, license, and more." />
-  <LinkCard title="Check a dependency →" href="/check/" description="Paste a package.json; run the exclusion policy in your browser with live license lookups." />
-  <LinkCard title="The build flow →" href="/pie/about/" description="From “my community has a problem” to a shippable plan." />
-</CardGrid>
-
-## Start where you are
-
-<CardGrid>
-  <LinkCard title="What this is →" href="/start/" description="The 3-minute orientation." />
-  <LinkCard title="Why not just use Goose? →" href="/start/vs-harness/" description="The harness vs. the layer that gives it judgment." />
-  <LinkCard title="How we keep our promise →" href="/policies/enforcement/" description="The safeguards that protect what you build, in plain language." />
-</CardGrid>
-
+<Landing />
