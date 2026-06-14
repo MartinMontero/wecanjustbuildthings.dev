@@ -245,7 +245,8 @@
   .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; font: inherit; padding: 0; text-decoration: underline; }
   .status { color: var(--sl-color-gray-2); }
   .cards { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--wcb-space-xs); }
-  .card { border: 1px solid var(--sl-color-gray-6); border-radius: 0.6rem; padding: 0.85rem 1rem; }
+  .card { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-md); padding: 0.85rem 1rem; box-shadow: var(--wcb-shadow-1); transition: transform var(--wcb-motion-standard) var(--wcb-easing-standard), box-shadow var(--wcb-motion-standard) var(--wcb-easing-standard), border-color var(--wcb-motion-standard) var(--wcb-easing-standard); }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--wcb-shadow-2); border-color: color-mix(in srgb, var(--sl-color-accent) 50%, var(--sl-color-gray-5)); }
   .card-top { display: flex; justify-content: space-between; gap: var(--wcb-space-xs); flex-wrap: wrap; align-items: baseline; }
   .card-name { font-weight: 700; font-size: 1.02rem; }
   .card-desc { margin: 0.35rem 0; color: var(--sl-color-text); font-size: 0.92rem; }
