@@ -49,6 +49,15 @@
       gooseDesc: 'A recipe is a one-file set of instructions Goose follows to build your project. Download it, then run the command below.',
       ghNotReady: 'Saving straight to GitHub isn’t switched on for this site yet — download the folder instead, or read',
       ghConnectBtn: 'Connect GitHub & save my project', ghSuccess: '✓ Your project is on GitHub:', copyPlan: 'Copy the plan',
+      refineTitle: 'Want a second opinion? Ask the AI mentor (optional)',
+      refineIntro: 'It asks you a few sharp questions first, then suggests a tweak or two — only from the verified catalog, and only if it truly helps. You decide what to keep. Your answers go only to the model you choose, never stored.',
+      refineAsk: 'Ask me the sharp questions first →', refineThinking: 'Thinking…',
+      refineAnswersHint: 'Answer in a few words, or skip any — then I’ll suggest what fits.',
+      refinePropose: 'Now show me what you’d add →',
+      refineWhy: 'Why:', refineWatch: 'Watch out:',
+      refineApply: 'Add to my blueprint', refineApplied: 'Added ✓',
+      refineNone: 'Your plan already covers what you described — I wouldn’t add anything. That’s a good sign.',
+      refineErr: 'Couldn’t reach the model. Check your key and try again.', refineNeedKey: 'Enter your AI key above first.',
     },
     es: {
       s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo',
@@ -87,6 +96,15 @@
       gooseDesc: 'Una receta es un archivo con instrucciones que Goose sigue para construir tu proyecto. Descárgala y ejecuta el comando de abajo.',
       ghNotReady: 'Guardar directo en GitHub aún no está activado en este sitio — descarga la carpeta, o lee',
       ghConnectBtn: 'Conectar GitHub y guardar mi proyecto', ghSuccess: '✓ Tu proyecto está en GitHub:', copyPlan: 'Copiar el plan',
+      refineTitle: '¿Quieres una segunda opinión? Pregunta al mentor de IA (opcional)',
+      refineIntro: 'Primero te hace unas preguntas precisas, luego sugiere uno o dos ajustes — solo del catálogo verificado y solo si de verdad ayuda. Tú decides qué conservar. Tus respuestas van solo al modelo que elijas, nunca se guardan.',
+      refineAsk: 'Hazme las preguntas clave primero →', refineThinking: 'Pensando…',
+      refineAnswersHint: 'Responde en pocas palabras, o salta las que quieras — luego sugeriré lo que encaje.',
+      refinePropose: 'Ahora muéstrame qué añadirías →',
+      refineWhy: 'Por qué:', refineWatch: 'Ojo:',
+      refineApply: 'Añadir a mi plano', refineApplied: 'Añadido ✓',
+      refineNone: 'Tu plan ya cubre lo que describiste — no añadiría nada. Eso es buena señal.',
+      refineErr: 'No se pudo contactar al modelo. Revisa tu clave e inténtalo de nuevo.', refineNeedKey: 'Primero ingresa tu clave de IA arriba.',
     },
     ar: {
       s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه',
@@ -125,6 +143,15 @@
       gooseDesc: 'الوصفة ملف واحد فيه تعليمات يتبعها Goose لبناء مشروعك. نزّلها ثم شغّل الأمر أدناه.',
       ghNotReady: 'الحفظ المباشر إلى GitHub غير مُفعّل في هذا الموقع بعد — نزّل المجلد بدلاً من ذلك، أو اقرأ',
       ghConnectBtn: 'اربط GitHub واحفظ مشروعي', ghSuccess: '✓ مشروعك على GitHub:', copyPlan: 'انسخ الخطة',
+      refineTitle: 'تريد رأياً ثانياً؟ اسأل مرشد الذكاء الاصطناعي (اختياري)',
+      refineIntro: 'يطرح عليك أولاً بضعة أسئلة دقيقة، ثم يقترح تعديلاً أو اثنين — من الكتالوج المُوثَّق فقط، وفقط إن كان يساعد فعلاً. أنت تقرّر ما تُبقيه. إجاباتك تذهب إلى النموذج الذي تختاره فقط، ولا تُخزَّن أبداً.',
+      refineAsk: 'اطرح عليّ الأسئلة المهمة أولاً ←', refineThinking: 'يفكّر…',
+      refineAnswersHint: 'أجب بكلمات قليلة، أو تجاوز ما تشاء — ثم سأقترح ما يناسب.',
+      refinePropose: 'الآن أرني ما الذي ستضيفه ←',
+      refineWhy: 'لماذا:', refineWatch: 'انتبه:',
+      refineApply: 'أضِف إلى مخططي', refineApplied: 'أُضيف ✓',
+      refineNone: 'مخططك يغطّي ما وصفته بالفعل — لن أضيف شيئاً. هذه علامة جيدة.',
+      refineErr: 'تعذّر الوصول إلى النموذج. تحقّق من مفتاحك وحاول مجدداً.', refineNeedKey: 'أدخل مفتاح الذكاء الاصطناعي أعلاه أولاً.',
     },
   };
   let lang = $state<Lang>((['en', 'es', 'ar'].includes(initialLang) ? initialLang : 'en') as Lang);
@@ -487,6 +514,110 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
       if (d.output) kOutput = d.output; else kError = d.error + (d.detail ? `: ${JSON.stringify(d.detail).slice(0, 200)}` : '');
     } catch (e) { kError = String(e); } finally { kBusy = false; }
   }
+
+  // ---------- AI refinement (Morpheus → JARVIS): Socratic questions, then
+  // grounded, gated proposals. The model only ever sees real, pre-screened
+  // catalog tools and may only reference them by exact name; every suggestion is
+  // verified against the catalog before the builder sees it, and nothing is ever
+  // applied without an explicit click. The model advises; the builder decides. ----------
+  interface Proposal { action: 'add' | 'remove' | 'swap'; name: string; from?: string; why: string; tradeoff?: string }
+  type AiPhase = 'idle' | 'questions' | 'proposals';
+  const LANG_NAME: Record<Lang, string> = { en: 'English', es: 'Spanish', ar: 'Arabic' };
+  let aiPhase = $state<AiPhase>('idle');
+  let aiBusy = $state(false);
+  let aiError = $state('');
+  let aiQuestions = $state<string[]>([]);
+  let aiAnswers = $state<string[]>([]);
+  let aiProposals = $state<Proposal[]>([]);
+  let aiApplied = $state<Set<number>>(new Set());
+
+  // The constrained menu the model may choose from: the current pieces and their
+  // alternatives, plus the strongest tools in each relevant capability category.
+  // Everything here is already in the verified, policy-screened catalog.
+  const AI_CATS = ['Frameworks & Libraries', 'Auth Identity & Keys', 'Security & Privacy', 'Databases & Storage', 'Bitcoin Lightning Nostr', 'Hosting Infra & Deploy', 'Dev Environment & Tooling'];
+  const aiCandidates = $derived.by<Item[]>(() => {
+    if (!items.length) return [];
+    const out = new Map<string, Item>();
+    const add = (it: Item) => { if (!out.has(it.name)) out.set(it.name, it); };
+    for (const p of blueprint) { add(p.item); p.alts.forEach(add); }
+    for (const c of AI_CATS) {
+      // Don't offer Meta/OpenAI/xAI-origin tools as new suggestions (they're in
+      // the catalog only with an advisory); the mentor shouldn't push them.
+      items.filter((x) => x.category === c && !x.advisory)
+        .sort((a, b) => protoMatch(b) - protoMatch(a) || (b.verification === 'verified' ? 1 : 0) - (a.verification === 'verified' ? 1 : 0) || b.uses - a.uses)
+        .slice(0, 8).forEach(add);
+    }
+    return [...out.values()].slice(0, 50);
+  });
+
+  function intentBlock(): string {
+    return `PROJECT: ${projectName || slug}\nPROBLEM: ${problem || '(not given)'}\nGOAL: ${goal || '(not given)'}\nSUCCESS: ${success || '(not given)'}\nNETWORKS: ${protoList.join(', ') || 'general'}`;
+  }
+  function planBlock(): string {
+    return blueprint.filter((p) => !removed.has(p.capId)).map((p) => `- ${p.role}: ${p.item.name} (${p.item.license})`).join('\n') || '- (nothing yet)';
+  }
+  const MENTOR = 'You are a wise, calm mentor for community organizers and non-developers building freedom tech — think Morpheus, not Clippy. You help people see their own intent more clearly. You never lecture, never hype, never pad. You value accuracy, security, and the project ethos (no tools owned by Meta, OpenAI, or xAI) over sounding agreeable.';
+
+  function socraticPrompt(): string {
+    return `${MENTOR}\n\n${intentBlock()}\n\nCURRENT PLAN:\n${planBlock()}\n\nAsk 3 to 5 short, plain-language questions that surface things this builder probably has not said yet but that would change what they should build — for example: who must NEVER see this data, whether people are on cheap phones or offline, what happens if it suddenly gets popular, what must still work in a year, accessibility, or safety. Tailor every question to THIS project; no generic questions. One sentence each, no jargon, no preamble.\n\nRespond in ${LANG_NAME[lang]}. Output ONLY a JSON object: {"questions": ["...", "..."]}`;
+  }
+  function proposalPrompt(): string {
+    const qa = aiQuestions.map((q, i) => `Q: ${q}\nA: ${aiAnswers[i]?.trim() || '(skipped)'}`).join('\n');
+    const cands = aiCandidates.map((c) => `- ${c.name} | ${c.category} | ${c.license} | ${c.verification} | ${(c.desc || '').slice(0, 90)}`).join('\n');
+    return `${MENTOR} The builder answered your questions. Suggest concrete refinements to their plan — but only what genuinely helps.\n\n${intentBlock()}\n\nCURRENT PLAN:\n${planBlock()}\n\nTHEIR ANSWERS:\n${qa}\n\nYou may ONLY recommend tools from this CANDIDATES list, by their exact name. Never invent a tool, and never propose anything owned by Meta, OpenAI, or xAI.\nCANDIDATES:\n${cands}\n\nRules:\n- Prefer fewer tools. It is good to suggest nothing if the plan is already right (return an empty array).\n- For each suggestion: a plain-language reason a non-developer understands, and an honest trade-off or thing to watch.\n- You advise; the builder decides. Be honest over agreeable.\n\nRespond in ${LANG_NAME[lang]}. Output ONLY a JSON object:\n{"proposals": [{"action": "add" | "swap" | "remove", "name": "<exact candidate name>", "from": "<name being replaced, swap only>", "why": "...", "tradeoff": "..."}]}`;
+  }
+
+  async function callModel(prompt: string): Promise<string> {
+    const res = await fetch('/api/agent/kickoff', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ provider: kProvider, model: kModel, apiKey: kKey, prompt }) });
+    const d = await res.json();
+    if (typeof d.output === 'string') return d.output;
+    throw new Error(d.error || 'failed');
+  }
+  function parseObj(text: string): any {
+    const m = text.match(/\{[\s\S]*\}/);
+    return JSON.parse(m ? m[0] : text);
+  }
+
+  async function aiAsk() {
+    if (!kKey) { aiError = t.refineNeedKey; return; }
+    aiBusy = true; aiError = ''; aiProposals = []; aiApplied = new Set();
+    try {
+      const j = parseObj(await callModel(socraticPrompt()));
+      aiQuestions = (Array.isArray(j.questions) ? j.questions : []).map(String).slice(0, 5);
+      aiAnswers = aiQuestions.map(() => '');
+      aiPhase = 'questions';
+    } catch { aiError = t.refineErr; } finally { aiBusy = false; }
+  }
+  async function aiPropose() {
+    aiBusy = true; aiError = ''; aiApplied = new Set();
+    try {
+      const j = parseObj(await callModel(proposalPrompt()));
+      const raw: any[] = Array.isArray(j.proposals) ? j.proposals : [];
+      // Verification gate: keep only proposals whose tool is a real catalog entry
+      // (catalog membership === already policy-screened). Canonicalize the name.
+      aiProposals = raw
+        .map((p) => {
+          const it = items.find((x) => x.name.toLowerCase() === String(p?.name || '').toLowerCase());
+          if (!it) return null;
+          if (p.action === 'swap' && !blueprint.some((b) => !removed.has(b.capId) && b.item.name === p.from)) return null;
+          return { action: ['add', 'remove', 'swap'].includes(p.action) ? p.action : 'add', name: it.name, from: p.from, why: String(p.why || ''), tradeoff: p.tradeoff ? String(p.tradeoff) : undefined } as Proposal;
+        })
+        .filter((p): p is Proposal => p !== null)
+        .slice(0, 6);
+      aiPhase = 'proposals';
+    } catch { aiError = t.refineErr; } finally { aiBusy = false; }
+  }
+  function applyProposal(p: Proposal, i: number) {
+    if (p.action === 'add') { const n = new Set(extra); n.add(p.name); extra = n; }
+    else if (p.action === 'remove') {
+      const bp = blueprint.find((b) => b.item.name === p.name);
+      if (bp) togglePiece(bp.capId); else { const n = new Set(extra); n.delete(p.name); extra = n; }
+    } else if (p.action === 'swap') {
+      const bp = blueprint.find((b) => b.item.name === p.from);
+      if (bp) swapPiece(bp.capId, p.name); else { const n = new Set(extra); n.add(p.name); extra = n; }
+    }
+    const a = new Set(aiApplied); a.add(i); aiApplied = a;
+  }
 </script>
 
 <div class="studio" dir={rtl ? 'rtl' : 'ltr'}>
@@ -563,6 +694,54 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
         <strong>{t.bpFits}</strong>
         <p>{#each blueprint.filter((p) => !removed.has(p.capId)) as p, i}{i > 0 ? ' → ' : ''}<a href={p.item.url}>{p.item.name}</a> ({p.role.toLowerCase()}){/each}.</p>
       </div>
+
+      <details class="refine">
+        <summary>{t.refineTitle}</summary>
+        <p class="hint">{t.refineIntro}</p>
+        <div class="modelgrid">
+          <label class="field"><span>{t.provider}</span><select bind:value={kProvider}><option value="anthropic">Anthropic</option><option value="deepseek">DeepSeek</option><option value="openrouter">OpenRouter</option></select></label>
+          <label class="field"><span>{t.modelLabel}</span><select bind:value={kModel}>{#each kModels as m (m.id)}<option value={m.id}>{m.label}</option>{/each}</select></label>
+        </div>
+        <label class="field"><span>{t.apikey}</span><input type="password" bind:value={kKey} placeholder="sk-…" /></label>
+
+        {#if aiPhase === 'idle'}
+          <button class="primary" onclick={aiAsk} disabled={aiBusy || !kKey}>{aiBusy ? t.refineThinking : t.refineAsk}</button>
+        {/if}
+        {#if aiError}<p class="err">{aiError}</p>{/if}
+
+        {#if aiQuestions.length}
+          <ol class="qs">
+            {#each aiQuestions as q, i}
+              <li><p class="q">{q}</p><textarea bind:value={aiAnswers[i]} rows="2"></textarea></li>
+            {/each}
+          </ol>
+          {#if aiPhase === 'questions'}
+            <p class="hint">{t.refineAnswersHint}</p>
+            <button class="primary" onclick={aiPropose} disabled={aiBusy}>{aiBusy ? t.refineThinking : t.refinePropose}</button>
+          {/if}
+        {/if}
+
+        {#if aiPhase === 'proposals'}
+          {#if aiProposals.length === 0}
+            <p class="hint">{t.refineNone}</p>
+          {:else}
+            <ul class="proposals">
+              {#each aiProposals as p, i (i)}
+                {@const it = items.find((x) => x.name === p.name)}
+                <li class="proposal">
+                  <div class="prop-head">
+                    <span class="prop-name">{p.action === 'add' ? '+ ' : p.action === 'remove' ? '– ' : '⇄ '}{p.name}{p.from ? ` (↳ ${p.from})` : ''}{#if it} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span> <span class="tool-meta">{it.license}</span>{/if}</span>
+                    {#if aiApplied.has(i)}<span class="applied">{t.refineApplied}</span>{:else}<button class="apply" onclick={() => applyProposal(p, i)}>{t.refineApply}</button>{/if}
+                  </div>
+                  <p class="prop-why"><strong>{t.refineWhy}</strong> {p.why}</p>
+                  {#if p.tradeoff}<p class="prop-watch"><strong>{t.refineWatch}</strong> {p.tradeoff}</p>{/if}
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        {/if}
+      </details>
+
       <details class="advanced">
         <summary>{t.bpAdvanced}</summary>
         <label class="field"><span>{t.add}</span><input bind:value={addQuery} placeholder="search the full catalog…" /></label>
@@ -672,6 +851,19 @@ ${otherDeps.map((it) => `- ${it.name} (${it.ecosystem})`).join('\n') || '- (none
   .examples { display: flex; flex-direction: column; gap: 0.4rem; }
   .chip.ex { text-align: start; font-size: 0.82rem; max-width: 100%; white-space: normal; line-height: 1.3; }
   .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .refine { border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.6rem 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent); }
+  .refine > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 700; }
+  .qs { list-style: none; counter-reset: q; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
+  .qs li { counter-increment: q; }
+  .qs .q { margin: 0 0 0.3rem; font-weight: 600; }
+  .qs .q::before { content: counter(q) '. '; color: var(--sl-color-text-accent); }
+  .proposals { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
+  .proposal { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.6rem 0.8rem; }
+  .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+  .prop-name { font-weight: 700; }
+  .apply { background: var(--sl-color-accent); color: #fff; border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+  .applied { font-size: 0.78rem; font-weight: 700; color: #2da44e; }
+  .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
   .deeper summary, .advanced summary, .swap summary { cursor: pointer; color: var(--sl-color-text-accent); font-size: 0.9rem; font-weight: 600; }
   .bp-head h3 { margin: 0 0 0.3rem; }
   .bp-sub { margin: 0.4rem 0 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--sl-color-gray-2); }
