@@ -18,7 +18,7 @@
       problem: 'What problem does it solve, and for whom? Say it like you would out loud — one short paragraph.',
       why: 'Why does this matter? The real change you want — not just “ship an app.”',
       success: 'How will you know it’s working? What’s different for your community when it does.',
-      protocols: 'Which network does it live on?', focus: 'What kind of thing are you building?',
+      protocols: 'Which network does it live on?',
       tenq: 'Start with the why. Answer these the way you’d explain the project to a friend — the clearer you are, the better your AI agent builds.',
       protoHelp: 'A “network” (protocol) is the shared, open rulebook your tool plugs into — owned by no single company. Nostr and AT Protocol (Bluesky) are open social networks; pick “general” if it isn’t a social tool.',
       choose: 'Show me the blueprint →', back: '← Back', gen: 'Build it →', backStack: '← Back to the blueprint',
@@ -27,7 +27,6 @@
       bpAdvanced: 'Power user? Browse and add tools yourself', bpEmpty: 'Tell me what you want to build first — go back and describe it in a sentence or two.',
       bpLead: 'You don’t need to know any of these by name. I picked a small, proven set for what you described and wired them together. Keep it as-is, or swap any piece — every option is safe and license-checked.',
       examples: 'Not sure where to start? Try one:',
-      suggested: '',
       add: 'Need something specific? Search the full catalog', selected: 'building blocks chosen', loading: 'Loading the catalog…',
       handoff: 'How do you want to get started?', zip: 'Download a starter folder', github: 'Save it to GitHub',
       goose: 'Run it with Goose', kickoff: 'Try a step with AI',
@@ -36,10 +35,6 @@
       apikey: 'Your AI key (sent straight to the model, never stored by us)',
       provider: 'Who makes the model', run: 'Run it', running: 'Working…',
       ghError: 'Connecting to GitHub didn’t finish. Try again, or download the folder below.',
-      stackIntro: 'Your “stack” is just the set of ready-made building blocks — tools other people have already built and tested — that your project is made from. Choosing good ones means you and your AI agent don’t start from scratch: you assemble proven parts instead of reinventing them, which saves months and avoids dead ends. Below is a starting set picked for what you described. Not sure? Keep the ones marked ★ and the defaults — you can’t pick “wrong” here, because everything listed is already safe and checked. Add or remove anything; nothing is final.',
-      legendPrimary: '★ the recommended starting point for your network',
-      legendClean: 'every option is safe to use (no Meta/OpenAI/xAI) and license-checked',
-      showMore: 'Show more tools', showFewer: 'Show fewer', showing: 'Showing', of: 'of',
       modelTitle: 'Choose your AI model',
       modelIntro: 'This runs one planning step with your own AI key, so you can feel it work before you commit. Your key and your project go straight to the model — never stored by us, and never routed through Meta, OpenAI, or xAI. The options below are chosen for that: models trained accountably, open models you can run yourself, or a neutral router locked to allowed models.',
       modelLabel: 'Model',
@@ -72,7 +67,7 @@
       problem: '¿Qué problema resuelve y para quién? Dilo como lo dirías en voz alta — un párrafo corto.',
       why: '¿Por qué importa? El cambio real que buscas — no solo “lanzar una app.”',
       success: '¿Cómo sabrás que funciona? Qué cambia para tu comunidad cuando lo logra.',
-      protocols: '¿En qué red vive?', focus: '¿Qué tipo de cosa estás construyendo?',
+      protocols: '¿En qué red vive?',
       tenq: 'Empieza por el porqué. Responde como si le explicaras el proyecto a un amigo — cuanto más claro seas, mejor construye tu agente de IA.',
       protoHelp: 'Una “red” (protocolo) es el reglamento abierto y compartido al que se conecta tu herramienta — sin dueño único. Nostr y AT Protocol (Bluesky) son redes sociales abiertas; elige “general” si no es una herramienta social.',
       choose: 'Muéstrame el plano →', back: '← Atrás', gen: 'Construirlo →', backStack: '← Volver al plano',
@@ -81,7 +76,6 @@
       bpAdvanced: '¿Experto? Explora y añade herramientas tú mismo', bpEmpty: 'Primero dime qué quieres construir — vuelve y descríbelo en una o dos frases.',
       bpLead: 'No necesitas conocer ninguna de estas por su nombre. Elegí un conjunto pequeño y probado para lo que describiste y las conecté entre sí. Déjalo así, o cambia cualquier pieza — cada opción es segura y con licencia verificada.',
       examples: '¿No sabes por dónde empezar? Prueba una:',
-      suggested: '',
       add: '¿Necesitas algo específico? Busca en todo el catálogo', selected: 'bloques elegidos', loading: 'Cargando el catálogo…',
       handoff: '¿Cómo quieres empezar?', zip: 'Descargar una carpeta inicial', github: 'Guardarlo en GitHub',
       goose: 'Ejecutarlo con Goose', kickoff: 'Probar un paso con IA',
@@ -90,10 +84,6 @@
       apikey: 'Tu clave de IA (se envía directo al modelo, nunca la guardamos)',
       provider: 'Quién hace el modelo', run: 'Ejecutar', running: 'Trabajando…',
       ghError: 'La conexión con GitHub no terminó. Inténtalo de nuevo o descarga la carpeta abajo.',
-      stackIntro: 'Tu “stack” es simplemente el conjunto de bloques ya hechos — herramientas que otras personas ya construyeron y probaron — con los que se arma tu proyecto. Elegir buenos bloques significa que tú y tu agente de IA no empiezan de cero: ensamblas piezas probadas en vez de reinventarlas, lo que ahorra meses y evita callejones sin salida. Abajo hay un conjunto inicial elegido para lo que describiste. ¿No estás seguro? Deja los marcados con ★ y los predeterminados — aquí no puedes elegir “mal”, porque todo lo listado ya es seguro y está verificado. Agrega o quita lo que quieras; nada es definitivo.',
-      legendPrimary: '★ el punto de partida recomendado para tu red',
-      legendClean: 'cada opción es segura de usar (sin Meta/OpenAI/xAI) y con licencia verificada',
-      showMore: 'Mostrar más herramientas', showFewer: 'Mostrar menos', showing: 'Mostrando', of: 'de',
       modelTitle: 'Elige tu modelo de IA',
       modelIntro: 'Esto ejecuta un paso de planificación con tu propia clave de IA, para que lo sientas funcionar antes de comprometerte. Tu clave y tu proyecto van directo al modelo — nunca los guardamos, y nunca pasan por Meta, OpenAI o xAI. Las opciones de abajo se eligen por eso: modelos entrenados de forma responsable, modelos abiertos que puedes ejecutar tú mismo, o un enrutador neutral limitado a modelos permitidos.',
       modelLabel: 'Modelo',
@@ -126,7 +116,7 @@
       problem: 'ما المشكلة التي يحلها، ولمن؟ قُلها كما تقولها بصوتك — فقرة قصيرة.',
       why: 'لماذا يهمّ هذا؟ التغيير الحقيقي الذي تريده — وليس مجرد «إطلاق تطبيق».',
       success: 'كيف ستعرف أنه ينجح؟ ما الذي يتغيّر لمجتمعك عندما ينجح.',
-      protocols: 'على أي شبكة يعمل؟', focus: 'ما نوع الشيء الذي تبنيه؟',
+      protocols: 'على أي شبكة يعمل؟',
       tenq: 'ابدأ بالـ«لماذا». أجب كأنك تشرح المشروع لصديق — كلما كنت أوضح، بنى وكيل الذكاء الاصطناعي بشكل أفضل.',
       protoHelp: 'الـ«شبكة» (البروتوكول) هي القواعد المفتوحة المشتركة التي تتصل بها أداتك — لا يملكها طرف واحد. Nostr وAT Protocol (Bluesky) شبكات اجتماعية مفتوحة؛ اختر «general» إن لم تكن أداة اجتماعية.',
       choose: 'أرني المخطط ←', back: '→ رجوع', gen: 'ابنِه ←', backStack: '→ العودة للمخطط',
@@ -135,7 +125,6 @@
       bpAdvanced: 'خبير؟ تصفّح وأضف الأدوات بنفسك', bpEmpty: 'أخبرني أولاً بما تريد بناءه — ارجع وصِفه في جملة أو جملتين.',
       bpLead: 'لا حاجة لأن تعرف أيّاً منها بالاسم. اخترتُ مجموعة صغيرة ومُجرَّبة لما وصفته وربطتها معاً. اتركها كما هي، أو بدّل أي قطعة — كل خيار آمن ومُتحقَّق من ترخيصه.',
       examples: 'لا تعرف من أين تبدأ؟ جرّب واحدة:',
-      suggested: '',
       add: 'تحتاج شيئاً محدداً؟ ابحث في الكتالوج كاملاً', selected: 'لبنات مختارة', loading: 'جارٍ تحميل الكتالوج…',
       handoff: 'كيف تريد أن تبدأ؟', zip: 'تنزيل مجلد بداية', github: 'احفظه في GitHub',
       goose: 'شغّله مع Goose', kickoff: 'جرّب خطوة بالذكاء الاصطناعي',
@@ -144,10 +133,6 @@
       apikey: 'مفتاح الذكاء الاصطناعي الخاص بك (يُرسل مباشرة إلى النموذج، ولا نخزّنه أبداً)',
       provider: 'من يصنع النموذج', run: 'شغّل', running: 'جارٍ العمل…',
       ghError: 'لم يكتمل الاتصال بـ GitHub. حاول مرة أخرى، أو نزّل المجلد أدناه.',
-      stackIntro: '«الحزمة» (stack) هي ببساطة مجموعة اللبنات الجاهزة — أدوات بناها واختبرها آخرون — التي يتكوّن منها مشروعك. اختيار لبنات جيدة يعني أنك ووكيل الذكاء الاصطناعي لا تبدآن من الصفر: تجمّع قطعاً مُجرَّبة بدل إعادة اختراعها، ما يوفّر شهوراً ويتجنّب الطرق المسدودة. في الأسفل مجموعة بداية مُختارة لما وصفته. غير متأكد؟ اترك المعلّمة بـ ★ والافتراضية — لا يمكنك الاختيار «الخطأ» هنا، فكل المُدرَج آمن ومُتحقَّق منه. أضِف أو احذف ما تشاء؛ لا شيء نهائي.',
-      legendPrimary: '★ نقطة البداية الموصى بها لشبكتك',
-      legendClean: 'كل خيار آمن للاستخدام (بلا Meta/OpenAI/xAI) ومُتحقَّق من ترخيصه',
-      showMore: 'عرض أدوات أكثر', showFewer: 'عرض أقل', showing: 'عرض', of: 'من',
       modelTitle: 'اختر نموذج الذكاء الاصطناعي',
       modelIntro: 'هذا يشغّل خطوة تخطيط واحدة باستخدام مفتاحك الخاص، لتشعر به يعمل قبل أن تلتزم. مفتاحك ومشروعك يذهبان مباشرة إلى النموذج — لا نخزّنهما أبداً، ولا يمران عبر Meta أو OpenAI أو xAI. الخيارات أدناه مُختارة لذلك: نماذج مُدرَّبة بمسؤولية، نماذج مفتوحة يمكنك تشغيلها بنفسك، أو موجّه محايد مقصور على النماذج المسموح بها.',
       modelLabel: 'النموذج',
@@ -368,6 +353,10 @@
       let item = pool[0]!;
       const sw = swaps[def.id];
       if (sw) { const s = pool.find((x) => x.name === sw) ?? items.find((x) => x.name === sw); if (s) item = s; }
+      // A swap target could collide with a tool an earlier piece already took
+      // (the items.find fallback bypasses `taken`); fall back to this pool's
+      // default so the same tool never appears in two pieces.
+      if (taken.has(item.name)) item = pool[0]!;
       const alts = pool.filter((x) => x.name !== item.name).slice(0, 3);
       taken.add(item.name);
       const txt = (CAP_TEXT[lang] ?? CAP_TEXT.en)[def.id] ?? CAP_TEXT.en[def.id]!;
@@ -813,12 +802,20 @@ manuals with the knowledge-to-skills-pipeline).
     } catch { aiError = t.refineErr; } finally { aiBusy = false; }
   }
   function applyProposal(p: Proposal, i: number) {
-    if (p.action === 'add') { const n = new Set(extra); n.add(p.name); extra = n; }
-    else if (p.action === 'remove') {
-      const bp = blueprint.find((b) => b.item.name === p.name);
-      if (bp) togglePiece(bp.capId); else { const n = new Set(extra); n.delete(p.name); extra = n; }
+    // Apply idempotently: 'add'/'remove' on a blueprint piece set its removed
+    // state directly (never toggle — a toggle could re-add a piece the builder
+    // already removed, or strike out one they kept).
+    const pieceFor = (name: string) => blueprint.find((b) => b.item.name === name);
+    if (p.action === 'add') {
+      const bp = pieceFor(p.name);
+      if (bp) { const r = new Set(removed); r.delete(bp.capId); removed = r; } // un-remove the piece
+      else { const n = new Set(extra); n.add(p.name); extra = n; }
+    } else if (p.action === 'remove') {
+      const bp = pieceFor(p.name);
+      if (bp) { const r = new Set(removed); r.add(bp.capId); removed = r; } // ensure removed
+      else { const n = new Set(extra); n.delete(p.name); extra = n; }
     } else if (p.action === 'swap') {
-      const bp = blueprint.find((b) => b.item.name === p.from);
+      const bp = pieceFor(p.from ?? '');
       if (bp) swapPiece(bp.capId, p.name); else { const n = new Set(extra); n.add(p.name); extra = n; }
     }
     const a = new Set(aiApplied); a.add(i); aiApplied = a;
