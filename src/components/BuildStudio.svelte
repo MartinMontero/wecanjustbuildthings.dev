@@ -27,6 +27,7 @@
       runLocal: 'Get started with Goose →', ghGuide: 'How to connect GitHub →',
       apikey: 'Your API key (BYOK — sent only to the provider, never stored)',
       provider: 'Provider (permitted only)', run: 'Run kickoff', running: 'Running…',
+      ghError: 'GitHub authorization didn’t complete. Try again, or download the .zip below.',
     },
     es: {
       s1: '1 · Describe', s2: '2 · Elige stack', s3: '3 · Genera',
@@ -43,6 +44,7 @@
       runLocal: 'Empezar con Goose →', ghGuide: 'Cómo conectar GitHub →',
       apikey: 'Tu clave API (solo se envía al proveedor, nunca se guarda)',
       provider: 'Proveedor (solo permitidos)', run: 'Ejecutar arranque', running: 'Ejecutando…',
+      ghError: 'La autorización de GitHub no se completó. Inténtalo de nuevo o descarga el .zip abajo.',
     },
     ar: {
       s1: '١ · صِف', s2: '٢ · اختر الأدوات', s3: '٣ · وَلِّد',
@@ -59,6 +61,7 @@
       runLocal: 'ابدأ مع Goose ←', ghGuide: 'كيفية ربط GitHub ←',
       apikey: 'مفتاح API الخاص بك (يُرسل للمزوّد فقط، ولا يُخزَّن أبداً)',
       provider: 'المزوّد (المسموح فقط)', run: 'تشغيل الانطلاقة', running: 'جارٍ التشغيل…',
+      ghError: 'لم تكتمل عملية ربط GitHub. حاول مرة أخرى، أو نزّل ملف .zip أدناه.',
     },
   };
   let lang = $state<Lang>((['en', 'es', 'ar'].includes(initialLang) ? initialLang : 'en') as Lang);
@@ -94,9 +97,16 @@
   };
 
   onMount(async () => {
+    // Follow the page's locale so /es/build/ and /ar/build/ open in that language
+    // (the site-wide picker switches the surrounding chrome; this keeps the tool in sync).
+    const dl = document.documentElement.lang?.slice(0, 2);
+    if (dl && ['en', 'es', 'ar'].includes(dl)) lang = dl as Lang;
     try { const res = await fetch('/catalog.json'); items = (await res.json()).filter((i: Item & { kind?: string }) => (i as any).kind !== 'dataset'); } catch { /* offline */ }
     loading = false;
-    if (new URLSearchParams(location.search).get('gh') === 'connected') { handoff = 'github'; ghConnected = true; step = 3; }
+    const gh = new URLSearchParams(location.search).get('gh');
+    if (gh === 'connected') { handoff = 'github'; ghConnected = true; step = 3; }
+    else if (gh === 'error') { handoff = 'github'; step = 3; ghResult = `error:${t.ghError}`; }
+    else if (gh === 'unconfigured') { handoff = 'github'; step = 3; ghConfigured = false; }
   });
 
   const slug = $derived((projectName || 'my-app').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '') || 'my-app');

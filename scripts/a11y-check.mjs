@@ -28,6 +28,8 @@ const PORT = 4399;
 const BASE = `http://localhost:${PORT}`;
 const PATHS = [
   '/',
+  '/es/',
+  '/ar/',
   '/start/',
   '/start/vs-harness/',
   '/method/',

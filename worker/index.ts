@@ -138,10 +138,18 @@ function cookie(request: Request, name: string): string | undefined {
   return undefined;
 }
 
+function backTo(origin: string, back: string, params: string): Response {
+  const sep = back.includes('?') ? '&' : '?';
+  const target = /^https?:\/\//.test(back) ? back : `${origin}${back.startsWith('/') ? '' : '/'}${back}`;
+  return new Response(null, { status: 302, headers: [['location', `${target}${sep}${params}`]] as any });
+}
+
 function githubStart(url: URL, env: Env): Response {
-  if (!env.GITHUB_OAUTH_CLIENT_ID) return json({ error: 'GitHub one-click is not configured on this deployment.' }, 503);
-  const state = crypto.randomUUID();
   const redirectBack = url.searchParams.get('redirect') || '/build/';
+  // Not configured: bounce back to the Studio with a friendly flag instead of
+  // dumping JSON, since this endpoint is reached by a full-page navigation.
+  if (!env.GITHUB_OAUTH_CLIENT_ID) return backTo(url.origin, redirectBack, 'gh=unconfigured');
+  const state = crypto.randomUUID();
   const cbUrl = `${url.origin}/api/github/callback`;
   const auth = new URL('https://github.com/login/oauth/authorize');
   auth.searchParams.set('client_id', env.GITHUB_OAUTH_CLIENT_ID);
@@ -156,23 +164,27 @@ function githubStart(url: URL, env: Env): Response {
 }
 
 async function githubCallback(request: Request, url: URL, env: Env): Promise<Response> {
-  if (!env.GITHUB_OAUTH_CLIENT_ID || !env.GITHUB_OAUTH_CLIENT_SECRET) return json({ error: 'not configured' }, 503);
+  // Always return to the Studio (not raw JSON): the user lands here via a
+  // browser redirect from GitHub, so failures should surface in the UI.
+  const back = cookie(request, 'gh_back') || '/build/';
+  const fail = (reason: string) => backTo(url.origin, back, `gh=error&reason=${reason}`);
+  if (!env.GITHUB_OAUTH_CLIENT_ID || !env.GITHUB_OAUTH_CLIENT_SECRET) return fail('unconfigured');
+  if (url.searchParams.get('error')) return fail('denied'); // user declined authorization
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
-  if (!code || !state || state !== cookie(request, 'gh_state')) return json({ error: 'OAuth state mismatch' }, 400);
+  if (!code || !state || state !== cookie(request, 'gh_state')) return fail('state');
   const tokRes = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',
     headers: { 'content-type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify({ client_id: env.GITHUB_OAUTH_CLIENT_ID, client_secret: env.GITHUB_OAUTH_CLIENT_SECRET, code }),
   });
   const tok = await tokRes.json().catch(() => null) as any;
-  if (!tok?.access_token) return json({ error: 'token exchange failed' }, 502);
-  const back = cookie(request, 'gh_back') || '/build/';
+  if (!tok?.access_token) return fail('token');
   const sep = back.includes('?') ? '&' : '?';
   return new Response(null, {
     status: 302,
     headers: [
-      ['location', `${back}${sep}gh=connected`],
+      ['location', `${url.origin}${back}${sep}gh=connected`],
       ['set-cookie', `gh_token=${tok.access_token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=900`],
     ] as any,
   });
