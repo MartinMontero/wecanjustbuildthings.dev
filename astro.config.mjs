@@ -67,7 +67,7 @@ export default defineConfig({
         baseUrl: 'https://github.com/martinmontero/wecanjustbuildthings.dev/edit/main/',
       },
       lastUpdated: true,
-      customCss: ['./src/styles/theme.css'],
+      customCss: ['./src/styles/colors.generated.css', './src/styles/theme.css'],
       sidebar: [
         {
           label: 'Start here',

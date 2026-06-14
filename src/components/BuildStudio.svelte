@@ -59,6 +59,7 @@
       refineNone: 'Your plan already covers what you described — I wouldn’t add anything. That’s a good sign.',
       refineErr: 'Couldn’t reach the model. Check your key and try again.', refineNeedKey: 'Enter your AI key above first.',
       skillsHint: 'Have a field guide, manual, or SOP? Turn your own know-how into a skill your agent follows →',
+      designHint: 'New to design? The Design Field Guide teaches you to direct the look — in plain words, no jargon →',
       skillsDraft: 'Skills I can scaffold from what you told me', skillsReady: 'Or drop in a ready-made skill',
       skillAdd: 'Add to my project', skillAdded: 'Added ✓',
       skillReview: 'A draft in your words — review and refine it; you’re the expert.',
@@ -111,6 +112,7 @@
       refineNone: 'Tu plan ya cubre lo que describiste — no añadiría nada. Eso es buena señal.',
       refineErr: 'No se pudo contactar al modelo. Revisa tu clave e inténtalo de nuevo.', refineNeedKey: 'Primero ingresa tu clave de IA arriba.',
       skillsHint: '¿Tienes una guía de campo, un manual o un procedimiento? Convierte tu propio saber en una habilidad que tu agente sigue →',
+      designHint: '¿Nuevo en diseño? La Guía de Diseño te enseña a dirigir el aspecto — en palabras claras, sin jerga →',
       skillsDraft: 'Habilidades que puedo crear a partir de lo que me contaste', skillsReady: 'O agrega una habilidad lista para usar',
       skillAdd: 'Añadir a mi proyecto', skillAdded: 'Añadida ✓',
       skillReview: 'Un borrador en tus palabras — revísalo y ajústalo; tú eres quien sabe.',
@@ -163,6 +165,7 @@
       refineNone: 'مخططك يغطّي ما وصفته بالفعل — لن أضيف شيئاً. هذه علامة جيدة.',
       refineErr: 'تعذّر الوصول إلى النموذج. تحقّق من مفتاحك وحاول مجدداً.', refineNeedKey: 'أدخل مفتاح الذكاء الاصطناعي أعلاه أولاً.',
       skillsHint: 'لديك دليل ميداني أو كُتيّب أو إجراء عمل؟ حوّل معرفتك إلى مهارة يتّبعها وكيلك ←',
+      designHint: 'جديد على التصميم؟ دليل التصميم يعلّمك توجيه المظهر — بكلمات واضحة بلا مصطلحات ←',
       skillsDraft: 'مهارات يمكنني إنشاؤها مما أخبرتني به', skillsReady: 'أو أضِف مهارة جاهزة',
       skillAdd: 'أضِف إلى مشروعي', skillAdded: 'أُضيفت ✓',
       skillReview: 'مسودة بكلماتك — راجعها وحسّنها؛ أنت صاحب الخبرة.',
@@ -368,6 +371,16 @@ methods, field guides, and operating procedures — follow them as written; do n
 quietly substitute your own approach. If a skill conflicts with a task, surface
 the conflict and ask. (Generate skills from your own manuals with the
 knowledge-to-skills-pipeline.)
+
+## Article VII — Design & welcome (the people it's for)
+Build it so everyone's invited. Meet WCAG 2.2 AA: readable contrast (4.5:1 body,
+3:1 large/non-text), tap targets large enough for real thumbs, full keyboard
+navigation with a visible focus ring, screen-reader support, and respect for
+reduced-motion and dark-mode settings. Define colour/spacing/type as tokens and
+reuse them (one consistent kit). One clear primary action per screen; obvious
+interactive cues and immediate feedback. Reflect the builder's specific community
+— their colours and voice — over a generic "tech-blue" default. Design with the
+community, not just for them.
 `);
 
   const spec = $derived(`# Spec: ${projectName || slug}
@@ -402,6 +415,7 @@ PROTOCOLS: ${protoList.length ? protoList.join(', ') : 'general'}
 RULES (binding — see constitution.md):
 - Read .specify/memory/constitution.md FIRST and never violate it.
 - Read skills/*.SKILL.md and follow the builder's own methods exactly; if a skill conflicts with a task, surface it and ask.
+- Design for welcome: meet WCAG 2.2 AA (readable contrast, large tap targets, keyboard nav with visible focus, screen-reader support, reduced-motion + dark-mode). Token-driven, consistent styling; one clear primary action per screen; reflect the community's own colours and voice, not a generic default.
 - Use ONLY these vetted, policy-clean dependencies:
 ${chosenItems.map((it) => `    - ${it.name} (${it.ecosystem})`).join('\n') || '    - <none selected>'}
 ${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the primary SDK for relays, subscriptions, and signers.\n' : ''}${protocols.has('atproto') ? '- For AT Protocol, use @atproto/api as the primary SDK; prefer OAuth (DPoP) over App Passwords.\n' : ''}- No dependency or provider owned by Meta, OpenAI, or xAI — directly or transitively.
@@ -750,6 +764,7 @@ manuals with the knowledge-to-skills-pipeline).
   {#if step === 1}
     <section class="panel">
       <p class="hint">{t.tenq} <a href="/method/ten-questions/">↗</a></p>
+      <p class="hint"><a href="/guides/design-for-your-community/">{t.designHint}</a></p>
       <label class="field"><span>{t.problem}</span><textarea bind:value={problem} rows="3" placeholder="e.g. Tenants need to document evictions without exposing who they are."></textarea></label>
       <div class="examples">
         <span class="hint">{t.examples}</span>
@@ -967,41 +982,41 @@ manuals with the knowledge-to-skills-pipeline).
 </div>
 
 <style>
-  .studio { margin: 1rem 0 2rem; }
+  .studio { margin: var(--wcb-space-sm) 0 var(--wcb-space-lg); }
   /* WCAG 2.2: a visible focus ring on every control; small pills clear the 24px target floor. */
   .studio :focus-visible { outline: var(--wcb-focus-width) solid var(--wcb-focus-color); outline-offset: var(--wcb-focus-offset); border-radius: var(--wcb-radius-sm); }
   .studio .toggle, .studio .apply, .studio .lang { min-height: var(--wcb-target-min); }
-  .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; margin-bottom: 0.5rem; }
-  .lang { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
+  .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; margin-bottom: var(--wcb-space-2xs); }
+  .lang { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: var(--wcb-radius-pill); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
   .lang.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
-  .steps { display: flex; gap: 0.5rem; list-style: none; padding: 0; margin: 0 0 1.25rem; }
+  .steps { display: flex; gap: var(--wcb-space-2xs); list-style: none; padding: 0; margin: 0 0 1.25rem; }
   .steps li { flex: 1; }
-  .steps button { width: 100%; padding: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); border-radius: 0.5rem; cursor: pointer; font-weight: 600; }
+  .steps button { width: 100%; padding: var(--wcb-space-2xs); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); border-radius: var(--wcb-radius-sm); cursor: pointer; font-weight: 600; }
   .steps li.on button { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
-  .panel { display: flex; flex-direction: column; gap: 1rem; }
+  .panel { display: flex; flex-direction: column; gap: var(--wcb-space-sm); }
   .field { display: flex; flex-direction: column; gap: 0.35rem; }
   .field > span { font-weight: 600; font-size: 0.9rem; }
-  input, textarea, select { padding: 0.55rem 0.7rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; background: var(--sl-color-black); color: var(--sl-color-white); font: inherit; }
-  .chips, .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .chip { padding: 0.35rem 0.8rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
+  input, textarea, select { padding: 0.55rem 0.7rem; border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-sm); background: var(--sl-color-black); color: var(--sl-color-white); font: inherit; }
+  .chips, .tabs { display: flex; flex-wrap: wrap; gap: var(--wcb-space-2xs); }
+  .chip { padding: 0.35rem 0.8rem; border-radius: var(--wcb-radius-pill); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
   .chip.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
   .tabs button { padding: 0.45rem 0.8rem; border-radius: 0.5rem 0.5rem 0 0; border: 1px solid var(--sl-color-gray-6); background: transparent; color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
   .tabs button.on { background: var(--sl-color-gray-6); border-color: var(--sl-color-gray-5); }
-  .hpanel { border: 1px solid var(--sl-color-gray-5); border-radius: 0 0.5rem 0.5rem 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .hpanel { border: 1px solid var(--sl-color-gray-5); border-radius: 0 0.5rem 0.5rem 0.5rem; padding: var(--wcb-space-sm); display: flex; flex-direction: column; gap: 0.7rem; }
   .picklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
-  .pick { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.7rem; }
+  .pick { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.7rem; }
   .pick.on { border-color: var(--sl-color-accent); }
   .pick label { display: grid; grid-template-columns: auto 1fr auto; gap: 0.2rem 0.6rem; align-items: baseline; cursor: pointer; }
   .pick-name { font-weight: 700; }
   .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
-  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
+  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: var(--wcb-radius-pill); border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
   .vbadge--verified { border-left-color: var(--wcb-success-edge); }
   .vbadge--under_review { border-left-color: var(--wcb-warning-edge); }
   .vbadge--blocked { border-left-color: var(--wcb-danger-edge); }
   .examples { display: flex; flex-direction: column; gap: 0.4rem; }
   .chip.ex { text-align: start; font-size: 0.82rem; max-width: 100%; white-space: normal; line-height: 1.3; }
-  .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .refine { border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.6rem 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent); }
   .refine > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 700; }
   .qs { list-style: none; counter-reset: q; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
@@ -1009,17 +1024,17 @@ manuals with the knowledge-to-skills-pipeline).
   .qs .q { margin: 0 0 0.3rem; font-weight: 600; }
   .qs .q::before { content: counter(q) '. '; color: var(--sl-color-text-accent); }
   .proposals { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
-  .proposal { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.6rem 0.8rem; }
-  .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+  .proposal { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: var(--wcb-radius-sm); padding: 0.6rem 0.8rem; }
+  .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--wcb-space-xs); flex-wrap: wrap; }
   .prop-name { font-weight: 700; }
-  .apply { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+  .apply { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 0; border-radius: var(--wcb-radius-pill); padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
   .applied { font-size: 0.78rem; font-weight: 700; color: var(--wcb-success-text); }
   .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
-  .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .skillsbox > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 600; }
-  .skilllist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
-  .skillcard { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.55rem 0.8rem; }
-  .skill-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+  .skilllist { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--wcb-space-2xs); }
+  .skillcard { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: var(--wcb-radius-sm); padding: 0.55rem 0.8rem; }
+  .skill-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--wcb-space-xs); flex-wrap: wrap; }
   .skill-name { font-weight: 700; font-family: var(--sl-font-mono); font-size: 0.92rem; }
   .skill-desc { margin: 0.25rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
   .skill-steps { margin: 0.4rem 0 0; padding-inline-start: 1.2rem; font-size: 0.85rem; color: var(--sl-color-gray-2); display: grid; gap: 0.15rem; }
@@ -1029,32 +1044,32 @@ manuals with the knowledge-to-skills-pipeline).
   .pieces { list-style: none; counter-reset: piece; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
   .piece { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.7rem 0.9rem; }
   .piece.off { opacity: 0.55; border-inline-start-color: var(--sl-color-gray-5); }
-  .piece-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; }
+  .piece-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--wcb-space-xs); }
   .role { counter-increment: piece; font-weight: 700; }
   .role::before { content: counter(piece) '. '; color: var(--sl-color-text-accent); }
-  .toggle { background: none; border: 1px solid var(--sl-color-gray-5); border-radius: 999px; padding: 0.1rem 0.65rem; font-size: 0.74rem; color: var(--sl-color-text); cursor: pointer; }
-  .piece-tool { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; margin: 0.35rem 0; }
+  .toggle { background: none; border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-pill); padding: 0.1rem 0.65rem; font-size: 0.74rem; color: var(--sl-color-text); cursor: pointer; }
+  .piece-tool { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--wcb-space-2xs); margin: 0.35rem 0; }
   .tool-name { font-weight: 700; font-size: 1.02rem; }
   .tool-meta { color: var(--sl-color-gray-2); font-size: 0.8rem; }
   .piece-why, .piece-connects { margin: 0.25rem 0; font-size: 0.9rem; color: var(--sl-color-text); }
   .swap { margin-top: 0.45rem; }
   .swap ul { list-style: none; padding: 0.4rem 0 0; margin: 0; display: grid; gap: 0.3rem; }
-  .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.6rem 0.85rem; }
+  .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.6rem 0.85rem; }
   .fits p { margin: 0.3rem 0 0; font-size: 0.92rem; }
   .mtitle { margin: 0; font-size: 1.05rem; }
   .modelgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
   @media (max-width: 34rem) { .modelgrid { grid-template-columns: 1fr; } }
-  .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: 0.5rem; background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
-  .nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; }
-  .nav button { padding: 0.55rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
-  .primary { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }
+  .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: var(--wcb-radius-sm); background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
+  .nav { display: flex; justify-content: space-between; gap: var(--wcb-space-2xs); margin-top: var(--wcb-space-2xs); }
+  .nav button { padding: 0.55rem 1rem; border-radius: var(--wcb-radius-sm); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
+  .primary { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: var(--wcb-radius-sm); cursor: pointer; font-weight: 700; }
   .big { font-size: 1.05rem; padding: 0.7rem 1.3rem; }
   .hint { color: var(--sl-color-gray-2); font-size: 0.9rem; }
   .err { color: var(--wcb-danger-text); font-size: 0.9rem; }
   .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; text-decoration: underline; font: inherit; }
   .copyp { align-self: flex-start; }
-  details { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; }
-  summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; }
-  pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: 0.75rem; border-radius: 0.4rem; }
+  details { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.75rem; }
+  summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: var(--wcb-space-sm); }
+  pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: var(--wcb-space-xs); border-radius: 0.4rem; }
   .out { max-height: 28rem; }
 </style>

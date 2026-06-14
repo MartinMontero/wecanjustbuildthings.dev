@@ -41,6 +41,7 @@ const PATHS = [
   '/guides/get-started-with-goose/',
   '/guides/connect-github/',
   '/guides/knowledge-to-skills/',
+  '/guides/design-for-your-community/',
   '/policies/',
   '/policies/enforcement/',
   '/privacy/',
@@ -77,25 +78,30 @@ try {
   }
   const executablePath = findChromium();
   const browser = await chromium.launch(executablePath ? { executablePath } : {});
-  const context = await browser.newContext();
-  for (const path of PATHS) {
-    const page = await context.newPage();
-    await page.goto(`${BASE}${path}`, { waitUntil: 'load' });
-    const results = await new AxeBuilder({ page })
-      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
-      .analyze();
-    const serious = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
-    if (serious.length > 0) {
-      exitCode = 1;
-      console.log(`✗ ${path}`);
-      for (const v of serious) {
-        console.log(`    [${v.impact}] ${v.id}: ${v.help} — ${v.nodes.length} node(s)`);
-        console.log(`      ${v.helpUrl}`);
+  // Test BOTH colour schemes — Starlight renders dark/light from prefers-color-scheme,
+  // so this verifies the seed-derived accent and the dark feedback tokens too.
+  for (const scheme of /** @type {const} */ (['light', 'dark'])) {
+    const context = await browser.newContext({ colorScheme: scheme });
+    for (const path of PATHS) {
+      const page = await context.newPage();
+      await page.goto(`${BASE}${path}`, { waitUntil: 'load' });
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+        .analyze();
+      const serious = results.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
+      if (serious.length > 0) {
+        exitCode = 1;
+        console.log(`✗ [${scheme}] ${path}`);
+        for (const v of serious) {
+          console.log(`    [${v.impact}] ${v.id}: ${v.help} — ${v.nodes.length} node(s)`);
+          console.log(`      ${v.helpUrl}`);
+        }
+      } else {
+        console.log(`✓ [${scheme}] ${path}`);
       }
-    } else {
-      console.log(`✓ ${path}`);
+      await page.close();
     }
-    await page.close();
+    await context.close();
   }
   await browser.close();
 } finally {
