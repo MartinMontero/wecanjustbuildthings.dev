@@ -1,0 +1,104 @@
+---
+/**
+ * "The five moves, at a glance" — a visual, illustrated summary of the craft
+ * section of the Design Field Guide. Each move gets a geometric concept
+ * illustration (not clip-art): an abstract picture of the idea itself, drawn
+ * in the brand system (paper/ink/forest-green/coral) and themeable via tokens.
+ * Additive — the full teaching prose still follows below.
+ */
+---
+
+<section class="five" aria-label="The five design moves, at a glance">
+  <p class="wcb-eyebrow">The craft — at a glance</p>
+  <h2 class="five-title">Five moves that make things feel professional</h2>
+  <ol class="grid">
+    <li class="mv">
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 120 76" role="img">
+          <rect class="lead" x="10" y="12" width="58" height="40" rx="4" />
+          <rect class="q" x="78" y="12" width="32" height="8" rx="2" />
+          <rect class="q" x="78" y="26" width="32" height="8" rx="2" />
+          <rect class="q" x="78" y="40" width="24" height="8" rx="2" />
+          <rect class="q" x="10" y="58" width="44" height="6" rx="2" />
+        </svg>
+      </div>
+      <h3><span class="n">1</span> Make the important thing obvious</h3>
+      <p>One thing leads. Squint — does the right thing stand out?</p>
+    </li>
+    <li class="mv">
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 120 76" role="img">
+          <rect class="frame" x="6" y="6" width="108" height="64" rx="6" />
+          <rect class="lead" x="44" y="30" width="32" height="16" rx="3" />
+          <line class="dim" x1="14" y1="38" x2="40" y2="38" />
+          <line class="dim" x1="80" y1="38" x2="106" y2="38" />
+        </svg>
+      </div>
+      <h3><span class="n">2</span> Less, but better</h3>
+      <p>Remove first, then add room. Space reads as care.</p>
+    </li>
+    <li class="mv">
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 120 76" role="img">
+          <rect class="tok" x="14" y="22" width="26" height="32" rx="4" />
+          <rect class="tok" x="47" y="22" width="26" height="32" rx="4" />
+          <rect class="tok" x="80" y="22" width="26" height="32" rx="4" />
+          <circle class="dot" cx="27" cy="34" r="3.5" /><circle class="dot" cx="60" cy="34" r="3.5" /><circle class="dot" cx="93" cy="34" r="3.5" />
+        </svg>
+      </div>
+      <h3><span class="n">3</span> Decide once, repeat everywhere</h3>
+      <p>One set of colours, spacing, and buttons — reused.</p>
+    </li>
+    <li class="mv">
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 120 76" role="img">
+          <rect class="lead" x="30" y="28" width="60" height="22" rx="11" />
+          <path class="check" d="M50 39 l6 6 l12 -13" />
+          <path class="ripple" d="M22 30 a14 14 0 0 0 0 18" />
+          <path class="ripple" d="M98 30 a14 14 0 0 1 0 18" />
+        </svg>
+      </div>
+      <h3><span class="n">4</span> Clear what to do, and what happened</h3>
+      <p>Tappable looks tappable; every action answers back.</p>
+    </li>
+    <li class="mv">
+      <div class="art" aria-hidden="true">
+        <svg viewBox="0 0 120 76" role="img">
+          <line class="path" x1="16" y1="38" x2="104" y2="38" />
+          <circle class="dot" cx="16" cy="38" r="5" />
+          <circle class="dot" cx="46" cy="38" r="5" />
+          <circle class="dot" cx="76" cy="38" r="5" />
+          <path class="flag" d="M104 24 v28 M104 26 h14 l-4 5 l4 5 h-14" />
+        </svg>
+      </div>
+      <h3><span class="n">5</span> Smooth the path</h3>
+      <p>Map the journey. Cut steps. Always show the next one.</p>
+    </li>
+  </ol>
+  <p class="five-foot">Each move below: <b>the idea → why it matters → how to spot it → what to ask your agent.</b></p>
+</section>
+
+<style>
+  .five { margin: var(--wcb-space-xl) 0; }
+  .five-title { font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; letter-spacing: -0.02em; margin: var(--wcb-space-2xs) 0 var(--wcb-space-lg); border: 0; padding: 0; color: var(--wcb-ink); }
+  .grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: var(--wcb-space-md); }
+  .mv { background: var(--wcb-card); border: 1px solid var(--wcb-line); border-radius: var(--wcb-radius-md); padding: var(--wcb-space-sm); }
+  .art { aspect-ratio: 120 / 76; background: color-mix(in srgb, var(--wcb-green) 8%, var(--wcb-paper)); border: 1px solid var(--wcb-line); border-radius: var(--wcb-radius-sm); margin-bottom: var(--wcb-space-sm); overflow: hidden; }
+  .art svg { width: 100%; height: 100%; display: block; }
+  .mv h3 { font-size: 1rem; font-weight: 800; margin: 0 0 var(--wcb-space-3xs); border: 0; padding: 0; color: var(--wcb-ink); display: flex; align-items: baseline; gap: var(--wcb-space-2xs); }
+  .mv .n { font-family: var(--sl-font-mono); color: var(--wcb-green); font-size: 1.1rem; }
+  .mv p { margin: 0; font-size: 0.92rem; color: var(--wcb-ink-soft); line-height: 1.5; }
+  .five-foot { margin: var(--wcb-space-lg) 0 0; color: var(--wcb-ink-soft); }
+  .five-foot b { color: var(--wcb-ink); }
+
+  /* Concept illustration parts, drawn in the brand system. */
+  .art .lead { fill: var(--wcb-green); }
+  .art .q, .art .tok { fill: none; stroke: var(--wcb-ink-soft); stroke-width: 2.4; opacity: 0.55; }
+  .art .frame { fill: none; stroke: var(--wcb-line); stroke-width: 2.4; }
+  .art .dim { stroke: var(--wcb-coral); stroke-width: 2.4; stroke-linecap: round; }
+  .art .dot { fill: var(--wcb-green); }
+  .art .check { fill: none; stroke: var(--wcb-on-accent); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+  .art .ripple { fill: none; stroke: var(--wcb-coral); stroke-width: 2.4; stroke-linecap: round; opacity: 0.7; }
+  .art .path { stroke: var(--wcb-ink-soft); stroke-width: 2.4; stroke-dasharray: 2 7; stroke-linecap: round; opacity: 0.7; }
+  .art .flag { fill: none; stroke: var(--wcb-coral); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+</style>

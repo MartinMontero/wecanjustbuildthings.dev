@@ -269,3 +269,134 @@
 }
 /* The hero logo shouldn't dominate the words — keep it modest, ink-toned. */
 .hero img { max-height: 5rem; width: auto; }
+
+/* ============================================================================
+   Editorial reading layer — the long-form pages (guides, method, pie, policies).
+   Keeps Starlight's structure + sidebar flow, but makes the reading experience
+   designed instead of a default docs wall: a masthead with a coral kicker,
+   generous rhythm, callout cards with iconography, pull-quotes, a green numbered
+   step-timeline, editorial tables. Per the Design Field Guide — clear hierarchy,
+   room to breathe, one consistent system, real visual interest.
+   ============================================================================ */
+
+/* Masthead: a short coral kicker rule above a confident title. */
+.content-panel h1#_top {
+  font-size: clamp(2.1rem, 4.5vw, 3rem);
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  color: var(--wcb-ink);
+}
+.content-panel h1#_top::before {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 4px;
+  background: var(--wcb-coral);
+  border-radius: 2px;
+  margin-bottom: var(--wcb-space-md);
+}
+
+/* Reading rhythm — calm, roomy, readable (Move 2: less, but better). */
+.sl-markdown-content { font-size: 1.02rem; }
+.sl-markdown-content p { line-height: 1.7; }
+.sl-markdown-content > p:first-of-type {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--wcb-ink);
+}
+.sl-markdown-content :is(ul, ol) { line-height: 1.65; }
+.sl-markdown-content li + li { margin-top: var(--wcb-space-3xs); }
+
+/* h2 stays a strong section divider (set above); h3 gets a green marker. */
+.sl-markdown-content h3 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-top: var(--wcb-space-lg);
+  padding-inline-start: var(--wcb-space-sm);
+  border-inline-start: 3px solid var(--wcb-green);
+}
+
+/* Pull-quote — a real editorial quote, not a plain indented block. */
+.sl-markdown-content blockquote {
+  border: 0;
+  border-inline-start: 4px solid var(--wcb-coral);
+  margin: var(--wcb-space-lg) 0;
+  padding: 0 0 0 var(--wcb-space-md);
+  font-size: 1.2rem;
+  line-height: 1.5;
+  font-style: normal;
+  color: var(--wcb-ink);
+}
+.sl-markdown-content blockquote p { line-height: 1.5; }
+.sl-markdown-content blockquote strong { color: var(--wcb-ink); }
+
+/* Asides → designed callout cards with an icon chip. Green for note/tip,
+   coral for caution/danger — the page's visual punctuation. */
+.sl-markdown-content .starlight-aside {
+  --ca: var(--wcb-green);        /* chip fill (non-text, ≥3:1) */
+  --ca-text: var(--wcb-green);   /* used AS text — AA on the card */
+  border: 1px solid var(--wcb-line);
+  border-inline-start: 0;
+  border-radius: var(--wcb-radius-md);
+  background: var(--wcb-card);
+  padding: var(--wcb-space-md);
+}
+.sl-markdown-content .starlight-aside--caution,
+.sl-markdown-content .starlight-aside--danger { --ca: var(--wcb-coral); --ca-text: var(--wcb-coral-text); }
+.sl-markdown-content .starlight-aside__title {
+  display: flex;
+  align-items: center;
+  gap: var(--wcb-space-2xs);
+  font-family: var(--sl-font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--ca-text);
+  margin-bottom: var(--wcb-space-2xs);
+}
+.sl-markdown-content .starlight-aside__icon {
+  box-sizing: border-box;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0.38rem;
+  border-radius: var(--wcb-radius-sm);
+  background: var(--ca);
+  color: var(--wcb-on-accent);
+  flex: 0 0 auto;
+}
+.sl-markdown-content .starlight-aside__content { color: var(--wcb-ink-soft); }
+.sl-markdown-content .starlight-aside__content a { color: var(--ca-text); }
+
+/* Steps → a green numbered timeline. */
+.sl-markdown-content .sl-steps > li::before {
+  background: var(--wcb-green) !important;
+  border-color: var(--wcb-green) !important;
+  color: var(--wcb-on-accent) !important;
+  font-weight: 800 !important;
+}
+
+/* Tables — editorial: a mono header rule, hairline rows. */
+.sl-markdown-content table { width: 100%; border-collapse: collapse; }
+.sl-markdown-content thead th {
+  text-align: start;
+  border-bottom: 2px solid var(--wcb-ink);
+  font-family: var(--sl-font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--wcb-ink);
+  padding: var(--wcb-space-2xs) var(--wcb-space-sm);
+}
+.sl-markdown-content tbody td {
+  border-bottom: 1px solid var(--wcb-line);
+  padding: var(--wcb-space-2xs) var(--wcb-space-sm);
+}
+
+/* Section break — a confident ink rule. */
+.sl-markdown-content hr {
+  border: 0;
+  border-top: 2px solid var(--wcb-ink);
+  margin: var(--wcb-space-xl) 0;
+}
