@@ -34,6 +34,15 @@
   --md-sys-color-inverse-on-surface: #323033;
   --md-sys-color-inverse-primary: #6d3bd6;
 
+  /* M3 surface-container tonal levels (neutral palette; not in MCU 0.4's Scheme). */
+  --md-sys-color-surface-dim: #141316;
+  --md-sys-color-surface-bright: #3a383c;
+  --md-sys-color-surface-container-lowest: #0f0e11;
+  --md-sys-color-surface-container-low: #1c1b1e;
+  --md-sys-color-surface-container: #211f22;
+  --md-sys-color-surface-container-high: #2b292d;
+  --md-sys-color-surface-container-highest: #363438;
+
   /* Seed-derived Starlight accent (dark): low-emphasis bg / mid / high-contrast. */
   --sl-color-accent-low: #3b0091;
   --sl-color-accent: #bca2ff;
@@ -72,6 +81,15 @@
   --md-sys-color-inverse-surface: #323033;
   --md-sys-color-inverse-on-surface: #f5eff4;
   --md-sys-color-inverse-primary: #d0bcff;
+
+  /* M3 surface-container tonal levels (neutral palette; not in MCU 0.4's Scheme). */
+  --md-sys-color-surface-dim: #ddd8dd;
+  --md-sys-color-surface-bright: #fdf8fd;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f7f2f7;
+  --md-sys-color-surface-container: #f2ecf1;
+  --md-sys-color-surface-container-high: #ece7eb;
+  --md-sys-color-surface-container-highest: #e6e1e6;
 
   /* Seed-derived Starlight accent (light). */
   --sl-color-accent-low: #e9ddff;
