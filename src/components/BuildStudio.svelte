@@ -14,6 +14,11 @@
   const STR: Record<Lang, Record<string, string>> = {
     en: {
       s1: '1 · Describe', s2: '2 · Your blueprint', s3: '3 · Build it',
+      sl1: 'Describe', sl2: 'Blueprint', sl3: 'Build',
+      studioLead: 'Tell the Studio what your community needs, in plain words. It assembles a small, license-checked stack and hands your AI agent everything it needs to start — never anything from Meta, OpenAI, or xAI.',
+      eyebrow: 'Guided build · no code required',
+      foundation: 'Verified, values-locked foundation',
+      diagramLabel: 'Your stack, wired together',
       name: 'Project name (a short nickname is fine)',
       problem: 'What problem does it solve, and for whom? Say it like you would out loud — one short paragraph.',
       why: 'Why does this matter? The real change you want — not just “ship an app.”',
@@ -63,6 +68,11 @@
     },
     es: {
       s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo',
+      sl1: 'Describe', sl2: 'Tu plano', sl3: 'Construye',
+      studioLead: 'Dile al Studio lo que tu comunidad necesita, en palabras simples. Arma un conjunto pequeño y con licencia verificada, y le da a tu agente de IA todo para empezar — nunca nada de Meta, OpenAI o xAI.',
+      eyebrow: 'Construcción guiada · sin código',
+      foundation: 'Base verificada y con valores bloqueados',
+      diagramLabel: 'Tu stack, conectado',
       name: 'Nombre del proyecto (un apodo corto vale)',
       problem: '¿Qué problema resuelve y para quién? Dilo como lo dirías en voz alta — un párrafo corto.',
       why: '¿Por qué importa? El cambio real que buscas — no solo “lanzar una app.”',
@@ -112,6 +122,11 @@
     },
     ar: {
       s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه',
+      sl1: 'صِف', sl2: 'مخططك', sl3: 'ابنِه',
+      studioLead: 'أخبر الاستوديو بما يحتاجه مجتمعك، بكلمات بسيطة. يجمّع مجموعة صغيرة مُتحقَّقة من الترخيص، ويمنح وكيل الذكاء الاصطناعي كل ما يلزم للبدء — ولا شيء أبداً من Meta أو OpenAI أو xAI.',
+      eyebrow: 'بناء موجَّه · بلا برمجة',
+      foundation: 'أساس مُوثَّق ومُقفل على القيم',
+      diagramLabel: 'حزمتك، موصولة معاً',
       name: 'اسم المشروع (يكفي اسم مختصر)',
       problem: 'ما المشكلة التي يحلها، ولمن؟ قُلها كما تقولها بصوتك — فقرة قصيرة.',
       why: 'لماذا يهمّ هذا؟ التغيير الحقيقي الذي تريده — وليس مجرد «إطلاق تطبيق».',
@@ -823,16 +838,54 @@ manuals with the knowledge-to-skills-pipeline).
 </script>
 
 <div class="studio" dir={rtl ? 'rtl' : 'ltr'}>
-  <div class="langbar">
-    {#each ['en', 'es', 'ar'] as l}
-      <button class="lang" class:on={lang === l} onclick={() => (lang = l as Lang)} aria-pressed={lang === l}>{l === 'en' ? 'English' : l === 'es' ? 'Español' : 'العربية'}</button>
-    {/each}
-  </div>
+  {#snippet capIcon(id: string)}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      {#if id === 'connect'}
+        <circle cx="12" cy="5" r="2" /><circle cx="5" cy="19" r="2" /><circle cx="19" cy="19" r="2" /><path d="M11 6.7 6 17M13 6.7 18 17" />
+      {:else if id === 'app'}
+        <rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 9h18M8 14h8" />
+      {:else if id === 'identity'}
+        <circle cx="8.5" cy="8.5" r="4" /><path d="M11.5 11.5 19 19M16 16l2-2" />
+      {:else if id === 'privacy'}
+        <rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
+      {:else if id === 'storage'}
+        <ellipse cx="12" cy="6" rx="7" ry="3" /><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6" /><path d="M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3" />
+      {:else if id === 'payments'}
+        <path d="M13 2 4 14h7l-1 8 9-12h-7z" />
+      {:else if id === 'hosting'}
+        <rect x="4" y="4" width="16" height="7" rx="2" /><rect x="4" y="13" width="16" height="7" rx="2" /><path d="M8 7.5h.01M8 16.5h.01" />
+      {:else}
+        <circle cx="12" cy="12" r="8" /><path d="m9 12 2 2 4-4" />
+      {/if}
+    </svg>
+  {/snippet}
 
-  <ol class="steps" aria-label="Progress">
-    <li class:on={step === 1}><button onclick={() => (step = 1)}>{t.s1}</button></li>
-    <li class:on={step === 2}><button onclick={() => (step = 2)} disabled={loading}>{t.s2}</button></li>
-    <li class:on={step === 3}><button onclick={() => (step = 3)} disabled={loading}>{t.s3}</button></li>
+  <header class="studio-hero">
+    <div class="hero-text">
+      <p class="wcb-eyebrow">{t.eyebrow}</p>
+      <h1>Build Studio</h1>
+      <p class="studio-sub">{t.studioLead}</p>
+    </div>
+    <div class="langbar">
+      {#each ['en', 'es', 'ar'] as l}
+        <button class="lang" class:on={lang === l} onclick={() => (lang = l as Lang)} aria-pressed={lang === l}>{l === 'en' ? 'English' : l === 'es' ? 'Español' : 'العربية'}</button>
+      {/each}
+    </div>
+  </header>
+
+  <ol class="stepper" aria-label="Progress">
+    {#each [{ n: 1, label: t.sl1 }, { n: 2, label: t.sl2 }, { n: 3, label: t.sl3 }] as s (s.n)}
+      <li class="stp" class:on={step === s.n} class:done={step > s.n}>
+        <button onclick={() => { if (!(loading && s.n > 1)) step = s.n; }} disabled={loading && s.n > 1} aria-current={step === s.n ? 'step' : undefined}>
+          <span class="stp-mark">
+            {#if step > s.n}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-11" /></svg>
+            {:else}{s.n}{/if}
+          </span>
+          <span class="stp-label">{s.label}</span>
+        </button>
+      </li>
+    {/each}
   </ol>
 
   {#if step === 1}
@@ -865,38 +918,43 @@ manuals with the knowledge-to-skills-pipeline).
       {#if !problem.trim()}
         <p class="hint">{t.bpEmpty}</p>
       {/if}
-      <h4 class="bp-sub">{t.bpPieces}</h4>
-      <ol class="pieces">
+      <p class="wcb-eyebrow diagram-label">{t.diagramLabel}</p>
+      <ol class="pieces diagram">
         {#each blueprint as p (p.capId)}
-          <li class="piece" class:off={removed.has(p.capId)}>
-            <div class="piece-head">
-              <span class="role">{p.role}</span>
-              <button class="toggle" onclick={() => togglePiece(p.capId)} aria-pressed={!removed.has(p.capId)}>{removed.has(p.capId) ? t.bpKeep : t.bpRemove}</button>
+          <li class="piece node" class:off={removed.has(p.capId)}>
+            <span class="node-badge" aria-hidden="true">{@render capIcon(p.capId)}</span>
+            <div class="node-content">
+              <div class="piece-head">
+                <span class="role">{p.role}</span>
+                <button class="toggle" onclick={() => togglePiece(p.capId)} aria-pressed={!removed.has(p.capId)}>{removed.has(p.capId) ? t.bpKeep : t.bpRemove}</button>
+              </div>
+              <div class="piece-tool">
+                <a class="tool-name" href={p.item.url}>{p.item.name}</a>
+                <span class="vbadge vbadge--{p.item.verification}">{p.item.verification.replace('_', ' ')}</span>
+                <span class="tool-meta">{p.item.ecosystem} · {p.item.license}</span>
+              </div>
+              <p class="piece-why"><strong>{t.bpWhyFor}</strong> {p.why}</p>
+              <p class="piece-connects"><strong>{t.bpConnects}</strong> {p.connects}</p>
+              {#if p.alts.length}
+                <details class="swap">
+                  <summary>{t.bpSwap} ▾</summary>
+                  <ul>
+                    {#each p.alts as alt (alt.name)}
+                      <li><button class="link" onclick={() => swapPiece(p.capId, alt.name)}>{t.bpUse}: <strong>{alt.name}</strong></button> <span class="tool-meta">{alt.ecosystem} · {alt.license}</span></li>
+                    {/each}
+                  </ul>
+                </details>
+              {/if}
             </div>
-            <div class="piece-tool">
-              <a class="tool-name" href={p.item.url}>{p.item.name}</a>
-              <span class="vbadge vbadge--{p.item.verification}">{p.item.verification.replace('_', ' ')}</span>
-              <span class="tool-meta">{p.item.ecosystem} · {p.item.license}</span>
-            </div>
-            <p class="piece-why"><strong>{t.bpWhyFor}</strong> {p.why}</p>
-            <p class="piece-connects"><strong>{t.bpConnects}</strong> {p.connects}</p>
-            {#if p.alts.length}
-              <details class="swap">
-                <summary>{t.bpSwap} ▾</summary>
-                <ul>
-                  {#each p.alts as alt (alt.name)}
-                    <li><button class="link" onclick={() => swapPiece(p.capId, alt.name)}>{t.bpUse}: <strong>{alt.name}</strong></button> <span class="tool-meta">{alt.ecosystem} · {alt.license}</span></li>
-                  {/each}
-                </ul>
-              </details>
-            {/if}
           </li>
         {/each}
+        <li class="foundation" aria-hidden="false">
+          <span class="fnd-ico" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" /><path d="m9 12 2 2 4-4" /></svg>
+          </span>
+          <span class="fnd-text">{t.foundation}</span>
+        </li>
       </ol>
-      <div class="fits">
-        <strong>{t.bpFits}</strong>
-        <p>{#each blueprint.filter((p) => !removed.has(p.capId)) as p, i}{i > 0 ? ' → ' : ''}<a href={p.item.url}>{p.item.name}</a> ({p.role.toLowerCase()}){/each}.</p>
-      </div>
 
       <details class="refine">
         <summary>{t.refineTitle}</summary>
@@ -991,11 +1049,23 @@ manuals with the knowledge-to-skills-pipeline).
       <h3>{t.handoff}</h3>
       <p class="hint">{t.handoffIntro}</p>
       <p class="hint"><a href="/guides/knowledge-to-skills/">{t.skillsHint}</a></p>
-      <div class="tabs">
-        <button class:on={handoff === 'zip'} onclick={() => (handoff = 'zip')}>{t.zip}</button>
-        <button class:on={handoff === 'github'} onclick={() => (handoff = 'github')}>{t.github}</button>
-        <button class:on={handoff === 'goose'} onclick={() => (handoff = 'goose')}>{t.goose}</button>
-        <button class:on={handoff === 'kickoff'} onclick={() => (handoff = 'kickoff')}>{t.kickoff}</button>
+      <div class="handoff-cards" role="group" aria-label={t.handoff}>
+        <button class="hcard" class:on={handoff === 'zip'} aria-pressed={handoff === 'zip'} onclick={() => (handoff = 'zip')}>
+          <span class="hc-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 11l5 5 5-5M5 21h14" /></svg></span>
+          <span class="hc-label">{t.zip}</span>
+        </button>
+        <button class="hcard" class:on={handoff === 'github'} aria-pressed={handoff === 'github'} onclick={() => (handoff = 'github')}>
+          <span class="hc-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1 0-8 5 5 0 0 1 9.6-1.5A3.5 3.5 0 0 1 18 18Z" /><path d="M12 12v6M9.5 14.5 12 12l2.5 2.5" /></svg></span>
+          <span class="hc-label">{t.github}</span>
+        </button>
+        <button class="hcard" class:on={handoff === 'goose'} aria-pressed={handoff === 'goose'} onclick={() => (handoff = 'goose')}>
+          <span class="hc-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M10 9l5 3-5 3z" /></svg></span>
+          <span class="hc-label">{t.goose}</span>
+        </button>
+        <button class="hcard" class:on={handoff === 'kickoff'} aria-pressed={handoff === 'kickoff'} onclick={() => (handoff = 'kickoff')}>
+          <span class="hc-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.2L18 9l-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8z" /><path d="M18.5 14l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z" /></svg></span>
+          <span class="hc-label">{t.kickoff}</span>
+        </button>
       </div>
 
       {#if handoff === 'zip'}
@@ -1083,28 +1153,62 @@ manuals with the knowledge-to-skills-pipeline).
 </div>
 
 <style>
-  .studio { margin: var(--wcb-space-sm) 0 var(--wcb-space-lg); }
-  /* WCAG 2.2: a visible focus ring on every control; small pills clear the 24px target floor. */
+  /* Take the Studio out of the docs chrome: splash gives full width + no
+     sidebar/TOC; hide the auto page-title so the app owns its own header. */
+  :global(.main-pane > main > .content-panel:first-child) { padding: 0; border: 0; }
+  :global(.main-pane > main > .content-panel:first-child h1#_top) {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  :global(.main-pane > main > .content-panel + .content-panel) { border-top: 0; }
+  :global(.main-pane > main .sl-container) { max-width: 56rem; margin-inline: auto; }
+
+  .studio { color: var(--wcb-ink); margin: 0 0 var(--wcb-space-xl); }
+  /* WCAG 2.2: a visible focus ring on every control; small targets clear the 24px floor. */
   .studio :focus-visible { outline: var(--wcb-focus-width) solid var(--wcb-focus-color); outline-offset: var(--wcb-focus-offset); border-radius: var(--wcb-radius-sm); }
   .studio .toggle, .studio .apply, .studio .lang { min-height: var(--wcb-target-min); }
-  .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; margin-bottom: var(--wcb-space-2xs); }
-  .lang { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: var(--wcb-radius-pill); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
-  .lang.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
-  .steps { display: flex; gap: var(--wcb-space-2xs); list-style: none; padding: 0; margin: 0 0 1.25rem; }
-  .steps li { flex: 1; }
-  .steps button { width: 100%; padding: var(--wcb-space-xs); border: 1px solid var(--sl-color-gray-5); background: var(--md-sys-color-surface-container-high); color: var(--sl-color-text); border-radius: var(--wcb-radius-pill); cursor: pointer; font-weight: 700; transition: transform var(--wcb-motion-fast) var(--wcb-easing-standard), box-shadow var(--wcb-motion-fast) var(--wcb-easing-standard); }
-  .steps li.on button { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); box-shadow: var(--wcb-shadow-2); transform: translateY(-1px); }
-  .panel { display: flex; flex-direction: column; gap: var(--wcb-space-sm); background: var(--md-sys-color-surface-container); border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent); border-radius: var(--wcb-radius-md); padding: var(--wcb-space-md); box-shadow: var(--wcb-shadow-1); }
-  .field { display: flex; flex-direction: column; gap: 0.35rem; }
-  .field > span { font-weight: 600; font-size: 0.9rem; }
-  input, textarea, select { padding: 0.6rem 0.8rem; border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-sm); background: var(--sl-color-bg); color: var(--sl-color-white); font: inherit; transition: border-color var(--wcb-motion-fast) var(--wcb-easing-standard); }
-  input:focus, textarea:focus, select:focus { border-color: var(--sl-color-accent); }
-  .chips, .tabs { display: flex; flex-wrap: wrap; gap: var(--wcb-space-2xs); }
-  .chip { padding: 0.35rem 0.8rem; border-radius: var(--wcb-radius-pill); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
-  .chip.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
-  .tabs button { padding: 0.45rem 0.8rem; border-radius: 0.5rem 0.5rem 0 0; border: 1px solid var(--sl-color-gray-6); background: transparent; color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
-  .tabs button.on { background: var(--sl-color-gray-6); border-color: var(--sl-color-gray-5); }
-  .hpanel { border: 1px solid var(--sl-color-gray-5); border-radius: 0 0.5rem 0.5rem 0.5rem; padding: var(--wcb-space-sm); display: flex; flex-direction: column; gap: 0.7rem; }
+
+  /* App header — the Studio owns its own front matter, not Starlight's. */
+  .studio-hero { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--wcb-space-md); flex-wrap: wrap; padding-bottom: var(--wcb-space-md); border-bottom: 2px solid var(--wcb-ink); margin-bottom: var(--wcb-space-lg); }
+  .hero-text { flex: 1 1 22rem; }
+  .studio-hero h1 { font-size: clamp(2rem, 4.5vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; margin: var(--wcb-space-2xs) 0 0; color: var(--wcb-ink); }
+  .studio-sub { margin: var(--wcb-space-2xs) 0 0; color: var(--wcb-ink-soft); max-width: 56ch; font-size: var(--wcb-text-base); line-height: 1.5; }
+  .langbar { display: flex; gap: var(--wcb-space-3xs); flex: 0 0 auto; }
+  .lang { font-size: var(--wcb-text-sm); padding: 0.25rem 0.7rem; border-radius: var(--wcb-radius-sm); border: 1px solid var(--wcb-line); background: transparent; color: var(--wcb-ink-soft); cursor: pointer; }
+  .lang.on { background: var(--wcb-green); color: var(--wcb-on-accent); border-color: var(--wcb-green); }
+
+  /* Visual progress stepper — circles + a connector that fills green as you go. */
+  .stepper { display: grid; grid-template-columns: repeat(3, 1fr); list-style: none; padding: 0; margin: 0 0 var(--wcb-space-lg); }
+  .stp { position: relative; text-align: center; }
+  .stp + .stp::before { content: ""; position: absolute; top: 1.1rem; inset-inline-start: -50%; width: 100%; height: 2px; background: var(--wcb-line); z-index: 0; }
+  .stp.done + .stp::before { background: var(--wcb-green); }
+  .stp button { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--wcb-space-3xs); width: 100%; background: none; border: 0; cursor: pointer; color: var(--wcb-ink-soft); font: inherit; padding: 0; }
+  .stp button:disabled { cursor: default; }
+  .stp-mark { display: inline-flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: var(--wcb-paper); border: 2px solid var(--wcb-line); color: var(--wcb-ink-soft); font-weight: 800; font-family: var(--sl-font-mono); }
+  .stp-mark svg { width: 1.1rem; height: 1.1rem; }
+  .stp-label { font-size: var(--wcb-text-sm); font-weight: 700; }
+  .stp.on .stp-mark { background: var(--wcb-green); border-color: var(--wcb-green); color: var(--wcb-on-accent); }
+  .stp.on .stp-label, .stp.done .stp-label { color: var(--wcb-ink); }
+  .stp.done .stp-mark { background: color-mix(in srgb, var(--wcb-green) 16%, var(--wcb-paper)); border-color: var(--wcb-green); color: var(--wcb-green); }
+
+  .panel { display: flex; flex-direction: column; gap: var(--wcb-space-md); background: var(--wcb-card); border: 1px solid var(--wcb-line); border-radius: var(--wcb-radius-md); padding: clamp(var(--wcb-space-md), 3vw, var(--wcb-space-lg)); }
+  .field { display: flex; flex-direction: column; gap: 0.4rem; }
+  .field > span { font-weight: 700; font-size: var(--wcb-text-sm); color: var(--wcb-ink); }
+  input, textarea, select { padding: 0.65rem 0.8rem; border: 1px solid var(--wcb-line); border-radius: var(--wcb-radius-sm); background: var(--wcb-paper); color: var(--wcb-ink); font: inherit; transition: border-color var(--wcb-motion-fast) var(--wcb-easing-standard); }
+  input:focus, textarea:focus, select:focus { border-color: var(--wcb-green); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--wcb-space-2xs); }
+  .chip { padding: 0.35rem 0.85rem; border-radius: var(--wcb-radius-sm); border: 1px solid var(--wcb-line); background: var(--wcb-paper); color: var(--wcb-ink); cursor: pointer; font-weight: 600; }
+  .chip.on { background: var(--wcb-green); color: var(--wcb-on-accent); border-color: var(--wcb-green); }
+
+  /* Handoff: pick how to take your starter — icon cards, not bare tabs. */
+  .handoff-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--wcb-space-2xs); }
+  @media (max-width: 34rem) { .handoff-cards { grid-template-columns: repeat(2, 1fr); } }
+  .hcard { display: flex; flex-direction: column; align-items: center; gap: var(--wcb-space-2xs); padding: var(--wcb-space-sm) var(--wcb-space-2xs); border: 1px solid var(--wcb-line); border-radius: var(--wcb-radius-sm); background: var(--wcb-paper); color: var(--wcb-ink); cursor: pointer; font-weight: 700; font-size: var(--wcb-text-sm); text-align: center; transition: border-color var(--wcb-motion-fast) var(--wcb-easing-standard); }
+  .hcard:hover { border-color: var(--wcb-green); }
+  .hcard.on { border-color: var(--wcb-green); background: color-mix(in srgb, var(--wcb-green) 10%, transparent); }
+  .hc-ico { display: inline-flex; width: 2.4rem; height: 2.4rem; align-items: center; justify-content: center; border-radius: var(--wcb-radius-sm); background: var(--wcb-card); color: var(--wcb-green); border: 1px solid var(--wcb-line); }
+  .hcard.on .hc-ico { background: var(--wcb-green); color: var(--wcb-on-accent); border-color: var(--wcb-green); }
+  .hc-ico svg { width: 1.3rem; height: 1.3rem; }
+  .hpanel { border: 1px solid var(--wcb-line); border-radius: var(--wcb-radius-sm); padding: var(--wcb-space-md); display: flex; flex-direction: column; gap: 0.7rem; margin-top: var(--wcb-space-2xs); }
   .picklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
   .pick { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.7rem; }
   .pick.on { border-color: var(--sl-color-accent); }
@@ -1147,38 +1251,52 @@ manuals with the knowledge-to-skills-pipeline).
   .skill-steps { margin: 0.4rem 0 0; padding-inline-start: 1.2rem; font-size: 0.85rem; color: var(--sl-color-gray-2); display: grid; gap: 0.15rem; }
   .deeper summary, .advanced summary, .swap summary { cursor: pointer; color: var(--sl-color-text-accent); font-size: 0.9rem; font-weight: 600; }
   .bp-head h3 { margin: 0 0 0.3rem; }
-  .bp-sub { margin: 0.4rem 0 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--sl-color-gray-2); }
-  .pieces { list-style: none; counter-reset: piece; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
-  .piece { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.7rem 0.9rem; }
-  .piece.off { opacity: 0.55; border-inline-start-color: var(--sl-color-gray-5); }
+  .bp-sub { margin: 0.4rem 0 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--wcb-ink-soft); }
+  .diagram-label { margin: var(--wcb-space-2xs) 0; display: block; }
+
+  /* The blueprint is an architecture diagram you can edit: capability badges
+     down a connector spine, ending on the verified foundation. */
+  .pieces.diagram { list-style: none; padding: 0; margin: 0; display: block; }
+  .piece.node { position: relative; display: grid; grid-template-columns: 2.6rem 1fr; gap: var(--wcb-space-sm); padding: var(--wcb-space-2xs) 0; }
+  .diagram .piece:not(:last-child)::before { content: ""; position: absolute; top: 2.6rem; bottom: -0.6rem; inset-inline-start: 1.3rem; width: 2px; background: var(--wcb-line); transform: translateX(-1px); }
+  .node-badge { position: relative; z-index: 1; display: inline-flex; width: 2.6rem; height: 2.6rem; align-items: center; justify-content: center; border-radius: var(--wcb-radius-sm); background: var(--wcb-green); color: var(--wcb-on-accent); }
+  .node-badge svg { width: 1.4rem; height: 1.4rem; }
+  .node-content { border: 1px solid var(--wcb-line); border-radius: var(--wcb-radius-sm); padding: 0.7rem 0.9rem; background: var(--wcb-paper); }
+  .piece.off { opacity: 0.5; }
+  .piece.off .node-badge { background: var(--wcb-line); color: var(--wcb-ink-soft); }
   .piece-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--wcb-space-xs); }
-  .role { counter-increment: piece; font-weight: 700; }
-  .role::before { content: counter(piece) '. '; color: var(--sl-color-text-accent); }
-  .toggle { background: none; border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-pill); padding: 0.1rem 0.65rem; font-size: 0.74rem; color: var(--sl-color-text); cursor: pointer; }
+  .role { font-weight: 800; font-size: var(--wcb-text-sm); text-transform: uppercase; letter-spacing: 0.04em; color: var(--wcb-ink); }
+  .toggle { background: none; border: 1px solid var(--wcb-line); border-radius: var(--wcb-radius-sm); padding: 0.1rem 0.6rem; font-size: 0.74rem; color: var(--wcb-ink-soft); cursor: pointer; }
   .piece-tool { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--wcb-space-2xs); margin: 0.35rem 0; }
-  .tool-name { font-weight: 700; font-size: 1.02rem; }
-  .tool-meta { color: var(--sl-color-gray-2); font-size: 0.8rem; }
-  .piece-why, .piece-connects { margin: 0.25rem 0; font-size: 0.9rem; color: var(--sl-color-text); }
-  .swap { margin-top: 0.45rem; }
+  .tool-name { font-weight: 700; font-size: 1.02rem; color: var(--wcb-ink); }
+  .tool-meta { color: var(--wcb-ink-soft); font-size: 0.8rem; }
+  .piece-why, .piece-connects { margin: 0.25rem 0; font-size: 0.9rem; color: var(--wcb-ink-soft); }
+  .piece-why strong, .piece-connects strong { color: var(--wcb-ink); }
+  .swap { margin-top: 0.45rem; border: 0; padding: 0; }
   .swap ul { list-style: none; padding: 0.4rem 0 0; margin: 0; display: grid; gap: 0.3rem; }
-  .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.6rem 0.85rem; }
-  .fits p { margin: 0.3rem 0 0; font-size: 0.92rem; }
+  .foundation { display: flex; align-items: center; gap: var(--wcb-space-2xs); margin-top: var(--wcb-space-sm); padding: 0.75rem 0.9rem; border: 1px solid var(--wcb-green); border-radius: var(--wcb-radius-sm); background: color-mix(in srgb, var(--wcb-green) 10%, transparent); color: var(--wcb-ink); font-weight: 700; font-size: var(--wcb-text-sm); }
+  .fnd-ico { display: inline-flex; color: var(--wcb-green); }
+  .fnd-ico svg { width: 1.4rem; height: 1.4rem; }
   .mtitle { margin: 0; font-size: 1.05rem; }
   .modelgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
   @media (max-width: 34rem) { .modelgrid { grid-template-columns: 1fr; } }
   .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: var(--wcb-radius-sm); background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
   .nav { display: flex; justify-content: space-between; gap: var(--wcb-space-2xs); margin-top: var(--wcb-space-2xs); }
-  .nav button { padding: 0.55rem 1rem; border-radius: var(--wcb-radius-sm); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
-  .primary { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 1px solid var(--sl-color-accent); padding: 0.6rem 1.2rem; border-radius: var(--wcb-radius-pill); cursor: pointer; font-weight: 700; box-shadow: var(--wcb-shadow-1); transition: transform var(--wcb-motion-fast) var(--wcb-easing-standard), box-shadow var(--wcb-motion-fast) var(--wcb-easing-standard); }
-  .primary:hover { transform: translateY(-2px); box-shadow: var(--wcb-shadow-2); }
-  .primary:active { transform: translateY(0); box-shadow: var(--wcb-shadow-1); }
-  .big { font-size: 1.05rem; padding: 0.7rem 1.3rem; }
-  .hint { color: var(--sl-color-gray-2); font-size: 0.9rem; }
+  .nav button { padding: 0.6rem 1.1rem; border-radius: var(--wcb-radius-sm); border: 1px solid var(--wcb-line); background: var(--wcb-paper); color: var(--wcb-ink); cursor: pointer; font-weight: 700; }
+  .nav button:hover { border-color: var(--wcb-green); }
+  .primary { background: var(--wcb-green); color: var(--wcb-on-accent); border: 1px solid var(--wcb-green); padding: 0.65rem 1.2rem; border-radius: var(--wcb-radius-sm); cursor: pointer; font-weight: 700; transition: transform var(--wcb-motion-fast) var(--wcb-easing-standard), background var(--wcb-motion-fast) var(--wcb-easing-standard); }
+  .primary:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--wcb-green) 88%, black); }
+  .primary:active { transform: translateY(0); }
+  .primary:disabled { opacity: 0.55; cursor: default; transform: none; }
+  .big { font-size: 1.05rem; padding: 0.75rem 1.4rem; }
+  .hint { color: var(--wcb-ink-soft); font-size: 0.9rem; }
   .err { color: var(--wcb-danger-text); font-size: 0.9rem; }
-  .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; text-decoration: underline; font: inherit; }
+  .link { background: none; border: 0; color: var(--wcb-coral-text); cursor: pointer; text-decoration: underline; font: inherit; }
   .copyp { align-self: flex-start; }
-  details { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.75rem; }
-  summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: var(--wcb-space-sm); }
-  pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: var(--wcb-space-xs); border-radius: 0.4rem; }
+  details { border: 1px solid var(--wcb-line); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.75rem; }
+  summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: var(--wcb-space-sm); color: var(--wcb-ink); }
+  pre { max-height: 22rem; overflow: auto; background: var(--wcb-card); border: 1px solid var(--wcb-line); color: var(--wcb-ink); padding: var(--wcb-space-xs); border-radius: var(--wcb-radius-sm); }
+  pre code { color: var(--wcb-ink); }
   .out { max-height: 28rem; }
+  @media (prefers-reduced-motion: reduce) { .primary, .nav button, .hcard, .chip, .lang { transition: none; } }
 </style>

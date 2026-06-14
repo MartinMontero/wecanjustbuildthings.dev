@@ -1,18 +1,16 @@
 ---
 title: Build Studio
-description: Describe your project and the Studio assembles a policy-clean stack, then generates a constitution, spec, agent prompt, and a downloadable starter repo.
-tableOfContents: false
+description: Describe your project in plain words and the Studio assembles a policy-clean stack, then generates a constitution, spec, agent prompt, and a downloadable starter repo. Nothing here can pull in a Meta / OpenAI / xAI dependency.
+template: splash
+editUrl: false
+lastUpdated: false
+prev: false
+next: false
 sidebar:
   order: 0
   label: Build Studio
 ---
 
 import BuildStudio from '../../components/BuildStudio.svelte';
-
-Tell the Studio what you're building. It pulls a matching, **policy-clean** stack
-from the catalog, then hands you everything an AI agent needs to start:
-a project **constitution**, a **spec**, a ready-to-paste **prompt**, and a
-**downloadable starter repo** wired to the enforcement engine. Nothing here can
-pull in a Meta / OpenAI / xAI dependency.
 
 <BuildStudio client:load />
