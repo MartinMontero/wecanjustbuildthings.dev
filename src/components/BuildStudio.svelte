@@ -967,21 +967,32 @@ manuals with the knowledge-to-skills-pipeline).
 </div>
 
 <style>
-  .studio { margin: 1rem 0 2rem; }
-  .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; margin-bottom: 0.5rem; }
-  .lang { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
-  .lang.on { background: var(--sl-color-accent); color: var(--on-structure); border-color: var(--sl-color-accent); }
-  .steps { display: flex; gap: 0.5rem; list-style: none; padding: 0; margin: 0 0 1.25rem; }
+  /* The Studio reads as a defined workbench surface, not a floating form. */
+  .studio {
+    margin: var(--space-md) 0 var(--space-lg);
+    background: var(--surface);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-lg);
+    padding: clamp(var(--space-sm), 3vw, var(--space-lg));
+    border-top: 3px solid var(--structure);
+  }
+  .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; margin-bottom: var(--space-sm); }
+  .lang { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: var(--radius-pill); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink-soft); cursor: pointer; }
+  .lang.on { background: var(--structure); color: var(--on-structure); border-color: var(--structure); font-weight: var(--weight-bold); }
+  /* Step indicator: a numbered progress rail. */
+  .steps { display: flex; gap: var(--space-2xs); list-style: none; padding: 0; margin: 0 0 var(--space-md); }
   .steps li { flex: 1; }
-  .steps button { width: 100%; padding: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); border-radius: 0.5rem; cursor: pointer; font-weight: 600; }
-  .steps li.on button { background: var(--sl-color-accent); color: var(--on-structure); border-color: var(--sl-color-accent); }
-  .panel { display: flex; flex-direction: column; gap: 1rem; }
+  .steps button { width: 100%; padding: 0.55rem 0.5rem; border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink-soft); border-radius: var(--radius); cursor: pointer; font-weight: var(--weight-bold); border-top: 3px solid var(--edge-strong); transition: color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out); }
+  .steps button:hover { color: var(--ink); border-top-color: var(--structure); }
+  .steps li.on button { background: var(--structure); color: var(--on-structure); border-color: var(--structure); border-top-color: var(--signal); }
+  .panel { display: flex; flex-direction: column; gap: var(--space-sm); }
   .field { display: flex; flex-direction: column; gap: 0.35rem; }
-  .field > span { font-weight: 600; font-size: 0.9rem; }
-  input, textarea, select { padding: 0.55rem 0.7rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; background: var(--sl-color-black); color: var(--sl-color-white); font: inherit; }
+  .field > span { font-weight: var(--weight-bold); font-size: 0.9rem; color: var(--ink); }
+  input, textarea, select { padding: 0.6rem 0.75rem; border: 1px solid var(--control-edge); border-radius: var(--radius); background: var(--surface-2); color: var(--ink); font: inherit; transition: border-color var(--dur-1) var(--ease-out); }
+  :is(input, textarea, select):focus { border-color: var(--structure); }
   .chips, .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .chip { padding: 0.35rem 0.8rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
-  .chip.on { background: var(--sl-color-accent); color: var(--on-structure); border-color: var(--sl-color-accent); }
+  .chip { padding: 0.35rem 0.8rem; border-radius: var(--radius-pill); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink); cursor: pointer; }
+  .chip.on { background: var(--structure); color: var(--on-structure); border-color: var(--structure); }
   .tabs button { padding: 0.45rem 0.8rem; border-radius: 0.5rem 0.5rem 0 0; border: 1px solid var(--sl-color-gray-6); background: transparent; color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
   .tabs button.on { background: var(--sl-color-gray-6); border-color: var(--sl-color-gray-5); }
   .hpanel { border: 1px solid var(--sl-color-gray-5); border-radius: 0 0.5rem 0.5rem 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
@@ -993,9 +1004,9 @@ manuals with the knowledge-to-skills-pipeline).
   .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
   .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
-  .vbadge--verified { border-left-color: #2da44e; }
-  .vbadge--under_review { border-left-color: #bf8700; }
-  .vbadge--blocked { border-left-color: #cf222e; }
+  .vbadge--verified { border-left-color: var(--ok-edge); }
+  .vbadge--under_review { border-left-color: var(--warn-edge); }
+  .vbadge--blocked { border-left-color: var(--danger-edge); }
   .examples { display: flex; flex-direction: column; gap: 0.4rem; }
   .chip.ex { text-align: start; font-size: 0.82rem; max-width: 100%; white-space: normal; line-height: 1.3; }
   .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
@@ -1010,7 +1021,7 @@ manuals with the knowledge-to-skills-pipeline).
   .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
   .prop-name { font-weight: 700; }
   .apply { background: var(--sl-color-accent); color: var(--on-structure); border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-  .applied { font-size: 0.78rem; font-weight: 700; color: #2da44e; }
+  .applied { font-size: 0.78rem; font-weight: 700; color: var(--ok-text); }
   .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
   .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .skillsbox > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 600; }
@@ -1047,7 +1058,7 @@ manuals with the knowledge-to-skills-pipeline).
   .primary { background: var(--sl-color-accent); color: var(--on-structure); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }
   .big { font-size: 1.05rem; padding: 0.7rem 1.3rem; }
   .hint { color: var(--sl-color-gray-2); font-size: 0.9rem; }
-  .err { color: #ff7b72; font-size: 0.9rem; }
+  .err { color: var(--danger-text); font-size: 0.9rem; }
   .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; text-decoration: underline; font: inherit; }
   .copyp { align-self: flex-start; }
   details { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; }

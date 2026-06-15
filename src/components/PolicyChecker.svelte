@@ -154,13 +154,13 @@
   .controls label { display: flex; gap: 0.4rem; align-items: center; color: var(--sl-color-text); font-size: 0.9rem; }
   .cb { cursor: pointer; }
   .primary { padding: 0.55rem 1.1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-accent); background: var(--sl-color-accent); color: var(--on-structure); cursor: pointer; font-weight: 700; }
-  .summary { padding: 0.7rem 0.9rem; border-radius: 0.5rem; border: 1px solid #2da44e; color: var(--sl-color-text); background: var(--sl-color-gray-6); }
-  .summary.bad { border-color: #cf222e; }
+  .summary { padding: 0.7rem 0.9rem; border-radius: 0.5rem; border: 1px solid var(--ok-edge); color: var(--sl-color-text); background: var(--sl-color-gray-6); }
+  .summary.bad { border-color: var(--danger-edge); }
   table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
   th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--sl-color-gray-6); }
-  tr.blocked { background: color-mix(in srgb, #cf222e 8%, transparent); }
+  tr.blocked { background: color-mix(in srgb, var(--danger-edge) 8%, transparent); }
   .tag { font-size: 0.78rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; border-left: 4px solid; }
-  .tag.ok { border-color: #2da44e; }
-  .tag.bad { border-color: #cf222e; }
+  .tag.ok { border-color: var(--ok-edge); }
+  .tag.bad { border-color: var(--danger-edge); }
   .note { color: var(--sl-color-gray-2); font-size: 0.82rem; }
 </style>

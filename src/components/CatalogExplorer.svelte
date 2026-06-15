@@ -251,9 +251,9 @@
   .card-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
   .badge { font-size: 0.72rem; font-weight: 600; padding: 0.18rem 0.45rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 4px; background: var(--sl-color-gray-6); color: var(--sl-color-text); }
-  .badge--verified, .badge--active { border-left-color: #2da44e; }
-  .badge--under_review, .badge--minimal { border-left-color: #bf8700; }
-  .badge--blocked, .badge--abandoned { border-left-color: #cf222e; }
-  .badge--dormant, .badge--advisory { border-left-color: #bc4c00; }
+  .badge--verified, .badge--active { border-left-color: var(--ok-edge); }
+  .badge--under_review, .badge--minimal { border-left-color: var(--warn-edge); }
+  .badge--blocked, .badge--abandoned { border-left-color: var(--danger-edge); }
+  .badge--dormant, .badge--advisory { border-left-color: var(--signal); }
   .more { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
 </style>
