@@ -2,20 +2,17 @@
 /**
  * SiteTitle override — bespoke brand lockup (replaces Starlight's default).
  * The green "build plate" mark + the wordmark set in the display face, with a
- * single marigold register tick as the seed of the signature. Keeps Starlight's
- * i18n href + configured logo behavior intact.
+ * single marigold register tick as the seed of the signature. Imports the logo
+ * asset directly (no Starlight virtual modules) and keeps the i18n href.
  */
-import { logos } from 'virtual:starlight/user-images';
-import config from 'virtual:starlight/user-config';
+import logo from '../../assets/logo.svg';
 const { siteTitleHref, siteTitle } = Astro.locals.starlightRoute;
 ---
 
 <a href={siteTitleHref} class="wcb-brand sl-flex" translate="no">
-  {config.logo && logos.dark && (
-    <span class="wcb-brand__mark">
-      <img alt={config.logo.alt} src={logos.dark.src} width={logos.dark.width} height={logos.dark.height} />
-    </span>
-  )}
+  <span class="wcb-brand__mark">
+    <img src={logo.src} width={logo.width} height={logo.height} alt="" />
+  </span>
   <span class="wcb-brand__word">{siteTitle}</span>
 </a>
 
