@@ -296,6 +296,68 @@
 .feedback--danger { border-inline-start-color: var(--danger-edge); }
 .feedback--info { border-inline-start-color: var(--structure); }
 
+/* ===================== SEARCH MODAL (Pagefind) ===================== */
+/* The search dialog carries the workshop identity too. Prefixed with the
+   #starlight__search id so these win over Pagefind's own class-only stylesheet,
+   whatever the injection order. */
+dialog[aria-label='Search'] .dialog-frame {
+  background: var(--surface);
+  border: 1px solid var(--edge);
+  border-top: 3px solid var(--structure);
+  border-radius: var(--radius-lg);
+}
+dialog[aria-label='Search']::backdrop {
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+#starlight__search {
+  --pagefind-ui-primary: var(--structure);
+  --pagefind-ui-text: var(--ink);
+  --pagefind-ui-background: var(--surface);
+  --pagefind-ui-border: var(--edge);
+  --pagefind-ui-tag: var(--surface-2);
+  --pagefind-ui-border-width: 1px;
+  --pagefind-ui-border-radius: var(--radius);
+  --pagefind-ui-font: var(--font-sans);
+}
+#starlight__search .pagefind-ui__search-input {
+  background: var(--surface-2);
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-weight: var(--weight-medium);
+}
+#starlight__search .pagefind-ui__search-input:focus { border-color: var(--structure); }
+#starlight__search .pagefind-ui__message {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+#starlight__search .pagefind-ui__results { display: grid; gap: var(--space-2xs); }
+#starlight__search .pagefind-ui__result {
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: var(--space-xs) var(--space-sm);
+  transition: border-color var(--dur-1) var(--ease-out);
+}
+#starlight__search .pagefind-ui__result:hover,
+#starlight__search .pagefind-ui__result:focus-within { border-color: var(--structure); }
+#starlight__search .pagefind-ui__result-title { font-family: var(--font-display); letter-spacing: -0.01em; }
+#starlight__search .pagefind-ui__result-link { color: var(--ink); }
+#starlight__search .pagefind-ui__result-link:hover { color: var(--structure); }
+#starlight__search .pagefind-ui__result-excerpt { color: var(--ink-soft); }
+#starlight__search .pagefind-ui mark {
+  background: color-mix(in srgb, var(--signal) 30%, transparent);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 0 0.15em;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .sl-link-button, .btn, .card, .sl-link-card, .pagination-links a { transition: none; }
+  .sl-link-button, .btn, .card, .sl-link-card, .pagination-links a,
+  #starlight__search .pagefind-ui__result { transition: none; }
 }
