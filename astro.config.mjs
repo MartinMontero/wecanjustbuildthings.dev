@@ -69,6 +69,7 @@ export default defineConfig({
       lastUpdated: true,
       components: {
         SiteTitle: './src/components/overrides/SiteTitle.astro',
+        Hero: './src/components/overrides/Hero.astro',
       },
       customCss: ['./src/styles/tokens.css', './src/styles/theme.css', './src/styles/components.css'],
       sidebar: [

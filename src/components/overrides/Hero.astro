@@ -1,0 +1,214 @@
+---
+/**
+ * Hero override — "The Build Plate".
+ * The site's one signature moment: the hero rendered as a screen-printed maker's
+ * work-order plate. Registration crop-marks, a stamped spec rail, the wordmark,
+ * a hand-stamped marigold VERIFIED seal, and a mono work-order metadata row —
+ * turning the brand promise (verifiable provenance) into the front door.
+ * Reuses the page's hero frontmatter (title, tagline, actions); restraint
+ * everywhere else pays for the boldness here.
+ */
+import { LinkButton } from '@astrojs/starlight/components';
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { title = data.title, tagline, actions = [] } = data.hero || {};
+---
+
+<section class="plate" aria-labelledby="_top">
+  <span class="plate__reg plate__reg--tl" aria-hidden="true"></span>
+  <span class="plate__reg plate__reg--tr" aria-hidden="true"></span>
+  <span class="plate__reg plate__reg--bl" aria-hidden="true"></span>
+  <span class="plate__reg plate__reg--br" aria-hidden="true"></span>
+
+  <div class="plate__rail">
+    <span class="plate__tag">Build Plate</span>
+    <span class="plate__hr" aria-hidden="true"></span>
+    <span class="plate__spec">Freedom-tech fabrication · open source · rev 2026</span>
+  </div>
+
+  <div class="plate__body">
+    <div class="plate__copy">
+      <h1 id="_top" data-page-title set:html={title} />
+      {tagline && <p class="plate__tagline" set:html={tagline} />}
+      {
+        actions.length > 0 && (
+          <div class="plate__actions">
+            {actions.map(({ icon, link: href, text, variant }) => (
+              <LinkButton {href} {variant} icon={icon?.name}>
+                {text}
+              </LinkButton>
+            ))}
+          </div>
+        )
+      }
+    </div>
+
+    <div class="plate__seal" aria-hidden="true">
+      <svg viewBox="0 0 132 132" role="presentation">
+        <defs>
+          <path id="seal-arc" d="M66,66 m-50,0 a50,50 0 1,1 100,0 a50,50 0 1,1 -100,0" />
+        </defs>
+        <circle class="seal-ring" cx="66" cy="66" r="62" />
+        <circle class="seal-ring seal-ring--inner" cx="66" cy="66" r="40" />
+        <text class="seal-text">
+          <textPath href="#seal-arc" startOffset="0">
+            · VERIFIED · FREEDOM TECH · BUILT TO OUTLAST · YOURS TO FORK&#160;
+          </textPath>
+        </text>
+        <path
+          class="seal-mark"
+          d="M50 67 l11 11 l24 -28"
+          fill="none"
+          stroke-width="7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+  </div>
+
+  <dl class="plate__meta">
+    <div><dt>Catalog</dt><dd>1,300+ verified tools</dd></div>
+    <div><dt>License</dt><dd>checked @ commit</dd></div>
+    <div><dt>Owner</dt><dd>the movement</dd></div>
+    <div><dt>Agent</dt><dd>bring your own</dd></div>
+  </dl>
+</section>
+
+<style>
+  .plate {
+    position: relative;
+    margin-block: var(--space-lg) var(--space-xl);
+    padding: clamp(var(--space-md), 4vw, var(--space-xl));
+    background: var(--surface);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  /* screen-print halftone — a faint structural dot screen across the plate */
+  .plate::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(
+      color-mix(in srgb, var(--structure) 16%, transparent) 1px,
+      transparent 1.3px
+    );
+    background-size: 7px 7px;
+    -webkit-mask-image: linear-gradient(120deg, black, transparent 62%);
+    mask-image: linear-gradient(120deg, black, transparent 62%);
+    opacity: 0.7;
+  }
+
+  /* corner registration / crop marks — the fabrication signature */
+  .plate__reg {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border: 2px solid var(--structure);
+  }
+  .plate__reg--tl { inset-block-start: 10px; inset-inline-start: 10px; border-inline-end: 0; border-block-end: 0; }
+  .plate__reg--tr { inset-block-start: 10px; inset-inline-end: 10px; border-inline-start: 0; border-block-end: 0; }
+  .plate__reg--bl { inset-block-end: 10px; inset-inline-start: 10px; border-inline-end: 0; border-block-start: 0; }
+  .plate__reg--br { inset-block-end: 10px; inset-inline-end: 10px; border-inline-start: 0; border-block-start: 0; }
+
+  /* spec rail */
+  .plate__rail {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .plate__tag {
+    color: var(--on-structure);
+    background: var(--structure);
+    font-weight: var(--weight-bold);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-sm);
+  }
+  .plate__hr { flex: 1; height: 2px; background: var(--edge-strong); }
+  .plate__spec { color: var(--ink-soft); }
+
+  .plate__body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    align-items: center;
+  }
+
+  .plate__copy h1 {
+    font-family: var(--font-display);
+    font-weight: var(--weight-black);
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    font-size: clamp(2.6rem, 1rem + 7vw, 4.75rem);
+    color: var(--ink);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .plate__tagline {
+    margin: var(--space-md) 0 0;
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--ink-soft);
+    max-width: 46ch;
+  }
+  .plate__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+  }
+
+  /* the hand-stamped marigold seal — the one warm accent on the front door */
+  .plate__seal {
+    justify-self: center;
+    width: clamp(8rem, 22vw, 11.5rem);
+    transform: rotate(-7deg);
+  }
+  .plate__seal svg { width: 100%; height: auto; display: block; }
+  .seal-ring { fill: none; stroke: var(--signal); stroke-width: 2.5; opacity: 0.9; }
+  .seal-ring--inner { stroke-width: 1.5; }
+  .seal-text {
+    fill: var(--signal);
+    font-family: var(--font-mono);
+    font-size: 9.2px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+  }
+  .seal-mark { stroke: var(--signal); }
+
+  /* work-order metadata */
+  .plate__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-lg);
+    margin: var(--space-xl) 0 0;
+    padding-top: var(--space-md);
+    border-top: 2px solid var(--edge);
+  }
+  .plate__meta div { display: flex; flex-direction: column; gap: 2px; }
+  .plate__meta dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+  }
+  .plate__meta dd { margin: 0; font-weight: var(--weight-bold); color: var(--ink); }
+
+  @media (min-width: 50rem) {
+    .plate__body { grid-template-columns: 1fr auto; gap: var(--space-2xl); }
+    .plate__seal { justify-self: end; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .plate__seal { transform: none; }
+  }
+</style>
