@@ -54,6 +54,12 @@ site-title,
   letter-spacing: -0.015em;
 }
 
+/* Text selection in the brand's warm accent — no default-blue highlight. */
+::selection {
+  background: color-mix(in srgb, var(--signal) 32%, transparent);
+  color: var(--ink);
+}
+
 /* Visible focus on every interactive element (WCAG 2.2 — never colour alone,
    never obscured). Uses the structure green, which clears 3:1 on both themes. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
