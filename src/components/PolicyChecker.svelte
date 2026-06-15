@@ -153,7 +153,7 @@
   .controls { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
   .controls label { display: flex; gap: 0.4rem; align-items: center; color: var(--sl-color-text); font-size: 0.9rem; }
   .cb { cursor: pointer; }
-  .primary { padding: 0.55rem 1.1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-accent); background: var(--sl-color-accent); color: #fff; cursor: pointer; font-weight: 700; }
+  .primary { padding: 0.55rem 1.1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-accent); background: var(--sl-color-accent); color: var(--on-structure); cursor: pointer; font-weight: 700; }
   .summary { padding: 0.7rem 0.9rem; border-radius: 0.5rem; border: 1px solid #2da44e; color: var(--sl-color-text); background: var(--sl-color-gray-6); }
   .summary.bad { border-color: #cf222e; }
   table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }

@@ -1,65 +1,117 @@
-/* We Can Just Build Things — Starlight theme overrides.
-   Purple accent (freedom-tech / Nostr lineage), high-contrast, no web fonts
-   (system stack only) to keep the site fast and tracker-free. */
+/* theme.css — wire the design tokens into Starlight and set the global base.
+   tokens.css (loaded first) owns every value; this file only maps tokens onto
+   Starlight's variables so the whole chrome adopts the identity, plus a small
+   global base (type, links, focus, motion). No raw hex except the Starlight
+   neutral ramp, which IS the token layer for the framework's grays. */
 
 :root {
-  --sl-color-accent-low: #241152;
-  --sl-color-accent: #6d3bd6;
-  --sl-color-accent-high: #c9b6f5;
+  /* Fonts → Starlight */
+  --sl-font: var(--font-sans);
+  --sl-font-mono: var(--font-mono);
 
-  --sl-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, Helvetica, Arial, sans-serif;
-  --sl-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
-    'Liberation Mono', monospace;
+  /* Accent (structure green) → Starlight, dark theme */
+  --sl-color-accent-low: #133E2C;
+  --sl-color-accent: #45B886;
+  --sl-color-accent-high: #8FDCB6;
+
+  /* Neutral ramp → warm-cool green-ink, dark theme */
+  --sl-color-white: #EAF0E8;
+  --sl-color-gray-1: #DCE5DD;
+  --sl-color-gray-2: #B4C1B9;
+  --sl-color-gray-3: #8A968F;
+  --sl-color-gray-4: #5A655E;
+  --sl-color-gray-5: #2A342E;
+  --sl-color-gray-6: #17211C;
+  --sl-color-gray-7: #101814;
+  --sl-color-black: #0F1814;
 }
 
 :root[data-theme='light'] {
-  --sl-color-accent-low: #d7c7f7;
-  --sl-color-accent: #5a2db8;
-  --sl-color-accent-high: #2a1259;
+  --sl-color-accent-low: #CFE3D6;
+  --sl-color-accent: #1C5D43;
+  --sl-color-accent-high: #103B2A;
+
+  --sl-color-white: #14211B;
+  --sl-color-gray-1: #26312B;
+  --sl-color-gray-2: #44514A;
+  --sl-color-gray-3: #5C6862;
+  --sl-color-gray-4: #7E8A83;
+  --sl-color-gray-5: #C7CEC0;
+  --sl-color-gray-6: #E2E6DD;
+  --sl-color-gray-7: #EBEFE7;
+  --sl-color-black: #E8ECE6;
 }
 
-/* Status pills used across catalog entries and PIE pages. */
+/* ---- Global base ---- */
+
+/* Display face on headings + the site title; body/UI stay system sans. */
+.sl-markdown-content :is(h1, h2, h3, h4),
+.content-panel h1,
+.hero h1,
+site-title,
+.site-title {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+/* Visible focus on every interactive element (WCAG 2.2 — never colour alone,
+   never obscured). Uses the structure green, which clears 3:1 on both themes. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: var(--focus-width) solid var(--ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* Motion clarifies, not performs — honor the user's reduced-motion choice. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Status pills (catalog + PIE). Meaning is carried by the text label AND a
+   left edge — never colour alone — so the label uses high-contrast body ink. ---- */
 .wcb-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0.75rem 0 1.25rem;
+  gap: var(--space-2xs);
+  margin: var(--space-xs) 0 var(--space-md);
 }
-/* Status is conveyed by the (left) border colour, not the text colour, so the
-   label always uses the theme's high-contrast body colour and passes WCAG AA on
-   both light and dark themes. The text itself ("verified", "active", …) carries
-   the meaning — never colour alone. */
 .wcb-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.78rem;
-  font-weight: 600;
+  gap: var(--space-3xs);
+  font-size: var(--step--1);
+  font-weight: var(--weight-bold);
   line-height: 1;
   padding: 0.32rem 0.55rem;
-  border-radius: 999px;
-  border: 1px solid var(--sl-color-gray-5);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--edge);
   border-left-width: 4px;
-  background: var(--sl-color-gray-6);
-  color: var(--sl-color-text);
+  background: var(--surface);
+  color: var(--ink);
 }
-.wcb-badge--verified { border-left-color: #2da44e; }
-.wcb-badge--blocked { border-left-color: #cf222e; }
-.wcb-badge--under_review { border-left-color: #bf8700; }
-.wcb-badge--active { border-left-color: #2da44e; }
-.wcb-badge--minimal { border-left-color: #bf8700; }
-.wcb-badge--dormant { border-left-color: #bc4c00; }
-.wcb-badge--abandoned { border-left-color: #cf222e; }
-.wcb-badge--advisory { border-left-color: #bc4c00; }
+.wcb-badge--verified { border-left-color: var(--ok-edge); }
+.wcb-badge--blocked { border-left-color: var(--danger-edge); }
+.wcb-badge--under_review { border-left-color: var(--warn-edge); }
+.wcb-badge--active { border-left-color: var(--ok-edge); }
+.wcb-badge--minimal { border-left-color: var(--warn-edge); }
+.wcb-badge--dormant { border-left-color: var(--signal); }
+.wcb-badge--abandoned { border-left-color: var(--danger-edge); }
+.wcb-badge--advisory { border-left-color: var(--signal); }
 
 /* Compact definition grid for catalog entry metadata. */
 .wcb-meta {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 0.35rem 1rem;
-  margin: 1rem 0 1.5rem;
-  font-size: 0.9rem;
+  gap: var(--space-3xs) var(--space-sm);
+  margin: var(--space-sm) 0 var(--space-md);
+  font-size: var(--step-0);
 }
-.wcb-meta dt { font-weight: 600; color: var(--sl-color-gray-2); }
+.wcb-meta dt { font-weight: var(--weight-bold); color: var(--ink-soft); }
 .wcb-meta dd { margin: 0; }
