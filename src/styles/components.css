@@ -1,0 +1,301 @@
+/* components.css — the component layer, built entirely on tokens.css.
+   Two jobs: (1) re-dress Starlight's chrome + content components so no screen
+   reads as default-Starlight, and (2) provide reusable component classes the
+   Svelte islands share. "Civic workshop": structural green, chunky-friendly
+   forms, one marigold accent per view, generous space. No raw hex here. */
+
+/* =============================== CHROME =============================== */
+
+/* Header: opaque paper with a confident structural-green base rule — the bench
+   edge of the workshop, on every page. */
+.header {
+  background: var(--bg);
+  border-bottom: 2px solid var(--structure);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Search trigger reads as a real control, not a faint pill. */
+.header [data-open-modal],
+.header button.sl-flex[aria-keyshortcuts] {
+  background: var(--surface);
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+}
+.header [data-open-modal]:hover { border-color: var(--structure); color: var(--ink); }
+
+/* Sidebar nav: quiet links, a bold current item with a marigold marker. */
+.sidebar-content a {
+  color: var(--ink-soft);
+  border-radius: var(--radius-sm);
+  font-weight: var(--weight-medium);
+}
+.sidebar-content a:hover { color: var(--ink); background: var(--surface); }
+.sidebar-content a[aria-current='page'] {
+  color: var(--structure);
+  background: color-mix(in srgb, var(--structure) 10%, transparent);
+  font-weight: var(--weight-bold);
+  position: relative;
+}
+.sidebar-content a[aria-current='page']::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block: 0.35rem;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--signal);
+}
+/* Group headings in the display face. */
+.sidebar-content :is(summary, .large, span.group-label) {
+  font-family: var(--font-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* Right-hand "On this page" TOC. */
+.right-sidebar starlight-toc a { color: var(--ink-soft); }
+.right-sidebar starlight-toc a:hover,
+.right-sidebar starlight-toc a[aria-current='true'] { color: var(--structure); }
+
+/* Prev/next pagination read as cards, not list items. */
+.pagination-links a {
+  background: var(--surface);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  transition: transform var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+}
+.pagination-links a:hover { transform: translateY(-2px); border-color: var(--structure); }
+.pagination-links a span:last-child { color: var(--ink); font-weight: var(--weight-bold); }
+
+/* ====================== BUTTON SYSTEM (one source) ====================== */
+/* Primary = filled structure. Secondary = outlined. Tertiary = text.
+   One primary per view. Shared by Starlight actions + island .btn classes. */
+.sl-link-button,
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  min-height: 2.75rem; /* 44px target */
+  padding: 0 var(--space-md);
+  border-radius: var(--radius);
+  font-weight: var(--weight-bold);
+  font-family: var(--font-sans);
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out);
+}
+.sl-link-button.primary,
+.btn--primary {
+  background: var(--structure);
+  color: var(--on-structure);
+  border-color: var(--structure);
+}
+.sl-link-button.primary:hover,
+.btn--primary:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--structure) 88%, black); }
+.sl-link-button.primary:active,
+.btn--primary:active { transform: translateY(0); }
+
+.sl-link-button.secondary,
+.btn--secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--control-edge);
+}
+.sl-link-button.secondary:hover,
+.btn--secondary:hover { border-color: var(--structure); background: color-mix(in srgb, var(--structure) 8%, transparent); }
+
+.sl-link-button.minimal,
+.btn--text {
+  background: transparent;
+  color: var(--structure);
+  border-color: transparent;
+  padding-inline: var(--space-2xs);
+}
+.sl-link-button.minimal:hover,
+.btn--text:hover { background: color-mix(in srgb, var(--structure) 8%, transparent); }
+
+.btn:disabled, .btn[aria-disabled='true'] { opacity: 0.55; cursor: default; transform: none; }
+
+/* ============================== CARDS ============================== */
+.card,
+.sl-link-card {
+  background: var(--surface);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  box-shadow: none;
+  transition: transform var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+}
+.card:hover,
+.sl-link-card:hover { transform: translateY(-2px); border-color: var(--structure); }
+.sl-link-card:focus-within { border-color: var(--structure); }
+.card .icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--structure);
+  color: var(--on-structure);
+  border: 0;
+  border-radius: var(--radius);
+  font-size: 1.2rem;
+}
+.card .title { gap: var(--space-2xs); align-items: center; font-family: var(--font-display); }
+
+/* ===================== READING LAYER (markdown) ===================== */
+/* Designed long-form reading — chunky callout cards + display headings + a
+   marigold masthead tick. Deliberately NOT a hairline broadsheet. */
+.content-panel h1#_top {
+  font-size: clamp(var(--step-5), 5vw, var(--step-7));
+  line-height: 1.05;
+}
+.content-panel h1#_top::before {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--signal);
+  margin-bottom: var(--space-sm);
+}
+.sl-markdown-content { font-size: 1.02rem; }
+.sl-markdown-content p { line-height: 1.7; }
+.sl-markdown-content > p:first-of-type { font-size: var(--step-1); line-height: 1.6; color: var(--ink); }
+.sl-markdown-content :is(h2, h3) { font-family: var(--font-display); letter-spacing: -0.015em; }
+.sl-markdown-content h2 {
+  font-size: var(--step-3);
+  margin-top: var(--space-xl);
+  padding-top: var(--space-sm);
+  border-top: 0;
+}
+.sl-markdown-content h2::before {
+  content: "";
+  display: block;
+  width: 1.75rem;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--structure);
+  margin-bottom: var(--space-xs);
+}
+.sl-markdown-content h3 {
+  font-size: var(--step-2);
+  margin-top: var(--space-lg);
+  padding-inline-start: var(--space-sm);
+  border-inline-start: 3px solid var(--structure);
+}
+
+/* Pull-quote */
+.sl-markdown-content blockquote {
+  border: 0;
+  border-inline-start: 4px solid var(--signal);
+  margin: var(--space-lg) 0;
+  padding: 0 0 0 var(--space-md);
+  font-size: var(--step-1);
+  line-height: 1.5;
+  font-style: normal;
+  color: var(--ink);
+}
+
+/* Asides → callout cards with an icon chip. */
+.sl-markdown-content .starlight-aside {
+  --ca: var(--structure);
+  --ca-text: var(--structure);
+  border: 1px solid var(--edge);
+  border-inline-start: 0;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: var(--space-md);
+}
+.sl-markdown-content .starlight-aside--caution,
+.sl-markdown-content .starlight-aside--danger { --ca: var(--signal); --ca-text: var(--danger-text); }
+.sl-markdown-content .starlight-aside__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: var(--weight-bold);
+  color: var(--ca-text);
+  margin-bottom: var(--space-2xs);
+}
+.sl-markdown-content .starlight-aside__icon {
+  box-sizing: border-box;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0.38rem;
+  border-radius: var(--radius-sm);
+  background: var(--ca);
+  color: var(--on-structure);
+  flex: 0 0 auto;
+}
+.sl-markdown-content .starlight-aside--caution .starlight-aside__icon,
+.sl-markdown-content .starlight-aside--danger .starlight-aside__icon { color: var(--on-signal); }
+.sl-markdown-content .starlight-aside__content { color: var(--ink-soft); }
+.sl-markdown-content .starlight-aside__content a { color: var(--ca-text); }
+
+/* Steps → green numbered markers. */
+.sl-markdown-content .sl-steps > li::before {
+  background: var(--structure) !important;
+  border-color: var(--structure) !important;
+  color: var(--on-structure) !important;
+  font-weight: var(--weight-black) !important;
+}
+
+/* Tables */
+.sl-markdown-content table { width: 100%; border-collapse: collapse; }
+.sl-markdown-content thead th {
+  text-align: start;
+  border-bottom: 2px solid var(--structure);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  padding: var(--space-2xs) var(--space-sm);
+}
+.sl-markdown-content tbody td { border-bottom: 1px solid var(--edge); padding: var(--space-2xs) var(--space-sm); }
+.sl-markdown-content hr { border: 0; border-top: 2px solid var(--edge-strong); margin: var(--space-xl) 0; }
+
+/* =================== ISLAND UTILITIES (shared) =================== */
+.field { display: flex; flex-direction: column; gap: var(--space-2xs); }
+.field > span, .field > label { font-weight: var(--weight-bold); font-size: var(--step--1); color: var(--ink); }
+.input, .field :is(input, textarea, select) {
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--control-edge);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  transition: border-color var(--dur-1) var(--ease-out);
+}
+.field :is(input, textarea, select):focus { border-color: var(--structure); }
+.surface { background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-lg); }
+.chip {
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--control-edge);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: var(--weight-medium);
+}
+.chip--on { background: var(--structure); color: var(--on-structure); border-color: var(--structure); }
+
+/* inline feedback states */
+.feedback { border-radius: var(--radius); padding: var(--space-sm) var(--space-md); border: 1px solid var(--edge); border-inline-start-width: 4px; background: var(--surface); }
+.feedback--ok { border-inline-start-color: var(--ok-edge); }
+.feedback--warn { border-inline-start-color: var(--warn-edge); }
+.feedback--danger { border-inline-start-color: var(--danger-edge); }
+.feedback--info { border-inline-start-color: var(--structure); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-link-button, .btn, .card, .sl-link-card, .pagination-links a { transition: none; }
+}
