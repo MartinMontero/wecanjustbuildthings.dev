@@ -99,6 +99,10 @@ export const catalogFields = z.object({
   // ---- Maintenance ----
   maintenance_status: z.enum(MAINTENANCE_STATUS).default('unknown'),
   last_release_at: z.string().optional(),
+  /** The concrete release the license was verified at, recorded so generated
+   *  starters can pin to it instead of `latest`. Optional: some entries resolve
+   *  no version (e.g. source-only repos). */
+  version: z.string().optional(),
 
   // ---- AOS adoption metadata ----
   aos_repos_using: z.number().int().nonnegative().optional(),

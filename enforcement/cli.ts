@@ -84,6 +84,7 @@ function doLayer1(): void {
     else hadBlock = true;
   }
   if (treeDir) {
+    didWork = true;
     heading(`Layer 1 — manifests in tree (${treeDir})`);
     const report = runLayer1OnTree(treeDir, orgs);
     writeJsonReport(`${reportDir}/layer1-tree.json`, report);

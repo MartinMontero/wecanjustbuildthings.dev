@@ -27,6 +27,7 @@ export const GET: APIRoute = async () => {
     commit: (e.data.license_source_commit_sha as string) ?? null,
     verifiedAt: (e.data.verified_at as string) ?? null,
     maintenance: (e.data.maintenance_status as string) ?? 'unknown',
+    version: (e.data.version as string) ?? null,
     verification: (e.data.verification_status as string) ?? 'under_review',
     advisory: (e.data.origin_advisory as string) ?? null,
     blockedReason: (e.data.verification_blocked_reason as string) ?? null,
