@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { zipSync, strToU8 } from 'fflate';
+  import { loadSession, updateSession, hasSession } from '../lib/build-session.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
@@ -208,12 +209,55 @@
     // (the site-wide picker switches the surrounding chrome; this keeps the tool in sync).
     const dl = document.documentElement.lang?.slice(0, 2);
     if (dl && ['en', 'es', 'ar'].includes(dl)) lang = dl as Lang;
+
+    // Resume the persisted build session (the connective tissue): restore the
+    // builder's intent + blueprint edits across reloads, and pick up a tool
+    // seeded by the Catalog's "Build with this" — so nothing is ever re-asked.
+    // Done BEFORE the catalog fetch so a late-resolving await can never clobber
+    // restored input, and before the builder can type. The persistence $effect
+    // stays inert until `loading` flips false, so this hydration is not echoed.
+    if (hasSession()) {
+      const s = loadSession();
+      if (s.intent.projectName) projectName = s.intent.projectName;
+      if (s.intent.problem) problem = s.intent.problem;
+      if (s.intent.goal) goal = s.intent.goal;
+      if (s.intent.success) success = s.intent.success;
+      if (s.intent.protocols.length) protocols = new Set(s.intent.protocols);
+      if (Object.keys(s.adjustments.swaps).length) swaps = { ...s.adjustments.swaps };
+      if (s.adjustments.removed.length) removed = new Set(s.adjustments.removed);
+      if (s.adjustments.extra.length || s.seededTool) {
+        const ex = new Set(s.adjustments.extra);
+        if (s.seededTool) ex.add(s.seededTool);
+        extra = ex;
+      }
+      if (s.handoff) handoff = s.handoff as typeof handoff;
+    }
+
     try { const res = await fetch('/catalog.json'); items = (await res.json()).filter((i: Item & { kind?: string }) => (i as any).kind !== 'dataset'); } catch { /* offline */ }
     loading = false;
+
     const gh = new URLSearchParams(location.search).get('gh');
     if (gh === 'connected') { handoff = 'github'; ghConnected = true; step = 3; }
     else if (gh === 'error') { handoff = 'github'; step = 3; ghResult = `error:${t.ghError}`; }
     else if (gh === 'unconfigured') { handoff = 'github'; step = 3; ghConfigured = false; }
+  });
+
+  // Persist intent + blueprint edits to the build session on every change, so
+  // the builder's progress survives reloads and travels to the other movements.
+  // (Path A: deterministic and entirely on-device — no network, no model.)
+  $effect(() => {
+    if (loading) return;
+    const intent = {
+      projectName, problem, goal, success, protocols: [...protocols],
+    };
+    const adjustments = { swaps: { ...swaps }, removed: [...removed], extra: [...extra] };
+    const method = handoff;
+    updateSession((s) => ({
+      ...s,
+      intent: { ...s.intent, ...intent },
+      adjustments,
+      handoff: method,
+    }));
   });
 
   const slug = $derived((projectName || 'my-app').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '') || 'my-app');
