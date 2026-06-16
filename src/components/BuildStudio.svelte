@@ -669,9 +669,11 @@ ${chosenItems.map((it) => `- ${it.verification === 'verified' ? '★ ' : ''}${it
       if (pinning.has(it.name)) continue;
       pinning.add(it.name);
       fetch(`/api/license?eco=js&name=${encodeURIComponent(it.name)}`)
-        .then((r) => (r.ok ? r.json() : null))
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
         .then((d) => { if (d?.version) versionPins = { ...versionPins, [it.name]: d.version }; })
-        .catch(() => { /* offline / dev: dep falls back to latest */ });
+        // On a transient failure, drop the in-flight guard so a later run retries
+        // instead of permanently pinning this dep to `latest`.
+        .catch(() => { pinning.delete(it.name); });
     }
   });
   const packageJson = $derived(JSON.stringify({
