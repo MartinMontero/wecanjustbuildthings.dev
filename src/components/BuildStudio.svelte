@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { zipSync, strToU8 } from 'fflate';
-  import { loadSession, updateSession, hasSession, type SessionStackItem } from '../lib/build-session.ts';
+  import { loadSession, updateSession, hasSession, clearSession, type SessionStackItem } from '../lib/build-session.ts';
   import { matchDependency } from '../../enforcement/matcher.ts';
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
   import { detectSignals, pickQuestions, reflect, type ConstraintId } from '../lib/mentor-engine.ts';
@@ -21,7 +21,7 @@
   type Lang = 'en' | 'es' | 'ar';
   const STR: Record<Lang, Record<string, string>> = {
     en: {
-      s1: '1 · Describe', s2: '2 · Your blueprint', s3: '3 · Build it',
+      s1: '1 · Describe', s2: '2 · Your blueprint', s3: '3 · Build it', startOver: 'Start over',
       name: 'Project name (a short nickname is fine)',
       problem: 'What problem does it solve, and for whom? Say it like you would out loud — one short paragraph.',
       why: 'Why does this matter? The real change you want — not just “ship an app.”',
@@ -30,7 +30,7 @@
       tenq: 'Start with the why. Answer these the way you’d explain the project to a friend — the clearer you are, the better your AI agent builds.',
       protoHelp: 'A “network” (protocol) is the shared, open rulebook your tool plugs into — owned by no single company. Nostr and AT Protocol (Bluesky) are open social networks; pick “general” if it isn’t a social tool.',
       choose: 'Show me the blueprint →', back: '← Back', gen: 'Build it →', backStack: '← Back to the blueprint',
-      bpHead: 'Here’s how I’d build', bpPieces: 'The pieces you’ll need', bpWhyFor: 'Why this, for you:', bpConnects: 'How it fits in:', bpReceipt: 'License verified at commit',
+      bpHead: 'Here’s how I’d build', bpPieces: 'The pieces you’ll need', bpWhyFor: 'Why this, for you:', bpConnects: 'How it fits in:', bpReceipt: 'License verified at commit', bpAdded: 'Added to your blueprint', bpSeeded: 'From the catalog', bpAddedByYou: 'Added by you',
       bpSwap: 'Swap', bpUse: 'Use this instead', bpRemove: 'Remove', bpKeep: 'Add back', bpFits: 'How it all comes together',
       bpAdvanced: 'Power user? Browse and add tools yourself', bpEmpty: 'Tell me what you want to build first — go back and describe it in a sentence or two.',
       bpLead: 'You don’t need to know any of these by name. I picked a small, proven set for what you described and wired them together. Keep it as-is, or swap any piece — every option is safe and license-checked.',
@@ -74,7 +74,7 @@
       skillsIncluded: 'skill(s) will be included in your starter',
     },
     es: {
-      s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo',
+      s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo', startOver: 'Empezar de nuevo',
       name: 'Nombre del proyecto (un apodo corto vale)',
       problem: '¿Qué problema resuelve y para quién? Dilo como lo dirías en voz alta — un párrafo corto.',
       why: '¿Por qué importa? El cambio real que buscas — no solo “lanzar una app.”',
@@ -83,7 +83,7 @@
       tenq: 'Empieza por el porqué. Responde como si le explicaras el proyecto a un amigo — cuanto más claro seas, mejor construye tu agente de IA.',
       protoHelp: 'Una “red” (protocolo) es el reglamento abierto y compartido al que se conecta tu herramienta — sin dueño único. Nostr y AT Protocol (Bluesky) son redes sociales abiertas; elige “general” si no es una herramienta social.',
       choose: 'Muéstrame el plano →', back: '← Atrás', gen: 'Construirlo →', backStack: '← Volver al plano',
-      bpHead: 'Así lo construiría', bpPieces: 'Las piezas que necesitarás', bpWhyFor: 'Por qué esta, para ti:', bpConnects: 'Cómo encaja:', bpReceipt: 'Licencia verificada en el commit',
+      bpHead: 'Así lo construiría', bpPieces: 'Las piezas que necesitarás', bpWhyFor: 'Por qué esta, para ti:', bpConnects: 'Cómo encaja:', bpReceipt: 'Licencia verificada en el commit', bpAdded: 'Añadido a tu plano', bpSeeded: 'Del catálogo', bpAddedByYou: 'Añadido por ti',
       bpSwap: 'Cambiar', bpUse: 'Usar esta', bpRemove: 'Quitar', bpKeep: 'Volver a añadir', bpFits: 'Cómo se une todo',
       bpAdvanced: '¿Experto? Explora y añade herramientas tú mismo', bpEmpty: 'Primero dime qué quieres construir — vuelve y descríbelo en una o dos frases.',
       bpLead: 'No necesitas conocer ninguna de estas por su nombre. Elegí un conjunto pequeño y probado para lo que describiste y las conecté entre sí. Déjalo así, o cambia cualquier pieza — cada opción es segura y con licencia verificada.',
@@ -127,7 +127,7 @@
       skillsIncluded: 'habilidad(es) se incluirán en tu kit inicial',
     },
     ar: {
-      s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه',
+      s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه', startOver: 'ابدأ من جديد',
       name: 'اسم المشروع (يكفي اسم مختصر)',
       problem: 'ما المشكلة التي يحلها، ولمن؟ قُلها كما تقولها بصوتك — فقرة قصيرة.',
       why: 'لماذا يهمّ هذا؟ التغيير الحقيقي الذي تريده — وليس مجرد «إطلاق تطبيق».',
@@ -136,7 +136,7 @@
       tenq: 'ابدأ بالـ«لماذا». أجب كأنك تشرح المشروع لصديق — كلما كنت أوضح، بنى وكيل الذكاء الاصطناعي بشكل أفضل.',
       protoHelp: 'الـ«شبكة» (البروتوكول) هي القواعد المفتوحة المشتركة التي تتصل بها أداتك — لا يملكها طرف واحد. Nostr وAT Protocol (Bluesky) شبكات اجتماعية مفتوحة؛ اختر «general» إن لم تكن أداة اجتماعية.',
       choose: 'أرني المخطط ←', back: '→ رجوع', gen: 'ابنِه ←', backStack: '→ العودة للمخطط',
-      bpHead: 'هكذا سأبنيه', bpPieces: 'القطع التي ستحتاجها', bpWhyFor: 'لماذا هذه، لك:', bpConnects: 'كيف تتكامل:', bpReceipt: 'الترخيص مُتحقَّق عند الـcommit',
+      bpHead: 'هكذا سأبنيه', bpPieces: 'القطع التي ستحتاجها', bpWhyFor: 'لماذا هذه، لك:', bpConnects: 'كيف تتكامل:', bpReceipt: 'الترخيص مُتحقَّق عند الـcommit', bpAdded: 'أُضيف إلى مخطّطك', bpSeeded: 'من الكتالوج', bpAddedByYou: 'أضفته أنت',
       bpSwap: 'تبديل', bpUse: 'استخدم هذه', bpRemove: 'إزالة', bpKeep: 'إعادة الإضافة', bpFits: 'كيف يتكامل كل شيء',
       bpAdvanced: 'خبير؟ تصفّح وأضف الأدوات بنفسك', bpEmpty: 'أخبرني أولاً بما تريد بناءه — ارجع وصِفه في جملة أو جملتين.',
       bpLead: 'لا حاجة لأن تعرف أيّاً منها بالاسم. اخترتُ مجموعة صغيرة ومُجرَّبة لما وصفته وربطتها معاً. اتركها كما هي، أو بدّل أي قطعة — كل خيار آمن ومُتحقَّق من ترخيصه.',
@@ -201,6 +201,7 @@
   let swaps = $state<Record<string, string>>({});
   let removed = $state<Set<string>>(new Set());
   let extra = $state<Set<string>>(new Set());
+  let seededTool = $state<string | null>(null);
 
   const ALL_PROTOCOLS = ['nostr', 'atproto', 'lightning', 'cashu', 'general'];
   const PROTO_PRIORITY: Record<string, string[]> = {
@@ -238,7 +239,7 @@
       if (s.adjustments.removed.length) removed = new Set(s.adjustments.removed);
       if (s.adjustments.extra.length || s.seededTool) {
         const ex = new Set(s.adjustments.extra);
-        if (s.seededTool) ex.add(s.seededTool);
+        if (s.seededTool) { ex.add(s.seededTool); seededTool = s.seededTool; }
         extra = ex;
       }
       if (s.intent.answers && Object.keys(s.intent.answers).length) mentorAnswers = { ...(s.intent.answers as Record<string, string>) };
@@ -255,10 +256,21 @@
     try { const pr = await fetch('/policy.json'); policyOrgs = (await pr.json()).orgs ?? []; } catch { /* offline: stack stays unverified in-browser, flow still works */ }
     loading = false;
 
-    const gh = new URLSearchParams(location.search).get('gh');
+    const params = new URLSearchParams(location.search);
+    const gh = params.get('gh');
     if (gh === 'connected') { handoff = 'github'; ghConnected = true; step = 3; }
     else if (gh === 'error') { handoff = 'github'; step = 3; ghResult = `error:${t.ghError}`; }
     else if (gh === 'unconfigured') { handoff = 'github'; step = 3; ghConfigured = false; }
+
+    // Catalog hand-off: "Build with this" lands here as ?seed=<tool>. Seed the
+    // tool into the stack, open at the blueprint, and clean the URL.
+    const seed = params.get('seed');
+    if (seed) {
+      const n = new Set(extra); n.add(seed); extra = n;
+      seededTool = seed;
+      if (step < 2) step = 2;
+      history.replaceState(null, '', location.pathname);
+    }
   });
 
   // Persist intent + blueprint edits to the build session on every change, so
@@ -279,6 +291,7 @@
       ? { statement: problem.trim(), constraints: reflection.constraints.map((c) => m.c[c]), signals: reflection.signals }
       : null;
     const skills = authoredSkills.map((sk) => ({ name: slugifySkill(sk.name), description: sk.description, source: sk.source, steps: sk.method, body: skillToMd(sk) }));
+    const movement = (step >= 3 ? 4 : step) as 1 | 2 | 3 | 4;
     updateSession((s) => ({
       ...s,
       intent: { ...s.intent, ...intent, answers },
@@ -287,6 +300,8 @@
       handoff: method,
       stack,
       skills,
+      seededTool,
+      movement,
     }));
   });
 
@@ -389,6 +404,9 @@
     return s;
   });
   const chosenItems = $derived(items.filter((it) => chosen.has(it.name)));
+  // Tools the builder added by hand or seeded from the Catalog — shown in the
+  // blueprint as their own pieces (not just checkboxes), with full evidence.
+  const extraItems = $derived(items.filter((it) => extra.has(it.name) && !blueprint.some((p) => !removed.has(p.capId) && p.item.name === it.name)));
 
   // ---- Movement 2/4: receipts travel + in-browser policy re-verification ----
   // Map a catalog Item into a session stack entry carrying its license-at-commit
@@ -517,6 +535,16 @@
   const reflection = $derived(problem.trim().length > 8 ? reflect(signals, mentorAnswers) : { signals: [], constraints: [] as ConstraintId[] });
   const m = $derived(MENTOR_STR[lang] ?? MENTOR_STR.en);
   function answerMentor(qid: string, oid: string) { mentorAnswers = { ...mentorAnswers, [qid]: oid }; }
+
+  // Clear the whole build session and start fresh — so the persisted draft is
+  // never a trap the builder can't escape.
+  function startOver() {
+    clearSession();
+    projectName = ''; problem = ''; goal = ''; success = '';
+    protocols = new Set(['nostr']); swaps = {}; removed = new Set(); extra = new Set();
+    seededTool = null; mentorAnswers = {}; authoredSkills = []; customSkills = {};
+    handoff = 'zip'; step = 1;
+  }
 
   // ---------- Movement 2: advisories + deterministic chemistry ----------
   const ADV: Record<Lang, { worksWith: string; conflict: string; metaOrigin: string; dormant: string; abandoned: string; providerPicker: string }> = {
@@ -985,6 +1013,9 @@ manuals with the knowledge-to-skills-pipeline).
 
 <div class="studio" dir={rtl ? 'rtl' : 'ltr'}>
   <div class="langbar">
+    {#if problem.trim() || extra.size || authoredSkills.length}
+      <button class="lang start-over" onclick={startOver}>↺ {t.startOver}</button>
+    {/if}
     {#each ['en', 'es', 'ar'] as l}
       <button class="lang" class:on={lang === l} onclick={() => (lang = l as Lang)} aria-pressed={lang === l}>{l === 'en' ? 'English' : l === 'es' ? 'Español' : 'العربية'}</button>
     {/each}
@@ -1090,6 +1121,25 @@ manuals with the knowledge-to-skills-pipeline).
           </li>
         {/each}
       </ol>
+      {#if extraItems.length}
+        <h4 class="bp-sub">{t.bpAdded}</h4>
+        <ol class="pieces">
+          {#each extraItems as it (it.name)}
+            <li class="piece">
+              <div class="piece-head"><span class="add-label">{seededTool === it.name ? t.bpSeeded : t.bpAddedByYou}</span><button class="toggle" onclick={() => toggleTool(it.name)}>{t.bpRemove}</button></div>
+              <div class="piece-tool">
+                <a class="tool-name" href={it.url}>{it.name}</a>
+                <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span>
+                <span class="tool-meta">{it.ecosystem} · {it.license}</span>
+              </div>
+              {#if it.commit}<p class="receipt"><span class="receipt-check" aria-hidden="true">✓</span> {#if it.licenseUrl}<a href={it.licenseUrl} target="_blank" rel="noopener noreferrer">{t.bpReceipt} <code>{it.commit.slice(0, 7)}</code></a>{:else}{t.bpReceipt} <code>{it.commit.slice(0, 7)}</code>{/if}</p>{/if}
+              {#if partnersOf(it.name, chem).length}<p class="works-with"><strong>{adv.worksWith}</strong> {partnersOf(it.name, chem).join(', ')}</p>{/if}
+              {#each advisoriesFor(it) as a (a)}<p class="advisory"><span aria-hidden="true">⚠</span> {a}</p>{/each}
+            </li>
+          {/each}
+        </ol>
+      {/if}
+
       <div class="fits">
         <strong>{t.bpFits}</strong>
         <p>{#each blueprint.filter((p) => !removed.has(p.capId)) as p, i}{i > 0 ? ' → ' : ''}<a href={p.item.url}>{p.item.name}</a> ({p.role.toLowerCase()}){/each}.</p>
@@ -1288,7 +1338,10 @@ manuals with the knowledge-to-skills-pipeline).
     padding: clamp(var(--space-sm), 3vw, var(--space-lg));
     border-top: 3px solid var(--structure);
   }
-  .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; margin-bottom: var(--space-sm); }
+  .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; align-items: center; margin-bottom: var(--space-sm); }
+  .start-over { margin-inline-end: auto; color: var(--ink-soft); }
+  .start-over:hover { color: var(--danger-text); border-color: var(--danger-edge); }
+  .add-label { font-weight: var(--weight-bold); color: var(--structure); }
   .lang { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: var(--radius-pill); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink-soft); cursor: pointer; }
   .lang.on { background: var(--structure); color: var(--on-structure); border-color: var(--structure); font-weight: var(--weight-bold); }
   /* Step indicator: a numbered progress rail. */
