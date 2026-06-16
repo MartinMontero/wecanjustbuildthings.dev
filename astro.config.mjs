@@ -87,7 +87,7 @@ export default defineConfig({
           label: 'Tools',
           translations: { es: 'Herramientas', ar: 'الأدوات' },
           items: [
-            { label: 'Build Studio', translations: { es: 'Estudio de construcción', ar: 'استوديو البناء' }, link: '/build/', badge: { text: 'new', variant: 'tip' } },
+            { label: 'Build Studio', translations: { es: 'Estudio de construcción', ar: 'استوديو البناء' }, link: '/build/', badge: { text: 'new', variant: 'default' } },
             { label: 'Check a dependency', translations: { es: 'Verifica una dependencia', ar: 'افحص اعتمادية' }, link: '/check/' },
           ],
         },
