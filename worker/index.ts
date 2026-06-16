@@ -11,16 +11,20 @@
  *   POST /api/github/create                 → create a repo and push the starter files
  *   GET  /api/auth/session                  → current session (authenticated? + user)
  *   POST /api/auth/logout                   → destroy the session and clear its cookie
+ *   POST /api/auth/nostr/challenge          → issue a single-use NIP-98 sign-in challenge
+ *   POST /api/auth/nostr/verify             → verify a signed NIP-98 event → session
  *
  * Static assets are served by the asset layer first; this Worker only runs for
  * /api/* routes, with env.ASSETS as the fallback for anything else.
  */
 import type { KVNamespace, D1Database } from './auth/cf.ts';
-import { authJson } from './auth/respond.ts';
+import { authJson, authError } from './auth/respond.ts';
 import {
-  resolveSession, destroySession, clearSessionCookie, readCookie,
-  SESSION_COOKIE, type AuthEnv,
+  resolveSession, destroySession, createSession, sessionCookie, clearSessionCookie,
+  readCookie, SESSION_COOKIE, type AuthEnv,
 } from './auth/session.ts';
+import { issueChallenge, verifyNostrAuth, sanitizeDisplayName } from './auth/nostr.ts';
+import { getOrCreateUserByIdentity } from './auth/db.ts';
 
 export interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -302,6 +306,40 @@ async function authLogoutHandler(request: Request, env: Env): Promise<Response> 
   return authJson({ ok: true }, 200, { 'set-cookie': clearSessionCookie() });
 }
 
+/** Absolute URL the NIP-98 `u` tag must match. Pinned to SITE_URL (config), not
+ *  the request Host header, so a spoofed Host can't change what we accept. */
+function nostrVerifyUrl(request: Request, env: Env): string {
+  const origin = env.SITE_URL ?? new URL(request.url).origin;
+  return `${origin}/api/auth/nostr/verify`;
+}
+
+async function nostrChallengeHandler(env: Env): Promise<Response> {
+  if (!authConfigured(env)) return authError(503, 'auth not configured');
+  return authJson({ challenge: await issueChallenge(env) });
+}
+
+async function nostrVerifyHandler(request: Request, env: Env): Promise<Response> {
+  if (!authConfigured(env)) return authError(503, 'auth not configured');
+  const rawBody = await request.text();
+  let parsed: { challenge?: string; displayName?: string };
+  try {
+    parsed = JSON.parse(rawBody);
+  } catch {
+    return authError();
+  }
+  const result = await verifyNostrAuth(
+    env, request.headers.get('authorization'), rawBody, nostrVerifyUrl(request, env), parsed.challenge ?? '',
+  );
+  if (!result) return authError(); // one generic 401 for every failure mode
+  const user = await getOrCreateUserByIdentity(env.DB, 'nostr', result.pubkey, sanitizeDisplayName(parsed.displayName));
+  const sid = await createSession(env, user.id);
+  return authJson(
+    { authenticated: true, user: { id: user.id, displayName: user.displayName } },
+    200,
+    { 'set-cookie': sessionCookie(sid) },
+  );
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -315,6 +353,8 @@ export default {
     if (path === '/api/github/create' && request.method === 'POST') return githubCreate(request);
     if (path === '/api/auth/session') return authSessionHandler(request, env);
     if (path === '/api/auth/logout' && request.method === 'POST') return authLogoutHandler(request, env);
+    if (path === '/api/auth/nostr/challenge' && request.method === 'POST') return nostrChallengeHandler(env);
+    if (path === '/api/auth/nostr/verify' && request.method === 'POST') return nostrVerifyHandler(request, env);
     return env.ASSETS.fetch(request);
   },
 };
