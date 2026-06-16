@@ -1,13 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { zipSync, strToU8 } from 'fflate';
-  import { loadSession, updateSession, hasSession } from '../lib/build-session.ts';
+  import { loadSession, updateSession, hasSession, type SessionStackItem } from '../lib/build-session.ts';
+  import { matchDependency } from '../../enforcement/matcher.ts';
+  import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
   interface Item {
     name: string; url: string; ecosystem: string; category: string;
     protocols: string[]; license: string; verification: string; uses: number; desc: string; repo: string | null;
+    licenseUrl?: string | null; commit?: string | null; verifiedAt?: string | null;
+    advisory?: string | null; blockedReason?: string | null; providerAgnostic?: boolean;
   }
 
   // ---------- i18n ----------
@@ -23,7 +27,7 @@
       tenq: 'Start with the why. Answer these the way you’d explain the project to a friend — the clearer you are, the better your AI agent builds.',
       protoHelp: 'A “network” (protocol) is the shared, open rulebook your tool plugs into — owned by no single company. Nostr and AT Protocol (Bluesky) are open social networks; pick “general” if it isn’t a social tool.',
       choose: 'Show me the blueprint →', back: '← Back', gen: 'Build it →', backStack: '← Back to the blueprint',
-      bpHead: 'Here’s how I’d build', bpPieces: 'The pieces you’ll need', bpWhyFor: 'Why this, for you:', bpConnects: 'How it fits in:',
+      bpHead: 'Here’s how I’d build', bpPieces: 'The pieces you’ll need', bpWhyFor: 'Why this, for you:', bpConnects: 'How it fits in:', bpReceipt: 'License verified at commit',
       bpSwap: 'Swap', bpUse: 'Use this instead', bpRemove: 'Remove', bpKeep: 'Add back', bpFits: 'How it all comes together',
       bpAdvanced: 'Power user? Browse and add tools yourself', bpEmpty: 'Tell me what you want to build first — go back and describe it in a sentence or two.',
       bpLead: 'You don’t need to know any of these by name. I picked a small, proven set for what you described and wired them together. Keep it as-is, or swap any piece — every option is safe and license-checked.',
@@ -75,7 +79,7 @@
       tenq: 'Empieza por el porqué. Responde como si le explicaras el proyecto a un amigo — cuanto más claro seas, mejor construye tu agente de IA.',
       protoHelp: 'Una “red” (protocolo) es el reglamento abierto y compartido al que se conecta tu herramienta — sin dueño único. Nostr y AT Protocol (Bluesky) son redes sociales abiertas; elige “general” si no es una herramienta social.',
       choose: 'Muéstrame el plano →', back: '← Atrás', gen: 'Construirlo →', backStack: '← Volver al plano',
-      bpHead: 'Así lo construiría', bpPieces: 'Las piezas que necesitarás', bpWhyFor: 'Por qué esta, para ti:', bpConnects: 'Cómo encaja:',
+      bpHead: 'Así lo construiría', bpPieces: 'Las piezas que necesitarás', bpWhyFor: 'Por qué esta, para ti:', bpConnects: 'Cómo encaja:', bpReceipt: 'Licencia verificada en el commit',
       bpSwap: 'Cambiar', bpUse: 'Usar esta', bpRemove: 'Quitar', bpKeep: 'Volver a añadir', bpFits: 'Cómo se une todo',
       bpAdvanced: '¿Experto? Explora y añade herramientas tú mismo', bpEmpty: 'Primero dime qué quieres construir — vuelve y descríbelo en una o dos frases.',
       bpLead: 'No necesitas conocer ninguna de estas por su nombre. Elegí un conjunto pequeño y probado para lo que describiste y las conecté entre sí. Déjalo así, o cambia cualquier pieza — cada opción es segura y con licencia verificada.',
@@ -127,7 +131,7 @@
       tenq: 'ابدأ بالـ«لماذا». أجب كأنك تشرح المشروع لصديق — كلما كنت أوضح، بنى وكيل الذكاء الاصطناعي بشكل أفضل.',
       protoHelp: 'الـ«شبكة» (البروتوكول) هي القواعد المفتوحة المشتركة التي تتصل بها أداتك — لا يملكها طرف واحد. Nostr وAT Protocol (Bluesky) شبكات اجتماعية مفتوحة؛ اختر «general» إن لم تكن أداة اجتماعية.',
       choose: 'أرني المخطط ←', back: '→ رجوع', gen: 'ابنِه ←', backStack: '→ العودة للمخطط',
-      bpHead: 'هكذا سأبنيه', bpPieces: 'القطع التي ستحتاجها', bpWhyFor: 'لماذا هذه، لك:', bpConnects: 'كيف تتكامل:',
+      bpHead: 'هكذا سأبنيه', bpPieces: 'القطع التي ستحتاجها', bpWhyFor: 'لماذا هذه، لك:', bpConnects: 'كيف تتكامل:', bpReceipt: 'الترخيص مُتحقَّق عند الـcommit',
       bpSwap: 'تبديل', bpUse: 'استخدم هذه', bpRemove: 'إزالة', bpKeep: 'إعادة الإضافة', bpFits: 'كيف يتكامل كل شيء',
       bpAdvanced: 'خبير؟ تصفّح وأضف الأدوات بنفسك', bpEmpty: 'أخبرني أولاً بما تريد بناءه — ارجع وصِفه في جملة أو جملتين.',
       bpLead: 'لا حاجة لأن تعرف أيّاً منها بالاسم. اخترتُ مجموعة صغيرة ومُجرَّبة لما وصفته وربطتها معاً. اتركها كما هي، أو بدّل أي قطعة — كل خيار آمن ومُتحقَّق من ترخيصه.',
@@ -176,6 +180,7 @@
 
   // ---------- state ----------
   let items = $state<Item[]>([]);
+  let policyOrgs = $state<ExcludedOrg[]>([]);
   let loading = $state(true);
   let step = $state(1);
   let projectName = $state('');
@@ -234,6 +239,9 @@
     }
 
     try { const res = await fetch('/catalog.json'); items = (await res.json()).filter((i: Item & { kind?: string }) => (i as any).kind !== 'dataset'); } catch { /* offline */ }
+    // Load the same excluded-org policy the dependency checker uses, so the
+    // Studio can re-verify its own assembled stack in-browser (Movement 4).
+    try { const pr = await fetch('/policy.json'); policyOrgs = (await pr.json()).orgs ?? []; } catch { /* offline: stack stays unverified in-browser, flow still works */ }
     loading = false;
 
     const gh = new URLSearchParams(location.search).get('gh');
@@ -252,11 +260,13 @@
     };
     const adjustments = { swaps: { ...swaps }, removed: [...removed], extra: [...extra] };
     const method = handoff;
+    const stack = sessionStack.map((it) => ({ ...it, receipt: it.receipt ? { ...it.receipt } : undefined }));
     updateSession((s) => ({
       ...s,
       intent: { ...s.intent, ...intent },
       adjustments,
       handoff: method,
+      stack,
     }));
   });
 
@@ -359,6 +369,47 @@
     return s;
   });
   const chosenItems = $derived(items.filter((it) => chosen.has(it.name)));
+
+  // ---- Movement 2/4: receipts travel + in-browser policy re-verification ----
+  // Map a catalog Item into a session stack entry carrying its license-at-commit
+  // receipt + advisory, so the evidence travels with the tool into the blueprint
+  // and the handoff artifacts — never asking the builder to take a README's word.
+  function stackItemFrom(capId: string, reason: string, it: Item): SessionStackItem {
+    return {
+      capId, name: it.name, reason, catalogUrl: it.url,
+      receipt: {
+        license: it.license,
+        commitSha: it.commit ?? null,
+        sourceUrl: it.licenseUrl ?? null,
+        verification: it.verification,
+        advisory: it.advisory ?? null,
+      },
+    };
+  }
+  const sessionStack = $derived.by<SessionStackItem[]>(() => {
+    const out: SessionStackItem[] = [];
+    for (const p of blueprint) if (!removed.has(p.capId)) out.push(stackItemFrom(p.capId, p.why, p.item));
+    for (const name of extra) {
+      const it = items.find((x) => x.name === name);
+      if (it && !out.some((s) => s.name === it.name)) out.push(stackItemFrom('extra', it.desc, it));
+    }
+    return out;
+  });
+  // Re-run the shared exclusion policy on the assembled stack, in the browser —
+  // the same matchDependency() the dependency checker and the CLI engine use.
+  // The catalog is already enforced at build, so this should always be clean; it
+  // is the live guarantee that the handoff the builder downloads is policy-clean.
+  const policyMatches = $derived.by(() => {
+    if (!policyOrgs.length) return [] as Array<{ name: string; org: string }>;
+    const hits: Array<{ name: string; org: string }> = [];
+    for (const it of chosenItems) {
+      for (const m of matchDependency({ name: it.name, ecosystem: it.ecosystem as Ecosystem, source_file: 'studio' }, policyOrgs)) {
+        hits.push({ name: it.name, org: m.org_key });
+      }
+    }
+    return hits;
+  });
+  const policyClean = $derived(policyOrgs.length > 0 && policyMatches.length === 0);
 
   // Advanced escape hatch: search the full catalog by hand.
   const addResults = $derived.by(() => {
@@ -833,6 +884,9 @@ manuals with the knowledge-to-skills-pipeline).
               <span class="vbadge vbadge--{p.item.verification}">{p.item.verification.replace('_', ' ')}</span>
               <span class="tool-meta">{p.item.ecosystem} · {p.item.license}</span>
             </div>
+            {#if p.item.commit}
+              <p class="receipt"><span class="receipt-check" aria-hidden="true">✓</span> {#if p.item.licenseUrl}<a href={p.item.licenseUrl} target="_blank" rel="noopener noreferrer">{t.bpReceipt} <code>{p.item.commit.slice(0, 7)}</code></a>{:else}{t.bpReceipt} <code>{p.item.commit.slice(0, 7)}</code>{/if}</p>
+            {/if}
             <p class="piece-why"><strong>{t.bpWhyFor}</strong> {p.why}</p>
             <p class="piece-connects"><strong>{t.bpConnects}</strong> {p.connects}</p>
             {#if p.alts.length}
@@ -1089,6 +1143,11 @@ manuals with the knowledge-to-skills-pipeline).
   .tool-name { font-weight: 700; font-size: 1.02rem; }
   .tool-meta { color: var(--sl-color-gray-2); font-size: 0.8rem; }
   .piece-why, .piece-connects { margin: 0.25rem 0; font-size: 0.9rem; color: var(--sl-color-text); }
+  .receipt { margin: 0.3rem 0 0; font-size: 0.8rem; color: var(--ink-soft); display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+  .receipt a { color: var(--structure); text-decoration: none; }
+  .receipt a:hover { text-decoration: underline; }
+  .receipt code { font-size: 0.92em; background: color-mix(in srgb, var(--ok-edge) 16%, transparent); padding: 0.05rem 0.35rem; border-radius: var(--radius-sm); color: var(--ink); }
+  .receipt-check { color: var(--ok-edge); font-weight: 800; }
   .swap { margin-top: 0.45rem; }
   .swap ul { list-style: none; padding: 0.4rem 0 0; margin: 0; display: grid; gap: 0.3rem; }
   .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.6rem 0.85rem; }
