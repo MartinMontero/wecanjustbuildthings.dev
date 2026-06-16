@@ -387,6 +387,9 @@
       let item = pool[0]!;
       const sw = swaps[def.id];
       if (sw) { const s = pool.find((x) => x.name === sw) ?? items.find((x) => x.name === sw); if (s) item = s; }
+      // A swap target could collide with a tool an earlier piece already took (the
+      // items.find fallback bypasses `taken`); fall back to this pool's default.
+      if (taken.has(item.name)) item = pool[0]!;
       const alts = pool.filter((x) => x.name !== item.name).slice(0, 3);
       taken.add(item.name);
       const txt = (CAP_TEXT[lang] ?? CAP_TEXT.en)[def.id] ?? CAP_TEXT.en[def.id]!;
@@ -999,12 +1002,21 @@ manuals with the knowledge-to-skills-pipeline).
     } catch { aiError = t.refineErr; } finally { aiBusy = false; }
   }
   function applyProposal(p: Proposal, i: number) {
-    if (p.action === 'add') { const n = new Set(extra); n.add(p.name); extra = n; }
-    else if (p.action === 'remove') {
-      const bp = blueprint.find((b) => b.item.name === p.name);
-      if (bp) togglePiece(bp.capId); else { const n = new Set(extra); n.delete(p.name); extra = n; }
+    // Apply idempotently (fix carried over from main's review pass): 'add'/'remove'
+    // on a blueprint piece set its removed-state directly — toggling could re-add a
+    // piece the builder already removed, or strike out one they kept. Only
+    // non-piece tools touch the extra set.
+    const pieceFor = (name: string) => blueprint.find((b) => b.item.name === name);
+    if (p.action === 'add') {
+      const bp = pieceFor(p.name);
+      if (bp) { const r = new Set(removed); r.delete(bp.capId); removed = r; }
+      else { const n = new Set(extra); n.add(p.name); extra = n; }
+    } else if (p.action === 'remove') {
+      const bp = pieceFor(p.name);
+      if (bp) { const r = new Set(removed); r.add(bp.capId); removed = r; }
+      else { const n = new Set(extra); n.delete(p.name); extra = n; }
     } else if (p.action === 'swap') {
-      const bp = blueprint.find((b) => b.item.name === p.from);
+      const bp = pieceFor(p.from ?? '');
       if (bp) swapPiece(bp.capId, p.name); else { const n = new Set(extra); n.add(p.name); extra = n; }
     }
     const a = new Set(aiApplied); a.add(i); aiApplied = a;
