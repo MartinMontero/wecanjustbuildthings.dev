@@ -4,6 +4,7 @@
   import { loadSession, updateSession, hasSession, type SessionStackItem } from '../lib/build-session.ts';
   import { matchDependency } from '../../enforcement/matcher.ts';
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
+  import { detectSignals, pickQuestions, reflect, type ConstraintId } from '../lib/mentor-engine.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
@@ -235,6 +236,7 @@
         if (s.seededTool) ex.add(s.seededTool);
         extra = ex;
       }
+      if (s.intent.answers && Object.keys(s.intent.answers).length) mentorAnswers = { ...(s.intent.answers as Record<string, string>) };
       if (s.handoff) handoff = s.handoff as typeof handoff;
     }
 
@@ -261,9 +263,16 @@
     const adjustments = { swaps: { ...swaps }, removed: [...removed], extra: [...extra] };
     const method = handoff;
     const stack = sessionStack.map((it) => ({ ...it, receipt: it.receipt ? { ...it.receipt } : undefined }));
+    const answers = { ...mentorAnswers };
+    // The reflected-back problem: the builder's words + the constraints the
+    // Mentor Engine derived from them (deterministic). Feeds the spec.
+    const converged = reflection.constraints.length
+      ? { statement: problem.trim(), constraints: reflection.constraints.map((c) => m.c[c]), signals: reflection.signals }
+      : null;
     updateSession((s) => ({
       ...s,
-      intent: { ...s.intent, ...intent },
+      intent: { ...s.intent, ...intent, answers },
+      converged,
       adjustments,
       handoff: method,
       stack,
@@ -411,6 +420,93 @@
   });
   const policyClean = $derived(policyOrgs.length > 0 && policyMatches.length === 0);
 
+  // ---------- Movement 1: the live Mentor Engine (deterministic) ----------
+  // Localized prompts/options/constraint phrases for the engine's IDs. The logic
+  // lives in src/lib/mentor-engine.ts (model-free); this is only presentation.
+  interface MentorStrings {
+    heading: string; sub: string; reflectHeading: string; reflectIntro: string; skip: string;
+    q: Record<string, { prompt: string; opts: Record<string, string> }>;
+    c: Record<ConstraintId, string>;
+  }
+  const MENTOR_STR: Record<Lang, MentorStrings> = {
+    en: {
+      heading: 'A few quick questions', sub: 'These sharpen the plan — answer what fits, skip the rest.',
+      reflectHeading: 'The real problem I’m hearing', reflectIntro: 'It sounds like you’re building something where:', skip: 'Skip',
+      q: {
+        'q-privacy-who': { prompt: 'Who must never be able to see who’s involved?', opts: { public: 'The general public', platform: 'Any platform or company', authorities: 'Authorities / the powerful', pseudonymous: 'A handle they choose is fine' } },
+        'q-payments-flow': { prompt: 'When money moves, where should it go?', opts: { direct: 'Straight to people, no middleman', org: 'Through our organization first' } },
+        'q-storage-survive': { prompt: 'If your servers went down, what must still survive?', opts: { 'must-survive': 'The data has to outlast any one server', 'on-device': 'It can live on each person’s device' } },
+        'q-identity-proof': { prompt: 'How should people prove who they are?', opts: { 'own-keys': 'They hold their own keys', pseudonymous: 'A nickname they control' } },
+        'q-community-own': { prompt: 'Who should be able to keep this running?', opts: { forkable: 'Anyone in the movement can fork and run it', unsure: 'Not sure yet' } },
+      },
+      c: {
+        'anonymity-first': 'Identities must never be exposed — anonymity comes first.',
+        'pseudonymous': 'People act under a handle they control, not their real name.',
+        'no-platform-visibility': 'No platform or company can see who’s involved.',
+        'self-sovereign-identity': 'People hold their own keys — their accounts are truly theirs.',
+        'direct-payment': 'Money reaches people directly, with no middleman taking a cut.',
+        'org-custody': 'Funds flow through your organization first.',
+        'durable-data': 'The data must outlast any single server.',
+        'local-first': 'Data can live on each person’s device.',
+        'community-owned': 'Anyone can fork it and keep it running — it belongs to the movement.',
+        'safety-tooling': 'It needs safeguards against abuse built in.',
+      },
+    },
+    es: {
+      heading: 'Unas preguntas rápidas', sub: 'Afinan el plan — responde lo que encaje y salta el resto.',
+      reflectHeading: 'El problema real que escucho', reflectIntro: 'Parece que estás construyendo algo donde:', skip: 'Saltar',
+      q: {
+        'q-privacy-who': { prompt: '¿Quién nunca debe poder ver quién está involucrado?', opts: { public: 'El público en general', platform: 'Cualquier plataforma o empresa', authorities: 'Las autoridades / los poderosos', pseudonymous: 'Un alias que elijan está bien' } },
+        'q-payments-flow': { prompt: 'Cuando se mueve el dinero, ¿adónde debe ir?', opts: { direct: 'Directo a las personas, sin intermediario', org: 'Primero a través de nuestra organización' } },
+        'q-storage-survive': { prompt: 'Si tus servidores se cayeran, ¿qué debe sobrevivir?', opts: { 'must-survive': 'Los datos deben sobrevivir a cualquier servidor', 'on-device': 'Pueden vivir en el dispositivo de cada persona' } },
+        'q-identity-proof': { prompt: '¿Cómo deben demostrar las personas quiénes son?', opts: { 'own-keys': 'Tienen sus propias claves', pseudonymous: 'Un alias que controlan' } },
+        'q-community-own': { prompt: '¿Quién debería poder mantener esto en marcha?', opts: { forkable: 'Cualquiera del movimiento puede bifurcarlo y ejecutarlo', unsure: 'Aún no estoy seguro' } },
+      },
+      c: {
+        'anonymity-first': 'Las identidades nunca deben quedar expuestas — el anonimato es lo primero.',
+        'pseudonymous': 'Las personas actúan bajo un alias que controlan, no su nombre real.',
+        'no-platform-visibility': 'Ninguna plataforma o empresa puede ver quién está involucrado.',
+        'self-sovereign-identity': 'Las personas tienen sus propias claves — sus cuentas son realmente suyas.',
+        'direct-payment': 'El dinero llega a las personas directamente, sin que un intermediario se lleve una parte.',
+        'org-custody': 'Los fondos pasan primero por tu organización.',
+        'durable-data': 'Los datos deben sobrevivir a cualquier servidor.',
+        'local-first': 'Los datos pueden vivir en el dispositivo de cada persona.',
+        'community-owned': 'Cualquiera puede bifurcarlo y mantenerlo — pertenece al movimiento.',
+        'safety-tooling': 'Necesita salvaguardas contra el abuso incorporadas.',
+      },
+    },
+    ar: {
+      heading: 'بضعة أسئلة سريعة', sub: 'تُحدِّد الخطة بدقّة — أجب عمّا يناسبك وتجاوز الباقي.',
+      reflectHeading: 'المشكلة الحقيقية التي أسمعها', reflectIntro: 'يبدو أنك تبني شيئاً حيث:', skip: 'تخطٍّ',
+      q: {
+        'q-privacy-who': { prompt: 'مَن الذي يجب ألا يستطيع أبداً معرفة هوية المشاركين؟', opts: { public: 'عامة الناس', platform: 'أي منصّة أو شركة', authorities: 'السلطات / أصحاب النفوذ', pseudonymous: 'يكفي اسم مستعار يختارونه' } },
+        'q-payments-flow': { prompt: 'عندما تتحرّك الأموال، إلى أين يجب أن تذهب؟', opts: { direct: 'مباشرة إلى الناس، دون وسيط', org: 'عبر منظّمتنا أولاً' } },
+        'q-storage-survive': { prompt: 'لو تعطّلت خوادمك، ما الذي يجب أن يبقى؟', opts: { 'must-survive': 'يجب أن تبقى البيانات رغم أي خادم', 'on-device': 'يمكن أن تعيش على جهاز كل شخص' } },
+        'q-identity-proof': { prompt: 'كيف ينبغي للناس إثبات هويتهم؟', opts: { 'own-keys': 'يملكون مفاتيحهم الخاصة', pseudonymous: 'اسم مستعار يتحكّمون به' } },
+        'q-community-own': { prompt: 'مَن الذي ينبغي أن يستطيع إبقاء هذا قيد التشغيل؟', opts: { forkable: 'أي شخص في الحركة يمكنه نسخه وتشغيله', unsure: 'لست متأكداً بعد' } },
+      },
+      c: {
+        'anonymity-first': 'يجب ألا تُكشف الهويات أبداً — إخفاء الهوية أولاً.',
+        'pseudonymous': 'يتصرّف الناس باسم مستعار يتحكّمون به، لا باسمهم الحقيقي.',
+        'no-platform-visibility': 'لا يمكن لأي منصّة أو شركة معرفة المشاركين.',
+        'self-sovereign-identity': 'يملك الناس مفاتيحهم الخاصة — حساباتهم مِلكهم حقاً.',
+        'direct-payment': 'تصل الأموال إلى الناس مباشرة، دون وسيط يقتطع حصّة.',
+        'org-custody': 'تمرّ الأموال عبر منظّمتك أولاً.',
+        'durable-data': 'يجب أن تبقى البيانات رغم أي خادم منفرد.',
+        'local-first': 'يمكن أن تعيش البيانات على جهاز كل شخص.',
+        'community-owned': 'يمكن لأي شخص نسخه وإبقاؤه يعمل — إنه مِلك الحركة.',
+        'safety-tooling': 'يحتاج إلى وسائل حماية من إساءة الاستخدام مدمجة.',
+      },
+    },
+  };
+
+  let mentorAnswers = $state<Record<string, string>>({});
+  const signals = $derived(detectSignals(`${problem} ${goal} ${success}`, [...protocols]));
+  const mentorQuestions = $derived(problem.trim().length > 8 ? pickQuestions(signals, mentorAnswers) : []);
+  const reflection = $derived(problem.trim().length > 8 ? reflect(signals, mentorAnswers) : { signals: [], constraints: [] as ConstraintId[] });
+  const m = $derived(MENTOR_STR[lang] ?? MENTOR_STR.en);
+  function answerMentor(qid: string, oid: string) { mentorAnswers = { ...mentorAnswers, [qid]: oid }; }
+
   // Advanced escape hatch: search the full catalog by hand.
   const addResults = $derived.by(() => {
     const q = addQuery.trim().toLowerCase();
@@ -475,12 +571,15 @@ ${goal || '<the real objective — not a convenient proxy>'}
 
 ## Success looks like
 ${success || '<the non-negotiable success criteria>'}
-
+${reflection.constraints.length ? `
+## Non-negotiable constraints (surfaced by the Socratic intake)
+${reflection.constraints.map((c) => `- ${m.c[c]}`).join('\n')}
+` : ''}
 ## Protocols
 ${protoList.length ? protoList.join(', ') : 'general'}
 
-## Stack (policy-clean, from wecanjustbuildthings.dev)
-${chosenItems.map((it) => `- ${it.name} (${it.ecosystem}, ${it.license}) — ${it.desc}`).join('\n') || '- <select tools>'}
+## Stack (policy-clean, from wecanjustbuildthings.dev — license verified at commit)
+${chosenItems.map((it) => `- ${it.name} (${it.ecosystem}, ${it.license}${it.commit ? `, license @ ${it.commit.slice(0, 7)}` : ''}) — ${it.desc}`).join('\n') || '- <select tools>'}
 `);
 
   const jsDeps = $derived(chosenItems.filter((it) => it.ecosystem === 'js'));
@@ -854,6 +953,34 @@ manuals with the knowledge-to-skills-pipeline).
         <div class="chips">{#each ALL_PROTOCOLS as p}<button class="chip" class:on={protocols.has(p)} onclick={() => toggleProto(p)} aria-pressed={protocols.has(p)}>{p}</button>{/each}</div>
         <p class="hint">{t.protoHelp}</p>
       </div>
+
+      {#if mentorQuestions.length || reflection.constraints.length}
+        <div class="mentor">
+          {#if mentorQuestions.length}
+            <p class="mentor-head"><strong>{m.heading}</strong></p>
+            <p class="hint">{m.sub}</p>
+            {#each mentorQuestions as q (q.id)}
+              <fieldset class="mentor-q">
+                <legend>{m.q[q.id].prompt}</legend>
+                <div class="chips">
+                  {#each q.options as o (o.id)}
+                    <button type="button" class="chip" class:on={mentorAnswers[q.id] === o.id} aria-pressed={mentorAnswers[q.id] === o.id} onclick={() => answerMentor(q.id, o.id)}>{m.q[q.id].opts[o.id]}</button>
+                  {/each}
+                  <button type="button" class="chip mentor-skip" onclick={() => answerMentor(q.id, '__skip')}>{m.skip}</button>
+                </div>
+              </fieldset>
+            {/each}
+          {/if}
+          {#if reflection.constraints.length}
+            <div class="reflect" role="status" aria-live="polite">
+              <p class="reflect-head"><strong>{m.reflectHeading}</strong></p>
+              <p>{m.reflectIntro}</p>
+              <ul class="reflect-list">{#each reflection.constraints as c (c)}<li>{m.c[c]}</li>{/each}</ul>
+            </div>
+          {/if}
+        </div>
+      {/if}
+
       <details class="deeper">
         <summary>Want a sharper blueprint? Add the why &amp; what success looks like (optional)</summary>
         <label class="field"><span>{t.name}</span><input bind:value={projectName} placeholder="e.g. neighborhood-shield" /></label>
@@ -1107,6 +1234,14 @@ manuals with the knowledge-to-skills-pipeline).
   .vbadge--blocked { border-left-color: var(--danger-edge); }
   .examples { display: flex; flex-direction: column; gap: 0.4rem; }
   .chip.ex { text-align: start; font-size: 0.82rem; max-width: 100%; white-space: normal; line-height: 1.3; }
+  .mentor { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-sm); background: color-mix(in srgb, var(--structure) 4%, transparent); }
+  .mentor-head { margin: 0; }
+  .mentor-q { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .mentor-q legend { font-weight: var(--weight-bold); font-size: 0.92rem; padding: 0; color: var(--ink); }
+  .mentor-skip { opacity: 0.7; }
+  .reflect { border-inline-start: 3px solid var(--signal); background: var(--surface-2); border-radius: var(--radius); padding: var(--space-sm) var(--space-md); }
+  .reflect-head { margin: 0 0 0.25rem; color: var(--ink); }
+  .reflect-list { margin: 0.4rem 0 0; padding-inline-start: 1.1rem; display: grid; gap: 0.25rem; }
   .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .refine { border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.6rem 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent); }
   .refine > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 700; }
