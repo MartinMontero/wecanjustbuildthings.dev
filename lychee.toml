@@ -12,6 +12,9 @@ exclude = [
   "^tel:",
   # SPA that returns 200 but renders content via JS:
   "^https://shakespeare\\.diy",
+  # tricentis.com serves a broken HTTP/2 handshake to lychee (the page is live in
+  # a browser); a connection-level error, not a dead link, so skip it.
+  "^https://www\\.tricentis\\.com",
   # Issue/PR "new" template links resolve only when authenticated:
   "github\\.com/.*/issues/new",
   "github\\.com/.*/security/advisories/new",
