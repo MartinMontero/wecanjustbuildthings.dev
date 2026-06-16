@@ -1,0 +1,126 @@
+/* =============================================================================
+   tokens.css — the single source of truth for the design system.
+   "Civic workshop": cool paper, a confident green structure, one bold marigold
+   spot. Self-hosted Bricolage Grotesque for display ("build from what's at
+   hand"); a portable system stack for body and UI.
+
+   Components NEVER hard-code hex or px — they reference these tokens only.
+   Color is split light/dark; everything else is theme-independent.
+   ========================================================================== */
+
+/* ---- Display face: Bricolage Grotesque (variable wght 200–800), self-hosted,
+        privacy-first (no third-party CDN). Latin + Latin-ext cover EN/ES; other
+        scripts (e.g. Arabic) fall back to the system stack. OFL in /fonts. ---- */
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/bricolage-grotesque-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
+    U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/bricolage-grotesque-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+    U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  /* ---- Type ---- */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter,
+    system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    'Liberation Mono', monospace;
+  --font-display: 'Bricolage Grotesque', var(--font-sans);
+
+  /* Type scale (rem, ~1.2 ratio) — set in rem so zoom + base-size are honored. */
+  --step--1: 0.833rem;
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-2: 1.44rem;
+  --step-3: 1.728rem;
+  --step-4: 2.074rem;
+  --step-5: 2.488rem;
+  --step-6: 2.986rem;
+  --step-7: 3.583rem;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+  --weight-black: 800;
+
+  /* ---- Spacing — strict 8px grid (4px sub-grid for fine detail) ---- */
+  --space-3xs: 0.25rem; /* 4  */
+  --space-2xs: 0.5rem;  /* 8  */
+  --space-xs: 0.75rem;  /* 12 */
+  --space-sm: 1rem;     /* 16 */
+  --space-md: 1.5rem;   /* 24 */
+  --space-lg: 2rem;     /* 32 */
+  --space-xl: 3rem;     /* 48 */
+  --space-2xl: 4rem;    /* 64 */
+  --space-3xl: 6rem;    /* 96 */
+
+  /* ---- Radius — chunky-friendly, never 0 (anti-broadsheet) ---- */
+  --radius-sm: 0.25rem;   /* 4  */
+  --radius: 0.625rem;     /* 10 */
+  --radius-lg: 1rem;      /* 16 */
+  --radius-pill: 999px;
+
+  /* ---- Motion — purposeful only; clarify, don't perform ---- */
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+
+  /* ---- Focus ---- */
+  --focus-width: 2px;
+  --focus-offset: 2px;
+  --target-min: 1.5rem; /* 24px floor; controls aim for 44–48 */
+
+  /* ============================ COLOR — DARK ============================ */
+  --bg: #0F1814;          /* green-ink paper (not pure black) */
+  --surface: #17211C;     /* raised cards */
+  --surface-2: #1F2A24;   /* higher elevation */
+  --ink: #E7ECE4;         /* primary text / headings */
+  --ink-soft: #9FB0A6;    /* secondary text */
+  --structure: #45B886;   /* the green — primary, structural */
+  --on-structure: #06140C;/* text/glyph on a green fill */
+  --signal: #F2B23E;      /* the one warm spot — marigold */
+  --on-signal: #1E1405;   /* text/glyph on a marigold fill */
+  --edge: #29342E;        /* decorative hairlines (exempt from 3:1) */
+  --edge-strong: #3C4A42; /* stronger dividers */
+  --control-edge: #677469;/* interactive boundaries — ≥3:1 on paper */
+  --ring: var(--structure);
+
+  /* status (–edge = ≥3:1 indicator; –text = ≥4.5:1 as text) */
+  --ok-edge: #46C07B;   --ok-text: #57CE8B;
+  --warn-edge: #E0A52E; --warn-text: #E8B252;
+  --danger-edge: #E5634A; --danger-text: #FF8A74;
+}
+
+:root[data-theme='light'] {
+  /* ============================ COLOR — LIGHT =========================== */
+  --bg: #E8ECE6;          /* cool grey-green paper (deliberately not cream) */
+  --surface: #F3F5F0;     /* raised cards */
+  --surface-2: #FFFFFF;
+  --ink: #14211B;         /* primary text / headings */
+  --ink-soft: #44514A;    /* secondary text */
+  --structure: #1C5D43;   /* the green — primary, structural */
+  --on-structure: #FFFFFF;
+  --signal: #E59500;      /* marigold spot (fills/marks; dark text on it) */
+  --on-signal: #1E1405;
+  --edge: #CBD3CB;        /* decorative hairlines (exempt from 3:1) */
+  --edge-strong: #AEB8AF;
+  --control-edge: #6E7A72;/* interactive boundaries — ≥3:1 on paper */
+  --ring: var(--structure);
+
+  --ok-edge: #2E844E;   --ok-text: #1C7A3E;
+  --warn-edge: #B7811C; --warn-text: #8A6200;
+  --danger-edge: #C5371F; --danger-text: #B5301A;
+}

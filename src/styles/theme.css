@@ -1,90 +1,74 @@
-/* We Can Just Build Things — design system for Starlight.
-
-   Built against the project's Design Field Manual (Apple HIG × Material 3):
-   - TOKENS ARE THE SOURCE OF TRUTH. Components reference these custom
-     properties; they never hard-code hex values or pixel literals.
-   - Material's token discipline + Apple's restraint (subtle depth, deference).
-   - WCAG 2.2 AA is the floor: 4.5:1 body text, 3:1 large/non-text, a visible
-     :focus-visible ring on every control, honored reduced-motion. Status is
-     never colour alone — a text label always carries the meaning.
-
-   Purple accent (freedom-tech / Nostr lineage); system font stack only, so the
-   site stays fast and tracker-free (no web fonts). */
+/* theme.css — wire the design tokens into Starlight and set the global base.
+   tokens.css (loaded first) owns every value; this file only maps tokens onto
+   Starlight's variables so the whole chrome adopts the identity, plus a small
+   global base (type, links, focus, motion). No raw hex except the Starlight
+   neutral ramp, which IS the token layer for the framework's grays. */
 
 :root {
-  /* The accent + full --md-sys-color-* palette are generated from one seed by
-     Material Color Utilities — see colors.generated.css (loaded first). */
+  /* Fonts → Starlight */
+  --sl-font: var(--font-sans);
+  --sl-font-mono: var(--font-mono);
 
-  --sl-font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    Roboto, Helvetica, Arial, sans-serif;
-  --sl-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
-    'Liberation Mono', monospace;
+  /* Accent (structure green) → Starlight, dark theme */
+  --sl-color-accent-low: #133E2C;
+  --sl-color-accent: #45B886;
+  --sl-color-accent-high: #8FDCB6;
 
-  /* --- Type scale (rem so user zoom + base-size preferences are respected) --- */
-  --wcb-text-xs: 0.75rem;    /* 12px */
-  --wcb-text-sm: 0.875rem;   /* 14px */
-  --wcb-text-base: 1rem;     /* 16px */
-  --wcb-text-lg: 1.125rem;   /* 18px */
-  --wcb-text-xl: 1.5rem;     /* 24px */
-  --wcb-text-2xl: 2rem;      /* 32px */
-
-  /* --- Spacing — 8px grid (4px sub-grid for fine work) --- */
-  --wcb-space-3xs: 0.25rem; /* 4px  */
-  --wcb-space-2xs: 0.5rem;  /* 8px  */
-  --wcb-space-xs: 0.75rem;  /* 12px */
-  --wcb-space-sm: 1rem;     /* 16px */
-  --wcb-space-md: 1.5rem;   /* 24px */
-  --wcb-space-lg: 2rem;     /* 32px */
-  --wcb-space-xl: 3rem;     /* 48px */
-
-  /* --- Radius — continuous-ish corners (Apple), Material scale --- */
-  --wcb-radius-sm: 0.5rem;  /* 8px  */
-  --wcb-radius-md: 1rem;    /* 16px */
-  --wcb-radius-pill: 999px;
-
-  /* --- Motion — purposeful; standard easing (M3) --- */
-  --wcb-motion-fast: 120ms;
-  --wcb-motion-standard: 200ms;
-  --wcb-easing-standard: cubic-bezier(0.2, 0, 0, 1);
-
-  /* --- Elevation — restrained depth (Apple) over Material structure --- */
-  --wcb-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.10), 0 1px 3px rgba(0, 0, 0, 0.06);
-  --wcb-shadow-2: 0 6px 18px rgba(0, 0, 0, 0.16), 0 2px 6px rgba(0, 0, 0, 0.10);
-  --wcb-glass-blur: 14px;
-  --wcb-on-vivid: #ffffff; /* glyph on a saturated colour badge (white in both themes) */
-
-  /* --- Interaction --- */
-  --wcb-target-min: 1.75rem;            /* 28px — clears the WCAG 2.2 24px floor */
-  --wcb-focus-width: 2px;
-  --wcb-focus-offset: 2px;
-  --wcb-focus-color: var(--sl-color-accent-high); /* accent-high flips per theme, so it shows on both */
-
-  /* --wcb-on-accent (text on a filled accent) is generated per theme — see
-     colors.generated.css — because the seed-derived accent is light in dark mode. */
-
-  /* --- Feedback / status colours ---
-     "-edge"  = decorative indicator (left borders, dots, rings) — kept ≥3:1.
-     "-text"  = used AS text — ≥4.5:1 against the page background.
-     These are the dark-theme defaults; light overrides below. */
-  --wcb-success-edge: #2da44e;
-  --wcb-success-text: #3fb950;
-  --wcb-warning-edge: #bf8700;
-  --wcb-warning-text: #d29922;
-  --wcb-danger-edge: #cf222e;
-  --wcb-danger-text: #ff7b72;
-  --wcb-caution-edge: #bc4c00;
-  --wcb-caution-text: #db6d28;
+  /* Neutral ramp → warm-cool green-ink, dark theme */
+  --sl-color-white: #EAF0E8;
+  --sl-color-gray-1: #DCE5DD;
+  --sl-color-gray-2: #B4C1B9;
+  --sl-color-gray-3: #8A968F;
+  --sl-color-gray-4: #5A655E;
+  --sl-color-gray-5: #2A342E;
+  --sl-color-gray-6: #17211C;
+  --sl-color-gray-7: #101814;
+  --sl-color-black: #0F1814;
 }
 
 :root[data-theme='light'] {
-  /* Darker text variants so feedback text clears 4.5:1 on light surfaces. */
-  --wcb-success-text: #1a7f37;
-  --wcb-warning-text: #9a6700;
-  --wcb-danger-text: #cf222e;
-  --wcb-caution-text: #9a4d00;
+  --sl-color-accent-low: #CFE3D6;
+  --sl-color-accent: #1C5D43;
+  --sl-color-accent-high: #103B2A;
+
+  --sl-color-white: #14211B;
+  --sl-color-gray-1: #26312B;
+  --sl-color-gray-2: #44514A;
+  --sl-color-gray-3: #5C6862;
+  --sl-color-gray-4: #7E8A83;
+  --sl-color-gray-5: #C7CEC0;
+  --sl-color-gray-6: #E2E6DD;
+  --sl-color-gray-7: #EBEFE7;
+  --sl-color-black: #E8ECE6;
 }
 
-/* Motion should clarify, not perform — honor the user's reduced-motion choice. */
+/* ---- Global base ---- */
+
+/* Display face on headings + the site title; body/UI stay system sans. */
+.sl-markdown-content :is(h1, h2, h3, h4),
+.content-panel h1,
+.hero h1,
+site-title,
+.site-title {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+/* Text selection in the brand's warm accent — no default-blue highlight. */
+::selection {
+  background: color-mix(in srgb, var(--signal) 32%, transparent);
+  color: var(--ink);
+}
+
+/* Visible focus on every interactive element (WCAG 2.2 — never colour alone,
+   never obscured). Uses the structure green, which clears 3:1 on both themes. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: var(--focus-width) solid var(--ring);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* Motion clarifies, not performs — honor the user's reduced-motion choice. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -96,172 +80,44 @@
   }
 }
 
-/* Status pills used across catalog entries and PIE pages. Status is conveyed by
-   the (left) border colour AND the text label — never colour alone — so the
-   label always uses the theme's high-contrast body colour (WCAG AA on both
-   themes). */
+/* ---- Status pills (catalog + PIE). Meaning is carried by the text label AND a
+   left edge — never colour alone — so the label uses high-contrast body ink. ---- */
 .wcb-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--wcb-space-3xs);
-  margin: var(--wcb-space-xs) 0 var(--wcb-space-md);
+  gap: var(--space-2xs);
+  margin: var(--space-xs) 0 var(--space-md);
 }
 .wcb-badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--wcb-space-3xs);
-  font-size: 0.78rem;
-  font-weight: 600;
+  gap: var(--space-3xs);
+  font-size: var(--step--1);
+  font-weight: var(--weight-bold);
   line-height: 1;
   padding: 0.32rem 0.55rem;
-  border-radius: var(--wcb-radius-pill);
-  border: 1px solid var(--sl-color-gray-5);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--edge);
   border-left-width: 4px;
-  background: var(--sl-color-gray-6);
-  color: var(--sl-color-text);
+  background: var(--surface);
+  color: var(--ink);
 }
-.wcb-badge--verified { border-left-color: var(--wcb-success-edge); }
-.wcb-badge--blocked { border-left-color: var(--wcb-danger-edge); }
-.wcb-badge--under_review { border-left-color: var(--wcb-warning-edge); }
-.wcb-badge--active { border-left-color: var(--wcb-success-edge); }
-.wcb-badge--minimal { border-left-color: var(--wcb-warning-edge); }
-.wcb-badge--dormant { border-left-color: var(--wcb-caution-edge); }
-.wcb-badge--abandoned { border-left-color: var(--wcb-danger-edge); }
-.wcb-badge--advisory { border-left-color: var(--wcb-caution-edge); }
+.wcb-badge--verified { border-left-color: var(--ok-edge); }
+.wcb-badge--blocked { border-left-color: var(--danger-edge); }
+.wcb-badge--under_review { border-left-color: var(--warn-edge); }
+.wcb-badge--active { border-left-color: var(--ok-edge); }
+.wcb-badge--minimal { border-left-color: var(--warn-edge); }
+.wcb-badge--dormant { border-left-color: var(--signal); }
+.wcb-badge--abandoned { border-left-color: var(--danger-edge); }
+.wcb-badge--advisory { border-left-color: var(--signal); }
 
 /* Compact definition grid for catalog entry metadata. */
 .wcb-meta {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: var(--wcb-space-3xs) var(--wcb-space-sm);
-  margin: var(--wcb-space-sm) 0 var(--wcb-space-md);
-  font-size: 0.9rem;
+  gap: var(--space-3xs) var(--space-sm);
+  margin: var(--space-sm) 0 var(--space-md);
+  font-size: var(--step-0);
 }
-.wcb-meta dt { font-weight: 600; color: var(--sl-color-gray-2); }
+.wcb-meta dt { font-weight: var(--weight-bold); color: var(--ink-soft); }
 .wcb-meta dd { margin: 0; }
-
-/* ============================================================================
-   Surface craft — the visible layer (Design Field Manual §0, §7.4, §7.5, §7.7).
-   Apple's restraint over Material's structure: glass reserved for chrome, tonal
-   elevation + a gentle lift for cards, purposeful motion. All depth is subtle.
-   ============================================================================ */
-
-/* --- Type: bigger, tighter, more confident headings --- */
-.sl-markdown-content :is(h1, h2, h3),
-.hero h1 { letter-spacing: -0.02em; }
-.sl-markdown-content h1, .hero h1 { font-weight: 800; line-height: 1.05; }
-.sl-markdown-content h2 {
-  font-weight: 700;
-  margin-top: var(--wcb-space-xl);
-  padding-top: var(--wcb-space-sm);
-  border-top: 1px solid color-mix(in srgb, var(--sl-color-gray-5) 45%, transparent);
-}
-
-/* Liquid Glass, responsibly — ONE glass layer on the sticky top chrome, with a
-   solid fallback and a hairline edge (§7.4). */
-.header {
-  background: color-mix(in srgb, var(--sl-color-bg) 70%, transparent);
-  -webkit-backdrop-filter: blur(var(--wcb-glass-blur)) saturate(1.6);
-  backdrop-filter: blur(var(--wcb-glass-blur)) saturate(1.6);
-  border-bottom: 1px solid color-mix(in srgb, var(--sl-color-gray-5) 55%, transparent);
-}
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .header { background: var(--sl-color-bg); }
-}
-
-/* Designed cards: a real filled tonal surface (Material elevation-by-tone), a
-   generous radius, true depth, a confident hover lift, and a bold colour-coded
-   icon badge (§0 structure, §7.5 motion). */
-.card,
-.sl-link-card {
-  background: var(--md-sys-color-surface-container-high);
-  border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent);
-  border-radius: var(--wcb-radius-md);
-  padding: var(--wcb-space-md);
-  box-shadow: var(--wcb-shadow-1);
-  transition:
-    transform var(--wcb-motion-standard) var(--wcb-easing-standard),
-    box-shadow var(--wcb-motion-standard) var(--wcb-easing-standard),
-    border-color var(--wcb-motion-standard) var(--wcb-easing-standard);
-}
-.card:hover,
-.sl-link-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--wcb-shadow-2);
-  border-color: color-mix(in srgb, var(--sl-color-accent) 60%, transparent);
-}
-.sl-link-card:focus-within { border-color: var(--sl-color-accent); }
-
-/* Card icon → a bold, rounded colour badge using Starlight's per-card hue. */
-.card .icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--sl-card-border);
-  color: var(--wcb-on-vivid);
-  border: 0;
-  border-radius: var(--wcb-radius-sm);
-  padding: 0;
-  font-size: 1.2rem;
-  box-shadow: var(--wcb-shadow-1);
-}
-.card .title { gap: var(--wcb-space-2xs); align-items: center; }
-
-/* Actions: pill shape + real, tactile lift (§7.7). We keep Starlight's computed
-   fill/text pairing (it's contrast-correct per theme) and add the motion. */
-.sl-link-button {
-  border-radius: var(--wcb-radius-pill);
-  transition:
-    transform var(--wcb-motion-fast) var(--wcb-easing-standard),
-    box-shadow var(--wcb-motion-fast) var(--wcb-easing-standard),
-    background var(--wcb-motion-fast) var(--wcb-easing-standard);
-}
-.sl-link-button.primary { box-shadow: var(--wcb-shadow-1); }
-.sl-link-button.primary:hover { transform: translateY(-2px); box-shadow: var(--wcb-shadow-2); }
-.sl-link-button.primary:active { transform: translateY(0); box-shadow: var(--wcb-shadow-1); }
-.sl-link-button.minimal:hover { background: color-mix(in srgb, var(--sl-color-accent) 12%, transparent); }
-
-/* Pagination prev/next read as cards too. */
-.pagination-links a {
-  border-radius: var(--wcb-radius-md);
-  transition: transform var(--wcb-motion-standard) var(--wcb-easing-standard), box-shadow var(--wcb-motion-standard) var(--wcb-easing-standard);
-}
-.pagination-links a:hover { transform: translateY(-3px); box-shadow: var(--wcb-shadow-2); }
-
-/* A designed splash hero: a soft gradient-mesh panel + a large display headline. */
-.hero {
-  position: relative;
-  padding: clamp(var(--wcb-space-lg), 5vw, 3.5rem) clamp(var(--wcb-space-md), 4vw, 3.5rem);
-  border-radius: var(--wcb-radius-md);
-  background:
-    radial-gradient(62% 80% at 10% 6%, color-mix(in srgb, var(--md-sys-color-primary) 28%, transparent), transparent 60%),
-    radial-gradient(55% 70% at 94% 96%, color-mix(in srgb, var(--md-sys-color-tertiary) 24%, transparent), transparent 60%),
-    var(--md-sys-color-surface-container);
-  overflow: hidden;
-}
-.hero h1 { font-size: clamp(2.5rem, 6vw, 4rem); }
-
-/* Trust strip under the hero — designed, on-brand proof at a glance. */
-.wcb-trust {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--wcb-space-2xs);
-  margin: var(--wcb-space-md) 0 var(--wcb-space-lg);
-  list-style: none;
-  padding: 0;
-}
-.wcb-trust li {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--wcb-space-3xs);
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: var(--wcb-space-3xs) var(--wcb-space-sm);
-  border-radius: var(--wcb-radius-pill);
-  background: var(--md-sys-color-surface-container-high);
-  border: 1px solid color-mix(in srgb, var(--sl-color-accent) 35%, transparent);
-  color: var(--sl-color-text);
-}
-.wcb-trust b { color: var(--sl-color-text-accent); font-weight: 800; }

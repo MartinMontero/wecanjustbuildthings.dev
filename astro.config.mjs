@@ -67,7 +67,12 @@ export default defineConfig({
         baseUrl: 'https://github.com/martinmontero/wecanjustbuildthings.dev/edit/main/',
       },
       lastUpdated: true,
-      customCss: ['./src/styles/colors.generated.css', './src/styles/theme.css'],
+      components: {
+        SiteTitle: './src/components/overrides/SiteTitle.astro',
+        Hero: './src/components/overrides/Hero.astro',
+        PageTitle: './src/components/overrides/PageTitle.astro',
+      },
+      customCss: ['./src/styles/tokens.css', './src/styles/theme.css', './src/styles/components.css'],
       sidebar: [
         {
           label: 'Start here',
@@ -82,7 +87,7 @@ export default defineConfig({
           label: 'Tools',
           translations: { es: 'Herramientas', ar: 'الأدوات' },
           items: [
-            { label: 'Build Studio', translations: { es: 'Estudio de construcción', ar: 'استوديو البناء' }, link: '/build/', badge: { text: 'new', variant: 'tip' } },
+            { label: 'Build Studio', translations: { es: 'Estudio de construcción', ar: 'استوديو البناء' }, link: '/build/', badge: { text: 'new', variant: 'default' } },
             { label: 'Check a dependency', translations: { es: 'Verifica una dependencia', ar: 'افحص اعتمادية' }, link: '/check/' },
           ],
         },

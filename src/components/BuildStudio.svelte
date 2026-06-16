@@ -1,32 +1,41 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { zipSync, strToU8 } from 'fflate';
+  import { loadSession, updateSession, hasSession, clearSession, type SessionStackItem } from '../lib/build-session.ts';
+  import { matchDependency } from '../../enforcement/matcher.ts';
+  import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
+  import { detectSignals, pickQuestions, reflect, type ConstraintId } from '../lib/mentor-engine.ts';
+  import { chemistry, partnersOf } from '../lib/chemistry.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
   interface Item {
     name: string; url: string; ecosystem: string; category: string;
     protocols: string[]; license: string; verification: string; uses: number; desc: string; repo: string | null;
+    licenseUrl?: string | null; commit?: string | null; verifiedAt?: string | null;
+    advisory?: string | null; blockedReason?: string | null; providerAgnostic?: boolean;
+    maintenance?: string;
   }
 
   // ---------- i18n ----------
   type Lang = 'en' | 'es' | 'ar';
   const STR: Record<Lang, Record<string, string>> = {
     en: {
-      s1: '1 · Describe', s2: '2 · Your blueprint', s3: '3 · Build it',
+      s1: '1 · Describe', s2: '2 · Your blueprint', s3: '3 · Build it', startOver: 'Start over',
       name: 'Project name (a short nickname is fine)',
       problem: 'What problem does it solve, and for whom? Say it like you would out loud — one short paragraph.',
       why: 'Why does this matter? The real change you want — not just “ship an app.”',
       success: 'How will you know it’s working? What’s different for your community when it does.',
-      protocols: 'Which network does it live on?',
+      protocols: 'Which network does it live on?', focus: 'What kind of thing are you building?',
       tenq: 'Start with the why. Answer these the way you’d explain the project to a friend — the clearer you are, the better your AI agent builds.',
       protoHelp: 'A “network” (protocol) is the shared, open rulebook your tool plugs into — owned by no single company. Nostr and AT Protocol (Bluesky) are open social networks; pick “general” if it isn’t a social tool.',
       choose: 'Show me the blueprint →', back: '← Back', gen: 'Build it →', backStack: '← Back to the blueprint',
-      bpHead: 'Here’s how I’d build', bpPieces: 'The pieces you’ll need', bpWhyFor: 'Why this, for you:', bpConnects: 'How it fits in:',
+      bpHead: 'Here’s how I’d build', bpPieces: 'The pieces you’ll need', bpWhyFor: 'Why this, for you:', bpConnects: 'How it fits in:', bpReceipt: 'License verified at commit', bpAdded: 'Added to your blueprint', bpSeeded: 'From the catalog', bpAddedByYou: 'Added by you',
       bpSwap: 'Swap', bpUse: 'Use this instead', bpRemove: 'Remove', bpKeep: 'Add back', bpFits: 'How it all comes together',
       bpAdvanced: 'Power user? Browse and add tools yourself', bpEmpty: 'Tell me what you want to build first — go back and describe it in a sentence or two.',
       bpLead: 'You don’t need to know any of these by name. I picked a small, proven set for what you described and wired them together. Keep it as-is, or swap any piece — every option is safe and license-checked.',
       examples: 'Not sure where to start? Try one:',
+      suggested: '',
       add: 'Need something specific? Search the full catalog', selected: 'building blocks chosen', loading: 'Loading the catalog…',
       handoff: 'How do you want to get started?', zip: 'Download a starter folder', github: 'Save it to GitHub',
       goose: 'Run it with Goose', kickoff: 'Try a step with AI',
@@ -35,6 +44,10 @@
       apikey: 'Your AI key (sent straight to the model, never stored by us)',
       provider: 'Who makes the model', run: 'Run it', running: 'Working…',
       ghError: 'Connecting to GitHub didn’t finish. Try again, or download the folder below.',
+      stackIntro: 'Your “stack” is just the set of ready-made building blocks — tools other people have already built and tested — that your project is made from. Choosing good ones means you and your AI agent don’t start from scratch: you assemble proven parts instead of reinventing them, which saves months and avoids dead ends. Below is a starting set picked for what you described. Not sure? Keep the ones marked ★ and the defaults — you can’t pick “wrong” here, because everything listed is already safe and checked. Add or remove anything; nothing is final.',
+      legendPrimary: '★ the recommended starting point for your network',
+      legendClean: 'every option is safe to use (no Meta/OpenAI/xAI) and license-checked',
+      showMore: 'Show more tools', showFewer: 'Show fewer', showing: 'Showing', of: 'of',
       modelTitle: 'Choose your AI model',
       modelIntro: 'This runs one planning step with your own AI key, so you can feel it work before you commit. Your key and your project go straight to the model — never stored by us, and never routed through Meta, OpenAI, or xAI. The options below are chosen for that: models trained accountably, open models you can run yourself, or a neutral router locked to allowed models.',
       modelLabel: 'Model',
@@ -54,28 +67,28 @@
       refineNone: 'Your plan already covers what you described — I wouldn’t add anything. That’s a good sign.',
       refineErr: 'Couldn’t reach the model. Check your key and try again.', refineNeedKey: 'Enter your AI key above first.',
       skillsHint: 'Have a field guide, manual, or SOP? Turn your own know-how into a skill your agent follows →',
-      designHint: 'New to design? The Design Field Guide teaches you to direct the look — in plain words, no jargon →',
-      designHintShort: 'the five moves', cardCopy: 'Copy', cardCopyAsk: 'Copy the ask',
       skillsDraft: 'Skills I can scaffold from what you told me', skillsReady: 'Or drop in a ready-made skill',
       skillAdd: 'Add to my project', skillAdded: 'Added ✓',
+      skCaptureHead: 'You know something the agent doesn’t', skCaptureSub: 'A method only you know — how you take a report, vet a member, keep people safe. Capture it once and every build follows it.', skName: 'Skill name', skDesc: 'One line: what it does', skDescPh: 'Take an eviction report without exposing the tenant', skSteps: 'The steps, one per line', skStepsPh: 'Use a chosen handle, not a legal name\nRecord the building, not the unit\nEncrypt everything; two organizers hold keys', skSource: 'Where it came from (optional)', skSourcePh: 'Tenants Union field manual', skCaptureBtn: 'Capture as a skill', skillRemove: 'Remove',
       skillReview: 'A draft in your words — review and refine it; you’re the expert.',
       skillsIncluded: 'skill(s) will be included in your starter',
     },
     es: {
-      s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo',
+      s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo', startOver: 'Empezar de nuevo',
       name: 'Nombre del proyecto (un apodo corto vale)',
       problem: '¿Qué problema resuelve y para quién? Dilo como lo dirías en voz alta — un párrafo corto.',
       why: '¿Por qué importa? El cambio real que buscas — no solo “lanzar una app.”',
       success: '¿Cómo sabrás que funciona? Qué cambia para tu comunidad cuando lo logra.',
-      protocols: '¿En qué red vive?',
+      protocols: '¿En qué red vive?', focus: '¿Qué tipo de cosa estás construyendo?',
       tenq: 'Empieza por el porqué. Responde como si le explicaras el proyecto a un amigo — cuanto más claro seas, mejor construye tu agente de IA.',
       protoHelp: 'Una “red” (protocolo) es el reglamento abierto y compartido al que se conecta tu herramienta — sin dueño único. Nostr y AT Protocol (Bluesky) son redes sociales abiertas; elige “general” si no es una herramienta social.',
       choose: 'Muéstrame el plano →', back: '← Atrás', gen: 'Construirlo →', backStack: '← Volver al plano',
-      bpHead: 'Así lo construiría', bpPieces: 'Las piezas que necesitarás', bpWhyFor: 'Por qué esta, para ti:', bpConnects: 'Cómo encaja:',
+      bpHead: 'Así lo construiría', bpPieces: 'Las piezas que necesitarás', bpWhyFor: 'Por qué esta, para ti:', bpConnects: 'Cómo encaja:', bpReceipt: 'Licencia verificada en el commit', bpAdded: 'Añadido a tu plano', bpSeeded: 'Del catálogo', bpAddedByYou: 'Añadido por ti',
       bpSwap: 'Cambiar', bpUse: 'Usar esta', bpRemove: 'Quitar', bpKeep: 'Volver a añadir', bpFits: 'Cómo se une todo',
       bpAdvanced: '¿Experto? Explora y añade herramientas tú mismo', bpEmpty: 'Primero dime qué quieres construir — vuelve y descríbelo en una o dos frases.',
       bpLead: 'No necesitas conocer ninguna de estas por su nombre. Elegí un conjunto pequeño y probado para lo que describiste y las conecté entre sí. Déjalo así, o cambia cualquier pieza — cada opción es segura y con licencia verificada.',
       examples: '¿No sabes por dónde empezar? Prueba una:',
+      suggested: '',
       add: '¿Necesitas algo específico? Busca en todo el catálogo', selected: 'bloques elegidos', loading: 'Cargando el catálogo…',
       handoff: '¿Cómo quieres empezar?', zip: 'Descargar una carpeta inicial', github: 'Guardarlo en GitHub',
       goose: 'Ejecutarlo con Goose', kickoff: 'Probar un paso con IA',
@@ -84,6 +97,10 @@
       apikey: 'Tu clave de IA (se envía directo al modelo, nunca la guardamos)',
       provider: 'Quién hace el modelo', run: 'Ejecutar', running: 'Trabajando…',
       ghError: 'La conexión con GitHub no terminó. Inténtalo de nuevo o descarga la carpeta abajo.',
+      stackIntro: 'Tu “stack” es simplemente el conjunto de bloques ya hechos — herramientas que otras personas ya construyeron y probaron — con los que se arma tu proyecto. Elegir buenos bloques significa que tú y tu agente de IA no empiezan de cero: ensamblas piezas probadas en vez de reinventarlas, lo que ahorra meses y evita callejones sin salida. Abajo hay un conjunto inicial elegido para lo que describiste. ¿No estás seguro? Deja los marcados con ★ y los predeterminados — aquí no puedes elegir “mal”, porque todo lo listado ya es seguro y está verificado. Agrega o quita lo que quieras; nada es definitivo.',
+      legendPrimary: '★ el punto de partida recomendado para tu red',
+      legendClean: 'cada opción es segura de usar (sin Meta/OpenAI/xAI) y con licencia verificada',
+      showMore: 'Mostrar más herramientas', showFewer: 'Mostrar menos', showing: 'Mostrando', of: 'de',
       modelTitle: 'Elige tu modelo de IA',
       modelIntro: 'Esto ejecuta un paso de planificación con tu propia clave de IA, para que lo sientas funcionar antes de comprometerte. Tu clave y tu proyecto van directo al modelo — nunca los guardamos, y nunca pasan por Meta, OpenAI o xAI. Las opciones de abajo se eligen por eso: modelos entrenados de forma responsable, modelos abiertos que puedes ejecutar tú mismo, o un enrutador neutral limitado a modelos permitidos.',
       modelLabel: 'Modelo',
@@ -103,28 +120,28 @@
       refineNone: 'Tu plan ya cubre lo que describiste — no añadiría nada. Eso es buena señal.',
       refineErr: 'No se pudo contactar al modelo. Revisa tu clave e inténtalo de nuevo.', refineNeedKey: 'Primero ingresa tu clave de IA arriba.',
       skillsHint: '¿Tienes una guía de campo, un manual o un procedimiento? Convierte tu propio saber en una habilidad que tu agente sigue →',
-      designHint: '¿Nuevo en diseño? La Guía de Diseño te enseña a dirigir el aspecto — en palabras claras, sin jerga →',
-      designHintShort: 'los cinco movimientos', cardCopy: 'Copiar', cardCopyAsk: 'Copiar la frase',
       skillsDraft: 'Habilidades que puedo crear a partir de lo que me contaste', skillsReady: 'O agrega una habilidad lista para usar',
       skillAdd: 'Añadir a mi proyecto', skillAdded: 'Añadida ✓',
+      skCaptureHead: 'Sabes algo que el agente no sabe', skCaptureSub: 'Un método que solo tú conoces — cómo tomas un reporte, verificas a un miembro, proteges a la gente. Captúralo una vez y cada construcción lo seguirá.', skName: 'Nombre de la habilidad', skDesc: 'Una línea: qué hace', skDescPh: 'Tomar un reporte de desalojo sin exponer al inquilino', skSteps: 'Los pasos, uno por línea', skStepsPh: 'Usa un alias elegido, no un nombre legal\nRegistra el edificio, no la unidad\nCifra todo; dos organizadores tienen las claves', skSource: 'De dónde viene (opcional)', skSourcePh: 'Manual de campo del sindicato de inquilinos', skCaptureBtn: 'Capturar como habilidad', skillRemove: 'Quitar',
       skillReview: 'Un borrador en tus palabras — revísalo y ajústalo; tú eres quien sabe.',
       skillsIncluded: 'habilidad(es) se incluirán en tu kit inicial',
     },
     ar: {
-      s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه',
+      s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه', startOver: 'ابدأ من جديد',
       name: 'اسم المشروع (يكفي اسم مختصر)',
       problem: 'ما المشكلة التي يحلها، ولمن؟ قُلها كما تقولها بصوتك — فقرة قصيرة.',
       why: 'لماذا يهمّ هذا؟ التغيير الحقيقي الذي تريده — وليس مجرد «إطلاق تطبيق».',
       success: 'كيف ستعرف أنه ينجح؟ ما الذي يتغيّر لمجتمعك عندما ينجح.',
-      protocols: 'على أي شبكة يعمل؟',
+      protocols: 'على أي شبكة يعمل؟', focus: 'ما نوع الشيء الذي تبنيه؟',
       tenq: 'ابدأ بالـ«لماذا». أجب كأنك تشرح المشروع لصديق — كلما كنت أوضح، بنى وكيل الذكاء الاصطناعي بشكل أفضل.',
       protoHelp: 'الـ«شبكة» (البروتوكول) هي القواعد المفتوحة المشتركة التي تتصل بها أداتك — لا يملكها طرف واحد. Nostr وAT Protocol (Bluesky) شبكات اجتماعية مفتوحة؛ اختر «general» إن لم تكن أداة اجتماعية.',
       choose: 'أرني المخطط ←', back: '→ رجوع', gen: 'ابنِه ←', backStack: '→ العودة للمخطط',
-      bpHead: 'هكذا سأبنيه', bpPieces: 'القطع التي ستحتاجها', bpWhyFor: 'لماذا هذه، لك:', bpConnects: 'كيف تتكامل:',
+      bpHead: 'هكذا سأبنيه', bpPieces: 'القطع التي ستحتاجها', bpWhyFor: 'لماذا هذه، لك:', bpConnects: 'كيف تتكامل:', bpReceipt: 'الترخيص مُتحقَّق عند الـcommit', bpAdded: 'أُضيف إلى مخطّطك', bpSeeded: 'من الكتالوج', bpAddedByYou: 'أضفته أنت',
       bpSwap: 'تبديل', bpUse: 'استخدم هذه', bpRemove: 'إزالة', bpKeep: 'إعادة الإضافة', bpFits: 'كيف يتكامل كل شيء',
       bpAdvanced: 'خبير؟ تصفّح وأضف الأدوات بنفسك', bpEmpty: 'أخبرني أولاً بما تريد بناءه — ارجع وصِفه في جملة أو جملتين.',
       bpLead: 'لا حاجة لأن تعرف أيّاً منها بالاسم. اخترتُ مجموعة صغيرة ومُجرَّبة لما وصفته وربطتها معاً. اتركها كما هي، أو بدّل أي قطعة — كل خيار آمن ومُتحقَّق من ترخيصه.',
       examples: 'لا تعرف من أين تبدأ؟ جرّب واحدة:',
+      suggested: '',
       add: 'تحتاج شيئاً محدداً؟ ابحث في الكتالوج كاملاً', selected: 'لبنات مختارة', loading: 'جارٍ تحميل الكتالوج…',
       handoff: 'كيف تريد أن تبدأ؟', zip: 'تنزيل مجلد بداية', github: 'احفظه في GitHub',
       goose: 'شغّله مع Goose', kickoff: 'جرّب خطوة بالذكاء الاصطناعي',
@@ -133,6 +150,10 @@
       apikey: 'مفتاح الذكاء الاصطناعي الخاص بك (يُرسل مباشرة إلى النموذج، ولا نخزّنه أبداً)',
       provider: 'من يصنع النموذج', run: 'شغّل', running: 'جارٍ العمل…',
       ghError: 'لم يكتمل الاتصال بـ GitHub. حاول مرة أخرى، أو نزّل المجلد أدناه.',
+      stackIntro: '«الحزمة» (stack) هي ببساطة مجموعة اللبنات الجاهزة — أدوات بناها واختبرها آخرون — التي يتكوّن منها مشروعك. اختيار لبنات جيدة يعني أنك ووكيل الذكاء الاصطناعي لا تبدآن من الصفر: تجمّع قطعاً مُجرَّبة بدل إعادة اختراعها، ما يوفّر شهوراً ويتجنّب الطرق المسدودة. في الأسفل مجموعة بداية مُختارة لما وصفته. غير متأكد؟ اترك المعلّمة بـ ★ والافتراضية — لا يمكنك الاختيار «الخطأ» هنا، فكل المُدرَج آمن ومُتحقَّق منه. أضِف أو احذف ما تشاء؛ لا شيء نهائي.',
+      legendPrimary: '★ نقطة البداية الموصى بها لشبكتك',
+      legendClean: 'كل خيار آمن للاستخدام (بلا Meta/OpenAI/xAI) ومُتحقَّق من ترخيصه',
+      showMore: 'عرض أدوات أكثر', showFewer: 'عرض أقل', showing: 'عرض', of: 'من',
       modelTitle: 'اختر نموذج الذكاء الاصطناعي',
       modelIntro: 'هذا يشغّل خطوة تخطيط واحدة باستخدام مفتاحك الخاص، لتشعر به يعمل قبل أن تلتزم. مفتاحك ومشروعك يذهبان مباشرة إلى النموذج — لا نخزّنهما أبداً، ولا يمران عبر Meta أو OpenAI أو xAI. الخيارات أدناه مُختارة لذلك: نماذج مُدرَّبة بمسؤولية، نماذج مفتوحة يمكنك تشغيلها بنفسك، أو موجّه محايد مقصور على النماذج المسموح بها.',
       modelLabel: 'النموذج',
@@ -152,10 +173,9 @@
       refineNone: 'مخططك يغطّي ما وصفته بالفعل — لن أضيف شيئاً. هذه علامة جيدة.',
       refineErr: 'تعذّر الوصول إلى النموذج. تحقّق من مفتاحك وحاول مجدداً.', refineNeedKey: 'أدخل مفتاح الذكاء الاصطناعي أعلاه أولاً.',
       skillsHint: 'لديك دليل ميداني أو كُتيّب أو إجراء عمل؟ حوّل معرفتك إلى مهارة يتّبعها وكيلك ←',
-      designHint: 'جديد على التصميم؟ دليل التصميم يعلّمك توجيه المظهر — بكلمات واضحة بلا مصطلحات ←',
-      designHintShort: 'الحركات الخمس', cardCopy: 'نسخ', cardCopyAsk: 'انسخ الجملة',
       skillsDraft: 'مهارات يمكنني إنشاؤها مما أخبرتني به', skillsReady: 'أو أضِف مهارة جاهزة',
       skillAdd: 'أضِف إلى مشروعي', skillAdded: 'أُضيفت ✓',
+      skCaptureHead: 'أنت تعرف شيئاً لا يعرفه الوكيل', skCaptureSub: 'طريقة تعرفها أنت وحدك — كيف تأخذ بلاغاً، تتحقّق من عضو، تحمي الناس. التقطها مرّة وسيتّبعها كل بناء.', skName: 'اسم المهارة', skDesc: 'سطر واحد: ماذا تفعل', skDescPh: 'أخذ بلاغ إخلاء دون كشف هوية المستأجر', skSteps: 'الخطوات، واحدة في كل سطر', skStepsPh: 'استخدم اسماً مستعاراً، لا اسماً قانونياً\nسجّل المبنى، لا الوحدة\nشفّر كل شيء؛ منظّمان يحملان المفاتيح', skSource: 'من أين أتت (اختياري)', skSourcePh: 'دليل ميداني لنقابة المستأجرين', skCaptureBtn: 'التقطها كمهارة', skillRemove: 'إزالة',
       skillReview: 'مسودة بكلماتك — راجعها وحسّنها؛ أنت صاحب الخبرة.',
       skillsIncluded: 'مهارة ستُضمَّن في حزمتك المبدئية',
     },
@@ -164,72 +184,9 @@
   const t = $derived(STR[lang]);
   const rtl = $derived(lang === 'ar');
 
-  // ---------- Design Field Card (pocket quick-reference, localized) ----------
-  // The five craft moves with copy-ready "ask your agent" prompts, the two
-  // pocket prompts, and the pre-ship checklist. Companion to the full guide.
-  interface CardMove { title: string; spot: string; ask: string }
-  interface FieldCard {
-    title: string; intro: string; moves: CardMove[];
-    accessLabel: string; accessPrompt: string; optionsLabel: string; optionsPrompt: string;
-    shipLabel: string; ship: string[]; full: string;
-  }
-  const CARD: Record<Lang, FieldCard> = {
-    en: {
-      title: 'Design Field Card', intro: 'Start with your people. Then make these five moves on every screen.',
-      moves: [
-        { title: 'Make the important thing obvious', spot: 'Squint — does the right thing stand out?', ask: 'Strengthen the hierarchy: make the main action stand out, quiet the rest.' },
-        { title: 'Less, but better', spot: 'Remove first, then add room. Cramped reads amateur; space reads pro.', ask: "This feels cluttered — add whitespace and cut what isn't essential." },
-        { title: 'Decide once, repeat everywhere', spot: 'One set of colours, spacing, and buttons — reused on every screen.', ask: 'Make buttons, spacing, and styles consistent across every screen.' },
-        { title: 'Clear what to do, and what happened', spot: 'Tappable things look tappable. Every action gets a response.', ask: 'Make actions obviously tappable and add feedback for every one.' },
-        { title: 'Smooth the path', spot: 'Map the journey. Cut steps. Always show the next step.', ask: 'Map this flow, cut steps, and make the next step obvious.' },
-      ],
-      accessLabel: 'Paste every build — accessibility',
-      accessPrompt: 'Make this meet WCAG 2.2 AA: readable contrast, large tap targets, full keyboard navigation with visible focus, screen-reader support, and respect for reduced-motion and dark-mode settings.',
-      optionsLabel: 'For any decision — options',
-      optionsPrompt: 'Show me 2–3 different versions so I can compare, pick, and show the community.',
-      shipLabel: 'Before you ship',
-      ship: ['Squint — does the right thing stand out?', 'Breathe — does it feel roomy, not cramped?', 'Match — are colours, spacing, and buttons consistent?', 'Stranger — could a first-timer do the main task in silence?', 'Welcome — can someone with low vision, a screen reader, or an old phone use it?', 'Belong — would your community feel this was made by us, for us?'],
-      full: 'Read the full Design Field Guide →',
-    },
-    es: {
-      title: 'Tarjeta de diseño', intro: 'Empieza por tu gente. Luego haz estos cinco movimientos en cada pantalla.',
-      moves: [
-        { title: 'Haz obvio lo importante', spot: 'Entrecierra los ojos — ¿resalta lo correcto?', ask: 'Refuerza la jerarquía: que la acción principal destaque y lo demás quede más callado.' },
-        { title: 'Menos, pero mejor', spot: 'Primero quita, luego da espacio. Lo apretado parece amateur; el espacio, profesional.', ask: 'Esto se siente saturado — añade espacio en blanco y quita lo que no es esencial.' },
-        { title: 'Decide una vez, repite en todas partes', spot: 'Un solo set de colores, espaciado y botones — reutilizado en cada pantalla.', ask: 'Haz que botones, espaciado y estilos sean consistentes en todas las pantallas.' },
-        { title: 'Claro qué hacer y qué pasó', spot: 'Lo tocable parece tocable. Cada acción recibe respuesta.', ask: 'Haz que las acciones se vean claramente tocables y añade respuesta a cada una.' },
-        { title: 'Suaviza el camino', spot: 'Mapea el recorrido. Recorta pasos. Muestra siempre el siguiente.', ask: 'Mapea este flujo, recorta pasos y deja claro el siguiente paso.' },
-      ],
-      accessLabel: 'Pega en cada build — accesibilidad',
-      accessPrompt: 'Haz que esto cumpla WCAG 2.2 AA: contraste legible, áreas de toque grandes, navegación completa por teclado con foco visible, soporte de lector de pantalla, y respeto a las preferencias de movimiento reducido y modo oscuro.',
-      optionsLabel: 'Para cualquier decisión — opciones',
-      optionsPrompt: 'Muéstrame 2–3 versiones distintas para comparar, elegir y enseñar a la comunidad.',
-      shipLabel: 'Antes de publicar',
-      ship: ['Entrecierra — ¿resalta lo correcto?', 'Respira — ¿se siente amplio, no apretado?', 'Coincide — ¿colores, espaciado y botones son consistentes?', 'Desconocido — ¿podría alguien nuevo hacer la tarea en silencio?', 'Bienvenida — ¿puede usarlo alguien con baja visión, lector de pantalla o un teléfono viejo?', 'Pertenencia — ¿sentiría tu comunidad que se hizo por nosotros, para nosotros?'],
-      full: 'Lee la Guía de Diseño completa →',
-    },
-    ar: {
-      title: 'بطاقة التصميم', intro: 'ابدأ بناسك. ثم نفّذ هذه الحركات الخمس في كل شاشة.',
-      moves: [
-        { title: 'اجعل المهم واضحاً', spot: 'حدّق بعينين نصف مغمضتين — هل يبرز الشيء الصحيح؟', ask: 'قوِّ التسلسل البصري: اجعل الإجراء الرئيسي يبرز، واخفض البقية.' },
-        { title: 'أقل، لكن أفضل', spot: 'احذف أولاً ثم أضِف مساحة. الازدحام يبدو هاوياً؛ المساحة تبدو احترافية.', ask: 'هذا يبدو مزدحماً — أضِف مساحة بيضاء واحذف ما ليس ضرورياً.' },
-        { title: 'قرّر مرة، وكرّر في كل مكان', spot: 'مجموعة واحدة من الألوان والمسافات والأزرار — تُعاد في كل شاشة.', ask: 'اجعل الأزرار والمسافات والأنماط متسقة في كل الشاشات.' },
-        { title: 'وضّح ماذا تفعل وماذا حدث', spot: 'القابل للنقر يبدو قابلاً للنقر. كل إجراء يحصل على استجابة.', ask: 'اجعل الإجراءات واضحة القابلية للنقر وأضِف استجابة لكل منها.' },
-        { title: 'مهّد الطريق', spot: 'ارسم الرحلة. اختصر الخطوات. أظهِر دائماً الخطوة التالية.', ask: 'ارسم هذا المسار، واختصر الخطوات، ووضّح الخطوة التالية.' },
-      ],
-      accessLabel: 'الصقها في كل build — إمكانية الوصول',
-      accessPrompt: 'اجعل هذا يحقق WCAG 2.2 AA: تباين مقروء، أهداف لمس كبيرة، تنقّل كامل بلوحة المفاتيح مع تركيز مرئي، دعم قارئ الشاشة، واحترام إعدادات تقليل الحركة والوضع الداكن.',
-      optionsLabel: 'لأي قرار — خيارات',
-      optionsPrompt: 'أرني ٢–٣ نسخ مختلفة لأقارن وأختار وأعرضها على المجتمع.',
-      shipLabel: 'قبل الإطلاق',
-      ship: ['حدّق — هل يبرز الشيء الصحيح؟', 'تنفّس — هل يبدو فسيحاً لا مزدحماً؟', 'تطابق — هل الألوان والمسافات والأزرار متسقة؟', 'غريب — هل يستطيع مستخدم جديد إنجاز المهمة بصمت؟', 'ترحيب — هل يستطيع استخدامه شخص ضعيف البصر أو بقارئ شاشة أو بهاتف قديم؟', 'انتماء — هل سيشعر مجتمعك أنه صُنع بأيدينا، لنا؟'],
-      full: 'اقرأ دليل التصميم الكامل ←',
-    },
-  };
-  const card = $derived(CARD[lang]);
-
   // ---------- state ----------
   let items = $state<Item[]>([]);
+  let policyOrgs = $state<ExcludedOrg[]>([]);
   let loading = $state(true);
   let step = $state(1);
   let projectName = $state('');
@@ -244,6 +201,7 @@
   let swaps = $state<Record<string, string>>({});
   let removed = $state<Set<string>>(new Set());
   let extra = $state<Set<string>>(new Set());
+  let seededTool = $state<string | null>(null);
 
   const ALL_PROTOCOLS = ['nostr', 'atproto', 'lightning', 'cashu', 'general'];
   const PROTO_PRIORITY: Record<string, string[]> = {
@@ -263,12 +221,88 @@
     // (the site-wide picker switches the surrounding chrome; this keeps the tool in sync).
     const dl = document.documentElement.lang?.slice(0, 2);
     if (dl && ['en', 'es', 'ar'].includes(dl)) lang = dl as Lang;
+
+    // Resume the persisted build session (the connective tissue): restore the
+    // builder's intent + blueprint edits across reloads, and pick up a tool
+    // seeded by the Catalog's "Build with this" — so nothing is ever re-asked.
+    // Done BEFORE the catalog fetch so a late-resolving await can never clobber
+    // restored input, and before the builder can type. The persistence $effect
+    // stays inert until `loading` flips false, so this hydration is not echoed.
+    if (hasSession()) {
+      const s = loadSession();
+      if (s.intent.projectName) projectName = s.intent.projectName;
+      if (s.intent.problem) problem = s.intent.problem;
+      if (s.intent.goal) goal = s.intent.goal;
+      if (s.intent.success) success = s.intent.success;
+      if (s.intent.protocols.length) protocols = new Set(s.intent.protocols);
+      if (Object.keys(s.adjustments.swaps).length) swaps = { ...s.adjustments.swaps };
+      if (s.adjustments.removed.length) removed = new Set(s.adjustments.removed);
+      if (s.adjustments.extra.length || s.seededTool) {
+        const ex = new Set(s.adjustments.extra);
+        if (s.seededTool) { ex.add(s.seededTool); seededTool = s.seededTool; }
+        extra = ex;
+      }
+      if (s.intent.answers && Object.keys(s.intent.answers).length) mentorAnswers = { ...(s.intent.answers as Record<string, string>) };
+      if (s.skills?.length) {
+        authoredSkills = s.skills.map((sk) => ({ name: sk.name, description: sk.description, method: sk.steps ?? [], source: sk.source }));
+        for (const sk of authoredSkills) addSkill(sk);
+      }
+      if (s.handoff) handoff = s.handoff as typeof handoff;
+    }
+
     try { const res = await fetch('/catalog.json'); items = (await res.json()).filter((i: Item & { kind?: string }) => (i as any).kind !== 'dataset'); } catch { /* offline */ }
+    // Load the same excluded-org policy the dependency checker uses, so the
+    // Studio can re-verify its own assembled stack in-browser (Movement 4).
+    try { const pr = await fetch('/policy.json'); policyOrgs = (await pr.json()).orgs ?? []; } catch { /* offline: stack stays unverified in-browser, flow still works */ }
     loading = false;
-    const gh = new URLSearchParams(location.search).get('gh');
+
+    const params = new URLSearchParams(location.search);
+    const gh = params.get('gh');
     if (gh === 'connected') { handoff = 'github'; ghConnected = true; step = 3; }
     else if (gh === 'error') { handoff = 'github'; step = 3; ghResult = `error:${t.ghError}`; }
     else if (gh === 'unconfigured') { handoff = 'github'; step = 3; ghConfigured = false; }
+
+    // Catalog hand-off: "Build with this" lands here as ?seed=<tool>. Seed the
+    // tool into the stack, open at the blueprint, and clean the URL.
+    const seed = params.get('seed');
+    if (seed) {
+      const n = new Set(extra); n.add(seed); extra = n;
+      seededTool = seed;
+      if (step < 2) step = 2;
+      history.replaceState(null, '', location.pathname);
+    }
+  });
+
+  // Persist intent + blueprint edits to the build session on every change, so
+  // the builder's progress survives reloads and travels to the other movements.
+  // (Path A: deterministic and entirely on-device — no network, no model.)
+  $effect(() => {
+    if (loading) return;
+    const intent = {
+      projectName, problem, goal, success, protocols: [...protocols],
+    };
+    const adjustments = { swaps: { ...swaps }, removed: [...removed], extra: [...extra] };
+    const method = handoff;
+    const stack = sessionStack.map((it) => ({ ...it, receipt: it.receipt ? { ...it.receipt } : undefined }));
+    const answers = { ...mentorAnswers };
+    // The reflected-back problem: the builder's words + the constraints the
+    // Mentor Engine derived from them (deterministic). Feeds the spec.
+    const converged = reflection.constraints.length
+      ? { statement: problem.trim(), constraints: reflection.constraints.map((c) => m.c[c]), signals: reflection.signals }
+      : null;
+    const skills = authoredSkills.map((sk) => ({ name: slugifySkill(sk.name), description: sk.description, source: sk.source, steps: sk.method, body: skillToMd(sk) }));
+    const movement = (step >= 3 ? 4 : step) as 1 | 2 | 3 | 4;
+    updateSession((s) => ({
+      ...s,
+      intent: { ...s.intent, ...intent, answers },
+      converged,
+      adjustments,
+      handoff: method,
+      stack,
+      skills,
+      seededTool,
+      movement,
+    }));
   });
 
   const slug = $derived((projectName || 'my-app').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-|-$/g, '') || 'my-app');
@@ -353,9 +387,8 @@
       let item = pool[0]!;
       const sw = swaps[def.id];
       if (sw) { const s = pool.find((x) => x.name === sw) ?? items.find((x) => x.name === sw); if (s) item = s; }
-      // A swap target could collide with a tool an earlier piece already took
-      // (the items.find fallback bypasses `taken`); fall back to this pool's
-      // default so the same tool never appears in two pieces.
+      // A swap target could collide with a tool an earlier piece already took (the
+      // items.find fallback bypasses `taken`); fall back to this pool's default.
       if (taken.has(item.name)) item = pool[0]!;
       const alts = pool.filter((x) => x.name !== item.name).slice(0, 3);
       taken.add(item.name);
@@ -374,6 +407,170 @@
     return s;
   });
   const chosenItems = $derived(items.filter((it) => chosen.has(it.name)));
+  // Tools the builder added by hand or seeded from the Catalog — shown in the
+  // blueprint as their own pieces (not just checkboxes), with full evidence.
+  const extraItems = $derived(items.filter((it) => extra.has(it.name) && !blueprint.some((p) => !removed.has(p.capId) && p.item.name === it.name)));
+
+  // ---- Movement 2/4: receipts travel + in-browser policy re-verification ----
+  // Map a catalog Item into a session stack entry carrying its license-at-commit
+  // receipt + advisory, so the evidence travels with the tool into the blueprint
+  // and the handoff artifacts — never asking the builder to take a README's word.
+  function stackItemFrom(capId: string, reason: string, it: Item): SessionStackItem {
+    return {
+      capId, name: it.name, reason, catalogUrl: it.url,
+      receipt: {
+        license: it.license,
+        commitSha: it.commit ?? null,
+        sourceUrl: it.licenseUrl ?? null,
+        verification: it.verification,
+        advisory: it.advisory ?? null,
+      },
+    };
+  }
+  const sessionStack = $derived.by<SessionStackItem[]>(() => {
+    const out: SessionStackItem[] = [];
+    for (const p of blueprint) if (!removed.has(p.capId)) out.push(stackItemFrom(p.capId, p.why, p.item));
+    for (const name of extra) {
+      const it = items.find((x) => x.name === name);
+      if (it && !out.some((s) => s.name === it.name)) out.push(stackItemFrom('extra', it.desc, it));
+    }
+    return out;
+  });
+  // Re-run the shared exclusion policy on the assembled stack, in the browser —
+  // the same matchDependency() the dependency checker and the CLI engine use.
+  // The catalog is already enforced at build, so this should always be clean; it
+  // is the live guarantee that the handoff the builder downloads is policy-clean.
+  const policyMatches = $derived.by(() => {
+    if (!policyOrgs.length) return [] as Array<{ name: string; org: string }>;
+    const hits: Array<{ name: string; org: string }> = [];
+    for (const it of chosenItems) {
+      for (const m of matchDependency({ name: it.name, ecosystem: it.ecosystem as Ecosystem, source_file: 'studio' }, policyOrgs)) {
+        hits.push({ name: it.name, org: m.org_key });
+      }
+    }
+    return hits;
+  });
+  const policyClean = $derived(policyOrgs.length > 0 && policyMatches.length === 0);
+
+  // ---------- Movement 1: the live Mentor Engine (deterministic) ----------
+  // Localized prompts/options/constraint phrases for the engine's IDs. The logic
+  // lives in src/lib/mentor-engine.ts (model-free); this is only presentation.
+  interface MentorStrings {
+    heading: string; sub: string; reflectHeading: string; reflectIntro: string; skip: string;
+    q: Record<string, { prompt: string; opts: Record<string, string> }>;
+    c: Record<ConstraintId, string>;
+  }
+  const MENTOR_STR: Record<Lang, MentorStrings> = {
+    en: {
+      heading: 'A few quick questions', sub: 'These sharpen the plan — answer what fits, skip the rest.',
+      reflectHeading: 'The real problem I’m hearing', reflectIntro: 'It sounds like you’re building something where:', skip: 'Skip',
+      q: {
+        'q-privacy-who': { prompt: 'Who must never be able to see who’s involved?', opts: { public: 'The general public', platform: 'Any platform or company', authorities: 'Authorities / the powerful', pseudonymous: 'A handle they choose is fine' } },
+        'q-payments-flow': { prompt: 'When money moves, where should it go?', opts: { direct: 'Straight to people, no middleman', org: 'Through our organization first' } },
+        'q-storage-survive': { prompt: 'If your servers went down, what must still survive?', opts: { 'must-survive': 'The data has to outlast any one server', 'on-device': 'It can live on each person’s device' } },
+        'q-identity-proof': { prompt: 'How should people prove who they are?', opts: { 'own-keys': 'They hold their own keys', pseudonymous: 'A nickname they control' } },
+        'q-community-own': { prompt: 'Who should be able to keep this running?', opts: { forkable: 'Anyone in the movement can fork and run it', unsure: 'Not sure yet' } },
+      },
+      c: {
+        'anonymity-first': 'Identities must never be exposed — anonymity comes first.',
+        'pseudonymous': 'People act under a handle they control, not their real name.',
+        'no-platform-visibility': 'No platform or company can see who’s involved.',
+        'self-sovereign-identity': 'People hold their own keys — their accounts are truly theirs.',
+        'direct-payment': 'Money reaches people directly, with no middleman taking a cut.',
+        'org-custody': 'Funds flow through your organization first.',
+        'durable-data': 'The data must outlast any single server.',
+        'local-first': 'Data can live on each person’s device.',
+        'community-owned': 'Anyone can fork it and keep it running — it belongs to the movement.',
+        'safety-tooling': 'It needs safeguards against abuse built in.',
+      },
+    },
+    es: {
+      heading: 'Unas preguntas rápidas', sub: 'Afinan el plan — responde lo que encaje y salta el resto.',
+      reflectHeading: 'El problema real que escucho', reflectIntro: 'Parece que estás construyendo algo donde:', skip: 'Saltar',
+      q: {
+        'q-privacy-who': { prompt: '¿Quién nunca debe poder ver quién está involucrado?', opts: { public: 'El público en general', platform: 'Cualquier plataforma o empresa', authorities: 'Las autoridades / los poderosos', pseudonymous: 'Un alias que elijan está bien' } },
+        'q-payments-flow': { prompt: 'Cuando se mueve el dinero, ¿adónde debe ir?', opts: { direct: 'Directo a las personas, sin intermediario', org: 'Primero a través de nuestra organización' } },
+        'q-storage-survive': { prompt: 'Si tus servidores se cayeran, ¿qué debe sobrevivir?', opts: { 'must-survive': 'Los datos deben sobrevivir a cualquier servidor', 'on-device': 'Pueden vivir en el dispositivo de cada persona' } },
+        'q-identity-proof': { prompt: '¿Cómo deben demostrar las personas quiénes son?', opts: { 'own-keys': 'Tienen sus propias claves', pseudonymous: 'Un alias que controlan' } },
+        'q-community-own': { prompt: '¿Quién debería poder mantener esto en marcha?', opts: { forkable: 'Cualquiera del movimiento puede bifurcarlo y ejecutarlo', unsure: 'Aún no estoy seguro' } },
+      },
+      c: {
+        'anonymity-first': 'Las identidades nunca deben quedar expuestas — el anonimato es lo primero.',
+        'pseudonymous': 'Las personas actúan bajo un alias que controlan, no su nombre real.',
+        'no-platform-visibility': 'Ninguna plataforma o empresa puede ver quién está involucrado.',
+        'self-sovereign-identity': 'Las personas tienen sus propias claves — sus cuentas son realmente suyas.',
+        'direct-payment': 'El dinero llega a las personas directamente, sin que un intermediario se lleve una parte.',
+        'org-custody': 'Los fondos pasan primero por tu organización.',
+        'durable-data': 'Los datos deben sobrevivir a cualquier servidor.',
+        'local-first': 'Los datos pueden vivir en el dispositivo de cada persona.',
+        'community-owned': 'Cualquiera puede bifurcarlo y mantenerlo — pertenece al movimiento.',
+        'safety-tooling': 'Necesita salvaguardas contra el abuso incorporadas.',
+      },
+    },
+    ar: {
+      heading: 'بضعة أسئلة سريعة', sub: 'تُحدِّد الخطة بدقّة — أجب عمّا يناسبك وتجاوز الباقي.',
+      reflectHeading: 'المشكلة الحقيقية التي أسمعها', reflectIntro: 'يبدو أنك تبني شيئاً حيث:', skip: 'تخطٍّ',
+      q: {
+        'q-privacy-who': { prompt: 'مَن الذي يجب ألا يستطيع أبداً معرفة هوية المشاركين؟', opts: { public: 'عامة الناس', platform: 'أي منصّة أو شركة', authorities: 'السلطات / أصحاب النفوذ', pseudonymous: 'يكفي اسم مستعار يختارونه' } },
+        'q-payments-flow': { prompt: 'عندما تتحرّك الأموال، إلى أين يجب أن تذهب؟', opts: { direct: 'مباشرة إلى الناس، دون وسيط', org: 'عبر منظّمتنا أولاً' } },
+        'q-storage-survive': { prompt: 'لو تعطّلت خوادمك، ما الذي يجب أن يبقى؟', opts: { 'must-survive': 'يجب أن تبقى البيانات رغم أي خادم', 'on-device': 'يمكن أن تعيش على جهاز كل شخص' } },
+        'q-identity-proof': { prompt: 'كيف ينبغي للناس إثبات هويتهم؟', opts: { 'own-keys': 'يملكون مفاتيحهم الخاصة', pseudonymous: 'اسم مستعار يتحكّمون به' } },
+        'q-community-own': { prompt: 'مَن الذي ينبغي أن يستطيع إبقاء هذا قيد التشغيل؟', opts: { forkable: 'أي شخص في الحركة يمكنه نسخه وتشغيله', unsure: 'لست متأكداً بعد' } },
+      },
+      c: {
+        'anonymity-first': 'يجب ألا تُكشف الهويات أبداً — إخفاء الهوية أولاً.',
+        'pseudonymous': 'يتصرّف الناس باسم مستعار يتحكّمون به، لا باسمهم الحقيقي.',
+        'no-platform-visibility': 'لا يمكن لأي منصّة أو شركة معرفة المشاركين.',
+        'self-sovereign-identity': 'يملك الناس مفاتيحهم الخاصة — حساباتهم مِلكهم حقاً.',
+        'direct-payment': 'تصل الأموال إلى الناس مباشرة، دون وسيط يقتطع حصّة.',
+        'org-custody': 'تمرّ الأموال عبر منظّمتك أولاً.',
+        'durable-data': 'يجب أن تبقى البيانات رغم أي خادم منفرد.',
+        'local-first': 'يمكن أن تعيش البيانات على جهاز كل شخص.',
+        'community-owned': 'يمكن لأي شخص نسخه وإبقاؤه يعمل — إنه مِلك الحركة.',
+        'safety-tooling': 'يحتاج إلى وسائل حماية من إساءة الاستخدام مدمجة.',
+      },
+    },
+  };
+
+  let mentorAnswers = $state<Record<string, string>>({});
+  const signals = $derived(detectSignals(`${problem} ${goal} ${success}`, [...protocols]));
+  const mentorQuestions = $derived(problem.trim().length > 8 ? pickQuestions(signals, mentorAnswers) : []);
+  const reflection = $derived(problem.trim().length > 8 ? reflect(signals, mentorAnswers) : { signals: [], constraints: [] as ConstraintId[] });
+  const m = $derived(MENTOR_STR[lang] ?? MENTOR_STR.en);
+  function answerMentor(qid: string, oid: string) { mentorAnswers = { ...mentorAnswers, [qid]: oid }; }
+
+  // Clear the whole build session and start fresh — so the persisted draft is
+  // never a trap the builder can't escape.
+  function startOver() {
+    clearSession();
+    projectName = ''; problem = ''; goal = ''; success = '';
+    protocols = new Set(['nostr']); swaps = {}; removed = new Set(); extra = new Set();
+    seededTool = null; mentorAnswers = {}; authoredSkills = []; customSkills = {};
+    handoff = 'zip'; step = 1;
+  }
+
+  // ---------- Movement 2: advisories + deterministic chemistry ----------
+  const ADV: Record<Lang, { worksWith: string; conflict: string; metaOrigin: string; dormant: string; abandoned: string; providerPicker: string }> = {
+    en: { worksWith: 'Works with', conflict: 'Two tools here do the same job — you usually need only one:', metaOrigin: 'Built by Meta — admitted only because it’s permissively licensed and routes no data to them.', dormant: 'Looks dormant — check it’s still maintained before depending on it.', abandoned: 'Looks abandoned — prefer an active alternative if you can.', providerPicker: 'Has a model-provider picker — lock it to permitted providers (never OpenAI / xAI).' },
+    es: { worksWith: 'Funciona con', conflict: 'Dos herramientas aquí hacen lo mismo — normalmente solo necesitas una:', metaOrigin: 'Hecha por Meta — admitida solo porque tiene licencia permisiva y no le envía datos.', dormant: 'Parece inactiva — comprueba que siga mantenida antes de depender de ella.', abandoned: 'Parece abandonada — prefiere una alternativa activa si puedes.', providerPicker: 'Tiene un selector de proveedor de modelo — bloquéalo a proveedores permitidos (nunca OpenAI / xAI).' },
+    ar: { worksWith: 'يعمل مع', conflict: 'أداتان هنا تؤدّيان الوظيفة نفسها — عادةً تحتاج واحدة فقط:', metaOrigin: 'من صنع Meta — قُبِلت فقط لأنها بترخيص متساهل ولا تُرسل أي بيانات إليها.', dormant: 'تبدو خاملة — تأكّد من أنها ما زالت مُصانة قبل الاعتماد عليها.', abandoned: 'تبدو مهجورة — يُفضَّل بديل نشط إن أمكن.', providerPicker: 'تحتوي على مُحدِّد مزوّد نماذج — اقفله على المزوّدين المسموح بهم (أبداً OpenAI / xAI).' },
+  };
+  const adv = $derived(ADV[lang] ?? ADV.en);
+  function advisoriesFor(it: Item): string[] {
+    const out: string[] = [];
+    if (it.advisory === 'meta') out.push(adv.metaOrigin);
+    if (it.maintenance === 'dormant') out.push(adv.dormant);
+    if (it.maintenance === 'abandoned') out.push(adv.abandoned);
+    if (it.providerAgnostic) out.push(adv.providerPicker);
+    return out;
+  }
+  const stackTools = $derived.by(() => {
+    const out: { name: string; capId: string; category?: string; ecosystem?: string; protocols?: string[] }[] = [];
+    for (const p of blueprint) if (!removed.has(p.capId)) out.push({ name: p.item.name, capId: p.capId, category: p.item.category, ecosystem: p.item.ecosystem, protocols: p.item.protocols });
+    for (const name of extra) { const it = items.find((x) => x.name === name); if (it) out.push({ name: it.name, capId: 'extra', category: it.category, ecosystem: it.ecosystem, protocols: it.protocols }); }
+    return out;
+  });
+  const chem = $derived(chemistry(stackTools));
 
   // Advanced escape hatch: search the full catalog by hand.
   const addResults = $derived.by(() => {
@@ -427,16 +624,6 @@ methods, field guides, and operating procedures — follow them as written; do n
 quietly substitute your own approach. If a skill conflicts with a task, surface
 the conflict and ask. (Generate skills from your own manuals with the
 knowledge-to-skills-pipeline.)
-
-## Article VII — Design & welcome (the people it's for)
-Build it so everyone's invited. Meet WCAG 2.2 AA: readable contrast (4.5:1 body,
-3:1 large/non-text), tap targets large enough for real thumbs, full keyboard
-navigation with a visible focus ring, screen-reader support, and respect for
-reduced-motion and dark-mode settings. Define colour/spacing/type as tokens and
-reuse them (one consistent kit). One clear primary action per screen; obvious
-interactive cues and immediate feedback. Reflect the builder's specific community
-— their colours and voice — over a generic "tech-blue" default. Design with the
-community, not just for them.
 `);
 
   const spec = $derived(`# Spec: ${projectName || slug}
@@ -449,12 +636,15 @@ ${goal || '<the real objective — not a convenient proxy>'}
 
 ## Success looks like
 ${success || '<the non-negotiable success criteria>'}
-
+${reflection.constraints.length ? `
+## Non-negotiable constraints (surfaced by the Socratic intake)
+${reflection.constraints.map((c) => `- ${m.c[c]}`).join('\n')}
+` : ''}
 ## Protocols
 ${protoList.length ? protoList.join(', ') : 'general'}
 
-## Stack (policy-clean, from wecanjustbuildthings.dev)
-${chosenItems.map((it) => `- ${it.name} (${it.ecosystem}, ${it.license}) — ${it.desc}`).join('\n') || '- <select tools>'}
+## Stack (policy-clean, from wecanjustbuildthings.dev — license verified at commit)
+${chosenItems.map((it) => `- ${it.name} (${it.ecosystem}, ${it.license}${it.commit ? `, license @ ${it.commit.slice(0, 7)}` : ''}) — ${it.desc}`).join('\n') || '- <select tools>'}
 `);
 
   const jsDeps = $derived(chosenItems.filter((it) => it.ecosystem === 'js'));
@@ -471,7 +661,6 @@ PROTOCOLS: ${protoList.length ? protoList.join(', ') : 'general'}
 RULES (binding — see constitution.md):
 - Read .specify/memory/constitution.md FIRST and never violate it.
 - Read skills/*.SKILL.md and follow the builder's own methods exactly; if a skill conflicts with a task, surface it and ask.
-- Design for welcome: meet WCAG 2.2 AA (readable contrast, large tap targets, keyboard nav with visible focus, screen-reader support, reduced-motion + dark-mode). Token-driven, consistent styling; one clear primary action per screen; reflect the community's own colours and voice, not a generic default.
 - Use ONLY these vetted, policy-clean dependencies:
 ${chosenItems.map((it) => `    - ${it.name} (${it.ecosystem})`).join('\n') || '    - <none selected>'}
 ${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the primary SDK for relays, subscriptions, and signers.\n' : ''}${protocols.has('atproto') ? '- For AT Protocol, use @atproto/api as the primary SDK; prefer OAuth (DPoP) over App Passwords.\n' : ''}- No dependency or provider owned by Meta, OpenAI, or xAI — directly or transitively.
@@ -561,23 +750,13 @@ manuals with the knowledge-to-skills-pipeline).
       '.specify/memory/constitution.md': constitution,
       [`specs/001-${slug}/spec.md`]: spec,
       [`${slug}.goose-recipe.yaml`]: gooseRecipe,
-      '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; keep DESIGN-CARD.md in mind for every screen; run the enforcement engine before committing.\n`,
-      'DESIGN-CARD.md': designCardMd(),
+      '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; run the enforcement engine before committing.\n`,
       'skills/README.md': skillsReadme,
       // The example is just a placeholder; once the builder has real skills, ship those instead.
       ...(skillCount ? {} : { 'skills/example.SKILL.md': skillExample }),
       ...customSkills,
     };
     return files;
-  }
-
-  // The Design Field Card, as a Markdown file that travels with the project — a
-  // pocket reference for the builder and a design checklist the agent can follow.
-  function designCardMd(): string {
-    const c = CARD.en; // the file ships in English alongside the (English) constitution
-    const moves = c.moves.map((m, i) => `${i + 1}. **${m.title}** — ${m.spot}\n   _Ask:_ ${m.ask}`).join('\n');
-    const ship = c.ship.map((s) => `- ${s}`).join('\n');
-    return `# Design Field Card\n\n${c.intro}\n\n## The five moves\n${moves}\n\n## ${c.accessLabel}\n\n    ${c.accessPrompt}\n\n## ${c.optionsLabel}\n\n    ${c.optionsPrompt}\n\n## ${c.shipLabel}\n${ship}\n\n---\nFull guide: https://wecanjustbuildthings.dev/guides/design-for-your-community/\n`;
   }
 
   let copied = $state('');
@@ -719,6 +898,27 @@ manuals with the knowledge-to-skills-pipeline).
   }
   const skillCount = $derived(Object.keys(customSkills).length);
 
+  // ---------- Movement 3: the inline Skills Creator (capture your knowledge) ----------
+  // The builder knows something about their community/safety/problem the agent
+  // doesn't. Capture it here as a reusable skill — emitted as a SKILL.md into the
+  // starter repo and carried in the build session. Deterministic template, no model.
+  let authoredSkills = $state<DraftSkill[]>([]);
+  let skName = $state(''); let skDesc = $state(''); let skSteps = $state(''); let skSource = $state('');
+  function captureSkill() {
+    const method = skSteps.split('\n').map((l) => l.trim()).filter(Boolean);
+    if (!skName.trim() || !method.length) return;
+    const s: DraftSkill = { name: skName.trim(), description: skDesc.trim() || skName.trim(), method, source: skSource.trim() || undefined };
+    authoredSkills = [...authoredSkills.filter((x) => slugifySkill(x.name) !== slugifySkill(s.name)), s];
+    addSkill(s);
+    skName = ''; skDesc = ''; skSteps = ''; skSource = '';
+  }
+  function removeAuthored(name: string) {
+    authoredSkills = authoredSkills.filter((x) => x.name !== name);
+    const key = `skills/${slugifySkill(name)}.SKILL.md`;
+    const { [key]: _removed, ...rest } = customSkills;
+    customSkills = rest;
+  }
+
   // The constrained menu the model may choose from: the current pieces and their
   // alternatives, plus the strongest tools in each relevant capability category.
   // Everything here is already in the verified, policy-screened catalog.
@@ -802,17 +1002,18 @@ manuals with the knowledge-to-skills-pipeline).
     } catch { aiError = t.refineErr; } finally { aiBusy = false; }
   }
   function applyProposal(p: Proposal, i: number) {
-    // Apply idempotently: 'add'/'remove' on a blueprint piece set its removed
-    // state directly (never toggle — a toggle could re-add a piece the builder
-    // already removed, or strike out one they kept).
+    // Apply idempotently (fix carried over from main's review pass): 'add'/'remove'
+    // on a blueprint piece set its removed-state directly — toggling could re-add a
+    // piece the builder already removed, or strike out one they kept. Only
+    // non-piece tools touch the extra set.
     const pieceFor = (name: string) => blueprint.find((b) => b.item.name === name);
     if (p.action === 'add') {
       const bp = pieceFor(p.name);
-      if (bp) { const r = new Set(removed); r.delete(bp.capId); removed = r; } // un-remove the piece
+      if (bp) { const r = new Set(removed); r.delete(bp.capId); removed = r; }
       else { const n = new Set(extra); n.add(p.name); extra = n; }
     } else if (p.action === 'remove') {
       const bp = pieceFor(p.name);
-      if (bp) { const r = new Set(removed); r.add(bp.capId); removed = r; } // ensure removed
+      if (bp) { const r = new Set(removed); r.add(bp.capId); removed = r; }
       else { const n = new Set(extra); n.delete(p.name); extra = n; }
     } else if (p.action === 'swap') {
       const bp = pieceFor(p.from ?? '');
@@ -824,6 +1025,9 @@ manuals with the knowledge-to-skills-pipeline).
 
 <div class="studio" dir={rtl ? 'rtl' : 'ltr'}>
   <div class="langbar">
+    {#if problem.trim() || extra.size || authoredSkills.length}
+      <button class="lang start-over" onclick={startOver}>↺ {t.startOver}</button>
+    {/if}
     {#each ['en', 'es', 'ar'] as l}
       <button class="lang" class:on={lang === l} onclick={() => (lang = l as Lang)} aria-pressed={lang === l}>{l === 'en' ? 'English' : l === 'es' ? 'Español' : 'العربية'}</button>
     {/each}
@@ -838,7 +1042,6 @@ manuals with the knowledge-to-skills-pipeline).
   {#if step === 1}
     <section class="panel">
       <p class="hint">{t.tenq} <a href="/method/ten-questions/">↗</a></p>
-      <p class="hint"><a href="/guides/design-for-your-community/">{t.designHint}</a></p>
       <label class="field"><span>{t.problem}</span><textarea bind:value={problem} rows="3" placeholder="e.g. Tenants need to document evictions without exposing who they are."></textarea></label>
       <div class="examples">
         <span class="hint">{t.examples}</span>
@@ -848,6 +1051,34 @@ manuals with the knowledge-to-skills-pipeline).
         <div class="chips">{#each ALL_PROTOCOLS as p}<button class="chip" class:on={protocols.has(p)} onclick={() => toggleProto(p)} aria-pressed={protocols.has(p)}>{p}</button>{/each}</div>
         <p class="hint">{t.protoHelp}</p>
       </div>
+
+      {#if mentorQuestions.length || reflection.constraints.length}
+        <div class="mentor">
+          {#if mentorQuestions.length}
+            <p class="mentor-head"><strong>{m.heading}</strong></p>
+            <p class="hint">{m.sub}</p>
+            {#each mentorQuestions as q (q.id)}
+              <fieldset class="mentor-q">
+                <legend>{m.q[q.id].prompt}</legend>
+                <div class="chips">
+                  {#each q.options as o (o.id)}
+                    <button type="button" class="chip" class:on={mentorAnswers[q.id] === o.id} aria-pressed={mentorAnswers[q.id] === o.id} onclick={() => answerMentor(q.id, o.id)}>{m.q[q.id].opts[o.id]}</button>
+                  {/each}
+                  <button type="button" class="chip mentor-skip" onclick={() => answerMentor(q.id, '__skip')}>{m.skip}</button>
+                </div>
+              </fieldset>
+            {/each}
+          {/if}
+          {#if reflection.constraints.length}
+            <div class="reflect" role="status" aria-live="polite">
+              <p class="reflect-head"><strong>{m.reflectHeading}</strong></p>
+              <p>{m.reflectIntro}</p>
+              <ul class="reflect-list">{#each reflection.constraints as c (c)}<li>{m.c[c]}</li>{/each}</ul>
+            </div>
+          {/if}
+        </div>
+      {/if}
+
       <details class="deeper">
         <summary>Want a sharper blueprint? Add the why &amp; what success looks like (optional)</summary>
         <label class="field"><span>{t.name}</span><input bind:value={projectName} placeholder="e.g. neighborhood-shield" /></label>
@@ -878,8 +1109,17 @@ manuals with the knowledge-to-skills-pipeline).
               <span class="vbadge vbadge--{p.item.verification}">{p.item.verification.replace('_', ' ')}</span>
               <span class="tool-meta">{p.item.ecosystem} · {p.item.license}</span>
             </div>
+            {#if p.item.commit}
+              <p class="receipt"><span class="receipt-check" aria-hidden="true">✓</span> {#if p.item.licenseUrl}<a href={p.item.licenseUrl} target="_blank" rel="noopener noreferrer">{t.bpReceipt} <code>{p.item.commit.slice(0, 7)}</code></a>{:else}{t.bpReceipt} <code>{p.item.commit.slice(0, 7)}</code>{/if}</p>
+            {/if}
             <p class="piece-why"><strong>{t.bpWhyFor}</strong> {p.why}</p>
             <p class="piece-connects"><strong>{t.bpConnects}</strong> {p.connects}</p>
+            {#if partnersOf(p.item.name, chem).length}
+              <p class="works-with"><strong>{adv.worksWith}</strong> {partnersOf(p.item.name, chem).join(', ')}</p>
+            {/if}
+            {#each advisoriesFor(p.item) as a (a)}
+              <p class="advisory"><span aria-hidden="true">⚠</span> {a}</p>
+            {/each}
             {#if p.alts.length}
               <details class="swap">
                 <summary>{t.bpSwap} ▾</summary>
@@ -893,10 +1133,35 @@ manuals with the knowledge-to-skills-pipeline).
           </li>
         {/each}
       </ol>
+      {#if extraItems.length}
+        <h4 class="bp-sub">{t.bpAdded}</h4>
+        <ol class="pieces">
+          {#each extraItems as it (it.name)}
+            <li class="piece">
+              <div class="piece-head"><span class="add-label">{seededTool === it.name ? t.bpSeeded : t.bpAddedByYou}</span><button class="toggle" onclick={() => toggleTool(it.name)}>{t.bpRemove}</button></div>
+              <div class="piece-tool">
+                <a class="tool-name" href={it.url}>{it.name}</a>
+                <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span>
+                <span class="tool-meta">{it.ecosystem} · {it.license}</span>
+              </div>
+              {#if it.commit}<p class="receipt"><span class="receipt-check" aria-hidden="true">✓</span> {#if it.licenseUrl}<a href={it.licenseUrl} target="_blank" rel="noopener noreferrer">{t.bpReceipt} <code>{it.commit.slice(0, 7)}</code></a>{:else}{t.bpReceipt} <code>{it.commit.slice(0, 7)}</code>{/if}</p>{/if}
+              {#if partnersOf(it.name, chem).length}<p class="works-with"><strong>{adv.worksWith}</strong> {partnersOf(it.name, chem).join(', ')}</p>{/if}
+              {#each advisoriesFor(it) as a (a)}<p class="advisory"><span aria-hidden="true">⚠</span> {a}</p>{/each}
+            </li>
+          {/each}
+        </ol>
+      {/if}
+
       <div class="fits">
         <strong>{t.bpFits}</strong>
         <p>{#each blueprint.filter((p) => !removed.has(p.capId)) as p, i}{i > 0 ? ' → ' : ''}<a href={p.item.url}>{p.item.name}</a> ({p.role.toLowerCase()}){/each}.</p>
       </div>
+      {#if chem.conflicts.length}
+        <div class="conflict" role="alert">
+          <strong><span aria-hidden="true">⚠</span> {adv.conflict}</strong>
+          <ul>{#each chem.conflicts as c (c.a + c.b)}<li>{c.a} · {c.b}</li>{/each}</ul>
+        </div>
+      {/if}
 
       <details class="refine">
         <summary>{t.refineTitle}</summary>
@@ -961,6 +1226,26 @@ manuals with the knowledge-to-skills-pipeline).
           {/if}
         {/if}
       </details>
+
+      <div class="skill-capture">
+        <p class="skill-capture-head"><strong>{t.skCaptureHead}</strong></p>
+        <p class="hint">{t.skCaptureSub}</p>
+        <label class="field"><span>{t.skName}</span><input bind:value={skName} placeholder="tenant-intake" /></label>
+        <label class="field"><span>{t.skDesc}</span><input bind:value={skDesc} placeholder={t.skDescPh} /></label>
+        <label class="field"><span>{t.skSteps}</span><textarea bind:value={skSteps} rows="4" placeholder={t.skStepsPh}></textarea></label>
+        <label class="field"><span>{t.skSource}</span><input bind:value={skSource} placeholder={t.skSourcePh} /></label>
+        <div><button class="primary" onclick={captureSkill} disabled={!skName.trim() || !skSteps.trim()}>{t.skCaptureBtn}</button></div>
+        {#if authoredSkills.length}
+          <ul class="skilllist">
+            {#each authoredSkills as s (s.name)}
+              <li class="skillcard">
+                <div class="skill-head"><span class="skill-name">{slugifySkill(s.name)}.SKILL.md</span> <button class="link" onclick={() => removeAuthored(s.name)}>{t.skillRemove}</button></div>
+                <p class="skill-desc">{s.description}</p>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      </div>
 
       <details class="skillsbox">
         <summary>{t.skillsReady}{skillCount ? ` · ${skillCount} ${t.skillsIncluded}` : ''}</summary>
@@ -1050,75 +1335,66 @@ manuals with the knowledge-to-skills-pipeline).
       {@render artifact('The plan (spec.md)', 's', spec)}
       {@render artifact('The tools list (package.json)', 'pkg', packageJson)}
 
-      <details class="card">
-        <summary>{card.title} — {t.designHintShort}</summary>
-        <p class="hint">{card.intro}</p>
-        <ol class="moves card-moves">
-          {#each card.moves as m, i}
-            <li class="piece">
-              <div class="piece-head"><span class="role">{m.title}</span>
-                <button class="apply" onclick={() => copy(`cm${i}`, m.ask)}>{copied === `cm${i}` ? '✓' : t.cardCopyAsk}</button>
-              </div>
-              <p class="piece-why">{m.spot}</p>
-              <p class="piece-connects"><em>{m.ask}</em></p>
-            </li>
-          {/each}
-        </ol>
-        <div class="card-prompt">
-          <div class="prop-head"><span class="prop-name">{card.accessLabel}</span><button class="apply" onclick={() => copy('ca', card.accessPrompt)}>{copied === 'ca' ? '✓' : t.cardCopy}</button></div>
-          <pre><code>{card.accessPrompt}</code></pre>
-        </div>
-        <div class="card-prompt">
-          <div class="prop-head"><span class="prop-name">{card.optionsLabel}</span><button class="apply" onclick={() => copy('co', card.optionsPrompt)}>{copied === 'co' ? '✓' : t.cardCopy}</button></div>
-          <pre><code>{card.optionsPrompt}</code></pre>
-        </div>
-        <p class="bp-sub">{card.shipLabel}</p>
-        <ul class="ship">{#each card.ship as s}<li>{s}</li>{/each}</ul>
-        <p class="hint"><a href="/guides/design-for-your-community/">{card.full}</a></p>
-      </details>
-
       <div class="nav"><button onclick={() => (step = 2)}>{t.backStack}</button></div>
     </section>
   {/if}
 </div>
 
 <style>
-  .studio { margin: var(--wcb-space-sm) 0 var(--wcb-space-lg); }
-  /* WCAG 2.2: a visible focus ring on every control; small pills clear the 24px target floor. */
-  .studio :focus-visible { outline: var(--wcb-focus-width) solid var(--wcb-focus-color); outline-offset: var(--wcb-focus-offset); border-radius: var(--wcb-radius-sm); }
-  .studio .toggle, .studio .apply, .studio .lang { min-height: var(--wcb-target-min); }
-  .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; margin-bottom: var(--wcb-space-2xs); }
-  .lang { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: var(--wcb-radius-pill); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
-  .lang.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
-  .steps { display: flex; gap: var(--wcb-space-2xs); list-style: none; padding: 0; margin: 0 0 1.25rem; }
+  /* The Studio reads as a defined workbench surface, not a floating form. */
+  .studio {
+    margin: var(--space-md) 0 var(--space-lg);
+    background: var(--surface);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-lg);
+    padding: clamp(var(--space-sm), 3vw, var(--space-lg));
+    border-top: 3px solid var(--structure);
+  }
+  .langbar { display: flex; gap: 0.4rem; justify-content: flex-end; align-items: center; margin-bottom: var(--space-sm); }
+  .start-over { margin-inline-end: auto; color: var(--ink-soft); }
+  .start-over:hover { color: var(--danger-text); border-color: var(--danger-edge); }
+  .add-label { font-weight: var(--weight-bold); color: var(--structure); }
+  .lang { font-size: 0.8rem; padding: 0.25rem 0.6rem; border-radius: var(--radius-pill); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink-soft); cursor: pointer; }
+  .lang.on { background: var(--structure); color: var(--on-structure); border-color: var(--structure); font-weight: var(--weight-bold); }
+  /* Step indicator: a numbered progress rail. */
+  .steps { display: flex; gap: var(--space-2xs); list-style: none; padding: 0; margin: 0 0 var(--space-md); }
   .steps li { flex: 1; }
-  .steps button { width: 100%; padding: var(--wcb-space-xs); border: 1px solid var(--sl-color-gray-5); background: var(--md-sys-color-surface-container-high); color: var(--sl-color-text); border-radius: var(--wcb-radius-pill); cursor: pointer; font-weight: 700; transition: transform var(--wcb-motion-fast) var(--wcb-easing-standard), box-shadow var(--wcb-motion-fast) var(--wcb-easing-standard); }
-  .steps li.on button { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); box-shadow: var(--wcb-shadow-2); transform: translateY(-1px); }
-  .panel { display: flex; flex-direction: column; gap: var(--wcb-space-sm); background: var(--md-sys-color-surface-container); border: 1px solid color-mix(in srgb, var(--sl-color-gray-4) 40%, transparent); border-radius: var(--wcb-radius-md); padding: var(--wcb-space-md); box-shadow: var(--wcb-shadow-1); }
+  .steps button { width: 100%; padding: 0.55rem 0.5rem; border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink-soft); border-radius: var(--radius); cursor: pointer; font-weight: var(--weight-bold); border-top: 3px solid var(--edge-strong); transition: color var(--dur-1) var(--ease-out), border-color var(--dur-1) var(--ease-out); }
+  .steps button:hover { color: var(--ink); border-top-color: var(--structure); }
+  .steps li.on button { background: var(--structure); color: var(--on-structure); border-color: var(--structure); border-top-color: var(--signal); }
+  .panel { display: flex; flex-direction: column; gap: var(--space-sm); }
   .field { display: flex; flex-direction: column; gap: 0.35rem; }
-  .field > span { font-weight: 600; font-size: 0.9rem; }
-  input, textarea, select { padding: 0.6rem 0.8rem; border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-sm); background: var(--sl-color-bg); color: var(--sl-color-white); font: inherit; transition: border-color var(--wcb-motion-fast) var(--wcb-easing-standard); }
-  input:focus, textarea:focus, select:focus { border-color: var(--sl-color-accent); }
-  .chips, .tabs { display: flex; flex-wrap: wrap; gap: var(--wcb-space-2xs); }
-  .chip { padding: 0.35rem 0.8rem; border-radius: var(--wcb-radius-pill); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
-  .chip.on { background: var(--sl-color-accent); color: var(--wcb-on-accent); border-color: var(--sl-color-accent); }
+  .field > span { font-weight: var(--weight-bold); font-size: 0.9rem; color: var(--ink); }
+  input, textarea, select { padding: 0.6rem 0.75rem; border: 1px solid var(--control-edge); border-radius: var(--radius); background: var(--surface-2); color: var(--ink); font: inherit; transition: border-color var(--dur-1) var(--ease-out); }
+  :is(input, textarea, select):focus { border-color: var(--structure); }
+  .chips, .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .chip { padding: 0.35rem 0.8rem; border-radius: var(--radius-pill); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink); cursor: pointer; }
+  .chip.on { background: var(--structure); color: var(--on-structure); border-color: var(--structure); }
   .tabs button { padding: 0.45rem 0.8rem; border-radius: 0.5rem 0.5rem 0 0; border: 1px solid var(--sl-color-gray-6); background: transparent; color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
   .tabs button.on { background: var(--sl-color-gray-6); border-color: var(--sl-color-gray-5); }
-  .hpanel { border: 1px solid var(--sl-color-gray-5); border-radius: 0 0.5rem 0.5rem 0.5rem; padding: var(--wcb-space-sm); display: flex; flex-direction: column; gap: 0.7rem; }
+  .hpanel { border: 1px solid var(--sl-color-gray-5); border-radius: 0 0.5rem 0.5rem 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
   .picklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
-  .pick { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.7rem; }
+  .pick { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.7rem; }
   .pick.on { border-color: var(--sl-color-accent); }
   .pick label { display: grid; grid-template-columns: auto 1fr auto; gap: 0.2rem 0.6rem; align-items: baseline; cursor: pointer; }
   .pick-name { font-weight: 700; }
   .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
-  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: var(--wcb-radius-pill); border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
-  .vbadge--verified { border-left-color: var(--wcb-success-edge); }
-  .vbadge--under_review { border-left-color: var(--wcb-warning-edge); }
-  .vbadge--blocked { border-left-color: var(--wcb-danger-edge); }
+  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
+  .vbadge--verified { border-left-color: var(--ok-edge); }
+  .vbadge--under_review { border-left-color: var(--warn-edge); }
+  .vbadge--blocked { border-left-color: var(--danger-edge); }
   .examples { display: flex; flex-direction: column; gap: 0.4rem; }
   .chip.ex { text-align: start; font-size: 0.82rem; max-width: 100%; white-space: normal; line-height: 1.3; }
-  .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .mentor { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-sm); background: color-mix(in srgb, var(--structure) 4%, transparent); }
+  .mentor-head { margin: 0; }
+  .mentor-q { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+  .mentor-q legend { font-weight: var(--weight-bold); font-size: 0.92rem; padding: 0; color: var(--ink); }
+  .mentor-skip { opacity: 0.7; }
+  .reflect { border-inline-start: 3px solid var(--signal); background: var(--surface-2); border-radius: var(--radius); padding: var(--space-sm) var(--space-md); }
+  .reflect-head { margin: 0 0 0.25rem; color: var(--ink); }
+  .reflect-list { margin: 0.4rem 0 0; padding-inline-start: 1.1rem; display: grid; gap: 0.25rem; }
+  .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .refine { border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.6rem 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent); }
   .refine > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 700; }
   .qs { list-style: none; counter-reset: q; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
@@ -1126,22 +1402,19 @@ manuals with the knowledge-to-skills-pipeline).
   .qs .q { margin: 0 0 0.3rem; font-weight: 600; }
   .qs .q::before { content: counter(q) '. '; color: var(--sl-color-text-accent); }
   .proposals { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
-  .proposal { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: var(--wcb-radius-sm); padding: 0.6rem 0.8rem; }
-  .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--wcb-space-xs); flex-wrap: wrap; }
+  .proposal { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.6rem 0.8rem; }
+  .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
   .prop-name { font-weight: 700; }
-  .apply { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 0; border-radius: var(--wcb-radius-pill); padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-  .applied { font-size: 0.78rem; font-weight: 700; color: var(--wcb-success-text); }
+  .apply { background: var(--sl-color-accent); color: var(--on-structure); border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+  .applied { font-size: 0.78rem; font-weight: 700; color: var(--ok-text); }
   .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
-  .card { border: 1px solid var(--sl-color-accent); border-radius: var(--wcb-radius-sm); padding: 0.6rem 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent); }
-  .card > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 700; }
-  .card-prompt { border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.7rem; }
-  .card-prompt pre { margin: var(--wcb-space-3xs) 0 0; }
-  .ship { margin: 0; padding-inline-start: 1.1rem; display: grid; gap: var(--wcb-space-3xs); font-size: 0.88rem; color: var(--sl-color-text); }
-  .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .skill-capture { border: 1px solid var(--edge); border-inline-start: 3px solid var(--signal); border-radius: var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-2xs); background: color-mix(in srgb, var(--signal) 5%, transparent); }
+  .skill-capture-head { margin: 0; font-size: 1.02rem; font-family: var(--font-display); }
+  .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .skillsbox > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 600; }
-  .skilllist { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--wcb-space-2xs); }
-  .skillcard { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: var(--wcb-radius-sm); padding: 0.55rem 0.8rem; }
-  .skill-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--wcb-space-xs); flex-wrap: wrap; }
+  .skilllist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+  .skillcard { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.55rem 0.8rem; }
+  .skill-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
   .skill-name { font-weight: 700; font-family: var(--sl-font-mono); font-size: 0.92rem; }
   .skill-desc { margin: 0.25rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
   .skill-steps { margin: 0.4rem 0 0; padding-inline-start: 1.2rem; font-size: 0.85rem; color: var(--sl-color-gray-2); display: grid; gap: 0.15rem; }
@@ -1151,34 +1424,41 @@ manuals with the knowledge-to-skills-pipeline).
   .pieces { list-style: none; counter-reset: piece; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
   .piece { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.7rem 0.9rem; }
   .piece.off { opacity: 0.55; border-inline-start-color: var(--sl-color-gray-5); }
-  .piece-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--wcb-space-xs); }
+  .piece-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; }
   .role { counter-increment: piece; font-weight: 700; }
   .role::before { content: counter(piece) '. '; color: var(--sl-color-text-accent); }
-  .toggle { background: none; border: 1px solid var(--sl-color-gray-5); border-radius: var(--wcb-radius-pill); padding: 0.1rem 0.65rem; font-size: 0.74rem; color: var(--sl-color-text); cursor: pointer; }
-  .piece-tool { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--wcb-space-2xs); margin: 0.35rem 0; }
+  .toggle { background: none; border: 1px solid var(--sl-color-gray-5); border-radius: 999px; padding: 0.1rem 0.65rem; font-size: 0.74rem; color: var(--sl-color-text); cursor: pointer; }
+  .piece-tool { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; margin: 0.35rem 0; }
   .tool-name { font-weight: 700; font-size: 1.02rem; }
   .tool-meta { color: var(--sl-color-gray-2); font-size: 0.8rem; }
   .piece-why, .piece-connects { margin: 0.25rem 0; font-size: 0.9rem; color: var(--sl-color-text); }
+  .works-with { margin: 0.25rem 0; font-size: 0.85rem; color: var(--ink-soft); }
+  .advisory { margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--ink); background: color-mix(in srgb, var(--signal) 14%, transparent); border-inline-start: 3px solid var(--signal); border-radius: var(--radius-sm); padding: 0.3rem 0.55rem; }
+  .conflict { margin-top: 0.75rem; border: 1px solid var(--signal); border-inline-start-width: 4px; border-radius: var(--radius); padding: 0.55rem 0.8rem; background: color-mix(in srgb, var(--signal) 8%, transparent); font-size: 0.88rem; }
+  .conflict ul { margin: 0.3rem 0 0; padding-inline-start: 1.1rem; }
+  .receipt { margin: 0.3rem 0 0; font-size: 0.8rem; color: var(--ink-soft); display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+  .receipt a { color: var(--structure); text-decoration: none; }
+  .receipt a:hover { text-decoration: underline; }
+  .receipt code { font-size: 0.92em; background: color-mix(in srgb, var(--ok-edge) 16%, transparent); padding: 0.05rem 0.35rem; border-radius: var(--radius-sm); color: var(--ink); }
+  .receipt-check { color: var(--ok-edge); font-weight: 800; }
   .swap { margin-top: 0.45rem; }
   .swap ul { list-style: none; padding: 0.4rem 0 0; margin: 0; display: grid; gap: 0.3rem; }
-  .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.6rem 0.85rem; }
+  .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.6rem 0.85rem; }
   .fits p { margin: 0.3rem 0 0; font-size: 0.92rem; }
   .mtitle { margin: 0; font-size: 1.05rem; }
   .modelgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
   @media (max-width: 34rem) { .modelgrid { grid-template-columns: 1fr; } }
-  .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: var(--wcb-radius-sm); background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
-  .nav { display: flex; justify-content: space-between; gap: var(--wcb-space-2xs); margin-top: var(--wcb-space-2xs); }
-  .nav button { padding: 0.55rem 1rem; border-radius: var(--wcb-radius-sm); border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
-  .primary { background: var(--sl-color-accent); color: var(--wcb-on-accent); border: 1px solid var(--sl-color-accent); padding: 0.6rem 1.2rem; border-radius: var(--wcb-radius-pill); cursor: pointer; font-weight: 700; box-shadow: var(--wcb-shadow-1); transition: transform var(--wcb-motion-fast) var(--wcb-easing-standard), box-shadow var(--wcb-motion-fast) var(--wcb-easing-standard); }
-  .primary:hover { transform: translateY(-2px); box-shadow: var(--wcb-shadow-2); }
-  .primary:active { transform: translateY(0); box-shadow: var(--wcb-shadow-1); }
+  .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: 0.5rem; background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
+  .nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; }
+  .nav button { padding: 0.55rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
+  .primary { background: var(--sl-color-accent); color: var(--on-structure); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }
   .big { font-size: 1.05rem; padding: 0.7rem 1.3rem; }
   .hint { color: var(--sl-color-gray-2); font-size: 0.9rem; }
-  .err { color: var(--wcb-danger-text); font-size: 0.9rem; }
+  .err { color: var(--danger-text); font-size: 0.9rem; }
   .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; text-decoration: underline; font: inherit; }
   .copyp { align-self: flex-start; }
-  details { border: 1px solid var(--sl-color-gray-6); border-radius: var(--wcb-radius-sm); padding: 0.5rem 0.75rem; }
-  summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: var(--wcb-space-sm); }
-  pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: var(--wcb-space-xs); border-radius: 0.4rem; }
+  details { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; }
+  summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; }
+  pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: 0.75rem; border-radius: 0.4rem; }
   .out { max-height: 28rem; }
 </style>

@@ -1,0 +1,57 @@
+---
+/**
+ * PageTitle override — adds "Build with this" to Catalog tool entries.
+ *
+ * The bidirectional hand-off: from any tool's catalog entry, seed it straight
+ * into the Build Studio (via /build/?seed=…, which the Studio reads on mount).
+ * No localStorage coupling, no 2,183-file diff — one override, the button shows
+ * only for tool-type entries. Every other page keeps the plain title.
+ */
+const { entry } = Astro.locals.starlightRoute;
+const data = entry.data as { title: string; entry_type?: string; dependency_name?: string };
+
+const TOOL_TYPES = new Set(['tool', 'framework', 'library', 'service', 'protocol']);
+const isTool = Boolean(data.entry_type && TOOL_TYPES.has(data.entry_type));
+const seedName = data.dependency_name ?? data.title;
+const buildHref = `/build/?seed=${encodeURIComponent(seedName)}`;
+---
+
+<h1 id="_top">{data.title}</h1>
+{
+  isTool && (
+    <a class="build-with-this" href={buildHref}>
+      Build with this
+      <span aria-hidden="true">→</span>
+    </a>
+  )
+}
+
+<style>
+  h1 {
+    margin-top: 1rem;
+    font-size: var(--sl-text-h1);
+    line-height: var(--sl-line-height-headings);
+    font-weight: 600;
+    color: var(--sl-color-white);
+  }
+  .build-with-this {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin-top: var(--space-2xs);
+    margin-bottom: var(--space-2xs);
+    padding: 0.5rem var(--space-md);
+    border-radius: var(--radius);
+    background: var(--structure);
+    color: var(--on-structure);
+    font-weight: var(--weight-bold);
+    text-decoration: none;
+    transition: transform var(--dur-1) var(--ease-out);
+  }
+  .build-with-this:hover {
+    transform: translateY(-1px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .build-with-this { transition: none; }
+  }
+</style>
