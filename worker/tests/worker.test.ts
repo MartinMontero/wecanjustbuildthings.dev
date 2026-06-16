@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeRepo, safeLocalPath, cookie, PROVIDERS, isExcludedRouterModel } from '../index.ts';
+import { normalizeRepo, safeLocalPath, cookie, PROVIDERS, isExcludedRouterModel, isPermittedRouterModel } from '../index.ts';
 
 test('isExcludedRouterModel blocks Meta/OpenAI/xAI models via OpenRouter', () => {
   // Excluded vendors are unreachable through the router.
@@ -14,6 +14,27 @@ test('isExcludedRouterModel blocks Meta/OpenAI/xAI models via OpenRouter', () =>
   assert.ok(!isExcludedRouterModel('openrouter', 'google/gemini-2.0-flash'));
   // The guard only applies to the router; direct providers are already constrained.
   assert.ok(!isExcludedRouterModel('anthropic', 'openai/gpt-4o'));
+});
+
+test('isPermittedRouterModel is a default-deny allowlist for the OpenRouter broker (#2)', () => {
+  // Excluded vendors are unreachable, regardless of alias/casing.
+  assert.ok(!isPermittedRouterModel('openrouter', 'openai/gpt-4o'));
+  assert.ok(!isPermittedRouterModel('openrouter', 'meta-llama/llama-3.1-70b-instruct'));
+  assert.ok(!isPermittedRouterModel('openrouter', 'x-ai/grok-2'));
+  assert.ok(!isPermittedRouterModel('openrouter', 'XAI/grok'));
+  // Unknown/unlisted vendors are rejected by default — this is the point of an
+  // allowlist over a denylist: nothing slips through just by not being named.
+  assert.ok(!isPermittedRouterModel('openrouter', 'some-new-vendor/model'));
+  assert.ok(!isPermittedRouterModel('openrouter', 'gpt-4o')); // no vendor segment
+  // Vetted, non-excluded vendor families pass.
+  assert.ok(isPermittedRouterModel('openrouter', 'anthropic/claude-3.5-sonnet'));
+  assert.ok(isPermittedRouterModel('openrouter', 'deepseek/deepseek-chat'));
+  assert.ok(isPermittedRouterModel('openrouter', 'google/gemini-2.0-flash'));
+  assert.ok(isPermittedRouterModel('openrouter', 'mistralai/mistral-large'));
+  // Direct providers hit a hardcoded safe host, so they always pass.
+  assert.ok(isPermittedRouterModel('anthropic', 'anything'));
+  // The endpoint's default OpenRouter model must itself be permitted.
+  assert.ok(isPermittedRouterModel('openrouter', PROVIDERS.openrouter!.defaultModel));
 });
 
 test('PROVIDERS allowlist excludes Meta/OpenAI/xAI by policy', () => {
