@@ -1,6 +1,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { eligibleForStack, autoPickable, advisoryRank } from './studio-stack.ts';
+import { eligibleForStack, autoPickable, advisoryRank, pinnedDependencies } from './studio-stack.ts';
+
+test('pinnedDependencies pins to resolved versions, not "latest" (#3)', () => {
+  const deps = [{ name: 'nostr-tools' }, { name: '@noble/hashes' }, { name: 'unresolved-pkg' }];
+  const versions = { 'nostr-tools': '2.23.5', '@noble/hashes': '1.4.0' };
+  const out = pinnedDependencies(deps, versions);
+  assert.equal(out['nostr-tools'], '^2.23.5'); // pinned, not "latest"
+  assert.equal(out['@noble/hashes'], '^1.4.0');
+  // only genuinely-unresolved entries fall back
+  assert.equal(out['unresolved-pkg'], 'latest');
+  // when every version resolves, no "latest" is emitted at all
+  const all = pinnedDependencies([{ name: 'a' }], { a: '1.0.0' });
+  assert.ok(!Object.values(all).includes('latest'));
+});
 
 test('eligibleForStack admits verified AND under_review, excludes blocked + datasets (#4)', () => {
   assert.ok(eligibleForStack({ kind: 'tool', verification: 'verified' }));

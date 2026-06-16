@@ -43,3 +43,19 @@ export function autoPickable(it: StackCandidate): boolean {
 export function advisoryRank(it: StackCandidate): number {
   return it.advisory ? 1 : 0;
 }
+
+/**
+ * #3 — pin a generated package.json's dependencies to concrete versions (resolved
+ * live from the registry via /api/license) instead of the unbounded `latest`, so a
+ * starter installs the same tree later that was screened now. Entries that can't be
+ * resolved (registry offline) fall back to `latest` — verified-version pinning of
+ * every entry needs durable per-catalog version metadata (a separate data task).
+ */
+export function pinnedDependencies(
+  jsDeps: { name: string }[],
+  versions: Record<string, string>,
+): Record<string, string> {
+  return Object.fromEntries(
+    jsDeps.map((it) => [it.name, versions[it.name] ? `^${versions[it.name]}` : 'latest']),
+  );
+}

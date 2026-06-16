@@ -6,7 +6,7 @@
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
   import { detectSignals, pickQuestions, reflect, type ConstraintId } from '../lib/mentor-engine.ts';
   import { chemistry, partnersOf } from '../lib/chemistry.ts';
-  import { eligibleForStack, advisoryRank, autoPickable } from '../lib/studio-stack.ts';
+  import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies } from '../lib/studio-stack.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
@@ -606,7 +606,7 @@ goal, the goal wins — surface the conflict instead of silently trading it away
 ## Article I — Provider exclusion (non-negotiable)
 No dependency, directly or transitively, may be owned by Meta, OpenAI, or xAI, and
 no code may call their endpoints. Enforce before every commit:
-    npx tsx ./enforcement/cli.ts all --tree .
+    npm run enforce
 Any AI assistance must use a permitted, bring-your-own-key provider (Anthropic,
 DeepSeek, Kimi, OpenRouter, or local Ollama).
 
@@ -657,7 +657,71 @@ ${chosenItems.map((it) => `- ${it.verification === 'verified' ? '★ ' : ''}${it
 
   const jsDeps = $derived(chosenItems.filter((it) => it.ecosystem === 'js'));
   const otherDeps = $derived(chosenItems.filter((it) => it.ecosystem !== 'js'));
-  const packageJson = $derived(JSON.stringify({ name: slug, version: '0.1.0', private: true, type: 'module', engines: { node: '>=22.12.0' }, dependencies: Object.fromEntries(jsDeps.map((it) => [it.name, 'latest'])) }, null, 2) + '\n');
+
+  // #3 — resolve concrete versions for the chosen JS deps (from the registry, via
+  // the same /api/license endpoint the checker uses) so the generated package.json
+  // pins them instead of emitting unbounded `latest`. Fetched lazily at handoff.
+  let versionPins = $state<Record<string, string>>({});
+  const pinning = new Set<string>(); // in-flight guard (non-reactive)
+  $effect(() => {
+    if (step !== 3) return;
+    for (const it of jsDeps) {
+      if (pinning.has(it.name)) continue;
+      pinning.add(it.name);
+      fetch(`/api/license?eco=js&name=${encodeURIComponent(it.name)}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => { if (d?.version) versionPins = { ...versionPins, [it.name]: d.version }; })
+        .catch(() => { /* offline / dev: dep falls back to latest */ });
+    }
+  });
+  const packageJson = $derived(JSON.stringify({
+    name: slug, version: '0.1.0', private: true, type: 'module',
+    engines: { node: '>=22.12.0' },
+    scripts: { enforce: 'node scripts/enforce.mjs' },
+    dependencies: pinnedDependencies(jsDeps, versionPins),
+  }, null, 2) + '\n');
+
+  // A self-contained policy check that ships INSIDE the starter, so the command
+  // the docs tell people to run actually exists (#3). No extra deps: it fetches
+  // the live excluded-org policy and fails on any direct Meta/OpenAI/xAI dep.
+  const enforceScript = `#!/usr/bin/env node
+// Policy check for this starter — fetches the live excluded-organizations policy
+// from wecanjustbuildthings.dev and fails if any DIRECT dependency is owned by
+// Meta, OpenAI, or xAI. (The full multi-layer engine, incl. transitive scanning,
+// lives at the site; this is the Layer-1 direct check — enough to keep a starter
+// honest. Run before every commit: npm run enforce)
+import { readFileSync } from 'node:fs';
+
+const POLICY_URL = 'https://wecanjustbuildthings.dev/policy.json';
+const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const deps = Object.keys({ ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) });
+
+const res = await fetch(POLICY_URL).catch(() => null);
+if (!res || !res.ok) {
+  console.error('Could not fetch the policy from ' + POLICY_URL + ' — check your connection and retry.');
+  process.exit(1);
+}
+const { orgs } = await res.json();
+
+const findings = [];
+for (const dep of deps) {
+  const name = dep.toLowerCase();
+  for (const org of orgs) {
+    const scopes = (org.npm_scopes ?? []).map((s) => s.toLowerCase());
+    const packages = (org.npm_packages ?? []).map((s) => s.toLowerCase());
+    if (packages.includes(name) || scopes.some((s) => name === s || name.startsWith(s + '/'))) {
+      findings.push(dep + ' -> ' + (org.key ?? org.display_name));
+    }
+  }
+}
+
+if (findings.length) {
+  console.error('\\u2717 Excluded-org dependencies found (Meta/OpenAI/xAI):');
+  for (const f of findings) console.error('  - ' + f);
+  process.exit(1);
+}
+console.log('\\u2713 ' + deps.length + ' direct dependencies clean - no Meta/OpenAI/xAI.');
+`;
 
   const agentPrompt = $derived(`You are building "${projectName || slug}".
 
@@ -672,7 +736,7 @@ RULES (binding — see constitution.md):
 - Use ONLY these policy-clean dependencies (no Meta/OpenAI/xAI, screened by enforcement). ★ = human-verified; the rest passed automated policy screening and are pending verification — prefer ★ where a choice exists:
 ${chosenItems.map((it) => `    - ${it.verification === 'verified' ? '★ ' : ''}${it.name} (${it.ecosystem})${it.advisory ? ` [${it.advisory}-origin advisory]` : ''}`).join('\n') || '    - <none selected>'}
 ${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the primary SDK for relays, subscriptions, and signers.\n' : ''}${protocols.has('atproto') ? '- For AT Protocol, use @atproto/api as the primary SDK; prefer OAuth (DPoP) over App Passwords.\n' : ''}- No dependency or provider owned by Meta, OpenAI, or xAI — directly or transitively.
-- Run \`npx tsx ./enforcement/cli.ts all --tree .\` before every commit. Add rate
+- Run \`npm run enforce\` before every commit. Add rate
   limiting, test auth paths, and never swallow trust-path errors.
 
 Start by writing specs/001-${slug}/plan.md from the spec, then tasks.md, then implement task by task, keeping each change green.`);
@@ -682,7 +746,7 @@ title: "${(projectName || slug).replace(/"/g, "'")}"
 description: "Build ${slug} — policy-clean (no Meta/OpenAI/xAI), via wecanjustbuildthings.dev"
 instructions: |
   Read the constitution below and never violate it. Use only the listed,
-  policy-clean dependencies. Run \`npx tsx ./enforcement/cli.ts all --tree .\`
+  policy-clean dependencies. Run \`npm run enforce\`
   before every commit. Use a permitted BYOK provider only.
 prompt: |
 ${agentPrompt.split('\n').map((l) => '  ' + l).join('\n')}
@@ -701,7 +765,7 @@ ${chosenItems.map((it) => `- [${it.name}](${it.repo || it.url}) — ${it.desc}`)
 ## Build it with an agent
 1. Configure your agent (Goose or Claude Code) with a permitted, BYOK provider.
 2. Paste AGENT_PROMPT.txt (or open .specify/).
-3. Keep every change green: \`npx tsx ./enforcement/cli.ts all --tree .\`
+3. Keep every change green: \`npm run enforce\`
 
 ## Your methods (skills)
 Put your own know-how in \`skills/*.SKILL.md\` and the agent will follow it.
@@ -754,11 +818,12 @@ manuals with the knowledge-to-skills-pipeline).
     const files: Record<string, string> = {
       'README.md': readme,
       'package.json': packageJson,
+      'scripts/enforce.mjs': enforceScript,
       'AGENT_PROMPT.txt': agentPrompt,
       '.specify/memory/constitution.md': constitution,
       [`specs/001-${slug}/spec.md`]: spec,
       [`${slug}.goose-recipe.yaml`]: gooseRecipe,
-      '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; run the enforcement engine before committing.\n`,
+      '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; run \`npm run enforce\` before committing.\n`,
       'skills/README.md': skillsReadme,
       // The example is just a placeholder; once the builder has real skills, ship those instead.
       ...(skillCount ? {} : { 'skills/example.SKILL.md': skillExample }),
