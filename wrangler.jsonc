@@ -7,5 +7,22 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page"
+  },
+
+  // --- Auth storage (Sign in with Nostr / Bluesky) ---
+  // The ids below are PLACEHOLDERS. Create the resources on your Cloudflare
+  // account and paste the returned ids (see the commands handed over with Phase 1).
+  // Until then `wrangler deploy` will fail fast on the unknown ids — by design.
+  "kv_namespaces": [
+    { "binding": "SESSIONS", "id": "PLACEHOLDER_SESSIONS_KV_ID" },
+    { "binding": "ATPROTO", "id": "PLACEHOLDER_ATPROTO_KV_ID" }
+  ],
+  "d1_databases": [
+    { "binding": "DB", "database_name": "wcjbt-auth", "database_id": "PLACEHOLDER_D1_DATABASE_ID", "migrations_dir": "migrations" }
+  ],
+  "vars": {
+    // Canonical prod origin (used for OAuth client metadata + redirects). Local dev
+    // overrides this via .dev.vars (http://localhost:8788).
+    "SITE_URL": "https://wecanjustbuildthings.dev"
   }
 }

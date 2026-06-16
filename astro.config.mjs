@@ -71,6 +71,7 @@ export default defineConfig({
         SiteTitle: './src/components/overrides/SiteTitle.astro',
         Hero: './src/components/overrides/Hero.astro',
         PageTitle: './src/components/overrides/PageTitle.astro',
+        SocialIcons: './src/components/overrides/SocialIcons.astro',
       },
       customCss: ['./src/styles/tokens.css', './src/styles/theme.css', './src/styles/components.css'],
       sidebar: [

@@ -47,7 +47,10 @@ jobs:
       - name: Dead-link check
         uses: lycheeverse/lychee-action@v2
         with:
-          args: --config lychee.toml ./src
+          # Resolve root-relative links (/about/, /fonts/*) against the built
+          # site — lychee >=0.18 hard-errors on them otherwise. The Build step
+          # above produces dist/. --root-dir must be absolute.
+          args: --config lychee.toml --root-dir ${{ github.workspace }}/dist ./src
           fail: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

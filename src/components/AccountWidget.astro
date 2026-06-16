@@ -1,0 +1,298 @@
+---
+/**
+ * Global account widget, injected into the header (and mobile menu) via the
+ * SocialIcons override. The site is static, so the markup is identical for
+ * everyone and sign-in state is resolved client-side from the cookie session.
+ *
+ * It starts hidden and is revealed only once we know the state — so there's no
+ * flash of the wrong control, and a provider only appears when its backend is
+ * actually provisioned. Two providers:
+ *   - Nostr  — NIP-07 (window.nostr) signs a NIP-98 event in-page; we POST it to
+ *              /api/auth/nostr/{challenge,verify}. No redirect, no key leaves the user.
+ *   - Bluesky — hands off to the AT Proto OAuth flow at /api/auth/bluesky/start.
+ *
+ * Note: this component can render more than once per page (desktop header +
+ * mobile menu footer both use SocialIcons), so the script wires every instance,
+ * keeps them in sync, and uses data-attributes — never ids — to stay safe.
+ */
+---
+
+<div class="wcb-acct" data-acct hidden>
+  <!-- signed out: a trigger that opens the provider popover -->
+  <div class="wcb-acct__out" data-out hidden>
+    <button type="button" class="wcb-acct__link" data-toggle data-t="signIn"
+            aria-expanded="false" aria-haspopup="dialog">Sign in</button>
+    <div class="wcb-acct__panel" data-form hidden role="dialog" aria-label="Sign in">
+      <p class="wcb-acct__head" data-t="heading">Sign in</p>
+
+      <button type="button" class="wcb-acct__provbtn" data-nostr data-t="nostr" hidden>Continue with Nostr</button>
+
+      <div class="wcb-acct__or" data-or hidden><span data-t="or">or</span></div>
+
+      <form class="wcb-acct__bsky" data-bsky hidden>
+        <span class="wcb-acct__lbl" data-t="bsky">Continue with Bluesky</span>
+        <div class="wcb-acct__row">
+          <input class="wcb-acct__input" data-handle type="text" name="handle"
+                 inputmode="url" autocapitalize="none" autocomplete="off" spellcheck="false"
+                 placeholder="you.bsky.social" data-tph="placeholder" aria-label="Bluesky handle" />
+          <button type="submit" class="wcb-acct__go" data-t="go">Continue</button>
+        </div>
+      </form>
+
+      <p class="wcb-acct__perr" data-perr role="alert" hidden></p>
+      <p class="wcb-acct__hint" data-hint data-t="hint" hidden>You’ll authorize on your own server, then come back here.</p>
+    </div>
+  </div>
+
+  <!-- signed in: display name + sign out -->
+  <div class="wcb-acct__in" data-in hidden>
+    <span class="wcb-acct__who" data-who></span>
+    <button type="button" class="wcb-acct__link" data-signout data-t="signOut">Sign out</button>
+  </div>
+
+  <!-- transient result of the Bluesky OAuth round-trip -->
+  <p class="wcb-acct__note" data-note role="status" hidden></p>
+</div>
+
+<script>
+  type Strings = Record<string, string>;
+  const STR: Record<'en' | 'es' | 'ar', Strings> = {
+    en: {
+      signIn: 'Sign in', signOut: 'Sign out', heading: 'Sign in', or: 'or',
+      nostr: 'Continue with Nostr', bsky: 'Continue with Bluesky', go: 'Continue',
+      placeholder: 'you.bsky.social', hint: 'You’ll authorize on your own server, then come back here.',
+      signedIn: 'Signed in', connected: 'Signed in with Bluesky.', error: 'Sign-in didn’t finish — please try again.',
+      noExt: 'Install a Nostr extension (NIP-07), e.g. nos2x or Alby, then try again.',
+      nostrFailed: 'Nostr sign-in didn’t finish — please try again.',
+    },
+    es: {
+      signIn: 'Entrar', signOut: 'Salir', heading: 'Entrar', or: 'o',
+      nostr: 'Continuar con Nostr', bsky: 'Continuar con Bluesky', go: 'Continuar',
+      placeholder: 'tu.bsky.social', hint: 'Autorizarás en tu propio servidor y volverás aquí.',
+      signedIn: 'Sesión iniciada', connected: 'Sesión iniciada con Bluesky.', error: 'No se completó el inicio de sesión — inténtalo de nuevo.',
+      noExt: 'Instala una extensión de Nostr (NIP-07), p. ej. nos2x o Alby, e inténtalo de nuevo.',
+      nostrFailed: 'No se completó el inicio con Nostr — inténtalo de nuevo.',
+    },
+    ar: {
+      signIn: 'تسجيل الدخول', signOut: 'تسجيل الخروج', heading: 'تسجيل الدخول', or: 'أو',
+      nostr: 'المتابعة عبر Nostr', bsky: 'المتابعة عبر بلوسكاي', go: 'متابعة',
+      placeholder: 'you.bsky.social', hint: 'ستوافق على الدخول عبر خادمك ثم تعود إلى هنا.',
+      signedIn: 'تم تسجيل الدخول', connected: 'تم تسجيل الدخول عبر بلوسكاي.', error: 'لم يكتمل تسجيل الدخول — حاول مرة أخرى.',
+      noExt: 'ثبّت إضافة Nostr ‏(NIP-07)‏ مثل nos2x أو Alby ثم حاول مجددًا.',
+      nostrFailed: 'لم يكتمل تسجيل الدخول عبر Nostr — حاول مرة أخرى.',
+    },
+  };
+
+  const enc = new TextEncoder();
+  async function sha256Hex(s: string): Promise<string> {
+    const d = await crypto.subtle.digest('SHA-256', enc.encode(s));
+    return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+  function base64(s: string): string {
+    let bin = '';
+    for (const b of enc.encode(s)) bin += String.fromCharCode(b);
+    return btoa(bin);
+  }
+
+  // Update every instance at once (desktop header + mobile menu stay in sync).
+  let applyAll: (authed: boolean, name: string | null) => void = () => {};
+
+  function setup(root: HTMLElement, t: Strings) {
+    // Localize static labels + the input placeholder (hidden until reveal → no flash).
+    root.querySelectorAll<HTMLElement>('[data-t]').forEach((el) => { const v = t[el.dataset.t!]; if (v) el.textContent = v; });
+    root.querySelectorAll<HTMLInputElement>('[data-tph]').forEach((el) => { const v = t[el.dataset.tph!]; if (v) el.placeholder = v; });
+
+    const q = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const out = q('[data-out]'), inEl = q('[data-in]'), who = q('[data-who]'), note = q('[data-note]');
+    const toggle = q<HTMLButtonElement>('[data-toggle]'), form = q<HTMLFormElement>('[data-form]'), perr = q('[data-perr]');
+    const nostrBtn = q<HTMLButtonElement>('[data-nostr]'), orDiv = q('[data-or]'), hint = q('[data-hint]');
+    const bsky = q<HTMLFormElement>('[data-bsky]'), handle = q<HTMLInputElement>('[data-handle]');
+    const signout = q<HTMLButtonElement>('[data-signout]');
+    const show = (el: HTMLElement, v: boolean) => { el.hidden = !v; };
+    let nostrOn = false, bskyOn = false, open = false;
+
+    const setOpen = (v: boolean) => {
+      open = v; show(form, v); toggle.setAttribute('aria-expanded', String(v));
+      if (!v) show(perr, false);
+      if (v && bskyOn) handle.focus();
+    };
+    toggle.addEventListener('click', (e) => { e.stopPropagation(); setOpen(!open); });
+    document.addEventListener('click', (e) => { if (!root.contains(e.target as Node)) setOpen(false); });
+    root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { setOpen(false); toggle.focus(); } });
+
+    // Bluesky → full-page hand-off to the OAuth start endpoint (worker re-validates).
+    bsky.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const h = handle.value.trim();
+      if (!h) { handle.focus(); return; }
+      location.href = `/api/auth/bluesky/start?handle=${encodeURIComponent(h)}&redirect=${encodeURIComponent(location.pathname)}`;
+    });
+
+    // Nostr → NIP-07 signs a NIP-98 event in-page; verified server-side, no redirect.
+    nostrBtn.addEventListener('click', async () => {
+      show(perr, false);
+      const nostr = (window as any).nostr;
+      if (!nostr?.getPublicKey || !nostr?.signEvent) { perr.textContent = t.noExt; show(perr, true); return; }
+      nostrBtn.disabled = true;
+      try {
+        const cRes = await fetch('/api/auth/nostr/challenge', { method: 'POST', headers: { accept: 'application/json' } });
+        if (!cRes.ok) throw new Error('challenge');
+        const challenge = (await cRes.json()).challenge as string;
+        const body = JSON.stringify({ challenge });
+        const event = {
+          kind: 27235, created_at: Math.floor(Date.now() / 1000), content: '',
+          tags: [['u', `${location.origin}/api/auth/nostr/verify`], ['method', 'POST'], ['payload', await sha256Hex(body)]],
+        };
+        const signed = await nostr.signEvent(event);
+        const vRes = await fetch('/api/auth/nostr/verify', {
+          method: 'POST', body,
+          headers: { 'content-type': 'application/json', authorization: 'Nostr ' + base64(JSON.stringify(signed)) },
+        });
+        if (!vRes.ok) throw new Error('verify');
+        const data = await vRes.json();
+        setOpen(false);
+        applyAll(true, data?.user?.displayName ?? null);
+      } catch {
+        perr.textContent = t.nostrFailed; show(perr, true);
+      } finally {
+        nostrBtn.disabled = false;
+      }
+    });
+
+    signout.addEventListener('click', async () => {
+      signout.disabled = true;
+      try { await fetch('/api/auth/logout', { method: 'POST' }); } catch { /* clear the UI regardless */ }
+      signout.disabled = false;
+      applyAll(false, null);
+    });
+
+    function render(authed: boolean, name: string | null) {
+      if (authed) { who.textContent = name || t.signedIn; show(inEl, true); show(out, false); }
+      else { show(inEl, false); show(out, nostrOn || bskyOn); }
+      show(root, authed || nostrOn || bskyOn || !note.hidden);
+    }
+
+    return {
+      render,
+      setFlags: (n: boolean, b: boolean) => {
+        nostrOn = n; bskyOn = b;
+        show(nostrBtn, n); show(bsky, b); show(orDiv, n && b); show(hint, b);
+      },
+      showNote: (kind: 'ok' | 'err', msg: string) => {
+        note.textContent = msg; note.dataset.kind = kind; show(note, true);
+        window.setTimeout(() => show(note, false), 5000);
+      },
+    };
+  }
+
+  const roots = [...document.querySelectorAll<HTMLElement>('[data-acct]')];
+  if (roots.length) {
+    const docLang = document.documentElement.lang;
+    const lang = (docLang === 'es' || docLang === 'ar') ? docLang : 'en';
+    const t = STR[lang];
+    const insts = roots.map((r) => setup(r, t));
+    applyAll = (authed, name) => insts.forEach((i) => i.render(authed, name));
+
+    // Surface the result of the Bluesky OAuth round-trip, then strip the flag.
+    const params = new URLSearchParams(location.search);
+    const flag = params.get('bsky');
+    if (flag === 'connected') insts.forEach((i) => i.showNote('ok', t.connected));
+    else if (flag === 'error') insts.forEach((i) => i.showNote('err', t.error));
+    if (flag) {
+      params.delete('bsky'); params.delete('reason');
+      const qs = params.toString();
+      history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : '') + location.hash);
+    }
+
+    // Resolve current state once (session + which providers are provisioned), then render all.
+    (async () => {
+      let authed = false, name: string | null = null, nostrOn = false, bskyOn = false;
+      try {
+        const [s, n, b] = await Promise.all([
+          fetch('/api/auth/session', { headers: { accept: 'application/json' } }).then((r) => r.ok ? r.json() : { authenticated: false }),
+          fetch('/api/auth/nostr/status', { headers: { accept: 'application/json' } }).then((r) => r.ok ? r.json() : { configured: false }),
+          fetch('/api/auth/bluesky/status', { headers: { accept: 'application/json' } }).then((r) => r.ok ? r.json() : { configured: false }),
+        ]);
+        authed = !!s.authenticated; name = s.user?.displayName ?? null;
+        nostrOn = !!n.configured; bskyOn = !!b.configured;
+      } catch { /* offline / unprovisioned → stay hidden */ }
+      insts.forEach((i) => { i.setFlags(nostrOn, bskyOn); i.render(authed, name); });
+    })();
+  }
+</script>
+
+<style>
+  /* These elements set their own `display`, which would otherwise beat the UA
+     `[hidden] { display: none }` rule (author origin wins) and leave hidden
+     controls visible. Keep `[hidden]` authoritative within the widget. */
+  [hidden] { display: none !important; }
+
+  .wcb-acct { position: relative; display: inline-flex; align-items: center; }
+
+  .wcb-acct__link {
+    font: inherit; font-size: var(--step--1); font-weight: var(--weight-medium);
+    color: var(--ink-soft); background: transparent; border: 0; cursor: pointer;
+    padding: var(--space-3xs) var(--space-2xs); border-radius: var(--radius-sm);
+    white-space: nowrap;
+  }
+  .wcb-acct__link:hover { color: var(--ink); }
+  .wcb-acct__link:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+  .wcb-acct__in { display: inline-flex; align-items: center; gap: var(--space-2xs); }
+  .wcb-acct__who {
+    font-size: var(--step--1); font-weight: var(--weight-medium); color: var(--ink);
+    max-inline-size: 14ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .wcb-acct__panel {
+    position: absolute; inset-block-start: calc(100% + var(--space-2xs)); inset-inline-end: 0;
+    z-index: 50; inline-size: min(20rem, calc(100vw - 2rem));
+    background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-lg);
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.18); padding: var(--space-sm);
+    display: grid; gap: var(--space-sm);
+  }
+  .wcb-acct__head { margin: 0; font-weight: var(--weight-bold); font-size: var(--step--1); color: var(--ink); }
+
+  .wcb-acct__provbtn {
+    inline-size: 100%; font: inherit; font-size: var(--step--1); font-weight: var(--weight-medium); cursor: pointer;
+    color: var(--ink); background: var(--surface-2); border: 1px solid var(--control-edge); border-radius: var(--radius);
+    padding: var(--space-2xs) var(--space-sm);
+  }
+  .wcb-acct__provbtn:hover { border-color: var(--structure); }
+  .wcb-acct__provbtn:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+  .wcb-acct__provbtn:disabled { opacity: 0.6; cursor: default; }
+
+  .wcb-acct__or { display: flex; align-items: center; gap: var(--space-2xs); color: var(--ink-soft); font-size: var(--step--1); }
+  .wcb-acct__or::before, .wcb-acct__or::after { content: ""; flex: 1 1 auto; block-size: 1px; background: var(--edge); }
+
+  .wcb-acct__bsky { display: grid; gap: var(--space-2xs); }
+  .wcb-acct__lbl { font-size: var(--step--1); color: var(--ink-soft); }
+  .wcb-acct__row { display: flex; gap: var(--space-2xs); }
+  .wcb-acct__input {
+    flex: 1 1 auto; min-inline-size: 0; font: inherit; font-size: var(--step--1); color: var(--ink);
+    background: var(--bg); border: 1px solid var(--control-edge); border-radius: var(--radius);
+    padding: var(--space-2xs) var(--space-xs);
+  }
+  .wcb-acct__input:focus { outline: none; border-color: var(--structure); }
+  .wcb-acct__go {
+    flex: 0 0 auto; font: inherit; font-size: var(--step--1); font-weight: var(--weight-medium); cursor: pointer;
+    color: var(--bg); background: var(--signal); border: 1px solid var(--signal); border-radius: var(--radius);
+    padding: var(--space-2xs) var(--space-sm);
+  }
+  .wcb-acct__go:hover { filter: brightness(0.95); }
+  .wcb-acct__hint { margin: 0; font-size: var(--step--1); color: var(--ink-soft); }
+  .wcb-acct__perr { margin: 0; font-size: var(--step--1); color: var(--danger-text); }
+
+  .wcb-acct__note {
+    position: absolute; inset-block-start: calc(100% + var(--space-2xs)); inset-inline-end: 0; z-index: 50;
+    margin: 0; white-space: nowrap; font-size: var(--step--1);
+    padding: var(--space-2xs) var(--space-sm); border-radius: var(--radius);
+    border: 1px solid var(--edge); background: var(--surface); color: var(--ink);
+  }
+  .wcb-acct__note[data-kind="ok"] { border-color: var(--ok-edge); color: var(--ok-text); }
+  .wcb-acct__note[data-kind="err"] { border-color: var(--danger-edge); color: var(--danger-text); }
+
+  @media (max-width: 30rem) {
+    .wcb-acct__hint { display: none; }
+  }
+</style>

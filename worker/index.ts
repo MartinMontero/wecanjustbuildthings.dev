@@ -9,10 +9,31 @@
  *   GET  /api/github/start?redirect=        → begin GitHub OAuth
  *   GET  /api/github/callback               → finish OAuth, set short-lived token cookie
  *   POST /api/github/create                 → create a repo and push the starter files
+ *   GET  /api/auth/session                  → current session (authenticated? + user)
+ *   POST /api/auth/logout                   → destroy the session and clear its cookie
+ *   POST /api/auth/nostr/challenge          → issue a single-use NIP-98 sign-in challenge
+ *   POST /api/auth/nostr/verify             → verify a signed NIP-98 event → session
+ *   GET  /api/auth/nostr/status             → is Sign in with Nostr configured?
+ *   GET  /api/auth/bluesky/status           → is Sign in with Bluesky configured?
+ *   GET  /api/auth/bluesky/client-metadata.json → public AT Proto OAuth client metadata
+ *   GET  /api/auth/bluesky/start?handle=    → begin AT Proto OAuth (redirect to PDS)
+ *   GET  /api/auth/bluesky/callback         → finish OAuth → session (identity only)
  *
  * Static assets are served by the asset layer first; this Worker only runs for
  * /api/* routes, with env.ASSETS as the fallback for anything else.
  */
+import type { KVNamespace, D1Database } from './auth/cf.ts';
+import { authJson, authError } from './auth/respond.ts';
+import {
+  resolveSession, destroySession, createSession, sessionCookie, clearSessionCookie,
+  readCookie, SESSION_COOKIE, type AuthEnv,
+} from './auth/session.ts';
+import { issueChallenge, verifyNostrAuth, sanitizeDisplayName } from './auth/nostr.ts';
+import {
+  blueskyClientMetadata, blueskyAuthorizeUrl, blueskyCallback, isValidHandle, type BlueskyEnv,
+} from './auth/bluesky.ts';
+import { getOrCreateUserByIdentity } from './auth/db.ts';
+
 export interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
   // The OAuth *app* identity — registered once by the maintainer. This is NOT a
@@ -23,6 +44,17 @@ export interface Env {
   // NOTE: deliberately no shared GITHUB_TOKEN. Repo creation MUST use each
   // builder's own OAuth token (the gh_token cookie) so repos land in their
   // account, not the maintainer's. Do not add a server token fallback here.
+  // Auth (Sign in with Nostr / Bluesky). Optional: when a binding is unset the
+  // auth endpoints degrade gracefully (report "not authenticated") so the site
+  // still runs without auth provisioned.
+  SESSIONS?: KVNamespace; // app sessions (sess:<id>) + single-use Nostr challenges (chal:<v>)
+  ATPROTO?: KVNamespace;  // AT Proto OAuth state/session stores + did/handle caches (Phase 3)
+  DB?: D1Database;        // identity model — users, identities (migrations/0001_auth.sql)
+  SITE_URL?: string;      // canonical origin for OAuth client metadata + redirects
+  // Secret: the app's ES256 private key (JWK JSON) used to sign private_key_jwt
+  // client assertions for Sign in with Bluesky. Set with `wrangler secret put`.
+  // The matching public JWK is derived at runtime and published in the client metadata.
+  BLUESKY_PRIVATE_KEY_JWK?: string;
 }
 
 const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';
@@ -186,10 +218,10 @@ export function safeLocalPath(p: string | null | undefined, fallback = '/build/'
   return p;
 }
 
-function backTo(origin: string, back: string, params: string): Response {
+function backTo(origin: string, back: string, params: string, extraHeaders: [string, string][] = []): Response {
   const path = safeLocalPath(back);
   const sep = path.includes('?') ? '&' : '?';
-  return new Response(null, { status: 302, headers: [['location', `${origin}${path}${sep}${params}`]] as any });
+  return new Response(null, { status: 302, headers: [['location', `${origin}${path}${sep}${params}`], ...extraHeaders] as any });
 }
 
 function githubStart(url: URL, env: Env): Response {
@@ -262,6 +294,127 @@ async function githubCreate(request: Request): Promise<Response> {
   return json({ url: repoJson.html_url });
 }
 
+/** Auth needs both its KV (sessions) and D1 (identities) bindings. When either is
+ *  missing the feature is simply not provisioned — narrow Env to the satisfied
+ *  AuthEnv so callers can use the bindings without `!`. */
+function authConfigured(env: Env): env is Env & AuthEnv {
+  return Boolean(env.SESSIONS && env.DB);
+}
+
+async function authSessionHandler(request: Request, env: Env): Promise<Response> {
+  if (!authConfigured(env)) return authJson({ authenticated: false });
+  const resolved = await resolveSession(request, env);
+  if (!resolved) return authJson({ authenticated: false });
+  // Expose only non-identifying, user-facing fields — never the pubkey/DID subject.
+  return authJson({ authenticated: true, user: { id: resolved.user.id, displayName: resolved.user.displayName } });
+}
+
+async function authLogoutHandler(request: Request, env: Env): Promise<Response> {
+  // Always clear the cookie, even if storage is unconfigured or the id is stale.
+  if (authConfigured(env)) {
+    const id = readCookie(request, SESSION_COOKIE);
+    if (id) await destroySession(env, id);
+  }
+  return authJson({ ok: true }, 200, { 'set-cookie': clearSessionCookie() });
+}
+
+/** Absolute URL the NIP-98 `u` tag must match. Pinned to SITE_URL (config), not
+ *  the request Host header, so a spoofed Host can't change what we accept. */
+function nostrVerifyUrl(request: Request, env: Env): string {
+  const origin = env.SITE_URL ?? new URL(request.url).origin;
+  return `${origin}/api/auth/nostr/verify`;
+}
+
+async function nostrChallengeHandler(env: Env): Promise<Response> {
+  if (!authConfigured(env)) return authError(503, 'auth not configured');
+  return authJson({ challenge: await issueChallenge(env) });
+}
+
+async function nostrVerifyHandler(request: Request, env: Env): Promise<Response> {
+  if (!authConfigured(env)) return authError(503, 'auth not configured');
+  const rawBody = await request.text();
+  let parsed: { challenge?: string; displayName?: string };
+  try {
+    parsed = JSON.parse(rawBody);
+  } catch {
+    return authError();
+  }
+  const result = await verifyNostrAuth(
+    env, request.headers.get('authorization'), rawBody, nostrVerifyUrl(request, env), parsed.challenge ?? '',
+  );
+  if (!result) return authError(); // one generic 401 for every failure mode
+  const user = await getOrCreateUserByIdentity(env.DB, 'nostr', result.pubkey, sanitizeDisplayName(parsed.displayName));
+  const sid = await createSession(env, user.id);
+  return authJson(
+    { authenticated: true, user: { id: user.id, displayName: user.displayName } },
+    200,
+    { 'set-cookie': sessionCookie(sid) },
+  );
+}
+
+// ---- Sign in with Bluesky (AT Protocol OAuth) ----
+/** Bluesky sign-in needs its KV store, the canonical origin, and the signing key.
+ *  When any is missing the feature is simply not provisioned. */
+function blueskyConfigured(env: Env): env is Env & BlueskyEnv {
+  return Boolean(env.ATPROTO && env.SITE_URL && env.BLUESKY_PRIVATE_KEY_JWK);
+}
+
+/** Public OAuth client metadata, fetched by the authorization server. No auth; safe
+ *  to cache briefly. 503 when not provisioned so the absence is explicit. */
+async function blueskyMetadataHandler(env: Env): Promise<Response> {
+  if (!blueskyConfigured(env)) return json({ error: 'bluesky sign-in not configured' }, 503);
+  try {
+    return json(await blueskyClientMetadata(env), 200, { 'cache-control': 'public, max-age=300' });
+  } catch {
+    return json({ error: 'failed to build client metadata' }, 500);
+  }
+}
+
+/** Begin sign-in. Reached by a full-page navigation, so every outcome is a redirect
+ *  back to the studio with a flag (never raw JSON). */
+async function blueskyStartHandler(url: URL, env: Env): Promise<Response> {
+  const back = safeLocalPath(url.searchParams.get('redirect'));
+  if (!blueskyConfigured(env)) return backTo(url.origin, back, 'bsky=unconfigured');
+  const handle = url.searchParams.get('handle') || '';
+  if (!isValidHandle(handle)) return backTo(url.origin, back, 'bsky=error&reason=handle');
+  try {
+    const authUrl = await blueskyAuthorizeUrl(env, handle);
+    // Remember where to return after the PDS bounces back (same pattern as GitHub).
+    const backCookie = `bsky_back=${encodeURIComponent(back)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`;
+    return new Response(null, { status: 302, headers: [['location', authUrl.toString()], ['set-cookie', backCookie]] as any });
+  } catch {
+    return backTo(url.origin, back, 'bsky=error&reason=authorize');
+  }
+}
+
+/** Finish sign-in: verify the redirect, turn the DID into our own session, drop the
+ *  AT Proto tokens (identity only — see blueskyCallback), and bounce back to the studio. */
+async function blueskyCallbackHandler(request: Request, url: URL, env: Env): Promise<Response> {
+  const back = safeLocalPath(cookie(request, 'bsky_back'));
+  const clearBack = 'bsky_back=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0';
+  const fail = (reason: string) =>
+    backTo(url.origin, back, `bsky=error&reason=${reason}`, [['set-cookie', clearBack]]);
+  // Session creation needs SESSIONS + DB; the OAuth flow needs ATPROTO + key + origin.
+  if (!blueskyConfigured(env) || !authConfigured(env)) return fail('unconfigured');
+  if (url.searchParams.get('error')) return fail('denied'); // user declined authorization
+  try {
+    const { did, displayName } = await blueskyCallback(env, url.searchParams);
+    const user = await getOrCreateUserByIdentity(env.DB, 'bluesky', did, displayName);
+    const sid = await createSession(env, user.id);
+    const sep = back.includes('?') ? '&' : '?';
+    return new Response(null, {
+      status: 302,
+      headers: [
+        ['location', `${url.origin}${back}${sep}bsky=connected`],
+        ['set-cookie', sessionCookie(sid)],
+        ['set-cookie', clearBack],
+      ] as any,
+    });
+  } catch {
+    return fail('callback');
+  }
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -273,6 +426,15 @@ export default {
     if (path === '/api/github/start') return githubStart(url, env);
     if (path === '/api/github/callback') return githubCallback(request, url, env);
     if (path === '/api/github/create' && request.method === 'POST') return githubCreate(request);
+    if (path === '/api/auth/session') return authSessionHandler(request, env);
+    if (path === '/api/auth/logout' && request.method === 'POST') return authLogoutHandler(request, env);
+    if (path === '/api/auth/nostr/challenge' && request.method === 'POST') return nostrChallengeHandler(env);
+    if (path === '/api/auth/nostr/verify' && request.method === 'POST') return nostrVerifyHandler(request, env);
+    if (path === '/api/auth/nostr/status') return json({ configured: authConfigured(env) });
+    if (path === '/api/auth/bluesky/status') return json({ configured: blueskyConfigured(env) });
+    if (path === '/api/auth/bluesky/client-metadata.json') return blueskyMetadataHandler(env);
+    if (path === '/api/auth/bluesky/start') return blueskyStartHandler(url, env);
+    if (path === '/api/auth/bluesky/callback') return blueskyCallbackHandler(request, url, env);
     return env.ASSETS.fetch(request);
   },
 };

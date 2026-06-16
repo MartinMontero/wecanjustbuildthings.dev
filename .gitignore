@@ -21,12 +21,17 @@ public/pagefind/
 .env.*
 !.env.example
 *.local
+# Wrangler local secrets (not matched by the patterns above)
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 
 # Caches
 .cache/
 .fetch-cache/
 .eslintcache
 .lighthouseci/
+.lycheecache
 test-results/
 playwright-report/
 

@@ -1,0 +1,12 @@
+---
+/**
+ * SocialIcons override — render Starlight's default social links, then append the
+ * global account widget. SocialIcons is reused by both the desktop header and the
+ * mobile menu footer, so this single override puts sign-in in both places.
+ */
+import Default from '@astrojs/starlight/components/SocialIcons.astro';
+import AccountWidget from '../AccountWidget.astro';
+---
+
+<Default><slot /></Default>
+<AccountWidget />
