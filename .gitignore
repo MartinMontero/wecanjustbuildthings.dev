@@ -21,6 +21,9 @@ public/pagefind/
 .env.*
 !.env.example
 *.local
+# Wrangler local secrets (not matched by the patterns above)
+.dev.vars
+.dev.vars.*
 
 # Caches
 .cache/

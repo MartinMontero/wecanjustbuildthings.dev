@@ -9,10 +9,19 @@
  *   GET  /api/github/start?redirect=        → begin GitHub OAuth
  *   GET  /api/github/callback               → finish OAuth, set short-lived token cookie
  *   POST /api/github/create                 → create a repo and push the starter files
+ *   GET  /api/auth/session                  → current session (authenticated? + user)
+ *   POST /api/auth/logout                   → destroy the session and clear its cookie
  *
  * Static assets are served by the asset layer first; this Worker only runs for
  * /api/* routes, with env.ASSETS as the fallback for anything else.
  */
+import type { KVNamespace, D1Database } from './auth/cf.ts';
+import { authJson } from './auth/respond.ts';
+import {
+  resolveSession, destroySession, clearSessionCookie, readCookie,
+  SESSION_COOKIE, type AuthEnv,
+} from './auth/session.ts';
+
 export interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
   // The OAuth *app* identity — registered once by the maintainer. This is NOT a
@@ -23,6 +32,13 @@ export interface Env {
   // NOTE: deliberately no shared GITHUB_TOKEN. Repo creation MUST use each
   // builder's own OAuth token (the gh_token cookie) so repos land in their
   // account, not the maintainer's. Do not add a server token fallback here.
+  // Auth (Sign in with Nostr / Bluesky). Optional: when a binding is unset the
+  // auth endpoints degrade gracefully (report "not authenticated") so the site
+  // still runs without auth provisioned.
+  SESSIONS?: KVNamespace; // app sessions (sess:<id>) + single-use Nostr challenges (chal:<v>)
+  ATPROTO?: KVNamespace;  // AT Proto OAuth state/session stores + did/handle caches (Phase 3)
+  DB?: D1Database;        // identity model — users, identities (migrations/0001_auth.sql)
+  SITE_URL?: string;      // canonical origin for OAuth client metadata + redirects
 }
 
 const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';
@@ -262,6 +278,30 @@ async function githubCreate(request: Request): Promise<Response> {
   return json({ url: repoJson.html_url });
 }
 
+/** Auth needs both its KV (sessions) and D1 (identities) bindings. When either is
+ *  missing the feature is simply not provisioned — narrow Env to the satisfied
+ *  AuthEnv so callers can use the bindings without `!`. */
+function authConfigured(env: Env): env is Env & AuthEnv {
+  return Boolean(env.SESSIONS && env.DB);
+}
+
+async function authSessionHandler(request: Request, env: Env): Promise<Response> {
+  if (!authConfigured(env)) return authJson({ authenticated: false });
+  const resolved = await resolveSession(request, env);
+  if (!resolved) return authJson({ authenticated: false });
+  // Expose only non-identifying, user-facing fields — never the pubkey/DID subject.
+  return authJson({ authenticated: true, user: { id: resolved.user.id, displayName: resolved.user.displayName } });
+}
+
+async function authLogoutHandler(request: Request, env: Env): Promise<Response> {
+  // Always clear the cookie, even if storage is unconfigured or the id is stale.
+  if (authConfigured(env)) {
+    const id = readCookie(request, SESSION_COOKIE);
+    if (id) await destroySession(env, id);
+  }
+  return authJson({ ok: true }, 200, { 'set-cookie': clearSessionCookie() });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
@@ -273,6 +313,8 @@ export default {
     if (path === '/api/github/start') return githubStart(url, env);
     if (path === '/api/github/callback') return githubCallback(request, url, env);
     if (path === '/api/github/create' && request.method === 'POST') return githubCreate(request);
+    if (path === '/api/auth/session') return authSessionHandler(request, env);
+    if (path === '/api/auth/logout' && request.method === 'POST') return authLogoutHandler(request, env);
     return env.ASSETS.fetch(request);
   },
 };
