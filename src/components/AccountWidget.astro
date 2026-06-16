@@ -1,0 +1,206 @@
+---
+/**
+ * Global account widget, injected into the header (and mobile menu) via the
+ * SocialIcons override. The site is static, so the markup is identical for
+ * everyone and sign-in state is resolved client-side from the cookie session.
+ *
+ * It starts hidden and is revealed only once we know the state — so there's no
+ * flash of the wrong control, and on a site where Bluesky isn't provisioned the
+ * header simply shows nothing extra. Bluesky-only for now; Nostr can slot in later.
+ *
+ * Note: this component can render more than once per page (desktop header +
+ * mobile menu footer both use SocialIcons), so the script wires every instance
+ * and uses data-attributes — never ids — to stay duplication-safe.
+ */
+---
+
+<div class="wcb-acct" data-acct hidden>
+  <!-- signed out: a trigger that opens a small handle-entry popover -->
+  <div class="wcb-acct__out" data-out hidden>
+    <button type="button" class="wcb-acct__link" data-toggle data-t="signIn"
+            aria-expanded="false" aria-haspopup="dialog">Sign in</button>
+    <form class="wcb-acct__panel" data-form hidden role="dialog" aria-label="Sign in with Bluesky">
+      <p class="wcb-acct__head" data-t="heading">Sign in with Bluesky</p>
+      <div class="wcb-acct__row">
+        <input class="wcb-acct__input" data-handle type="text" name="handle"
+               inputmode="url" autocapitalize="none" autocomplete="off" spellcheck="false"
+               placeholder="you.bsky.social" data-tph="placeholder" aria-label="Bluesky handle" />
+        <button type="submit" class="wcb-acct__go" data-t="go">Continue</button>
+      </div>
+      <p class="wcb-acct__hint" data-t="hint">You’ll authorize on your own server, then come back here.</p>
+    </form>
+  </div>
+
+  <!-- signed in: display name + sign out -->
+  <div class="wcb-acct__in" data-in hidden>
+    <span class="wcb-acct__who" data-who></span>
+    <button type="button" class="wcb-acct__link" data-signout data-t="signOut">Sign out</button>
+  </div>
+
+  <!-- transient result of the OAuth round-trip -->
+  <p class="wcb-acct__note" data-note role="status" hidden></p>
+</div>
+
+<script>
+  type Strings = Record<string, string>;
+  const STR: Record<'en' | 'es' | 'ar', Strings> = {
+    en: {
+      signIn: 'Sign in', signOut: 'Sign out', go: 'Continue', heading: 'Sign in with Bluesky',
+      placeholder: 'you.bsky.social', hint: 'You’ll authorize on your own server, then come back here.',
+      signedIn: 'Signed in', connected: 'Signed in with Bluesky.', error: 'Sign-in didn’t finish — please try again.',
+    },
+    es: {
+      signIn: 'Entrar', signOut: 'Salir', go: 'Continuar', heading: 'Entrar con Bluesky',
+      placeholder: 'tu.bsky.social', hint: 'Autorizarás en tu propio servidor y volverás aquí.',
+      signedIn: 'Sesión iniciada', connected: 'Sesión iniciada con Bluesky.', error: 'No se completó el inicio de sesión — inténtalo de nuevo.',
+    },
+    ar: {
+      signIn: 'تسجيل الدخول', signOut: 'تسجيل الخروج', go: 'متابعة', heading: 'الدخول عبر بلوسكاي',
+      placeholder: 'you.bsky.social', hint: 'ستوافق على الدخول عبر خادمك ثم تعود إلى هنا.',
+      signedIn: 'تم تسجيل الدخول', connected: 'تم تسجيل الدخول عبر بلوسكاي.', error: 'لم يكتمل تسجيل الدخول — حاول مرة أخرى.',
+    },
+  };
+
+  function setup(root: HTMLElement, t: Strings) {
+    // Localize static labels + the input placeholder (the widget is hidden until
+    // we reveal it, so this never flashes).
+    root.querySelectorAll<HTMLElement>('[data-t]').forEach((el) => { const v = t[el.dataset.t!]; if (v) el.textContent = v; });
+    root.querySelectorAll<HTMLInputElement>('[data-tph]').forEach((el) => { const v = t[el.dataset.tph!]; if (v) el.placeholder = v; });
+
+    const q = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const out = q('[data-out]'), inEl = q('[data-in]'), who = q('[data-who]'), note = q('[data-note]');
+    const toggle = q<HTMLButtonElement>('[data-toggle]'), form = q<HTMLFormElement>('[data-form]');
+    const handle = q<HTMLInputElement>('[data-handle]'), signout = q<HTMLButtonElement>('[data-signout]');
+    const show = (el: HTMLElement, v: boolean) => { el.hidden = !v; };
+    let configured = false;
+    let open = false;
+
+    const setOpen = (v: boolean) => { open = v; show(form, v); toggle.setAttribute('aria-expanded', String(v)); if (v) handle.focus(); };
+    toggle.addEventListener('click', (e) => { e.stopPropagation(); setOpen(!open); });
+    document.addEventListener('click', (e) => { if (!root.contains(e.target as Node)) setOpen(false); });
+    root.addEventListener('keydown', (e) => { if (e.key === 'Escape') { setOpen(false); toggle.focus(); } });
+
+    // Hand off to the OAuth start endpoint; the worker re-validates the handle and
+    // the (same-origin) redirect, so this is just a convenient launcher.
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const h = handle.value.trim();
+      if (!h) { handle.focus(); return; }
+      location.href = `/api/auth/bluesky/start?handle=${encodeURIComponent(h)}&redirect=${encodeURIComponent(location.pathname)}`;
+    });
+
+    signout.addEventListener('click', async () => {
+      signout.disabled = true;
+      try { await fetch('/api/auth/logout', { method: 'POST' }); } catch { /* clear the UI regardless */ }
+      signout.disabled = false;
+      render(false, null);
+    });
+
+    function render(authed: boolean, name: string | null) {
+      if (authed) { who.textContent = name || t.signedIn; show(inEl, true); show(out, false); }
+      else { show(inEl, false); show(out, configured); }
+      show(root, authed || configured || !note.hidden);
+    }
+
+    return {
+      render,
+      setConfigured: (v: boolean) => { configured = v; },
+      showNote: (kind: 'ok' | 'err', msg: string) => {
+        note.textContent = msg; note.dataset.kind = kind; show(note, true);
+        window.setTimeout(() => show(note, false), 5000);
+      },
+    };
+  }
+
+  const roots = [...document.querySelectorAll<HTMLElement>('[data-acct]')];
+  if (roots.length) {
+    const docLang = document.documentElement.lang;
+    const lang = (docLang === 'es' || docLang === 'ar') ? docLang : 'en';
+    const t = STR[lang];
+    const insts = roots.map((r) => setup(r, t));
+
+    // Surface the result of the OAuth round-trip, then strip the flag so a refresh is clean.
+    const params = new URLSearchParams(location.search);
+    const flag = params.get('bsky');
+    if (flag === 'connected') insts.forEach((i) => i.showNote('ok', t.connected));
+    else if (flag === 'error') insts.forEach((i) => i.showNote('err', t.error));
+    if (flag) {
+      params.delete('bsky'); params.delete('reason');
+      const qs = params.toString();
+      history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : '') + location.hash);
+    }
+
+    // Resolve current state once, then render every instance.
+    (async () => {
+      let authed = false, name: string | null = null, configured = false;
+      try {
+        const [s, st] = await Promise.all([
+          fetch('/api/auth/session', { headers: { accept: 'application/json' } }).then((r) => r.ok ? r.json() : { authenticated: false }),
+          fetch('/api/auth/bluesky/status', { headers: { accept: 'application/json' } }).then((r) => r.ok ? r.json() : { configured: false }),
+        ]);
+        authed = !!s.authenticated; name = s.user?.displayName ?? null; configured = !!st.configured;
+      } catch { /* offline / unprovisioned → stay hidden */ }
+      insts.forEach((i) => { i.setConfigured(configured); i.render(authed, name); });
+    })();
+  }
+</script>
+
+<style>
+  /* These elements set their own `display`, which would otherwise beat the UA
+     `[hidden] { display: none }` rule (author origin wins) and leave hidden
+     controls visible. Keep `[hidden]` authoritative within the widget. */
+  [hidden] { display: none !important; }
+
+  .wcb-acct { position: relative; display: inline-flex; align-items: center; }
+
+  .wcb-acct__link {
+    font: inherit; font-size: var(--step--1); font-weight: var(--weight-medium);
+    color: var(--ink-soft); background: transparent; border: 0; cursor: pointer;
+    padding: var(--space-3xs) var(--space-2xs); border-radius: var(--radius-sm);
+    white-space: nowrap;
+  }
+  .wcb-acct__link:hover { color: var(--ink); }
+  .wcb-acct__link:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+  .wcb-acct__in { display: inline-flex; align-items: center; gap: var(--space-2xs); }
+  .wcb-acct__who {
+    font-size: var(--step--1); font-weight: var(--weight-medium); color: var(--ink);
+    max-inline-size: 14ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .wcb-acct__panel {
+    position: absolute; inset-block-start: calc(100% + var(--space-2xs)); inset-inline-end: 0;
+    z-index: 50; inline-size: min(20rem, calc(100vw - 2rem));
+    background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-lg);
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.18); padding: var(--space-sm);
+    display: grid; gap: var(--space-xs);
+  }
+  .wcb-acct__head { margin: 0; font-weight: var(--weight-bold); font-size: var(--step--1); color: var(--ink); }
+  .wcb-acct__row { display: flex; gap: var(--space-2xs); }
+  .wcb-acct__input {
+    flex: 1 1 auto; min-inline-size: 0; font: inherit; font-size: var(--step--1); color: var(--ink);
+    background: var(--bg); border: 1px solid var(--control-edge); border-radius: var(--radius);
+    padding: var(--space-2xs) var(--space-xs);
+  }
+  .wcb-acct__input:focus { outline: none; border-color: var(--structure); }
+  .wcb-acct__go {
+    flex: 0 0 auto; font: inherit; font-size: var(--step--1); font-weight: var(--weight-medium); cursor: pointer;
+    color: var(--bg); background: var(--signal); border: 1px solid var(--signal); border-radius: var(--radius);
+    padding: var(--space-2xs) var(--space-sm);
+  }
+  .wcb-acct__go:hover { filter: brightness(0.95); }
+  .wcb-acct__hint { margin: 0; font-size: var(--step--1); color: var(--ink-soft); }
+
+  .wcb-acct__note {
+    position: absolute; inset-block-start: calc(100% + var(--space-2xs)); inset-inline-end: 0; z-index: 50;
+    margin: 0; white-space: nowrap; font-size: var(--step--1);
+    padding: var(--space-2xs) var(--space-sm); border-radius: var(--radius);
+    border: 1px solid var(--edge); background: var(--surface); color: var(--ink);
+  }
+  .wcb-acct__note[data-kind="ok"] { border-color: var(--ok-edge); color: var(--ok-text); }
+  .wcb-acct__note[data-kind="err"] { border-color: var(--danger-edge); color: var(--danger-text); }
+
+  @media (max-width: 30rem) {
+    .wcb-acct__hint { display: none; }
+  }
+</style>
