@@ -515,6 +515,7 @@ async function buildEntry(row: SeedRow, used: Set<string>, spdxIds: Set<string>)
     license_source_commit_sha: sha,
     maintenance_status: status,
     last_release_at: reg.publishedAt,
+    version: reg.version,
     aos_repos_using: row.aos_repos_using ?? 0,
     aos_repos_list: row.aos_repos_list ?? [],
     pie_anchor: row.pie_anchor,

@@ -45,17 +45,19 @@ export function advisoryRank(it: StackCandidate): number {
 }
 
 /**
- * #3 — pin a generated package.json's dependencies to concrete versions (resolved
- * live from the registry via /api/license) instead of the unbounded `latest`, so a
- * starter installs the same tree later that was screened now. Entries that can't be
- * resolved (registry offline) fall back to `latest` — verified-version pinning of
- * every entry needs durable per-catalog version metadata (a separate data task).
+ * #3 — pin a generated package.json's dependencies to the concrete, license-
+ * verified version recorded for each catalog entry (frontmatter `version`),
+ * instead of the unbounded `latest`, so a starter installs the same tree that was
+ * screened. Entries with no recorded version fall back to `latest`. A leading `v`
+ * (some ecosystems tag releases `v1.2.3`) is stripped so the npm range is valid.
  */
 export function pinnedDependencies(
-  jsDeps: { name: string }[],
-  versions: Record<string, string>,
+  jsDeps: { name: string; version?: string | null }[],
 ): Record<string, string> {
   return Object.fromEntries(
-    jsDeps.map((it) => [it.name, versions[it.name] ? `^${versions[it.name]}` : 'latest']),
+    jsDeps.map((it) => {
+      const v = it.version?.replace(/^v/, '').trim();
+      return [it.name, v ? `^${v}` : 'latest'];
+    }),
   );
 }
