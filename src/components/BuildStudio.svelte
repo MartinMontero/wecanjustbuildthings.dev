@@ -5,6 +5,7 @@
   import { matchDependency } from '../../enforcement/matcher.ts';
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
   import { detectSignals, pickQuestions, reflect, type ConstraintId } from '../lib/mentor-engine.ts';
+  import { chemistry, partnersOf } from '../lib/chemistry.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
@@ -13,6 +14,7 @@
     protocols: string[]; license: string; verification: string; uses: number; desc: string; repo: string | null;
     licenseUrl?: string | null; commit?: string | null; verifiedAt?: string | null;
     advisory?: string | null; blockedReason?: string | null; providerAgnostic?: boolean;
+    maintenance?: string;
   }
 
   // ---------- i18n ----------
@@ -506,6 +508,29 @@
   const reflection = $derived(problem.trim().length > 8 ? reflect(signals, mentorAnswers) : { signals: [], constraints: [] as ConstraintId[] });
   const m = $derived(MENTOR_STR[lang] ?? MENTOR_STR.en);
   function answerMentor(qid: string, oid: string) { mentorAnswers = { ...mentorAnswers, [qid]: oid }; }
+
+  // ---------- Movement 2: advisories + deterministic chemistry ----------
+  const ADV: Record<Lang, { worksWith: string; conflict: string; metaOrigin: string; dormant: string; abandoned: string; providerPicker: string }> = {
+    en: { worksWith: 'Works with', conflict: 'Two tools here do the same job — you usually need only one:', metaOrigin: 'Built by Meta — admitted only because it’s permissively licensed and routes no data to them.', dormant: 'Looks dormant — check it’s still maintained before depending on it.', abandoned: 'Looks abandoned — prefer an active alternative if you can.', providerPicker: 'Has a model-provider picker — lock it to permitted providers (never OpenAI / xAI).' },
+    es: { worksWith: 'Funciona con', conflict: 'Dos herramientas aquí hacen lo mismo — normalmente solo necesitas una:', metaOrigin: 'Hecha por Meta — admitida solo porque tiene licencia permisiva y no le envía datos.', dormant: 'Parece inactiva — comprueba que siga mantenida antes de depender de ella.', abandoned: 'Parece abandonada — prefiere una alternativa activa si puedes.', providerPicker: 'Tiene un selector de proveedor de modelo — bloquéalo a proveedores permitidos (nunca OpenAI / xAI).' },
+    ar: { worksWith: 'يعمل مع', conflict: 'أداتان هنا تؤدّيان الوظيفة نفسها — عادةً تحتاج واحدة فقط:', metaOrigin: 'من صنع Meta — قُبِلت فقط لأنها بترخيص متساهل ولا تُرسل أي بيانات إليها.', dormant: 'تبدو خاملة — تأكّد من أنها ما زالت مُصانة قبل الاعتماد عليها.', abandoned: 'تبدو مهجورة — يُفضَّل بديل نشط إن أمكن.', providerPicker: 'تحتوي على مُحدِّد مزوّد نماذج — اقفله على المزوّدين المسموح بهم (أبداً OpenAI / xAI).' },
+  };
+  const adv = $derived(ADV[lang] ?? ADV.en);
+  function advisoriesFor(it: Item): string[] {
+    const out: string[] = [];
+    if (it.advisory === 'meta') out.push(adv.metaOrigin);
+    if (it.maintenance === 'dormant') out.push(adv.dormant);
+    if (it.maintenance === 'abandoned') out.push(adv.abandoned);
+    if (it.providerAgnostic) out.push(adv.providerPicker);
+    return out;
+  }
+  const stackTools = $derived.by(() => {
+    const out: { name: string; capId: string; category?: string; ecosystem?: string; protocols?: string[] }[] = [];
+    for (const p of blueprint) if (!removed.has(p.capId)) out.push({ name: p.item.name, capId: p.capId, category: p.item.category, ecosystem: p.item.ecosystem, protocols: p.item.protocols });
+    for (const name of extra) { const it = items.find((x) => x.name === name); if (it) out.push({ name: it.name, capId: 'extra', category: it.category, ecosystem: it.ecosystem, protocols: it.protocols }); }
+    return out;
+  });
+  const chem = $derived(chemistry(stackTools));
 
   // Advanced escape hatch: search the full catalog by hand.
   const addResults = $derived.by(() => {
@@ -1016,6 +1041,12 @@ manuals with the knowledge-to-skills-pipeline).
             {/if}
             <p class="piece-why"><strong>{t.bpWhyFor}</strong> {p.why}</p>
             <p class="piece-connects"><strong>{t.bpConnects}</strong> {p.connects}</p>
+            {#if partnersOf(p.item.name, chem).length}
+              <p class="works-with"><strong>{adv.worksWith}</strong> {partnersOf(p.item.name, chem).join(', ')}</p>
+            {/if}
+            {#each advisoriesFor(p.item) as a (a)}
+              <p class="advisory"><span aria-hidden="true">⚠</span> {a}</p>
+            {/each}
             {#if p.alts.length}
               <details class="swap">
                 <summary>{t.bpSwap} ▾</summary>
@@ -1033,6 +1064,12 @@ manuals with the knowledge-to-skills-pipeline).
         <strong>{t.bpFits}</strong>
         <p>{#each blueprint.filter((p) => !removed.has(p.capId)) as p, i}{i > 0 ? ' → ' : ''}<a href={p.item.url}>{p.item.name}</a> ({p.role.toLowerCase()}){/each}.</p>
       </div>
+      {#if chem.conflicts.length}
+        <div class="conflict" role="alert">
+          <strong><span aria-hidden="true">⚠</span> {adv.conflict}</strong>
+          <ul>{#each chem.conflicts as c (c.a + c.b)}<li>{c.a} · {c.b}</li>{/each}</ul>
+        </div>
+      {/if}
 
       <details class="refine">
         <summary>{t.refineTitle}</summary>
@@ -1278,6 +1315,10 @@ manuals with the knowledge-to-skills-pipeline).
   .tool-name { font-weight: 700; font-size: 1.02rem; }
   .tool-meta { color: var(--sl-color-gray-2); font-size: 0.8rem; }
   .piece-why, .piece-connects { margin: 0.25rem 0; font-size: 0.9rem; color: var(--sl-color-text); }
+  .works-with { margin: 0.25rem 0; font-size: 0.85rem; color: var(--ink-soft); }
+  .advisory { margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--ink); background: color-mix(in srgb, var(--signal) 14%, transparent); border-inline-start: 3px solid var(--signal); border-radius: var(--radius-sm); padding: 0.3rem 0.55rem; }
+  .conflict { margin-top: 0.75rem; border: 1px solid var(--signal); border-inline-start-width: 4px; border-radius: var(--radius); padding: 0.55rem 0.8rem; background: color-mix(in srgb, var(--signal) 8%, transparent); font-size: 0.88rem; }
+  .conflict ul { margin: 0.3rem 0 0; padding-inline-start: 1.1rem; }
   .receipt { margin: 0.3rem 0 0; font-size: 0.8rem; color: var(--ink-soft); display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
   .receipt a { color: var(--structure); text-decoration: none; }
   .receipt a:hover { text-decoration: underline; }
