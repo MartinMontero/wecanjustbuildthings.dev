@@ -19,6 +19,7 @@
     "data:fetch": "tsx scripts/build-catalog.ts",
     "watch:license": "tsx scripts/license-watch.ts",
     "watch:maintenance": "tsx scripts/maintenance-check.ts",
+    "gen:bluesky-key": "tsx scripts/gen-bluesky-key.ts",
     "deploy": "wrangler deploy",
     "deploy:dry": "wrangler deploy --dry-run",
     "enforce": "tsx enforcement/cli.ts all --catalog src/content/docs/catalog --recipes src/content/docs/recipes",
@@ -35,8 +36,8 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
     "@astrojs/starlight": "^0.40.0",
-    "@atproto/api": "^0.20.16",
-    "@atproto/oauth-client-node": "^0.4.2",
+    "@atproto/jwk-jose": "^0.2.1",
+    "@atproto/oauth-client": "^0.7.3",
     "astro": "^6.4.6",
     "fflate": "^0.8.3",
     "nostr-tools": "^2.23.5",
