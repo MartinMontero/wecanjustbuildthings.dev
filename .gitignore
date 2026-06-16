@@ -24,6 +24,7 @@ public/pagefind/
 # Wrangler local secrets (not matched by the patterns above)
 .dev.vars
 .dev.vars.*
+!.dev.vars.example
 
 # Caches
 .cache/

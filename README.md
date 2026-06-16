@@ -147,6 +147,15 @@ does not deploy.
 > and the `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` secrets, and don't also
 > connect the dashboard Git integration (to avoid double deploys).
 
+### Auth (Sign in with Nostr / Bluesky)
+
+Sign-in is the one feature with a backend: it runs in the Cloudflare **Worker**
+(`worker/index.ts`), which serves `dist/` *and* the `/api/*` routes. It needs KV +
+D1 + a signing key provisioned and a `wrangler deploy` — a different model from the
+static Pages deploy above. The catalog runs fine without it (the endpoints report
+"not configured" and the account widget hides). Full setup, deploy, and
+verification steps are in [`docs/AUTH_PROVISIONING.md`](./docs/AUTH_PROVISIONING.md).
+
 ## Contributing
 
 A tool gets in if it **passes the enforcement engine** and is **described
