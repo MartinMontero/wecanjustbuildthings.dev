@@ -15,7 +15,7 @@
     protocols: string[]; license: string; verification: string; uses: number; desc: string; repo: string | null;
     licenseUrl?: string | null; commit?: string | null; verifiedAt?: string | null;
     advisory?: string | null; blockedReason?: string | null; providerAgnostic?: boolean;
-    maintenance?: string;
+    maintenance?: string; version?: string | null;
   }
 
   // ---------- i18n ----------
@@ -658,29 +658,15 @@ ${chosenItems.map((it) => `- ${it.verification === 'verified' ? '★ ' : ''}${it
   const jsDeps = $derived(chosenItems.filter((it) => it.ecosystem === 'js'));
   const otherDeps = $derived(chosenItems.filter((it) => it.ecosystem !== 'js'));
 
-  // #3 — resolve concrete versions for the chosen JS deps (from the registry, via
-  // the same /api/license endpoint the checker uses) so the generated package.json
-  // pins them instead of emitting unbounded `latest`. Fetched lazily at handoff.
-  let versionPins = $state<Record<string, string>>({});
-  const pinning = new Set<string>(); // in-flight guard (non-reactive)
-  $effect(() => {
-    if (step !== 3) return;
-    for (const it of jsDeps) {
-      if (pinning.has(it.name)) continue;
-      pinning.add(it.name);
-      fetch(`/api/license?eco=js&name=${encodeURIComponent(it.name)}`)
-        .then((r) => (r.ok ? r.json() : Promise.reject()))
-        .then((d) => { if (d?.version) versionPins = { ...versionPins, [it.name]: d.version }; })
-        // On a transient failure, drop the in-flight guard so a later run retries
-        // instead of permanently pinning this dep to `latest`.
-        .catch(() => { pinning.delete(it.name); });
-    }
-  });
+  // #3 — pin each JS dep to the concrete, license-verified version recorded on its
+  // catalog entry (frontmatter `version`) instead of unbounded `latest`. This is a
+  // pure client-side read of already-loaded catalog data — no per-dependency
+  // network call, so the user's stack composition never leaves the browser.
   const packageJson = $derived(JSON.stringify({
     name: slug, version: '0.1.0', private: true, type: 'module',
     engines: { node: '>=22.12.0' },
     scripts: { enforce: 'node scripts/enforce.mjs' },
-    dependencies: pinnedDependencies(jsDeps, versionPins),
+    dependencies: pinnedDependencies(jsDeps),
   }, null, 2) + '\n');
 
   // A self-contained policy check that ships INSIDE the starter, so the command

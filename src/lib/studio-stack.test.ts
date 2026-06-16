@@ -2,16 +2,21 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { eligibleForStack, autoPickable, advisoryRank, pinnedDependencies } from './studio-stack.ts';
 
-test('pinnedDependencies pins to resolved versions, not "latest" (#3)', () => {
-  const deps = [{ name: 'nostr-tools' }, { name: '@noble/hashes' }, { name: 'unresolved-pkg' }];
-  const versions = { 'nostr-tools': '2.23.5', '@noble/hashes': '1.4.0' };
-  const out = pinnedDependencies(deps, versions);
+test('pinnedDependencies pins to each entry\'s recorded version, not "latest" (#3)', () => {
+  const deps = [
+    { name: 'nostr-tools', version: '2.23.5' },
+    { name: '@noble/hashes', version: '1.4.0' },
+    { name: 'v-prefixed', version: 'v1.0.1' }, // leading v stripped
+    { name: 'no-version-pkg', version: null },
+  ];
+  const out = pinnedDependencies(deps);
   assert.equal(out['nostr-tools'], '^2.23.5'); // pinned, not "latest"
   assert.equal(out['@noble/hashes'], '^1.4.0');
-  // only genuinely-unresolved entries fall back
-  assert.equal(out['unresolved-pkg'], 'latest');
-  // when every version resolves, no "latest" is emitted at all
-  const all = pinnedDependencies([{ name: 'a' }], { a: '1.0.0' });
+  assert.equal(out['v-prefixed'], '^1.0.1'); // not ^v1.0.1
+  // only entries with no recorded version fall back
+  assert.equal(out['no-version-pkg'], 'latest');
+  // when every entry has a version, no "latest" is emitted at all
+  const all = pinnedDependencies([{ name: 'a', version: '1.0.0' }]);
   assert.ok(!Object.values(all).includes('latest'));
 });
 
