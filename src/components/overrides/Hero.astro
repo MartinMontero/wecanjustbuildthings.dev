@@ -12,6 +12,24 @@ import { LinkButton } from '@astrojs/starlight/components';
 
 const { data } = Astro.locals.starlightRoute.entry;
 const { title = data.title, tagline, actions = [] } = data.hero || {};
+
+// Localize the plate's spec rail + work-order metadata. The seal and the
+// "Build Plate" tag stay in English as a brand stamp (like the wordmark).
+const locale = Astro.currentLocale === 'es' ? 'es' : Astro.currentLocale === 'ar' ? 'ar' : 'en';
+const T = {
+  en: {
+    spec: 'Freedom-tech fabrication · open source · rev 2026',
+    meta: [['Catalog', '1,300+ verified tools'], ['License', 'checked @ commit'], ['Owner', 'the movement'], ['Agent', 'bring your own']],
+  },
+  es: {
+    spec: 'Fabricación de tecnología libre · código abierto · rev 2026',
+    meta: [['Catálogo', '1300+ herramientas verificadas'], ['Licencia', 'verificada en el commit'], ['Propiedad', 'el movimiento'], ['Agente', 'trae el tuyo']],
+  },
+  ar: {
+    spec: 'تصنيع تقنيات الحرية · مفتوح المصدر · إصدار 2026',
+    meta: [['الكتالوج', 'أكثر من 1300 أداة موثّقة'], ['الترخيص', 'مُتحقَّقة عند الـcommit'], ['المالك', 'الحركة'], ['الوكيل', 'أحضر وكيلك']],
+  },
+}[locale];
 ---
 
 <section class="plate" aria-labelledby="_top">
@@ -23,7 +41,7 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
   <div class="plate__rail">
     <span class="plate__tag">Build Plate</span>
     <span class="plate__hr" aria-hidden="true"></span>
-    <span class="plate__spec">Freedom-tech fabrication · open source · rev 2026</span>
+    <span class="plate__spec">{T.spec}</span>
   </div>
 
   <div class="plate__body">
@@ -68,10 +86,9 @@ const { title = data.title, tagline, actions = [] } = data.hero || {};
   </div>
 
   <dl class="plate__meta">
-    <div><dt>Catalog</dt><dd>1,300+ verified tools</dd></div>
-    <div><dt>License</dt><dd>checked @ commit</dd></div>
-    <div><dt>Owner</dt><dd>the movement</dd></div>
-    <div><dt>Agent</dt><dd>bring your own</dd></div>
+    {T.meta.map(([dt, dd]) => (
+      <div><dt>{dt}</dt><dd>{dd}</dd></div>
+    ))}
   </dl>
 </section>
 
