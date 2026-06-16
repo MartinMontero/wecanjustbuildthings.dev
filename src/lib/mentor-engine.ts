@@ -24,16 +24,21 @@ export type SignalId =
   | 'realtime'
   | 'moderation';
 
-/** Curated lexicon — the only "understanding" the page does. Auditable. */
+/**
+ * Curated lexicon — the only "understanding" the page does. Auditable, and
+ * trilingual (en / es / ar) so the adaptive flow works in every supported
+ * language, not just English. English terms are word-bounded; es/ar terms match
+ * as substrings (their morphology makes \b unreliable).
+ */
 const LEXICON: Record<SignalId, RegExp> = {
-  privacy: /\b(privat|anonym|expos|surveil|confidential|sensitive|safe(ty)?|protect|hide|track(ed|ing)?|leak|dox)/i,
-  identity: /\b(log ?in|sign[- ]?in|account|member(ship)?|profile|auth|identit|verify who|real name|handle)/i,
-  storage: /\b(store|saved?|record|archive|document|history|database|list|directory|inventory|evidence|report)/i,
-  payments: /\b(pay|paid|tip|donat|fund|wallet|money|invoice|sats|bitcoin|lightning|zap|support|dues)/i,
-  hosting: /\b(server|back ?end|relay|host|deploy|\bapi\b|self-host|infrastructure|uptime)/i,
-  community: /\b(communit|collective|member|organiz|tenant|union|group|neighbo|mutual aid|movement|chapter)/i,
-  realtime: /\b(chat|messag|live|real-?time|notif|feed|stream|broadcast|thread)/i,
-  moderation: /\b(moderat|abuse|spam|harass|block|report|trust|bad actor|safety)/i,
+  privacy: /\b(privat|anonym|expos|surveil|confidential|sensitive|safe(ty)?|protect|hide|track(ed|ing)?|leak|dox)|priva|anónim|anonimato|expon|vigilan|confidencial|sensible|proteg|ocult|rastre|خصوص|خاص|مجهول|إخفاء|كشف|حماي|مراقب|حسّاس|حساس|تعريض|سرّي/i,
+  identity: /\b(log ?in|sign[- ]?in|account|member(ship)?|profile|auth|identit|verify who|real name|handle)|sesión|cuenta|miembro|perfil|identidad|nombre real|تسجيل|دخول|حساب|عضو|هوية|ملف شخصي|اسم حقيقي/i,
+  storage: /\b(store|saved?|record|archive|document|history|database|list|directory|inventory|evidence|report)|almacen|guard|registr|archiv|document|histor|base de datos|lista|directorio|inventario|evidencia|informe|reporte|تخزين|حفظ|سجل|أرشيف|وثيق|توثيق|تاريخ|قاعدة بيانات|قائمة|دليل|جرد|إبلاغ|بلاغ|تقرير/i,
+  payments: /\b(pay|paid|tip|donat|fund|wallet|money|invoice|sats|bitcoin|lightning|zap|support|dues)|pag|propina|donac|fond|cartera|monedero|dinero|factura|apoyo|cuota|دفع|إكرامي|تبرع|تمويل|محفظة|مال|فاتورة|دعم|اشتراك|بيتكوين/i,
+  hosting: /\b(server|back ?end|relay|host|deploy|\bapi\b|self-host|infrastructure|uptime)|servidor|backend|aloj|desplegar|infraestructura|خادم|استضاف|نشر|بنية تحتية/i,
+  community: /\b(communit|collective|member|organiz|tenant|union|group|neighbo|mutual aid|movement|chapter)|comunidad|colectiv|miembro|organiz|inquilin|sindicato|grupo|vecin|ayuda mutua|movimiento|مجتمع|جماعة|عضو|تنظيم|مستأجر|نقابة|مجموعة|جار|جيران|عون متبادل|حركة/i,
+  realtime: /\b(chat|messag|live|real-?time|notif|feed|stream|broadcast|thread)|mensaj|en vivo|tiempo real|notific|transmis|hilo|دردشة|رسائل|مباشر|الوقت الحقيقي|إشعار|بث|خيط/i,
+  moderation: /\b(moderat|abuse|spam|harass|block|report|trust|bad actor|safety)|moderac|abuso|acoso|bloque|denunci|confianza|seguridad|إشراف|إساءة|تطفل|تحرش|حظر|إبلاغ|ثقة|أمان|سلامة/i,
 };
 
 /** A protocol selection is itself a signal that certain concerns apply. */

@@ -107,7 +107,9 @@ const executablePath = findChromium();
 const browser = await chromium.launch(executablePath ? { executablePath } : {});
 const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, deviceScaleFactor: 1 });
 await page.setContent(html, { waitUntil: 'networkidle' });
-await page.evaluate(() => (document as unknown as { fonts: { ready: Promise<unknown> } }).fonts.ready);
+// document is a browser global here (runs in the page); reach it via globalThis
+// so the Node typecheck (no DOM lib) doesn't flag the bare identifier.
+await page.evaluate(() => (globalThis as unknown as { document: { fonts: { ready: Promise<unknown> } } }).document.fonts.ready);
 await page.waitForTimeout(200);
 mkdirSync('public', { recursive: true });
 await page.screenshot({ path: 'public/og.png', clip: { x: 0, y: 0, width: 1200, height: 630 } });

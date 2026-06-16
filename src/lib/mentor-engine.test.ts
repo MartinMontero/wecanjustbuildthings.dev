@@ -9,6 +9,20 @@ test('detectSignals reads the curated lexicon', () => {
   assert.ok(s.includes('storage')); // "report"
 });
 
+test('detectSignals works in Spanish (multilingual lexicon)', () => {
+  const s = detectSignals('Una forma privada para que los inquilinos denuncien desalojos y reciban donaciones sin exponer quiénes son.');
+  assert.ok(s.includes('privacy'));   // privada / exponer
+  assert.ok(s.includes('community')); // inquilinos
+  assert.ok(s.includes('payments'));  // donaciones
+});
+
+test('detectSignals works in Arabic (multilingual lexicon)', () => {
+  const s = detectSignals('طريقة خاصة للمستأجرين للإبلاغ عن الإخلاء وجمع التبرعات دون كشف هويتهم.');
+  assert.ok(s.includes('privacy'));   // خاصة / كشف
+  assert.ok(s.includes('community')); // المستأجرين
+  assert.ok(s.includes('payments'));  // التبرعات
+});
+
 test('detectSignals folds protocol selections into signals', () => {
   const s = detectSignals('a simple feed', ['lightning']);
   assert.ok(s.includes('payments'));
