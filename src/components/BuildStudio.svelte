@@ -6,6 +6,7 @@
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
   import { detectSignals, pickQuestions, reflect, type ConstraintId } from '../lib/mentor-engine.ts';
   import { chemistry, partnersOf } from '../lib/chemistry.ts';
+  import { eligibleForStack, advisoryRank, autoPickable } from '../lib/studio-stack.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
@@ -250,7 +251,10 @@
       if (s.handoff) handoff = s.handoff as typeof handoff;
     }
 
-    try { const res = await fetch('/catalog.json'); items = (await res.json()).filter((i: Item & { kind?: string }) => (i as any).kind !== 'dataset'); } catch { /* offline */ }
+    // Only fully verified tool entries are eligible for a generated stack (#4):
+    // the catalog shows under_review / blocked / dataset entries, but the Studio
+    // must never fold those into a stack it calls verified + policy-clean.
+    try { const res = await fetch('/catalog.json'); items = (await res.json()).filter((i: Item & { kind?: string }) => eligibleForStack(i)); } catch { /* offline */ }
     // Load the same excluded-org policy the dependency checker uses, so the
     // Studio can re-verify its own assembled stack in-browser (Movement 4).
     try { const pr = await fetch('/policy.json'); policyOrgs = (await pr.json()).orgs ?? []; } catch { /* offline: stack stays unverified in-browser, flow still works */ }
@@ -365,7 +369,9 @@
     if (category) {
       const cat = items
         .filter((x) => x.category === category && !taken.has(x.name) && !pool.includes(x))
-        .sort((a, b) => protoMatch(b) - protoMatch(a) || (b.verification === 'verified' ? 1 : 0) - (a.verification === 'verified' ? 1 : 0) || b.uses - a.uses || a.name.localeCompare(b.name));
+        // All items are already verified (#4); prefer non-advisory tools so a
+        // Meta-origin entry is never the default pick when a clean one exists.
+        .sort((a, b) => protoMatch(b) - protoMatch(a) || advisoryRank(a) - advisoryRank(b) || b.uses - a.uses || a.name.localeCompare(b.name));
       pool.push(...cat);
     }
     return pool;
@@ -384,12 +390,14 @@
       if (!want) continue;
       const pool = pickPool(def.names?.(protocols), def.category, taken);
       if (!pool.length) continue;
-      let item = pool[0]!;
+      // Default to the first non-advisory option so a Meta/OpenAI/xAI-origin tool
+      // (e.g. react) is never auto-selected; advisory tools remain as alternatives.
+      let item = pool.find(autoPickable) ?? pool[0]!;
       const sw = swaps[def.id];
       if (sw) { const s = pool.find((x) => x.name === sw) ?? items.find((x) => x.name === sw); if (s) item = s; }
       // A swap target could collide with a tool an earlier piece already took (the
       // items.find fallback bypasses `taken`); fall back to this pool's default.
-      if (taken.has(item.name)) item = pool[0]!;
+      if (taken.has(item.name)) item = pool.find(autoPickable) ?? pool[0]!;
       const alts = pool.filter((x) => x.name !== item.name).slice(0, 3);
       taken.add(item.name);
       const txt = (CAP_TEXT[lang] ?? CAP_TEXT.en)[def.id] ?? CAP_TEXT.en[def.id]!;
@@ -643,8 +651,8 @@ ${reflection.constraints.map((c) => `- ${m.c[c]}`).join('\n')}
 ## Protocols
 ${protoList.length ? protoList.join(', ') : 'general'}
 
-## Stack (policy-clean, from wecanjustbuildthings.dev — license verified at commit)
-${chosenItems.map((it) => `- ${it.name} (${it.ecosystem}, ${it.license}${it.commit ? `, license @ ${it.commit.slice(0, 7)}` : ''}) — ${it.desc}`).join('\n') || '- <select tools>'}
+## Stack (policy-clean — no Meta/OpenAI/xAI; ★ = human-verified, the rest passed automated screening and are pending verification)
+${chosenItems.map((it) => `- ${it.verification === 'verified' ? '★ ' : ''}${it.name} (${it.ecosystem}, ${it.license}${it.commit ? `, license @ ${it.commit.slice(0, 7)}` : ''})${it.advisory ? ` [${it.advisory}-origin advisory; permissively licensed]` : ''} — ${it.desc}`).join('\n') || '- <select tools>'}
 `);
 
   const jsDeps = $derived(chosenItems.filter((it) => it.ecosystem === 'js'));
@@ -661,8 +669,8 @@ PROTOCOLS: ${protoList.length ? protoList.join(', ') : 'general'}
 RULES (binding — see constitution.md):
 - Read .specify/memory/constitution.md FIRST and never violate it.
 - Read skills/*.SKILL.md and follow the builder's own methods exactly; if a skill conflicts with a task, surface it and ask.
-- Use ONLY these vetted, policy-clean dependencies:
-${chosenItems.map((it) => `    - ${it.name} (${it.ecosystem})`).join('\n') || '    - <none selected>'}
+- Use ONLY these policy-clean dependencies (no Meta/OpenAI/xAI, screened by enforcement). ★ = human-verified; the rest passed automated policy screening and are pending verification — prefer ★ where a choice exists:
+${chosenItems.map((it) => `    - ${it.verification === 'verified' ? '★ ' : ''}${it.name} (${it.ecosystem})${it.advisory ? ` [${it.advisory}-origin advisory]` : ''}`).join('\n') || '    - <none selected>'}
 ${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the primary SDK for relays, subscriptions, and signers.\n' : ''}${protocols.has('atproto') ? '- For AT Protocol, use @atproto/api as the primary SDK; prefer OAuth (DPoP) over App Passwords.\n' : ''}- No dependency or provider owned by Meta, OpenAI, or xAI — directly or transitively.
 - Run \`npx tsx ./enforcement/cli.ts all --tree .\` before every commit. Add rate
   limiting, test auth paths, and never swallow trust-path errors.
@@ -932,7 +940,7 @@ manuals with the knowledge-to-skills-pipeline).
       // Don't offer Meta/OpenAI/xAI-origin tools as new suggestions (they're in
       // the catalog only with an advisory); the mentor shouldn't push them.
       items.filter((x) => x.category === c && !x.advisory)
-        .sort((a, b) => protoMatch(b) - protoMatch(a) || (b.verification === 'verified' ? 1 : 0) - (a.verification === 'verified' ? 1 : 0) || b.uses - a.uses)
+        .sort((a, b) => protoMatch(b) - protoMatch(a) || b.uses - a.uses)
         .slice(0, 8).forEach(add);
     }
     return [...out.values()].slice(0, 50);
