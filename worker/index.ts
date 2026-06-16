@@ -13,6 +13,7 @@
  *   POST /api/auth/logout                   → destroy the session and clear its cookie
  *   POST /api/auth/nostr/challenge          → issue a single-use NIP-98 sign-in challenge
  *   POST /api/auth/nostr/verify             → verify a signed NIP-98 event → session
+ *   GET  /api/auth/nostr/status             → is Sign in with Nostr configured?
  *   GET  /api/auth/bluesky/status           → is Sign in with Bluesky configured?
  *   GET  /api/auth/bluesky/client-metadata.json → public AT Proto OAuth client metadata
  *   GET  /api/auth/bluesky/start?handle=    → begin AT Proto OAuth (redirect to PDS)
@@ -429,6 +430,7 @@ export default {
     if (path === '/api/auth/logout' && request.method === 'POST') return authLogoutHandler(request, env);
     if (path === '/api/auth/nostr/challenge' && request.method === 'POST') return nostrChallengeHandler(env);
     if (path === '/api/auth/nostr/verify' && request.method === 'POST') return nostrVerifyHandler(request, env);
+    if (path === '/api/auth/nostr/status') return json({ configured: authConfigured(env) });
     if (path === '/api/auth/bluesky/status') return json({ configured: blueskyConfigured(env) });
     if (path === '/api/auth/bluesky/client-metadata.json') return blueskyMetadataHandler(env);
     if (path === '/api/auth/bluesky/start') return blueskyStartHandler(url, env);
