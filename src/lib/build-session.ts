@@ -37,6 +37,8 @@ export interface SessionSkill {
   description: string;
   source?: string;
   license?: string;
+  /** The method, one step per entry — kept so the skill reconstructs on reload. */
+  steps?: string[];
   body: string;
 }
 

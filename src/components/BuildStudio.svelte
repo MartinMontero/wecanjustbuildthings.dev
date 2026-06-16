@@ -69,6 +69,7 @@
       skillsHint: 'Have a field guide, manual, or SOP? Turn your own know-how into a skill your agent follows →',
       skillsDraft: 'Skills I can scaffold from what you told me', skillsReady: 'Or drop in a ready-made skill',
       skillAdd: 'Add to my project', skillAdded: 'Added ✓',
+      skCaptureHead: 'You know something the agent doesn’t', skCaptureSub: 'A method only you know — how you take a report, vet a member, keep people safe. Capture it once and every build follows it.', skName: 'Skill name', skDesc: 'One line: what it does', skDescPh: 'Take an eviction report without exposing the tenant', skSteps: 'The steps, one per line', skStepsPh: 'Use a chosen handle, not a legal name\nRecord the building, not the unit\nEncrypt everything; two organizers hold keys', skSource: 'Where it came from (optional)', skSourcePh: 'Tenants Union field manual', skCaptureBtn: 'Capture as a skill', skillRemove: 'Remove',
       skillReview: 'A draft in your words — review and refine it; you’re the expert.',
       skillsIncluded: 'skill(s) will be included in your starter',
     },
@@ -121,6 +122,7 @@
       skillsHint: '¿Tienes una guía de campo, un manual o un procedimiento? Convierte tu propio saber en una habilidad que tu agente sigue →',
       skillsDraft: 'Habilidades que puedo crear a partir de lo que me contaste', skillsReady: 'O agrega una habilidad lista para usar',
       skillAdd: 'Añadir a mi proyecto', skillAdded: 'Añadida ✓',
+      skCaptureHead: 'Sabes algo que el agente no sabe', skCaptureSub: 'Un método que solo tú conoces — cómo tomas un reporte, verificas a un miembro, proteges a la gente. Captúralo una vez y cada construcción lo seguirá.', skName: 'Nombre de la habilidad', skDesc: 'Una línea: qué hace', skDescPh: 'Tomar un reporte de desalojo sin exponer al inquilino', skSteps: 'Los pasos, uno por línea', skStepsPh: 'Usa un alias elegido, no un nombre legal\nRegistra el edificio, no la unidad\nCifra todo; dos organizadores tienen las claves', skSource: 'De dónde viene (opcional)', skSourcePh: 'Manual de campo del sindicato de inquilinos', skCaptureBtn: 'Capturar como habilidad', skillRemove: 'Quitar',
       skillReview: 'Un borrador en tus palabras — revísalo y ajústalo; tú eres quien sabe.',
       skillsIncluded: 'habilidad(es) se incluirán en tu kit inicial',
     },
@@ -173,6 +175,7 @@
       skillsHint: 'لديك دليل ميداني أو كُتيّب أو إجراء عمل؟ حوّل معرفتك إلى مهارة يتّبعها وكيلك ←',
       skillsDraft: 'مهارات يمكنني إنشاؤها مما أخبرتني به', skillsReady: 'أو أضِف مهارة جاهزة',
       skillAdd: 'أضِف إلى مشروعي', skillAdded: 'أُضيفت ✓',
+      skCaptureHead: 'أنت تعرف شيئاً لا يعرفه الوكيل', skCaptureSub: 'طريقة تعرفها أنت وحدك — كيف تأخذ بلاغاً، تتحقّق من عضو، تحمي الناس. التقطها مرّة وسيتّبعها كل بناء.', skName: 'اسم المهارة', skDesc: 'سطر واحد: ماذا تفعل', skDescPh: 'أخذ بلاغ إخلاء دون كشف هوية المستأجر', skSteps: 'الخطوات، واحدة في كل سطر', skStepsPh: 'استخدم اسماً مستعاراً، لا اسماً قانونياً\nسجّل المبنى، لا الوحدة\nشفّر كل شيء؛ منظّمان يحملان المفاتيح', skSource: 'من أين أتت (اختياري)', skSourcePh: 'دليل ميداني لنقابة المستأجرين', skCaptureBtn: 'التقطها كمهارة', skillRemove: 'إزالة',
       skillReview: 'مسودة بكلماتك — راجعها وحسّنها؛ أنت صاحب الخبرة.',
       skillsIncluded: 'مهارة ستُضمَّن في حزمتك المبدئية',
     },
@@ -239,6 +242,10 @@
         extra = ex;
       }
       if (s.intent.answers && Object.keys(s.intent.answers).length) mentorAnswers = { ...(s.intent.answers as Record<string, string>) };
+      if (s.skills?.length) {
+        authoredSkills = s.skills.map((sk) => ({ name: sk.name, description: sk.description, method: sk.steps ?? [], source: sk.source }));
+        for (const sk of authoredSkills) addSkill(sk);
+      }
       if (s.handoff) handoff = s.handoff as typeof handoff;
     }
 
@@ -271,6 +278,7 @@
     const converged = reflection.constraints.length
       ? { statement: problem.trim(), constraints: reflection.constraints.map((c) => m.c[c]), signals: reflection.signals }
       : null;
+    const skills = authoredSkills.map((sk) => ({ name: slugifySkill(sk.name), description: sk.description, source: sk.source, steps: sk.method, body: skillToMd(sk) }));
     updateSession((s) => ({
       ...s,
       intent: { ...s.intent, ...intent, answers },
@@ -278,6 +286,7 @@
       adjustments,
       handoff: method,
       stack,
+      skills,
     }));
   });
 
@@ -858,6 +867,27 @@ manuals with the knowledge-to-skills-pipeline).
   }
   const skillCount = $derived(Object.keys(customSkills).length);
 
+  // ---------- Movement 3: the inline Skills Creator (capture your knowledge) ----------
+  // The builder knows something about their community/safety/problem the agent
+  // doesn't. Capture it here as a reusable skill — emitted as a SKILL.md into the
+  // starter repo and carried in the build session. Deterministic template, no model.
+  let authoredSkills = $state<DraftSkill[]>([]);
+  let skName = $state(''); let skDesc = $state(''); let skSteps = $state(''); let skSource = $state('');
+  function captureSkill() {
+    const method = skSteps.split('\n').map((l) => l.trim()).filter(Boolean);
+    if (!skName.trim() || !method.length) return;
+    const s: DraftSkill = { name: skName.trim(), description: skDesc.trim() || skName.trim(), method, source: skSource.trim() || undefined };
+    authoredSkills = [...authoredSkills.filter((x) => slugifySkill(x.name) !== slugifySkill(s.name)), s];
+    addSkill(s);
+    skName = ''; skDesc = ''; skSteps = ''; skSource = '';
+  }
+  function removeAuthored(name: string) {
+    authoredSkills = authoredSkills.filter((x) => x.name !== name);
+    const key = `skills/${slugifySkill(name)}.SKILL.md`;
+    const { [key]: _removed, ...rest } = customSkills;
+    customSkills = rest;
+  }
+
   // The constrained menu the model may choose from: the current pieces and their
   // alternatives, plus the strongest tools in each relevant capability category.
   // Everything here is already in the verified, policy-screened catalog.
@@ -1135,6 +1165,26 @@ manuals with the knowledge-to-skills-pipeline).
         {/if}
       </details>
 
+      <div class="skill-capture">
+        <p class="skill-capture-head"><strong>{t.skCaptureHead}</strong></p>
+        <p class="hint">{t.skCaptureSub}</p>
+        <label class="field"><span>{t.skName}</span><input bind:value={skName} placeholder="tenant-intake" /></label>
+        <label class="field"><span>{t.skDesc}</span><input bind:value={skDesc} placeholder={t.skDescPh} /></label>
+        <label class="field"><span>{t.skSteps}</span><textarea bind:value={skSteps} rows="4" placeholder={t.skStepsPh}></textarea></label>
+        <label class="field"><span>{t.skSource}</span><input bind:value={skSource} placeholder={t.skSourcePh} /></label>
+        <div><button class="primary" onclick={captureSkill} disabled={!skName.trim() || !skSteps.trim()}>{t.skCaptureBtn}</button></div>
+        {#if authoredSkills.length}
+          <ul class="skilllist">
+            {#each authoredSkills as s (s.name)}
+              <li class="skillcard">
+                <div class="skill-head"><span class="skill-name">{slugifySkill(s.name)}.SKILL.md</span> <button class="link" onclick={() => removeAuthored(s.name)}>{t.skillRemove}</button></div>
+                <p class="skill-desc">{s.description}</p>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      </div>
+
       <details class="skillsbox">
         <summary>{t.skillsReady}{skillCount ? ` · ${skillCount} ${t.skillsIncluded}` : ''}</summary>
         <ul class="skilllist">
@@ -1293,6 +1343,8 @@ manuals with the knowledge-to-skills-pipeline).
   .apply { background: var(--sl-color-accent); color: var(--on-structure); border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
   .applied { font-size: 0.78rem; font-weight: 700; color: var(--ok-text); }
   .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
+  .skill-capture { border: 1px solid var(--edge); border-inline-start: 3px solid var(--signal); border-radius: var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-2xs); background: color-mix(in srgb, var(--signal) 5%, transparent); }
+  .skill-capture-head { margin: 0; font-size: 1.02rem; font-family: var(--font-display); }
   .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .skillsbox > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 600; }
   .skilllist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
