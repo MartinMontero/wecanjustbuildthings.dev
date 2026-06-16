@@ -62,12 +62,35 @@ export const PROVIDERS: Record<string, { url: string; build: (model: string, pro
   },
 };
 
-/** OpenRouter is a gateway to every vendor — including excluded ones — so a BYOK
- *  caller could otherwise route to a Meta/OpenAI/xAI model through it. Block model
- *  ids whose vendor segment is owned by an excluded org. (Google is NOT excluded.) */
+// OpenRouter is a gateway to every vendor — including excluded ones — so a BYOK
+// caller could otherwise route to a Meta/OpenAI/xAI model through it. Gate brokered
+// models with a default-deny ALLOWLIST of permitted vendor families: stronger than
+// a denylist, since a new excluded vendor, alias, or typo can't slip through. The
+// list is curated and intentionally conservative — add vendors deliberately.
+const PERMITTED_ROUTER_VENDORS = new Set([
+  'anthropic', 'google', 'deepseek', 'mistralai', 'mistral', 'qwen', 'qwen2',
+  'cohere', 'nousresearch', 'microsoft', 'nvidia', 'amazon', 'ai21', 'perplexity', 'liquid',
+]);
+
+/** Vendor segment of an OpenRouter model id ("anthropic/claude-3.5" → "anthropic"). */
+function routerVendor(model: string): string {
+  return model.trim().toLowerCase().split('/')[0] ?? '';
+}
+
+/** Owned by an excluded org (Meta/OpenAI/xAI) — a hard block, even if a vendor is
+ *  mistakenly added to the allowlist. Belt-and-suspenders for the policy-critical case. */
 export function isExcludedRouterModel(provider: string, model: string): boolean {
   if (provider !== 'openrouter') return false;
-  return /^(openai|meta-llama|meta|x-ai|xai)\//i.test(model.trim());
+  return /^(openai|meta-llama|meta|x-ai|xai)$/i.test(routerVendor(model));
+}
+
+/** Default-deny: through the OpenRouter broker, only vetted non-excluded vendor
+ *  families may be requested. Direct providers hit a hardcoded safe host, so they
+ *  are already constrained and always pass. (Google is NOT excluded.) */
+export function isPermittedRouterModel(provider: string, model: string): boolean {
+  if (provider !== 'openrouter') return true;
+  if (isExcludedRouterModel(provider, model)) return false;
+  return PERMITTED_ROUTER_VENDORS.has(routerVendor(model));
 }
 
 function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
@@ -133,8 +156,8 @@ async function kickoffHandler(request: Request): Promise<Response> {
   if (!prompt) return json({ error: 'missing prompt' }, 400);
   const p = PROVIDERS[provider];
   const model = String(body.model || p.defaultModel);
-  if (isExcludedRouterModel(provider, model)) {
-    return json({ error: 'That model is owned by Meta, OpenAI, or xAI — excluded by policy. Pick a permitted model.' }, 400);
+  if (!isPermittedRouterModel(provider, model)) {
+    return json({ error: `Model "${model}" is not on the permitted list for the OpenRouter broker — only vetted, non-excluded vendor families are allowed (Meta/OpenAI/xAI are blocked by policy). Pick a permitted model.` }, 400);
   }
   try {
     const res = await fetch(p.url, { ...p.build(model, prompt, apiKey), signal: AbortSignal.timeout(60000) });
