@@ -1,0 +1,15 @@
+---
+title: Hosting cost estimator
+description: A deterministic, model-free estimate of what it costs to host your project and serve your users, at three levels of scale — read from your build session.
+tableOfContents: false
+---
+
+import CostEstimator from '../../../modules/cost-estimator/ui/CostEstimator.svelte';
+
+A **deterministic** estimator — arithmetic and dated price snapshots only, no AI or
+model calls. It reads your project's needs from the session you started in the
+[Build Studio](/build/) and writes the estimate back, so the rest of the platform
+can use it. Every figure is labelled with its provenance and source; prices not yet
+confirmed against a primary source are marked **TODO: confirm**.
+
+<CostEstimator client:load />

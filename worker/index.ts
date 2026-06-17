@@ -33,6 +33,9 @@ import {
   blueskyClientMetadata, blueskyAuthorizeUrl, blueskyCallback, isValidHandle, type BlueskyEnv,
 } from './auth/bluesky.ts';
 import { getOrCreateUserByIdentity } from './auth/db.ts';
+import { estimate } from '../src/modules/cost-estimator/core/estimator.ts';
+import { ALL_ADAPTERS } from '../src/modules/cost-estimator/adapters/index.ts';
+import type { UsageProfile } from '../src/modules/cost-estimator/core/types.ts';
 
 export interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -200,6 +203,19 @@ async function kickoffHandler(request: Request): Promise<Response> {
   } catch (e) {
     return json({ error: `Request to ${provider} failed`, detail: String(e) }, 502);
   }
+}
+
+/** Path A for the Hosting Cost Estimator: compute pricing server-side at request
+ *  time and return normalized results. Same deterministic estimator core + the
+ *  same in-bounds adapters the browser uses (Path C) — only the fetch location
+ *  differs. Stateless, thin, model-free. */
+async function pricingHandler(request: Request): Promise<Response> {
+  let body: any;
+  try { body = await request.json(); } catch { return json({ error: 'invalid JSON' }, 400); }
+  const usage = body?.usage as UsageProfile | undefined;
+  if (!usage || typeof usage !== 'object') return json({ error: 'missing usage profile' }, 400);
+  const est = await estimate({ usage, adapters: ALL_ADAPTERS, fetcher: (u, init) => fetch(u, init), dataSource: 'pathA-function' });
+  return json(est);
 }
 
 // ---- GitHub one-click ----
@@ -421,6 +437,7 @@ export default {
     const path = url.pathname;
     if (path === '/api/health') return json({ ok: true });
     if (path === '/api/license') return licenseHandler(url);
+    if (path === '/api/pricing' && request.method === 'POST') return pricingHandler(request);
     if (path === '/api/agent/kickoff' && request.method === 'POST') return kickoffHandler(request);
     if (path === '/api/github/status') return json({ configured: Boolean(env.GITHUB_OAUTH_CLIENT_ID) });
     if (path === '/api/github/start') return githubStart(url, env);

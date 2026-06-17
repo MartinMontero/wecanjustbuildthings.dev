@@ -16,6 +16,8 @@
  * event (same document) and the storage event (other tabs).
  */
 
+import type { UsageProfile, CostEstimate } from '../modules/cost-estimator/core/types.ts';
+
 export interface SessionReceipt {
   license?: string;
   commitSha?: string | null;
@@ -79,6 +81,12 @@ export interface BuildSession {
   seededTool: string | null;
   /** Movement 4 — chosen handoff method. */
   handoff: string;
+  /** Hosting Cost Estimator — its inputs (read by the estimator, filled from
+   *  derivation + manual override) and its results (written back, timestamped),
+   *  so downstream components can consume the estimate. Optional and
+   *  v1-compatible: absent until the builder opens the estimator. */
+  usage?: UsageProfile | null;
+  costEstimate?: CostEstimate | null;
 }
 
 const KEY = 'wcb.build-session.v1';
@@ -96,6 +104,8 @@ export function defaultSession(): BuildSession {
     skills: [],
     seededTool: null,
     handoff: 'zip',
+    usage: null,
+    costEstimate: null,
   };
 }
 
@@ -125,6 +135,8 @@ export function migrate(parsed: unknown): BuildSession {
     },
     stack: Array.isArray(p.stack) ? p.stack : [],
     skills: Array.isArray(p.skills) ? p.skills : [],
+    usage: p.usage ?? null,
+    costEstimate: p.costEstimate ?? null,
   };
 }
 
