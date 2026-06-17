@@ -45,13 +45,25 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Dead-link check
+      # Internal links are a hard gate: a broken on-site link (nav, anchor, asset)
+      # must fail the build. External http(s) URLs are excluded from this step.
+      - name: Dead-link check (internal — blocking)
         uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
         with:
-          # Resolve root-relative links (/about/, /fonts/*) against the built
-          # site — lychee >=0.18 hard-errors on them otherwise. The Build step
-          # above produces dist/. --root-dir must be absolute.
-          args: --config lychee.toml --root-dir ${{ github.workspace }}/dist ./src
+          # Resolve root-relative links (/about/, /fonts/*) against the built site
+          # — lychee >=0.18 hard-errors on them otherwise. --root-dir must be absolute.
+          args: --config lychee.toml --exclude '^https?://' --root-dir ${{ github.workspace }}/dist ./src
           fail: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # External links rot and time out transiently (third-party sites that are
+      # slow or block CI IPs). Report them in the job summary, but never flake the
+      # build on them — the weekly watch re-checks the catalog against live sources.
+      - name: Dead-link check (external — non-blocking)
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
+        with:
+          args: --config lychee.toml --root-dir ${{ github.workspace }}/dist ./src
+          fail: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
