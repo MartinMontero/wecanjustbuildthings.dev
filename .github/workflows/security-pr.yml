@@ -1,0 +1,146 @@
+name: Security — PR gate
+
+# Supply-chain SECURITY gate (known CVEs), distinct from verify.yml's PROVENANCE
+# gate (the Meta/OpenAI/xAI exclusion engine). Both run on every PR; neither
+# duplicates the other. This hard-fails only on an ACTIONABLE (fix-available)
+# CRITICAL, mirroring the enforcement engine's block-don't-warn discipline.
+#
+# Every action is pinned to a full commit SHA (resolved from each repo's canonical
+# git refs); .github/zizmor.yml fails the build if any moving tag slips back in.
+# Trivy is deliberately absent — aquasecurity/trivy-action was compromised in the
+# March 2026 supply-chain attack (CVE-2026-33634 / GHSA-69fq-xp46-6x23).
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-pr-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: Dependency review (PR diff — fast first line)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Dependency review (best-effort first line)
+        # Non-fatal on purpose: this is the cheap PR-diff first line, and the
+        # OSV-Scanner + Grype jobs below are the real gates. It only works when the
+        # repo's Dependency Graph is enabled (Settings -> Code security & analysis);
+        # until then it no-ops with a notice instead of blocking the merge.
+        continue-on-error: true
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.9.0
+        with:
+          fail-on-severity: critical
+          comment-summary-in-pr: on-failure
+
+  osv-scanner:
+    name: OSV-Scanner (primary CRITICAL-only gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write # upload SARIF to the Security tab
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: 'stable'
+      - name: Install OSV-Scanner v2 (pinned module version, verified via the Go checksum DB)
+        run: |
+          go install github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.3.5
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Self-test the CRITICAL gate (the gate is attack surface too)
+        run: bash scripts/tests/osv-gate/run.sh
+      - name: Scan all ecosystems recursively (JSON + SARIF; do NOT fail on findings)
+        run: |
+          osv-scanner scan source --recursive --format json  --output osv.json  . || true
+          osv-scanner scan source --recursive --format sarif --output osv.sarif . || true
+      - name: Gate on actionable CRITICAL (jq filter + no-CVSS fallback)
+        run: bash scripts/osv-critical-gate.sh osv.json
+      - name: Upload OSV-Scanner SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3.36.2
+        with:
+          sarif_file: osv.sarif
+          category: osv-scanner
+      - name: Upload OSV-Scanner JSON report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: osv-report
+          path: osv.json
+          if-no-files-found: warn
+
+  grype:
+    name: Grype (independent cross-check — different DB)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Grype scan (native fail-on critical)
+        id: grype
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          path: "."
+          fail-build: true
+          severity-cutoff: critical
+          output-format: sarif
+          add-cpes-if-none: true
+      - name: Upload Grype SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3.36.2
+        with:
+          sarif_file: ${{ steps.grype.outputs.sarif }}
+          category: grype
+
+  zizmor:
+    name: zizmor (static analysis of the workflows themselves)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Run zizmor (pinned) over .github/workflows
+        # uvx runs a pinned zizmor from PyPI; config in .github/zizmor.yml requires
+        # every action to be SHA-pinned (unpinned-uses: hash-pin).
+        run: |
+          pipx run --spec 'zizmor==1.25.2' zizmor --format sarif .github/workflows > zizmor.sarif || true
+          pipx run --spec 'zizmor==1.25.2' zizmor .github/workflows
+      - name: Upload zizmor SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3.36.2
+        with:
+          sarif_file: zizmor.sarif
+          category: zizmor

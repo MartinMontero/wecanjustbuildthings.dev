@@ -1,0 +1,19 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://wecanjustbuildthings.dev/vex/EXAMPLE",
+  "author": "We Can Just Build Things maintainers",
+  "role": "Project maintainers",
+  "timestamp": "2026-06-17T00:00:00Z",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": { "name": "CVE-0000-EXAMPLE" },
+      "products": [
+        { "@id": "pkg:npm/example-package@1.0.0" }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "TEMPLATE — not an active statement. The affected code path runs only under a server runtime; this project deploys a static site to Cloudflare with no server, so the path is never reached. Replace this file with a real YYYY-<id>.openvex.json when accepting a specific risk."
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+---
+title: Supply-chain security
+description: Beyond who built a tool — whether it's safe, and still safe. The CVE scanning, SBOM, and build provenance the catalog runs on itself, and how you can verify it.
+entry_type: policy
+sidebar:
+  order: 3
+  label: Supply-chain security
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The [exclusion policy](/policies/) answers one question: *who built this?* It says
+nothing about a second one that matters just as much to the people downstream:
+*is it safe — and is it still safe?* A dependency with clean provenance can still
+ship a critical vulnerability, and a package that was safe the day it was locked
+ages as new CVEs are disclosed against it. So the catalog holds a second line,
+with the same discipline as the first: machine-checked, hard-failing, and
+verifiable by you rather than taken on trust.
+
+## What runs, and when
+
+| Trigger | What runs |
+|---|---|
+| Every pull request | Dependency review of the diff + **OSV-Scanner** + **Grype**, hard-failing on an actionable CRITICAL. Results upload to the Security tab. |
+| Nightly (03:00 UTC) | Re-scan of the **locked** dependency set against the current advisory databases — so a CVE disclosed *after* a dependency was locked is caught with no new commit. A newly-disclosed CRITICAL opens a tracked issue. |
+| Every build of `main` | A Software Bill of Materials (CycloneDX + SPDX) and a signed **build-provenance attestation** for the deployed site. |
+
+This is separate from, and additive to, the [provenance enforcement](/policies/enforcement/):
+the exclusion engine checks *ownership and data flow*; this checks *known
+vulnerabilities*. Neither replaces the other.
+
+## Two scanners, on purpose
+
+**OSV-Scanner** (Google's scanner over the open [OSV.dev](https://osv.dev)
+database) is the primary gate. **Grype** (Anchore, backed by a *different*
+vulnerability database) runs as an independent cross-check. Agreement between
+vulnerability scanners is famously low, so the second opinion is deliberate — not
+redundant. Both scan **every ecosystem** a project contains (npm, PyPI, crates,
+Go, and more), transitive dependencies included.
+
+<Aside type="note" title="Why the CRITICAL gate isn't one line of config">
+OSV-Scanner has no native "fail only on CRITICAL" flag — its scan exits non-zero
+on a vulnerability of *any* severity. So the build runs the scan for its data, not
+its exit code, and a small reviewed script (`scripts/osv-critical-gate.sh`) makes
+the call: fail when a CVSS score is **≥ 9.0**, *or* — for advisories shipped
+without a CVSS score — when the advisory's own label is **CRITICAL**. A pure
+CVSS filter would silently let that second kind through. The gate has its own
+test suite, because a security control is only as trustworthy as its own proof.
+</Aside>
+
+## Gate hard on critical, fix-available
+
+The build blocks on a **CRITICAL** only — matching the project's
+block-don't-warn philosophy and avoiding the alert fatigue that quietly erodes a
+gate people are meant to trust. HIGH and below are tracked, not blocking. And the
+gate fires only when a **fix is available**: an unpatchable critical is reported
+but cannot wedge the build indefinitely. When a critical is genuinely not
+exploitable here, or has no fix, the reason is written down as a machine-readable
+[OpenVEX](https://openvex.dev) record under `security/vex/` — an exception is
+allowed only when it is justified in the open, never by lowering the bar.
+
+## An SBOM and provenance you can verify
+
+Every build emits a Software Bill of Materials in both CycloneDX and SPDX, and
+attests **build provenance** for the deployed artifact. You don't have to take our
+word that the site you're looking at came from this source: the attestation is
+verifiable with `gh attestation verify`, [`cosign`](https://docs.sigstore.dev), or
+`slsa-verifier`. The receipts are right there — the same standard the catalog
+holds for licenses.
+
+## The pipeline is attack surface too
+
+The thing that scans for supply-chain attacks is itself a supply-chain target. So
+every GitHub Action is pinned to a **full commit SHA**, not a moving tag a
+maintainer could repoint; a static analyzer ([zizmor](https://zizmor.sh)) fails
+the build if any unpinned action slips in; and each CI runner is hardened with
+egress monitoring. We also deliberately **do not use Trivy** — its popular action
+was compromised in a March 2026 supply-chain attack (CVE-2026-33634), force-pushed
+to credential-stealing malware. Treating the scanner as attack surface is not
+paranoia; it is the lesson.
+
+## Run it yourself
+
+```sh
+# CVE scan, every ecosystem, recursively (Google's OSV-Scanner)
+osv-scanner scan source --recursive .
+
+# Independent cross-check (Anchore's Grype)
+grype dir:.
+
+# Generate an SBOM (Anchore's Syft)
+syft scan dir:. -o cyclonedx-json
+```
+
+The CRITICAL gate itself is `scripts/osv-critical-gate.sh`, and the portable
+recipe for adding all of this to your *own* builder project ships as the
+`supply-chain-security` agent skill.

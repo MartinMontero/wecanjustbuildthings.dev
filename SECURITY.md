@@ -24,7 +24,25 @@ and the hosting configuration.
 - A weekly job re-checks licenses and maintenance and opens an issue on drift.
 - No model-provider keys are required or stored anywhere; anything that talks to a
   model does so client-side, BYOK.
-- CI pins action and Node versions and runs a dead-link check.
+- **CVE scanning on every PR and nightly** against the locked dependency set, with
+  two independent scanners (OSV-Scanner + Grype): a build is blocked by an
+  actionable (fix-available) CRITICAL, and a newly-disclosed CRITICAL against a
+  locked dependency opens a tracked issue. See
+  [Supply-chain security](https://wecanjustbuildthings.dev/policies/supply-chain-security/).
+- **An SBOM (CycloneDX + SPDX) and a signed build-provenance attestation** are
+  produced for every build of `main`, verifiable with `gh attestation verify`,
+  `cosign`, or `slsa-verifier`.
+- **The CI pipeline is hardened**: every GitHub Action is pinned to a full commit
+  SHA (enforced by zizmor), each runner is hardened with egress monitoring
+  (harden-runner), Node versions are pinned, and a dead-link check runs on every
+  PR. Trivy is deliberately excluded (CVE-2026-33634).
+
+## Accepted risk
+
+An unfixable or non-exploitable CRITICAL is recorded as a machine-readable
+[OpenVEX](https://openvex.dev) document under `security/vex/`, with a written
+justification — never suppressed silently. Scanner-level ignores in
+`osv-scanner.toml` / `.grype.yaml` carry the same written reason and a review date.
 
 ## Supported versions
 

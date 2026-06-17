@@ -1,0 +1,20 @@
+# Local Wrangler dev vars/secrets. Copy to `.dev.vars` (gitignored) and fill in.
+# These override wrangler.jsonc `vars` for `wrangler dev`. Real secrets in
+# production are set with `wrangler secret put`, never committed.
+
+# Canonical origin for OAuth client metadata + redirects. For local dev this is
+# the `wrangler dev` origin — keep the port in sync with how you start it
+# (`wrangler dev --port 8788`).
+SITE_URL="http://localhost:8788"
+
+# Sign in with Bluesky (AT Protocol). Generate with `npm run gen:bluesky-key` and
+# paste the printed JSON line below. Without it, /api/auth/bluesky/status reports
+# { configured: false } and the Bluesky option stays hidden.
+# NOTE: the full OAuth round-trip needs a public HTTPS origin (the PDS must reach
+# your client-metadata URL), so it won't complete from http://localhost — but the
+# rest of the wiring (status, the widget UI) runs locally.
+# BLUESKY_PRIVATE_KEY_JWK={"kty":"EC","crv":"P-256","x":"...","y":"...","d":"...","kid":"..."}
+
+# GitHub one-click repo creation (optional; separate from sign-in).
+# GITHUB_OAUTH_CLIENT_ID=
+# GITHUB_OAUTH_CLIENT_SECRET=

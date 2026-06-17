@@ -1,0 +1,18 @@
+# Grype configuration for the independent CVE cross-check.
+#
+# The hard-fail threshold (CRITICAL) and fail-build behaviour are set by the
+# anchore/scan-action inputs in the security workflows (severity-cutoff: critical,
+# fail-build: true). This file carries Grype-native ignore rules.
+output:
+  - sarif
+
+ignore:
+  # Mirror the OSV gate's "actionable only" posture: a CRITICAL with no fix
+  # available shouldn't wedge the build. Unfixable criticals are tracked as
+  # accepted risk under security/vex/ instead.
+  - fix-state: not-fixed
+
+  # Accepted, justified risks go below, each with a written reason and kept in
+  # sync with security/vex/ and osv-scanner.toml. Example (commented):
+  # - vulnerability: GHSA-xxxx-xxxx-xxxx
+  #   reason: "accepted — see security/vex/2026-xxxx.openvex.json"

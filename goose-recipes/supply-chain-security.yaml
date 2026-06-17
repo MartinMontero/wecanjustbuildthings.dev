@@ -1,0 +1,41 @@
+version: 1.0.0
+title: Supply-chain security enforcement
+description: >-
+  Scaffold CVE scanning (OSV-Scanner + Grype), an SBOM, and build provenance into
+  a project as SHA-pinned, hardened GitHub Actions that hard-fail only on an
+  actionable CRITICAL. Mirrors wecanjustbuildthings.dev's enforcement discipline.
+
+parameters:
+  - key: project_dir
+    input_type: string
+    requirement: optional
+    description: Path to the project to harden (default: current repo root)
+
+instructions: |
+  You add supply-chain security enforcement. Non-negotiable rules:
+  - Pin every GitHub Action to a full commit SHA (resolve via
+    `git ls-remote https://github.com/<owner>/<repo> refs/tags/<vX.Y.Z>`), never a
+    moving tag; zizmor (.github/zizmor.yml, unpinned-uses: hash-pin) enforces it.
+  - NEVER introduce Trivy in any form (CVE-2026-33634 supply-chain compromise).
+  - OSV-Scanner has no CRITICAL-only flag: run `osv-scanner ... --format json || true`
+    then fail via jq when any group max_severity >= 9.0 OR any
+    database_specific.severity == "CRITICAL" (the no-CVSS fallback). Never write a
+    naive `severity: CRITICAL` line.
+  - Block only on actionable (fix-available) criticals; record unfixable ones as
+    OpenVEX docs under security/vex/.
+  - Use Grype (anchore/scan-action, fail-build + severity-cutoff critical) as an
+    independent cross-check. harden-runner on every job; least-privilege permissions.
+  - No Meta/OpenAI/xAI tooling. Google (OSV-Scanner / OSV.dev) is permitted.
+
+prompt: |
+  Add supply-chain security enforcement to {{ project_dir }}.
+  1. Detect the project's ecosystems (lockfiles / manifests).
+  2. Scaffold .github/workflows/security-pr.yml, security-cron.yml (nightly cron),
+     build-attest.yml, scripts/osv-critical-gate.sh, osv-scanner.toml, .grype.yaml,
+     .github/zizmor.yml, and security/vex/ — following
+     skills/supply-chain-security/SKILL.md.
+  3. Resolve and SHA-pin every action. Self-test the gate. Run zizmor.
+  4. Document wiring the PR gate as a required status check.
+  Stop and ask if any tool is built by an excluded vendor, any SHA can't be
+  resolved from a primary source, or a CRITICAL is unfixable and its
+  exploitability here is unclear.

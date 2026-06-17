@@ -8,6 +8,7 @@ workflows. They are **harness-agnostic**: each ships in two forms.
 | [`catalog-entry-author`](./catalog-entry-author/SKILL.md) | Author one accurate, policy-clean catalog entry, verifying the license at a commit and running enforcement before commit. |
 | [`license-watcher`](./license-watcher/SKILL.md) | Detect license drift weekly via three independent signals; open a PR. |
 | [`maintenance-checker`](./maintenance-checker/SKILL.md) | Reclassify maintenance status weekly from primary-source activity; open a PR. |
+| [`supply-chain-security`](./supply-chain-security/SKILL.md) | Scaffold CVE scanning (OSV-Scanner + Grype), an SBOM, and build provenance as SHA-pinned, hardened CI that hard-fails only on an actionable CRITICAL. |
 
 ## Using them with Claude Code
 

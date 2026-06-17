@@ -1,0 +1,128 @@
+name: Security — nightly re-scan
+
+# Re-scans the LOCKED dependency set (the committed lockfile) against the CURRENT
+# advisory databases every night — so a CVE disclosed *after* a dependency was
+# locked is caught even with no new commits. A red cron run is easy to miss, so an
+# actionable CRITICAL also opens/updates a tracking issue.
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # 03:00 UTC, nightly
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-cron
+  cancel-in-progress: false
+
+jobs:
+  rescan:
+    name: Re-scan locked dependencies against current advisory DBs
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      security-events: write
+      issues: write
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: 'stable'
+      - name: Install OSV-Scanner v2 (pinned module version)
+        run: |
+          go install github.com/google/osv-scanner/v2/cmd/osv-scanner@v2.3.5
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Self-test the CRITICAL gate
+        run: bash scripts/tests/osv-gate/run.sh
+      - name: Scan the locked set (JSON + SARIF; do NOT fail on findings)
+        run: |
+          osv-scanner scan source --recursive --format json  --output osv.json  . || true
+          osv-scanner scan source --recursive --format sarif --output osv.sarif . || true
+      - name: Gate on actionable CRITICAL (capture result; don't abort yet)
+        id: gate
+        run: |
+          set +e
+          bash scripts/osv-critical-gate.sh osv.json | tee gate-output.txt
+          echo "status=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+      - name: Grype cross-check (non-fatal here; the SARIF carries the detail)
+        if: always()
+        id: grype
+        continue-on-error: true
+        uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+        with:
+          path: "."
+          fail-build: true
+          severity-cutoff: critical
+          output-format: sarif
+          add-cpes-if-none: true
+      - name: Upload OSV-Scanner SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3.36.2
+        with:
+          sarif_file: osv.sarif
+          category: osv-scanner
+      - name: Upload Grype SARIF
+        if: always() && steps.grype.outputs.sarif != ''
+        uses: github/codeql-action/upload-sarif@dd903d2e4f5405488e5ef1422510ee31c8b32357 # v3.36.2
+        with:
+          sarif_file: ${{ steps.grype.outputs.sarif }}
+          category: grype
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nightly-security-reports
+          path: |
+            osv.json
+            gate-output.txt
+          if-no-files-found: warn
+      - name: Open or update tracking issue on actionable CRITICAL
+        if: steps.gate.outputs.status != '0'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- security-nightly-critical -->';
+            const title = 'Security: actionable CRITICAL in a locked dependency';
+            const detail = fs.existsSync('gate-output.txt')
+              ? fs.readFileSync('gate-output.txt', 'utf8').trim()
+              : '(no gate output captured)';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const body = [
+              marker,
+              'The nightly re-scan found an **actionable (fix-available) CRITICAL** vulnerability in an already-locked dependency.',
+              '',
+              '```',
+              detail,
+              '```',
+              '',
+              `Run: ${runUrl}`,
+              '',
+              'Fix by bumping the affected dependency. If it is genuinely not exploitable here, record it as accepted risk under `security/vex/` (see SECURITY.md); if it is unfixable, it will already be reported as non-blocking.',
+            ].join('\n');
+            const open = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner, repo: context.repo.repo, state: 'open',
+              labels: 'security,automated', per_page: 100,
+            });
+            const hit = open.find((i) => i.title === title || (i.body || '').includes(marker));
+            if (hit) {
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: hit.number, body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo, title, body,
+                labels: ['security', 'automated'],
+              });
+            }
+      - name: Fail the run if an actionable CRITICAL remains
+        if: steps.gate.outputs.status != '0'
+        run: exit 1

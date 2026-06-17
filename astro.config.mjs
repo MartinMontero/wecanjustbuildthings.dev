@@ -71,6 +71,7 @@ export default defineConfig({
         SiteTitle: './src/components/overrides/SiteTitle.astro',
         Hero: './src/components/overrides/Hero.astro',
         PageTitle: './src/components/overrides/PageTitle.astro',
+        SocialIcons: './src/components/overrides/SocialIcons.astro',
       },
       customCss: ['./src/styles/tokens.css', './src/styles/theme.css', './src/styles/components.css'],
       sidebar: [
@@ -124,6 +125,7 @@ export default defineConfig({
           items: [
             { label: 'The exclusion policy', translations: { es: 'La política de exclusión', ar: 'سياسة الاستبعاد' }, link: '/policies/' },
             { label: 'How enforcement works', translations: { es: 'Cómo funciona la aplicación', ar: 'كيف يعمل الإنفاذ' }, link: '/policies/enforcement/' },
+            { label: 'Supply-chain security', translations: { es: 'Seguridad de la cadena de suministro', ar: 'أمن سلسلة التوريد' }, link: '/policies/supply-chain-security/' },
             { label: 'Privacy', translations: { es: 'Privacidad', ar: 'الخصوصية' }, link: '/privacy/' },
             { label: 'Security', translations: { es: 'Seguridad', ar: 'الأمان' }, link: '/security/' },
           ],

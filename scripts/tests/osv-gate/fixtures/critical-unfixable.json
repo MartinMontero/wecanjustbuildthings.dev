@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "source": { "path": "package-lock.json", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "wedged-pkg", "version": "3.0.0", "ecosystem": "npm" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-test-unfixable",
+              "affected": [
+                { "ranges": [ { "type": "SEMVER", "events": [ { "introduced": "0" } ] } ] }
+              ],
+              "database_specific": { "severity": "CRITICAL" }
+            }
+          ],
+          "groups": [
+            { "ids": ["GHSA-test-unfixable"], "max_severity": "9.8" }
+          ]
+        }
+      ]
+    }
+  ]
+}
