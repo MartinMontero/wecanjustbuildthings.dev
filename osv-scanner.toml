@@ -1,0 +1,19 @@
+# OSV-Scanner suppressions for wecanjustbuildthings.dev.
+#
+# OSV-Scanner honours [[IgnoredVulns]]: a matching advisory is dropped from the
+# report, so it never reaches scripts/osv-critical-gate.sh. Use this ONLY for an
+# accepted, justified risk — never to quiet a real, fixable CRITICAL.
+#
+# Rules for every entry:
+#   - `id`          the GHSA / CVE / RUSTSEC id being accepted.
+#   - `ignoreUntil` a near-term review date (force a re-decision; never open-ended).
+#   - `reason`      a written justification, mirroring the project's
+#                   `verification_blocked_reason` discipline. Link the matching
+#                   OpenVEX statement under security/vex/ where one exists.
+#
+# There are no active suppressions today. Example (kept commented):
+#
+# [[IgnoredVulns]]
+# id = "GHSA-xxxx-xxxx-xxxx"
+# ignoreUntil = 2026-09-01
+# reason = "Dev-only transitive dependency, not shipped to dist/; vulnerable path unreachable in a static build. Tracked in security/vex/2026-xxxx.openvex.json. Re-evaluate by the date above."

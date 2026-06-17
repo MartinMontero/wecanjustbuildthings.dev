@@ -125,6 +125,7 @@ export default defineConfig({
           items: [
             { label: 'The exclusion policy', translations: { es: 'La política de exclusión', ar: 'سياسة الاستبعاد' }, link: '/policies/' },
             { label: 'How enforcement works', translations: { es: 'Cómo funciona la aplicación', ar: 'كيف يعمل الإنفاذ' }, link: '/policies/enforcement/' },
+            { label: 'Supply-chain security', translations: { es: 'Seguridad de la cadena de suministro', ar: 'أمن سلسلة التوريد' }, link: '/policies/supply-chain-security/' },
             { label: 'Privacy', translations: { es: 'Privacidad', ar: 'الخصوصية' }, link: '/privacy/' },
             { label: 'Security', translations: { es: 'Seguridad', ar: 'الأمان' }, link: '/security/' },
           ],

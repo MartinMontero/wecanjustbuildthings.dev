@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "source": { "path": "package-lock.json", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "demo-pkg", "version": "1.0.0", "ecosystem": "npm" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-test-crit-fixable",
+              "aliases": ["CVE-2026-0001"],
+              "affected": [
+                { "ranges": [ { "type": "SEMVER", "events": [ { "introduced": "0" }, { "fixed": "1.0.1" } ] } ] }
+              ],
+              "database_specific": { "severity": "CRITICAL" }
+            }
+          ],
+          "groups": [
+            { "ids": ["GHSA-test-crit-fixable"], "aliases": ["CVE-2026-0001", "GHSA-test-crit-fixable"], "max_severity": "9.8" }
+          ]
+        }
+      ]
+    }
+  ]
+}

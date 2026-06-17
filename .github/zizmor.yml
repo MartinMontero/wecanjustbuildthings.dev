@@ -1,0 +1,11 @@
+# zizmor static-analysis config for this repo's GitHub Actions workflows.
+# https://docs.zizmor.sh/configuration/
+#
+# The load-bearing rule: every action must be pinned to a full commit SHA. zizmor
+# fails the build if any `uses:` is on a moving tag or branch — so SHA-pinning is
+# machine-enforced, not a thing a human has to remember.
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        "*": hash-pin

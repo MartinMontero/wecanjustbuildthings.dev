@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "source": { "path": "Cargo.lock", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "rust-demo", "version": "0.2.0", "ecosystem": "crates.io" },
+          "vulnerabilities": [
+            {
+              "id": "RUSTSEC-2026-0002",
+              "affected": [
+                { "ranges": [ { "type": "SEMVER", "events": [ { "introduced": "0" }, { "fixed": "0.2.1" } ] } ] }
+              ],
+              "database_specific": { "severity": "CRITICAL" }
+            }
+          ],
+          "groups": [
+            { "ids": ["RUSTSEC-2026-0002"], "aliases": ["RUSTSEC-2026-0002"], "max_severity": "" }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "source": { "path": "package-lock.json", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "high-only", "version": "2.0.0", "ecosystem": "npm" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-test-high",
+              "affected": [
+                { "ranges": [ { "type": "SEMVER", "events": [ { "introduced": "0" }, { "fixed": "2.0.1" } ] } ] }
+              ],
+              "database_specific": { "severity": "HIGH" }
+            }
+          ],
+          "groups": [
+            { "ids": ["GHSA-test-high"], "max_severity": "7.5" }
+          ]
+        }
+      ]
+    }
+  ]
+}

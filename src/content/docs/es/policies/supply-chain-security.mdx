@@ -1,0 +1,103 @@
+---
+title: Seguridad de la cadena de suministro
+description: Más allá de quién construyó una herramienta — si es segura, y si sigue siéndolo. El escaneo de CVE, el SBOM y la procedencia de compilación que el catálogo aplica sobre sí mismo, y cómo puedes verificarlo.
+entry_type: policy
+sidebar:
+  order: 3
+  label: Seguridad de la cadena de suministro
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+La [política de exclusión](/es/policies/) responde a una pregunta: *¿quién
+construyó esto?* No dice nada sobre una segunda que importa tanto a las personas
+que dependen de ello: *¿es seguro — y sigue siéndolo?* Una dependencia con
+procedencia limpia puede aun así traer una vulnerabilidad crítica, y un paquete
+que era seguro el día en que se fijó envejece a medida que se divulgan nuevos CVE
+en su contra. Por eso el catálogo sostiene una segunda línea, con la misma
+disciplina que la primera: comprobada por una máquina, que falla en duro, y
+verificable por ti en lugar de aceptada por confianza.
+
+## Qué se ejecuta, y cuándo
+
+| Disparador | Qué se ejecuta |
+|---|---|
+| Cada pull request | Revisión de dependencias del diff + **OSV-Scanner** + **Grype**, fallando en duro ante una crítica accionable. Los resultados suben a la pestaña Security. |
+| Cada noche (03:00 UTC) | Reescaneo del conjunto de dependencias **fijado** contra las bases de datos de avisos actuales — para que un CVE divulgado *después* de fijar una dependencia se detecte sin un commit nuevo. Una crítica recién divulgada abre una incidencia con seguimiento. |
+| Cada compilación de `main` | Una lista de materiales de software (SBOM, en CycloneDX y SPDX) y una **atestación de procedencia de compilación** firmada para el sitio desplegado. |
+
+Esto es independiente de —y se suma a— la [aplicación de la procedencia](/es/policies/enforcement/):
+el motor de exclusión comprueba la *propiedad y el flujo de datos*; esto comprueba
+las *vulnerabilidades conocidas*. Ninguno reemplaza al otro.
+
+## Dos escáneres, a propósito
+
+**OSV-Scanner** (el escáner de Google sobre la base de datos abierta
+[OSV.dev](https://osv.dev)) es la verja principal. **Grype** (de Anchore,
+respaldado por una base de datos de vulnerabilidades *distinta*) actúa como una
+verificación cruzada independiente. La concordancia entre escáneres de
+vulnerabilidades es notoriamente baja, así que la segunda opinión es deliberada,
+no redundante. Ambos escanean **todos los ecosistemas** que contiene un proyecto
+(npm, PyPI, crates, Go y más), dependencias transitivas incluidas.
+
+<Aside type="note" title="Por qué la verja de CRITICAL no es una línea de configuración">
+OSV-Scanner no tiene una opción nativa para «fallar solo en CRITICAL» — su escaneo
+sale con error ante una vulnerabilidad de *cualquier* severidad. Así que la
+compilación ejecuta el escaneo por sus datos, no por su código de salida, y un
+pequeño script revisado (`scripts/osv-critical-gate.sh`) toma la decisión: falla
+cuando una puntuación CVSS es **≥ 9.0**, *o* —para avisos publicados sin
+puntuación CVSS— cuando la etiqueta del propio aviso es **CRITICAL**. Un filtro de
+solo CVSS dejaría pasar en silencio ese segundo tipo. La verja tiene su propia
+batería de pruebas, porque un control de seguridad solo es tan fiable como su
+propia prueba.
+</Aside>
+
+## Bloquea en crítica, con corrección disponible
+
+La compilación se bloquea solo ante una **crítica** — acorde con la filosofía de
+«bloquear, no advertir» del proyecto, y evitando la fatiga de alertas que erosiona
+en silencio una verja en la que se supone que la gente debe confiar. HIGH y por
+debajo se rastrean, no bloquean. Y la verja se dispara solo cuando hay una
+**corrección disponible**: una crítica sin parche se reporta, pero no puede atascar
+la compilación indefinidamente. Cuando una crítica realmente no es explotable aquí,
+o no tiene corrección, la razón se anota como un registro
+[OpenVEX](https://openvex.dev) legible por máquina bajo `security/vex/` — una
+excepción se permite solo cuando se justifica en abierto, nunca bajando el listón.
+
+## Un SBOM y una procedencia que puedes verificar
+
+Cada compilación emite una lista de materiales de software en CycloneDX y SPDX, y
+atesta la **procedencia de compilación** del artefacto desplegado. No tienes que
+creernos que el sitio que estás viendo salió de esta fuente: la atestación es
+verificable con `gh attestation verify`, [`cosign`](https://docs.sigstore.dev) o
+`slsa-verifier`. Las pruebas están ahí mismo — el mismo estándar que el catálogo
+sostiene para las licencias.
+
+## El pipeline también es superficie de ataque
+
+Lo que escanea en busca de ataques a la cadena de suministro es, en sí mismo, un
+objetivo de la cadena de suministro. Por eso cada GitHub Action se fija a un
+**SHA de commit completo**, no a una etiqueta móvil que un mantenedor pudiera
+reapuntar; un analizador estático ([zizmor](https://zizmor.sh)) hace fallar la
+compilación si se cuela cualquier acción sin fijar; y cada runner de CI se endurece
+con monitoreo de egreso. Además, deliberadamente **no usamos Trivy** — su popular
+acción fue comprometida en un ataque a la cadena de suministro en marzo de 2026
+(CVE-2026-33634), reescrita a la fuerza con malware que roba credenciales. Tratar
+al escáner como superficie de ataque no es paranoia; es la lección.
+
+## Ejecútalo tú mismo
+
+```sh
+# Escaneo de CVE, todos los ecosistemas, recursivo (OSV-Scanner de Google)
+osv-scanner scan source --recursive .
+
+# Verificación cruzada independiente (Grype de Anchore)
+grype dir:.
+
+# Genera un SBOM (Syft de Anchore)
+syft scan dir:. -o cyclonedx-json
+```
+
+La verja de CRITICAL en sí es `scripts/osv-critical-gate.sh`, y la receta portátil
+para añadir todo esto a tu *propio* proyecto se distribuye como la habilidad de
+agente `supply-chain-security`.
