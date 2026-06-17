@@ -4,7 +4,7 @@
  * non-zero exit code only on fetch errors (status drift is reported, not fatal —
  * the weekly workflow opens a PR with the diff).
  *
- * Run: tsx scripts/maintenance-check.ts [--catalog <dir>]
+ * Run: tsx scripts/maintenance-check.ts [--catalog <dir>] [--limit <n>]
  */
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { readDocEntries } from '../enforcement/frontmatter.ts';
@@ -17,6 +17,11 @@ const catalogDir = process.argv.includes('--catalog')
   ? process.argv[process.argv.indexOf('--catalog') + 1]!
   : 'src/content/docs/catalog';
 
+// Optional cap on entries checked — a quick spot-check without burning the
+// GitHub rate limit on the full catalog. Absent (or non-positive) means no cap.
+const limitFlag = process.argv.indexOf('--limit');
+const limit = (limitFlag !== -1 && Number(process.argv[limitFlag + 1])) || Infinity;
+
 interface Row {
   slug: string;
   name: string;
@@ -26,9 +31,11 @@ interface Row {
 }
 
 async function main(): Promise<void> {
-  const entries = readDocEntries(catalogDir).filter((e) =>
-    ['tool', 'framework', 'library', 'service', 'protocol'].includes(String(e.frontmatter.entry_type)),
-  );
+  const entries = readDocEntries(catalogDir)
+    .filter((e) =>
+      ['tool', 'framework', 'library', 'service', 'protocol'].includes(String(e.frontmatter.entry_type)),
+    )
+    .slice(0, limit);
   const rows: Row[] = [];
 
   for (const e of entries) {
