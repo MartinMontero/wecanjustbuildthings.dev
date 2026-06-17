@@ -1,0 +1,15 @@
+---
+title: Estimador de costes de alojamiento
+description: Una estimación determinista y sin modelos de lo que cuesta alojar tu proyecto y atender a tus usuarios, en tres niveles de escala — leída de tu sesión de construcción.
+tableOfContents: false
+---
+
+import CostEstimator from '../../../../modules/cost-estimator/ui/CostEstimator.svelte';
+
+Un estimador **determinista** — solo aritmética e instantáneas de precios con
+fecha, sin IA ni llamadas a modelos. Lee las necesidades de tu proyecto de la
+sesión que iniciaste en el [Estudio de construcción](/es/build/) y vuelve a guardar
+la estimación. Cada cifra se etiqueta con su procedencia y fuente; los precios sin
+confirmar se marcan **PENDIENTE: confirmar**.
+
+<CostEstimator client:load lang="es" />
