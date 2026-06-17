@@ -56,7 +56,8 @@ below are load-bearing. Read them before generating anything.
 ## What it scaffolds
 
 - **`.github/workflows/security-pr.yml`** — PR gate: harden-runner → `dependency-review-action`
-  (`fail-on-severity: critical`, fast first line) → OSV-Scanner JSON + the jq CRITICAL
+  (`fail-on-severity: critical`, a best-effort first line — keep it `continue-on-error`,
+  as it needs the repo's Dependency Graph enabled) → OSV-Scanner JSON + the jq CRITICAL
   gate → Grype cross-check (`anchore/scan-action`, `fail-build: true`,
   `severity-cutoff: critical`, a *different* vulnerability DB — cross-scanner agreement
   is low, so the second scanner is deliberate) → SARIF to the Security tab → zizmor on
