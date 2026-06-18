@@ -49,6 +49,17 @@ All routes meet the targets in all three locales: **A11y ≥ 90, LCP ≤ 2.5s,
 CLS ≤ 0.1**. The bottom nav adds **no CLS** (fixed-position) and no a11y
 regression. `astro build` is clean (6634 pages); `astro check`: 0 errors.
 
+## Visual verification (360px)
+
+Captured from the built site in headless Chromium at a 360px phone width. The
+persistent bottom nav (Home · Build · Catalog · Check) marks the active
+destination and **mirrors correctly under `dir="rtl"`** — Home (الرئيسية) moves to
+the right, Check (افحص) to the left, Build (ابنِ) active.
+
+| English (LTR) | Arabic (RTL, mirrored) | Model Compass — overflow fixed |
+|---|---|---|
+| ![Bottom nav on /build/ in English, Build active](docs/assets/mobile/en-build.png) | ![Bottom nav on /ar/build/ mirrored for RTL, Build (ابنِ) active](docs/assets/mobile/ar-build-rtl.png) | ![/build/models/ with the filter select no longer overflowing](docs/assets/mobile/en-models.png) |
+
 ## Out of scope (reported, not changed)
 - **`color-contrast` on `/build/models/`** (89 nodes): pre-existing, from `opacity`
   on the meta `dt/dd` + hardcoded badge colour fallbacks. It is a *contrast*
