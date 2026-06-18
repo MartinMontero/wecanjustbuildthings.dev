@@ -1426,7 +1426,7 @@ manuals with the knowledge-to-skills-pipeline).
   .panel { display: flex; flex-direction: column; gap: var(--space-sm); }
   .field { display: flex; flex-direction: column; gap: 0.35rem; }
   .field > span { font-weight: var(--weight-bold); font-size: 0.9rem; color: var(--ink); }
-  input, textarea, select { padding: 0.6rem 0.75rem; border: 1px solid var(--control-edge); border-radius: var(--radius); background: var(--surface-2); color: var(--ink); font: inherit; transition: border-color var(--dur-1) var(--ease-out); }
+  input, textarea, select { padding: 0.6rem 0.75rem; border: 1px solid var(--control-edge); border-radius: var(--radius); background: var(--surface-2); color: var(--ink); font: inherit; font-size: max(16px, 1rem); transition: border-color var(--dur-1) var(--ease-out); }
   :is(input, textarea, select):focus { border-color: var(--structure); }
   .chips, .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .chip { padding: 0.35rem 0.8rem; border-radius: var(--radius-pill); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink); cursor: pointer; }

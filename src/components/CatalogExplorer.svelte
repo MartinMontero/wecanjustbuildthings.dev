@@ -415,12 +415,12 @@
   .toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end; margin-bottom: 1rem; }
   .search { flex: 1 1 18rem; }
   .search input {
-    width: 100%; padding: 0.55rem 0.75rem; font-size: 1rem;
+    width: 100%; padding: 0.55rem 0.75rem; font-size: max(16px, 1rem);
     border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem;
     background: var(--sl-color-black); color: var(--sl-color-white);
   }
   .sort { display: flex; gap: 0.4rem; align-items: center; color: var(--sl-color-text); font-size: 0.9rem; }
-  .sort select { padding: 0.4rem; border-radius: 0.4rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-black); color: var(--sl-color-white); }
+  .sort select { padding: 0.4rem; font-size: max(16px, 1rem); border-radius: 0.4rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-black); color: var(--sl-color-white); }
   .layout { display: grid; grid-template-columns: 16rem 1fr; gap: 1.5rem; align-items: start; }
   @media (max-width: 50rem) { .layout { grid-template-columns: 1fr; } }
   .facets { position: sticky; top: 1rem; }

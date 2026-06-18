@@ -148,7 +148,7 @@
 <style>
   .checker { margin: 1rem 0 2rem; display: flex; flex-direction: column; gap: 0.9rem; }
   .field { display: flex; flex-direction: column; gap: 0.4rem; }
-  textarea, select { padding: 0.55rem 0.7rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; background: var(--sl-color-black); color: var(--sl-color-white); font: inherit; }
+  textarea, select { padding: 0.55rem 0.7rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; background: var(--sl-color-black); color: var(--sl-color-white); font: inherit; font-size: max(16px, 1rem); }
   textarea { font-family: var(--sl-font-mono); }
   .controls { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
   .controls label { display: flex; gap: 0.4rem; align-items: center; color: var(--sl-color-text); font-size: 0.9rem; }

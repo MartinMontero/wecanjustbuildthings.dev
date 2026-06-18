@@ -274,6 +274,7 @@
   background: var(--surface);
   color: var(--ink);
   font: inherit;
+  font-size: max(16px, 1rem); /* never below 16px — avoids iOS focus auto-zoom */
   transition: border-color var(--dur-1) var(--ease-out);
 }
 .field :is(input, textarea, select):focus { border-color: var(--structure); }
