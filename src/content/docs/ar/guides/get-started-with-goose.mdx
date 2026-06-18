@@ -1,0 +1,73 @@
+---
+title: ابدأ مع Goose
+description: نزّل Goose وثبّته، وهيّئ مزوّدًا مسموحًا به من نوع bring-your-own-key، وشغّل وصفة مُصدَّرة من Build Studio — أمر واحد للبدء محليًّا.
+sidebar:
+  order: 1
+---
+
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+[Goose](https://block.github.io/goose/) وكيل ذكاء اصطناعي مجاني ومفتوح المصدر يعمل
+على جهازك **أنت** — لذا يمكنه فعلًا إنشاء الملفات وتشغيل الشيفرة، وهو ما لا يستطيعه تطبيق
+الويب. يصدّر [Build Studio](/ar/build/) **وصفة Goose** تهيّئه
+بدستور مشروعك، والحزمة التقنية المُتحقَّق منها، والمقصد.
+
+<Aside type="caution" title="أحضِر مزوّدًا مسموحًا به">
+هيّئ Goose بمزوّد نماذج مسموح به، من نوع bring-your-own-key — **Anthropic،
+أو DeepSeek، أو Kimi، أو OpenRouter، أو Ollama المحلي**. **لا** تستخدم OpenAI أو xAI؛ فذلك
+سيكسر السياسة ذاتها التي تبني في ظلها.
+</Aside>
+
+## 1. ثبّت Goose
+
+<Tabs>
+  <TabItem label="macOS / Linux">
+    ```sh
+    curl -fsSL https://block.github.io/goose/install.sh | bash
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    استخدم WSL، ثم شغّل أمر macOS/Linux أعلاه. (راجع
+    [التوثيق الرسمي](https://block.github.io/goose/docs/getting-started/installation/)
+    للحصول على أحدث مُثبِّت.)
+  </TabItem>
+</Tabs>
+
+## 2. هيّئ مزوّدًا مسموحًا به (BYOK)
+
+<Steps>
+
+1. احصل على مفتاح API من مزوّد مسموح به (مثل حساب Anthropic أو DeepSeek أو
+   OpenRouter). تدفع للمزوّد مباشرةً — ويبقى مفتاحك على
+   جهازك.
+2. شغّل أداة التهيئة واختر ذلك المزوّد:
+   ```sh
+   goose configure
+   ```
+   اختر **Anthropic / OpenRouter / DeepSeek / Ollama** — *لا* OpenAI أو xAI.
+
+</Steps>
+
+## 3. شغّل وصفة مشروعك
+
+<Steps>
+
+1. في [Build Studio](/ar/build/)، اختر **التشغيل باستخدام Goose** في خطوة التوليد
+   و**تنزيل وصفة Goose** (ملف `.goose-recipe.yaml`).
+2. من مجلد مشروعك، شغّل:
+   ```sh
+   goose run --recipe my-app.goose-recipe.yaml
+   ```
+3. يقرأ Goose دستور الوصفة ومقصدها، ويستخدم الحزمة التقنية المُتحقَّق منها فقط،
+   ويبدأ البناء. أبقِ كل تغيير نظيفًا:
+   ```sh
+   npx tsx ./enforcement/cli.ts all --tree .
+   ```
+
+</Steps>
+
+<Aside type="tip" title="تفضّل ألا تثبّت شيئًا؟">
+يمكنك أيضًا **تنزيل .zip** (افتحه بأي وكيل)، أو استخدام **إنشاء مستودع
+GitHub** لانطلاقة بعيدة بنقرة واحدة، أو **الانطلاق باستخدام الذكاء الاصطناعي (BYOK)** لتوليد
+خطة من المتصفح. يتيح لك Studio الاختيار.
+</Aside>

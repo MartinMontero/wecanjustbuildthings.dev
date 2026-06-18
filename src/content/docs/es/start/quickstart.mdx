@@ -1,0 +1,103 @@
+---
+title: Inicio rápido con un agente
+description: Usa el catálogo, las habilidades y las recetas con Goose o Claude Code para construir una herramienta de Nostr o AT Protocol — con la política de exclusión impuesta antes de que se lance nada.
+entry_type: page
+sidebar:
+  order: 3
+---
+
+import { Steps, Tabs, TabItem, Aside, Code } from '@astrojs/starlight/components';
+
+Esto te lleva desde cero hasta un punto de partida revisado y limpio de políticas para una herramienta de Nostr o
+AT Protocol, usando un agente de IA como colaborador competente. No asume nada
+más allá de una terminal.
+
+<Aside type="caution" title="Trae tu propia clave de modelo — y mantenla limpia">
+Todo el sentido de este proyecto es que lo que construyas no pase por proveedores
+excluidos. Cuando configures tu agente, usa un proveedor de modelos permitido
+(Anthropic, DeepSeek, Kimi, OpenRouter o Ollama local). Consulta la
+[receta de Shakespeare BYOK](/es/recipes/shakespeare-byok-configuration/) para conocer el
+patrón y cómo verificarlo.
+</Aside>
+
+## 1. Instala un harness
+
+<Tabs>
+  <TabItem label="Goose">
+    Goose es un harness de agente de código abierto ahora administrado bajo la Linux
+    Foundation. Instálalo y configúralo con un proveedor **permitido**:
+
+    ```sh
+    # Consulta https://block.github.io/goose/ para el instalador actual
+    curl -fsSL https://block.github.io/goose/install.sh | bash
+    goose configure   # choose Anthropic / OpenRouter / Ollama — not OpenAI or xAI
+    ```
+  </TabItem>
+  <TabItem label="Claude Code">
+    ```sh
+    npm install -g @anthropic-ai/claude-code
+    claude            # in your project directory
+    ```
+  </TabItem>
+</Tabs>
+
+## 2. Crea el andamiaje desde el arquetipo de Nostr / AT Protocol
+
+El repositorio incluye un [arquetipo de Spec Kit](/es/contribute/) para un cliente web de Nostr + AT
+Protocol cuya constitución prohíbe las dependencias excluidas y cablea
+el motor de imposición.
+
+```sh
+git clone https://github.com/martinmontero/wecanjustbuildthings.dev
+cp -r wecanjustbuildthings.dev/templates/spec-kit/nostr-web-client my-app
+cd my-app
+```
+
+## 3. Elige componentes del catálogo, no de la memoria
+
+No le preguntes al agente "¿qué librería debería usar para Nostr?" — pregúntale al catálogo.
+Cada entrada está [verificada por licencia en un commit](/es/policies/) y filtrada contra la
+[política de exclusión](/es/policies/enforcement/).
+
+<Steps>
+
+1. Explora el [Catálogo](/es/catalog/) o la [etapa del flujo de construcción](/es/pie/cooking/) relevante.
+2. Anota los componentes que quieras (p. ej. `nostr-tools`, `@noble/curves`,
+   `@atproto/api`).
+3. Entrégale al agente la lista **y** la restricción: *"usa solo estos, y ejecuta el
+   motor de imposición antes de hacer commit."*
+
+</Steps>
+
+## 4. Deja que el agente construya dentro de las protecciones
+
+Las [habilidades](/es/contribute/) se distribuyen como habilidades de Claude Code y recetas de Goose.
+Leen la política primero, se detienen y preguntan cuando falta información, y se niegan
+a hacer commit ante una violación de política.
+
+```sh
+# After the agent makes changes, the same gate CI runs:
+npm run enforce        # catalog + recipe checks
+npx tsx enforcement/cli.ts all --tree .   # scan this project's own tree
+```
+
+Si una dependencia — o una de *sus* dependencias — es propiedad de Meta, OpenAI o
+xAI, el motor imprime la cadena exacta y termina con código distinto de cero. Nada se lanza hasta
+que esté en verde.
+
+## 5. Verifica la postura respecto a proveedores
+
+Antes de desplegar, confirma que la app en ejecución no habla con ningún endpoint excluido. Las
+recetas describen una comprobación de observación de red de 5 minutos; el principio es simple:
+
+```sh
+# Watch outbound connections while exercising the app; none should hit
+# api.openai.com, api.x.ai, or graph.facebook.com
+```
+
+<Aside type="tip" title="Con qué acabas">
+Un artefacto estable que alguien puede auditar: dependencias fijadas y con licencia verificada; una
+postura limpia respecto a proveedores; una licencia real; y un build que falla ruidosamente si algo
+de eso regresa. Esa es la diferencia entre "un agente escribió algo de código" y
+"lanzamos algo del que podemos rendir cuentas."
+</Aside>

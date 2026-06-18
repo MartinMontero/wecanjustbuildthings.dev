@@ -1,0 +1,58 @@
+---
+title: Privacidad
+description: "Cómo trata este sitio tus datos: sin cookies, sin rastreadores, sin proveedores excluidos. Privacidad por diseño desde la base."
+entry_type: page
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Aquí la privacidad no es una formalidad legal: es el mismo respeto por las personas
+del que trata todo el proyecto. Tratamos tu visita como querrías tratar a las
+personas que usan lo que construyes: recopilar casi nada, no rastrear a nadie y
+mostrar nuestro trabajo. Este sitio practica lo que el catálogo predica.
+
+## Qué recopilamos: lo más cercano a nada que sea posible
+
+- **Sin cookies.** El sitio no establece ninguna. No hay banner de consentimiento
+  porque no hay nada a lo que consentir.
+- **Sin rastreadores de terceros.** Sin Google Analytics, sin píxel de Meta, sin
+  SDK de publicidad, y el [motor de aplicación](/es/policies/enforcement/) los
+  bloquearía si alguien que contribuye intentara añadir uno.
+- **Sin cuenta, sin inicio de sesión** para leer nada.
+
+## Analítica, si la hay
+
+Si quien mantiene el sitio activa la analítica, es **Plausible**: una herramienta
+de analítica sin cookies y respetuosa con la privacidad que no recopila datos
+personales ni identificadores entre sitios. Solo se carga cuando hay un
+`PLAUSIBLE_DOMAIN` configurado en tiempo de compilación; en el desarrollo local y
+en los forks, **no se incluye ningún script de analítica en absoluto**. Puedes
+confirmarlo en `astro.config.mjs`.
+
+<Aside type="tip" title="Verifícalo tú mismo">
+Abre la pestaña de red de tu navegador en cualquier página. Con la analítica
+desactivada deberías ver solicitudes únicamente al propio origen de este sitio. Es
+el mismo tipo de comprobación por observación de red que las
+[recetas](/es/recipes/) te piden que ejecutes sobre lo que *tú* construyes.
+</Aside>
+
+## Búsqueda
+
+La búsqueda del sitio funciona con **Pagefind**, que construye un índice estático
+en el momento del despliegue y se ejecuta enteramente en tu navegador. Tus
+consultas de búsqueda nunca salen de tu dispositivo y no llegan a ningún servidor.
+
+## Qué no hacemos
+
+- No vendemos, compartimos ni intermediamos datos: no hay ninguno que intermediar.
+- No incrustamos fuentes, scripts ni imágenes desde CDN de terceros que pudieran
+  registrar tu IP. El sitio usa el stack de fuentes de tu sistema y aloja sus
+  propios recursos.
+- No enrutamos nada a través de Meta, OpenAI ni xAI. De eso se trata todo.
+
+## Contacto
+
+Preguntas o inquietudes sobre privacidad: abre una incidencia en el
+[repositorio](https://github.com/martinmontero/wecanjustbuildthings.dev), o
+consulta [Seguridad](/es/security/) para saber cómo informar de una vulnerabilidad
+de forma privada.

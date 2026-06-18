@@ -1,0 +1,69 @@
+---
+title: Seguridad
+description: La postura de seguridad del catálogo y cómo informar de una vulnerabilidad.
+entry_type: page
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Para las comunidades a las que esto sirve, la seguridad no es abstracta: un detalle
+que se nos escape puede poner a personas reales en riesgo real. Te pedimos que
+confíes en el criterio de este catálogo sobre qué es seguro como dependencia, así
+que nos exigimos el mismo estándar que pedimos a las herramientas que contiene: una
+postura honesta que aguante el escrutinio y una puerta abierta a cualquiera que
+encuentre un fallo.
+
+## Cómo informar de una vulnerabilidad
+
+<Aside type="caution" title="Por favor, informa primero de forma privada">
+Si encuentras un problema de seguridad en este sitio, en el motor de aplicación o
+en una receta, infórmalo de forma privada a través de GitHub Security Advisories en
+el
+[repositorio](https://github.com/martinmontero/wecanjustbuildthings.dev/security/advisories/new)
+en lugar de abrir una incidencia pública. Aspiramos a dar acuse de recibo en un
+plazo de **5 días hábiles**.
+</Aside>
+
+Por favor, incluye: qué encontraste, cómo reproducirlo y el impacto que observas. Si
+se trata de un falso positivo o un falso negativo en el motor de aplicación, un caso
+de prueba que falle es lo más útil que puedes enviar.
+
+## Qué es el sitio, y qué no es
+
+Esto es un **sitio estático**. No hay aplicación del lado del servidor, ni base de
+datos, ni cuentas de usuario, ni datos enviados por usuarios procesados en tiempo de
+ejecución. La superficie de ataque es, en consecuencia, pequeña: el pipeline de
+compilación, las dependencias y la configuración del alojamiento.
+
+## Integridad de la cadena de suministro
+
+La razón de existir del catálogo es la rendición de cuentas de la cadena de
+suministro, y se aplica al catálogo mismo:
+
+- **Cada dependencia se examina** mediante el [motor de aplicación de tres
+  capas](/es/policies/enforcement/) en cada pull request: las capas directa,
+  transitiva y de cadenas de proveedor.
+- **Las licencias se fijan a un commit**, no solo se declaran, de modo que un
+  cambio silencioso de licencia es detectable.
+- **Un license-watcher semanal** calcula el hash de los archivos `LICENSE` aguas
+  arriba y escanea los commits recientes en busca de palabras clave de cambio de
+  licencia, abriendo un PR cuando algo se desvía.
+- **Un maintenance-checker semanal** reclasifica las entradas que han quedado
+  inactivas o abandonadas.
+
+## Secretos y tokens
+
+El sitio no necesita secretos para construir el catálogo. El despliegue usa un token
+de la API de Cloudflare con alcance limitado y un ID de cuenta almacenados como
+secretos del repositorio; un `GITHUB_TOKEN` opcional eleva los límites de tasa para
+los trabajos de indexación y semanales. Nunca se requieren ni se almacenan claves de
+proveedores de modelos: cualquier cosa que se comunica con un modelo lo hace del lado
+del cliente, BYOK, según las [recetas](/es/recipes/).
+
+## Lista de verificación de endurecimiento (lo que aplica la CI)
+
+- Esquema de contenido validado con `astro check`.
+- Motor de aplicación en verde (Capas 1–3 + contrato de receta).
+- Comprobación de enlaces rotos en cada PR.
+- Versiones de acción y versión de Node fijadas en la CI.
+- Sin analítica ni scripts de terceros salvo que se configure explícitamente.

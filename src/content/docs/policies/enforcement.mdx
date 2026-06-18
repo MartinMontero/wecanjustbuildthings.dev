@@ -8,6 +8,7 @@ sidebar:
 ---
 
 import { Aside, Steps } from '@astrojs/starlight/components';
+import IndependentChecks from '../../../components/IndependentChecks.astro';
 
 A promise you can't verify is just marketing. The
 [values we hold](/policies/) are only worth anything because a machine keeps them
@@ -16,6 +17,38 @@ never have to take anyone's word for it, including ours. The engine is a
 TypeScript CLI (`enforcement/cli.ts`) that runs in CI on every pull request and
 weekly against the whole catalog, checking three independent layers — something
 can hide from one, but not all three.
+
+<IndependentChecks
+  checks={[
+    {
+      eyebrow: 'Check one',
+      title: 'We read the label',
+      icon: 'label',
+      body: "We read each tool's own list of ingredients and flag anything owned by a gatekeeper we exclude.",
+      plain: 'What it openly declares.',
+    },
+    {
+      eyebrow: 'Check two',
+      title: 'We trace the whole chain',
+      icon: 'chain',
+      body: 'We follow the full supply chain &mdash; what your tool depends on, and what <i>those</i> depend on &mdash; and show the exact path to anything excluded.',
+      plain: 'What it quietly pulls in.',
+    },
+    {
+      eyebrow: 'Check three',
+      title: 'We check what it reaches',
+      icon: 'globe',
+      body: 'We scan the code for hidden connections &mdash; imports, addresses, and settings &mdash; that phone home to an excluded provider.',
+      plain: 'What it actually talks to.',
+    },
+  ]}
+  verdict={{
+    icon: 'shield',
+    title: "Fail any one check, and it isn't listed.",
+    body: 'No warnings. No exceptions. No override.',
+    trust: "The checker runs offline and returns the same answer every time &mdash; and it's open source, so anyone can read the rules and run it themselves.",
+  }}
+/>
 
 <Aside type="tip" title="Run it yourself">
 ```sh

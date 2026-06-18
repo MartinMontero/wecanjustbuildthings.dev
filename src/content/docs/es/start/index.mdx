@@ -1,0 +1,82 @@
+---
+title: Qué es esto
+description: Una orientación de 3 minutos a We Can Just Build Things — el catálogo verificado, el flujo guiado y el motor de políticas que se sitúan por encima de tu agente de IA.
+entry_type: page
+sidebar:
+  order: 1
+---
+
+import { Steps, Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+**We Can Just Build Things** es un sistema operativo abierto para construir software de calidad
+de producción y respetuoso con la privacidad usando agentes de IA — sin tener que ser ya
+desarrollador para tomar las decisiones que importan.
+
+Existe porque las personas con ideas chocan contra un muro en el momento en que intentan llevarlas
+a la práctica. No es un muro de capacidad — es un muro de **navegación**. No faltan
+herramientas libres y de código abierto. Hay decenas de miles, dispersas
+por registros y capturas de pantalla de Discord, sin una forma fiable de saber cuáles
+están mantenidas, cuáles cambiaron de licencia silenciosamente el año pasado, y cuáles enrutan los datos de tus
+usuarios a través de infraestructura que jamás elegirías a sabiendas.
+
+Este proyecto resuelve ambos problemas a la vez: hace que el panorama sea navegable para
+alguien que aún no está dentro de él, y toma una postura sobre lo que le corresponde
+estar ahí — **impuesta por herramientas, no por buenas intenciones en un README.**
+
+## Las tres cosas que te da
+
+<CardGrid>
+  <LinkCard
+    title="Un catálogo verificado"
+    href="/es/catalog/"
+    description="Herramientas con licencia comprobada en un commit específico y filtradas contra una estricta política de exclusión. Cada entrada muestra su trabajo."
+  />
+  <LinkCard
+    title="Un flujo de construcción guiado"
+    href="/es/pie/about/"
+    description="Un flujo de decisión adaptado del acelerador PIE PDX: desde “mi comunidad tiene un problema” hasta un plan concreto y revisado."
+  />
+  <LinkCard
+    title="Un motor de políticas con dientes"
+    href="/es/policies/enforcement/"
+    description="Una comprobación de tres capas que bloquea cualquier cosa que dependa de Meta, OpenAI o xAI — directa o transitivamente."
+  />
+  <LinkCard
+    title="Habilidades de agente reutilizables"
+    href="/es/contribute/"
+    description="Habilidades y recetas que codifican disciplina de ingeniería real en flujos de trabajo repetibles para Goose o Claude Code."
+  />
+</CardGrid>
+
+## Cómo lo usarás en la práctica
+
+<Steps>
+
+1. **Parte de tu problema, no de una herramienta.** Recorre el [flujo de construcción](/es/pie/about/) para
+   convertir una intención ("mi comunidad necesita documentar desalojos de forma segura") en una
+   forma concreta: qué tienes, qué falta, cuál es la teoría de trabajo.
+
+2. **Obtén una lista corta revisada.** Al final tendrás componentes concretos, con licencia
+   comprobada, que encajan con tu etapa, tu stack y los valores que te importan.
+
+3. **Entrégale el marco a un agente.** Apunta Goose, Claude Code o Aider a las
+   [recetas](/es/recipes/) y las [habilidades](/es/contribute/). El agente trabaja *dentro* de
+   un conjunto de decisiones que ya se han tomado, verificado y documentado.
+
+4. **Lanza algo del que puedas rendir cuentas.** El resultado es un artefacto estable que alguien puede
+   auditar — dependencias fijadas, una postura limpia respecto a proveedores, una licencia real.
+
+</Steps>
+
+<Aside type="tip" title="No tienes que convertirte en desarrollador">
+La persona que define lo que su comunidad necesita nunca tiene que convertirse en ingeniera.
+Pero el producto que entrega debería ser indistinguible de uno construido por un
+equipo profesional. Esa brecha es lo que cierran el catálogo, el flujo y el motor de políticas.
+</Aside>
+
+## Para quién es
+
+Esto **no** está hecho para el fundador que ya controla la red de agentes y
+fija las normas. Está hecho para el organizador, la organización sin fines de lucro, el colectivo
+feminista de tecnología — la persona que tiene que *confiar* en un sistema sin poder ver
+dentro de él. Lee [por qué esa distinción importa →](/es/start/vs-harness/)

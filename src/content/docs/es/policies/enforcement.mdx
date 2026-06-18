@@ -1,0 +1,151 @@
+---
+title: Cómo funciona la aplicación
+description: "Cómo cumplimos nuestra promesa a las comunidades: el motor de tres capas, en lenguaje claro, que puedes ejecutar tú mismo."
+entry_type: policy
+sidebar:
+  order: 2
+  label: Cómo funciona la aplicación
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+import IndependentChecks from '../../../../components/IndependentChecks.astro';
+
+Una promesa que no puedes verificar es solo marketing. Los
+[valores que sostenemos](/es/policies/) solo valen algo porque una máquina los
+mantiene por nosotros —de forma automática, a la vista de todos— de modo que las
+personas que dependen de lo que construyes nunca tengan que fiarse de la palabra de
+nadie, incluida la nuestra. El motor es una CLI de TypeScript
+(`enforcement/cli.ts`) que se ejecuta en CI en cada pull request y semanalmente
+contra todo el catálogo, comprobando tres capas independientes: algo puede
+ocultarse de una, pero no de las tres.
+
+<IndependentChecks
+  checks={[
+    {
+      eyebrow: 'Comprobación uno',
+      title: 'Leemos la etiqueta',
+      icon: 'label',
+      body: "Leemos la propia lista de ingredientes de cada herramienta y marcamos cualquier cosa que sea propiedad de un guardián que excluimos.",
+      plain: 'Lo que declara abiertamente.',
+    },
+    {
+      eyebrow: 'Comprobación dos',
+      title: 'Rastreamos toda la cadena',
+      icon: 'chain',
+      body: 'Seguimos la cadena de suministro completa &mdash; de qué depende tu herramienta, y de qué dependen <i>esas</i> &mdash; y mostramos la ruta exacta hacia cualquier cosa excluida.',
+      plain: 'Lo que arrastra en silencio.',
+    },
+    {
+      eyebrow: 'Comprobación tres',
+      title: 'Comprobamos con qué se comunica',
+      icon: 'globe',
+      body: 'Escaneamos el código en busca de conexiones ocultas &mdash; importaciones, direcciones y ajustes &mdash; que llamen a casa a un proveedor excluido.',
+      plain: 'Con qué habla en realidad.',
+    },
+  ]}
+  verdict={{
+    icon: 'shield',
+    title: "Falla cualquiera de las comprobaciones, y no se lista.",
+    body: 'Sin advertencias. Sin excepciones. Sin anulación.',
+    trust: "El comprobador se ejecuta sin conexión y devuelve la misma respuesta cada vez &mdash; y es de código abierto, así que cualquiera puede leer las reglas y ejecutarlo por su cuenta.",
+  }}
+/>
+
+<Aside type="tip" title="Ejecútalo tú mismo">
+```sh
+# Catálogo + recetas (lo que ejecuta la CI del sitio)
+npm run enforce
+# Escanea el árbol de fuentes de cualquier proyecto
+npx tsx enforcement/cli.ts all --tree path/to/project
+```
+El motor es offline y determinista: hace coincidir contra un archivo de política
+incluido en el repositorio, de modo que la misma entrada siempre produce el mismo
+resultado.
+</Aside>
+
+## Capa 1 — dependencias directas
+
+La Capa 1 lee los manifiestos de un proyecto —`package.json`, `Cargo.toml`,
+`pyproject.toml`/`requirements.txt`, `go.mod`, `mix.exs`, `pubspec.yaml`,
+`Gemfile` y los archivos de compilación de Gradle— y marca cualquier dependencia
+**declarada directamente** que sea propiedad de una organización excluida. Para el
+catálogo en sí, también lee el frontmatter de cada entrada y confirma que la
+herramienta que describe no es un paquete excluido.
+
+> *Ejemplo:* añadir `openai` a `package.json` falla la Capa 1 con
+> `"openai" → openai (npm_package: openai)`.
+
+## Capa 2 — el árbol transitivo
+
+El caso peligroso es la dependencia que no elegiste: una biblioteca en la que
+confías que arrastra en silencio un cliente excluido tres niveles más abajo. La
+Capa 2 recorre todo el grafo del lockfile —a través de **13 formatos** (npm, pnpm,
+yarn clásico y Berry, Cargo, uv, Poetry, pip-compile, módulos de Go, Bundler, Hex,
+pub, Gradle)— e informa de la **cadena entera** hasta el paquete excluido.
+
+> *Ejemplo:* `a@1.0.0 → openai@4.0.0 → openai` muestra exactamente cómo entró el
+> paquete excluido.
+
+<Aside type="note" title="Límites honestos, mostrados en vez de ocultos">
+Algunos lockfiles (`pubspec.lock`, `gradle.lockfile`, `requirements.txt` sin
+marcadores `# via` de pip-compile) registran el cierre pero no las aristas. Para
+esos, la Capa 2 aún **detecta** la presencia de un paquete excluido pero dice
+claramente que **no puede reconstruir la cadena**: nunca finge una certeza que no
+tiene.
+</Aside>
+
+## Capa 3 — cadenas de proveedor en el código fuente
+
+La propiedad no es toda la historia: una biblioteca con licencia permisiva y de
+propiedad independiente todavía puede incluir código que *llama* a un proveedor
+excluido. La Capa 3 escanea el código fuente en busca de tres tipos de señal:
+
+<Steps>
+
+1. **Importaciones** — `import OpenAI from "openai"`, `from facebook_business …`,
+   `use async_openai::` — la señal más fuerte, la más difícil de justificar.
+
+2. **Endpoints** — `api.openai.com`, `api.x.ai`, `graph.facebook.com`.
+
+3. **Claves de configuración** — `OPENAI_API_KEY`, `XAI_API_KEY`, `META_APP_ID`.
+
+</Steps>
+
+Los endpoints y las claves de configuración pueden aparecer en contextos
+*negativos* ("deliberadamente **no** llamamos a `api.openai.com`"), así que la Capa
+3 informa de cada coincidencia con `file:line` para revisión humana y da el mayor
+peso a las importaciones. Las definiciones de señal viven en
+`enforcement/excluded-provider-signals.yaml`.
+
+## Bloqueo de herramientas configurables: recetas
+
+Una herramienta que es en sí misma *configurable* para alcanzar un proveedor
+excluido puede admitirse **únicamente** bajo una **receta de bloqueo de proveedor**,
+y la receta debe demostrar que los proveedores excluidos están prohibidos, no
+meramente disponibles. Esto es la aplicación de la exclusión, no una exención de
+ella. La Capa 3 valida cada receta contra un contrato:
+
+- debe apuntar a una entrada del catálogo marcada como `provider_agnostic: true`
+  (es decir, la herramienta tiene un selector de proveedor configurable);
+- todo **proveedor de LLM** excluido (OpenAI, xAI) debe aparecer en la lista
+  `must_not_be_one_of` de la receta; de lo contrario, la receta no los prohíbe
+  realmente y es **rechazada**;
+- ningún proveedor "permitido" puede ser en sí mismo una organización excluida;
+- los pasos de verificación deben bloquear los endpoints de los proveedores
+  excluidos.
+
+Una receta que se olvida de prohibir OpenAI falla la compilación. Consulta la
+[receta de bloqueo de Shakespeare](/es/recipes/shakespeare-byok-configuration/)
+para ver un ejemplo que pasa.
+
+## Qué se ejecuta, y cuándo
+
+| Disparador | Qué se ejecuta |
+|---|---|
+| Cada pull request | Capa 1 (catálogo) + validación de recetas + `astro check` + comprobación de enlaces rotos |
+| Cron semanal (lunes) | Las tres capas + license-watcher + maintenance-checker, abriendo PR con cualquier desviación |
+| Localmente, en cualquier momento | `npm run enforce` o `enforcement/cli.ts all --tree .` |
+
+El motor tiene su propia batería de pruebas (más de 40 pruebas que cubren cada
+parser y el contrato de receta), porque aquello que aplica la rendición de cuentas
+también tiene que rendir cuentas.

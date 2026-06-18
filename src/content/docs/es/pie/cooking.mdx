@@ -1,0 +1,68 @@
+---
+title: Cocinar
+description: El corazón del flujo de construcción — ingredientes base, el horno y las recetas, mapeados al catálogo verificado.
+entry_type: pie
+sidebar:
+  order: 4
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import CatalogList from '../../../../components/CatalogList.astro';
+
+**Cocinar es donde construyes.** La sección *Cocinar* del PIE Cookbook se divide
+en un *objetivo principal*, *ingredientes base*, *otros ingredientes críticos*, el
+*horno* y *recetas*. Aquí es donde el catálogo se conecta directamente: cada agrupación
+se mapea a un conjunto de componentes evaluados y con licencia revisada.
+
+<Aside type="note" title="Desde la fuente">
+Esto adapta la sección *Cocinar → Objetivo principal / Ingredientes base / Otros ingredientes
+críticos / Horno / Recetas* del
+[PIE Cookbook](https://github.com/piepdx/pie-cookbook). Los mapeos del catálogo
+a continuación son una adición de este proyecto.
+</Aside>
+
+## El horno — tu entorno, infraestructura y herramientas
+
+El horno es aquello en lo que cocinas: tu entorno de desarrollo, las herramientas de
+compilación, el alojamiento y el almacenamiento. Acierta con esto y todo lo demás será
+más rápido; equivócate y pelearás con tus herramientas todo el día.
+
+<CatalogList pie="The Oven" />
+
+## Recetas — tus frameworks y librerías
+
+Los ingredientes del plato principal: los frameworks y librerías que conforman el cuerpo
+de lo que entregas. Para el trabajo con Nostr y AT Protocol, aquí es donde viven los SDK
+de los protocolos.
+
+<CatalogList pie="Recipes" />
+
+## Catalizadores y presión — seguridad, identidad y observabilidad
+
+Los ingredientes que determinan si lo que entregas es *seguro*: criptografía,
+manejo de claves y la monitorización que te avisa cuando algo va mal. Para las
+comunidades a las que sirve este catálogo, no son adornos opcionales.
+
+<CatalogList pie="Catalysts" />
+<CatalogList pie="Pressure" />
+
+## Construye por protocolo
+
+Si ya conoces tu sustrato, salta directo a los componentes correspondientes:
+
+<CardGrid>
+  <LinkCard title="Nostr" href="/es/catalog/" description="Primitivas sociales y de mensajería basadas en eventos firmados." />
+  <LinkCard title="AT Protocol" href="/es/catalog/" description="El stack de Bluesky / atproto." />
+</CardGrid>
+
+### Componentes de Nostr
+<CatalogList protocol="nostr" />
+
+### Componentes de AT Protocol
+<CatalogList protocol="atproto" />
+
+<Aside type="tip" title="Pásaselo a tu agente">
+Una vez que hayas elegido los ingredientes, entrega la lista a tu harness con la
+restricción *"usa solo estos, y ejecuta el motor de aplicación antes de hacer commit."*
+Consulta la [guía rápida](/es/start/quickstart/) para los comandos exactos.
+</Aside>

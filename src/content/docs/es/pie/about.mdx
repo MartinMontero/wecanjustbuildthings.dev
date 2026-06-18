@@ -1,0 +1,62 @@
+---
+title: Sobre el flujo de construcción
+description: Cómo el flujo de construcción guiado adapta la metodología del "recetario" del acelerador PIE PDX para crear un camino desde la intención hasta un plan entregable y verificado.
+entry_type: pie
+sidebar:
+  order: 1
+  label: Sobre el flujo
+---
+
+import { Aside, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+El flujo de construcción está adaptado del **PIE Cookbook** — el manual de código
+abierto del Portland Incubator Experiment (PIE PDX), un acelerador de larga
+trayectoria que documentó cómo ayudó realmente a la gente a pasar de una idea a un
+emprendimiento en marcha. El recetario se publica abiertamente; este flujo reutiliza
+su estructura y su metáfora y remite a la fuente en todo momento.
+
+<Aside type="note" title="Fuente y atribución">
+La estructura de las secciones aquí refleja el propio esquema del PIE Cookbook — *Sobre*,
+*Horneando PIE*, *Preparación de la cocina*, *Cocinando*, *Otros sabores de PIE* y *Apéndice*.
+Lee el original en
+[github.com/piepdx/pie-cookbook](https://github.com/piepdx/pie-cookbook). Donde
+este sitio adapta el lenguaje, lo indica; no pone palabras en boca del
+recetario.
+</Aside>
+
+## Por qué una metáfora de cocina
+
+El recetario plantea construir algo como cocinar: haces inventario de tu cocina
+(**Preparación de la cocina** — el escaneo del entorno), reúnes los ingredientes y usas el
+equipo adecuado (**Cocinando** — los ingredientes base, el horno, las recetas), y
+aprendes de lo que funcionó y de lo que no. La metáfora es útil aquí porque
+mantiene el foco en *quien cocina* — la persona con la intención — y no en las
+herramientas. Las herramientas son ingredientes; tú sigues siendo quien cocina.
+
+Esa es exactamente la postura que este proyecto adopta frente a los agentes de IA: el agente es un
+ayudante de cocina muy capaz, pero tú decides qué hay para cenar y eres responsable
+de lo que sale de la cocina.
+
+<Aside type="tip" title="Combínalo con el método">
+PIE es *cómo cocinas*. Su complemento, [Ingeniería de Intención Socrática](/es/method/), es
+*cómo decides qué vale la pena cocinar* — y cómo mantienes al agente enfocado en tu
+objetivo real en lugar de en un sustituto conveniente. La mayoría de los proyectos empiezan ahí y luego fluyen
+por estas etapas.
+</Aside>
+
+## La forma del flujo
+
+<CardGrid>
+  <LinkCard title="Horneando PIE" href="/es/pie/baking-pie/" description="Contexto e historia: por qué una metodología de acelerador abierta, y por qué código abierto." />
+  <LinkCard title="Preparación de la cocina" href="/es/pie/kitchen-prep/" description="El escaneo del entorno: qué tienes, qué falta y cuál es tu teoría de trabajo." />
+  <LinkCard title="Cocinando" href="/es/pie/cooking/" description="El núcleo: ingredientes base, el horno y las recetas, donde se integra el catálogo." />
+  <LinkCard title="Otros sabores" href="/es/pie/other-flavors/" description="Cómo los colectivos y aceleradores lo reutilizan como infraestructura compartida." />
+  <LinkCard title="Apéndice" href="/es/pie/appendix/" description="El kit de herramientas y los recursos, incluido el propio catálogo." />
+</CardGrid>
+
+## Cómo leerlo
+
+No tienes que ir en orden, pero a la mayoría le conviene empezar por la
+[Preparación de la cocina](/es/pie/kitchen-prep/): nombra el problema antes de echar mano de una herramienta.
+Para cuando llegues a [Cocinando](/es/pie/cooking/) estarás eligiendo de un
+[catálogo](/es/catalog/) de componentes verificados en lugar de una conjetura de motor de búsqueda.

@@ -1,0 +1,122 @@
+---
+title: Convierte tu conocimiento en skills para el agente
+description: Tus manuales, guías de campo, procedimientos operativos y la experiencia ganada con esfuerzo son el verdadero activo. Conviértelos en "skills" reutilizables en .md que tu agente de IA sigue siempre — para que trabaje a tu manera, no con una suposición genérica.
+sidebar:
+  order: 3
+---
+
+import { Steps, Aside, Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Ya posees lo más valioso de aquí: la sabiduría de tu comunidad y
+tu campo. La lista de respuesta ante desalojos. Los pasos de desescalada. La forma en que
+tu colectivo maneja datos sensibles. El tono con el que habla tu organización.
+Esta página trata de convertir todo eso — lo que está en tu cabeza y en tus carpetas — en
+**skills para el agente** que tu agente de IA sigue absolutamente siempre.
+
+## ¿Qué es una skill para el agente?
+
+Una **skill** es un breve archivo `.md` que le enseña a tu agente *uno de tus métodos*.
+En lugar de que el agente adivine cómo hacer algo, lee tu skill y lo hace
+**a tu manera** — de forma consistente, para ti y para todos en tu colectivo.
+
+**Un harness como Goose le da manos al agente. El catálogo le da herramientas verificadas.
+Una skill le da *tu criterio.*** Es la diferencia entre "una IA escribió
+algo" y "una IA aplicó nuestro manual de juego real".
+
+<Aside type="tip" title="Este es el ethos entero, hecho concreto">
+We Can Just Build Things existe para aumentar tu sabiduría, no para reemplazarla. Una skill
+es exactamente eso: tu experiencia, escrita una vez, reutilizada para siempre — y sigue siendo
+tuya.
+</Aside>
+
+## La herramienta: knowledge-to-skills-pipeline
+
+[**knowledge-to-skills-pipeline**](/es/catalog/knowledge-to-skills-pipeline/) toma
+tu material fuente — libros, guías, kits de herramientas, manuales — y lo convierte en
+archivos `SKILL.md` estructurados: una metodología que tu agente puede aplicar, más un
+bloque de **atribución** que da crédito a la procedencia del conocimiento.
+
+Se ejecuta sobre **Anthropic Claude — un proveedor permitido** (nunca Meta, OpenAI ni
+xAI), de modo que crear skills sigue los mismos valores que todo lo demás aquí. Sus propias
+skills de referencia provienen de *Beautiful Trouble: A Toolbox for Revolution*.
+
+<CardGrid>
+  <Card title="Qué entra" icon="open-book">
+    Tus manuales, guías de campo, procedimientos operativos estándar, documentos de formación,
+    kits de herramientas de organización — el conocimiento que le entregarías a un nuevo miembro.
+  </Card>
+  <Card title="Qué sale" icon="document">
+    Archivos `SKILL.md`: un método claro que tu agente sigue, con metadatos y
+    atribución para que el crédito y la licencia viajen junto al conocimiento.
+  </Card>
+</CardGrid>
+
+## Cómo se ve una skill
+
+Un `SKILL.md` es simplemente texto plano — metadatos YAML arriba, luego tu método en
+lenguaje sencillo:
+
+```markdown
+---
+name: tenant-intake
+description: Take an eviction report safely.
+attribution:
+  source: "Tenants Union field manual"
+  license: CC-BY-SA-4.0
+---
+
+# Taking a tenant intake
+
+1. Use a chosen handle, not a legal name.
+2. Record the building, not the unit, at first.
+3. Encrypt everything; two organizers hold keys.
+4. Confirm what the tenant wants next.
+```
+
+El agente lee esto y sigue *tu* proceso de admisión — no uno genérico.
+
+## Crea tu primera skill
+
+<Steps>
+
+1. **Reúne tu fuente.** Un manual, una guía de campo, un SOP, incluso buenas notas.
+   Cuanto más clara sea tu fuente, mejor será la skill.
+2. **Ejecuta el pipeline.** Sigue las [instrucciones del
+   repo](https://github.com/MartinMontero/knowledge-to-skills-pipeline)
+   para instalarlo y ejecutarlo (usa [Bun](https://bun.sh) y tu propia clave de
+   Anthropic). Lee tu material y redacta archivos `SKILL.md`.
+3. **Revísalo — el experto eres tú.** Lee el borrador. Corrige cualquier cosa que el modelo haya
+   entendido sutilmente mal. Tu criterio es el punto clave; la herramienta solo hace el tecleo.
+4. **Mantén honesta la atribución.** Si el método viene del libro o del kit de herramientas de
+   alguien, dale crédito y respeta su licencia (muchos recursos de los movimientos son
+   CC-BY-SA).
+
+</Steps>
+
+## Usa tus skills en una construcción
+
+Cada plantilla del [Build Studio](/es/build/) ya incluye una carpeta `skills/`
+con una plantilla y un README. Para poner a trabajar tus propias skills:
+
+<Steps>
+
+1. Coloca tus archivos `SKILL.md` en la carpeta `skills/` del proyecto.
+2. Apunta tu agente al proyecto (Goose o Claude Code). La constitución generada
+   y el prompt del agente ya le dicen que **lea `skills/` primero y
+   siga tus métodos.**
+3. Construye. El agente ahora aplica tu manual de juego en cada tarea — de forma consistente,
+   y rindiendo cuentas a las personas que lo escribieron.
+
+</Steps>
+
+<Aside type="caution" title="Tu método es ley, no una sugerencia">
+Las skills se sitúan junto a la constitución del proyecto: el agente las trata como
+instrucciones a seguir, no como ideas a mejorar. Si una skill entra en conflicto con una
+tarea, el agente debería señalarlo y preguntar — nunca hacerlo a su manera en silencio.
+</Aside>
+
+<LinkCard
+  title="Explora la herramienta en el catálogo →"
+  href="/es/catalog/knowledge-to-skills-pipeline/"
+  description="Licencia, procedencia y verificación de knowledge-to-skills-pipeline."
+/>

@@ -80,6 +80,7 @@ export default defineConfig({
           translations: { es: 'Empieza aquí', ar: 'ابدأ هنا' },
           items: [
             { label: 'What this is', translations: { es: 'Qué es esto', ar: 'ما هذا' }, link: '/start/' },
+            { label: 'How it works', translations: { es: 'Cómo funciona', ar: 'كيف يعمل' }, link: '/start/how-it-works/' },
             { label: 'Why not just use Goose?', translations: { es: '¿Por qué no usar solo Goose?', ar: 'لماذا لا تكتفي بـ Goose؟' }, link: '/start/vs-harness/' },
             { label: 'Quickstart with an agent', translations: { es: 'Inicio rápido con un agente', ar: 'بداية سريعة مع وكيل' }, link: '/start/quickstart/' },
           ],
@@ -91,6 +92,7 @@ export default defineConfig({
             { label: 'Build Studio', translations: { es: 'Estudio de construcción', ar: 'استوديو البناء' }, link: '/build/', badge: { text: 'new', variant: 'default' } },
             { label: 'Check a dependency', translations: { es: 'Verifica una dependencia', ar: 'افحص اعتمادية' }, link: '/check/' },
             { label: 'Hosting cost estimator', translations: { es: 'Estimador de costes de alojamiento', ar: 'مُقدّر تكاليف الاستضافة' }, link: '/build/cost/' },
+            { label: 'Model Compass', translations: { es: 'Brújula de modelos', ar: 'بوصلة النماذج' }, link: '/build/models/' },
           ],
         },
         {

@@ -1,0 +1,43 @@
+---
+title: الملحق
+description: مجموعة الأدوات والموارد — بما في ذلك الكتالوج المُتحقَّق منه نفسه ومهارات الوكيل.
+entry_type: pie
+sidebar:
+  order: 6
+---
+
+import { Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+يجمع *الملحق* في PIE Cookbook إحصاءات وتصنيفات حسب الفئة ومجموعة أدوات
+وموارد. هنا، يكون الملحق في معظمه مجموعة من المؤشّرات نحو أجزاء
+هذا المشروع التي ستستخدمها أثناء الطهي.
+
+<Aside type="note" title="من المصدر">
+هذا مقتبَس من القسمين الفرعيين *الملحق ← مجموعة الأدوات / الموارد* في
+[PIE Cookbook](https://github.com/piepdx/pie-cookbook).
+</Aside>
+
+## مجموعة الأدوات
+
+<CardGrid>
+  <LinkCard title="الكتالوج" href="/ar/catalog/" description="كل مكوّن خضع للتدقيق، مع التحقق من ترخيصه عند commit محدّد." />
+  <LinkCard title="الوصفات" href="/ar/recipes/" description="أنماط إعداد تربط الأدوات معًا بأمان." />
+  <LinkCard title="المهارات" href="/ar/contribute/" description="مهارات الوكيل ووصفات Goose التي تُرسّخ الانضباط." />
+  <LinkCard title="النموذج الأوّلي" href="/ar/contribute/" description="هيكل Spec Kit لعملاء Nostr + AT Protocol." />
+</CardGrid>
+
+## الموارد
+
+- **سياسة الاستبعاد** — [ما الذي يُستبعَد ولماذا](/ar/policies/).
+- **كيف يعمل الإنفاذ** — [المحرّك ذو الطبقات الثلاث بلغة واضحة](/ar/policies/enforcement/).
+- **الخصوصية والأمن** — [كيف يتعامل هذا الموقع مع بياناتك](/ar/privacy/) و
+  [موقفه الأمني](/ar/security/).
+- **PIE Cookbook** — المنهجية الأصلية، على
+  [github.com/piepdx/pie-cookbook](https://github.com/piepdx/pie-cookbook).
+
+## ملاحظة حول الإحصاءات
+
+يقدّم الـ cookbook تقارير عن الأفواج والنتائج. والمقابِل هنا هو صحة الكتالوج
+نفسه: كم عدد المُدخَلات التي هي `verified` مقابل `under_review`، ومدى حداثة
+بيانات الترخيص والصيانة. تُنتَج تلك الأرقام بواسطة الأتمتة الأسبوعية الموصوفة
+في [نبذة وصيانة](/ar/about/)، ولا تُؤكَّد يدويًا.

@@ -111,6 +111,11 @@ export const catalogFields = z.object({
   // ---- PIE navigation anchor ----
   pie_anchor: z.string().optional(),
 
+  // ---- i18n provenance ----
+  /** Set by scripts/translate-catalog.ts on generated es/ar copies so the flag
+   *  is first-class (lets templates surface a "machine translated" advisory). */
+  machine_translated: z.boolean().optional(),
+
   // ---- Enforcement / exception ----
   provider_agnostic: z.boolean().default(false),
   verification_status: z.enum(VERIFICATION_STATUS).default('verified'),

@@ -1,0 +1,91 @@
+---
+title: Shakespeare — إغلاق المزوّدين (BYOK)
+description: الوصفة المرجعية لإغلاق المزوّدين — يُمنَع Shakespeare من استخدام OpenAI أو xAI؛ اقفله على المزوّدين المسموح بهم وتحقّق من أنهم غير قابلين للوصول.
+entry_type: recipe
+recipe_type: configuration
+target_entry: Shakespeare
+target_entry_slug: shakespeare
+provider_agnostic: false
+excluded_providers_unreachable_when:
+  - description: "مُنتقي المزوّد في Shakespeare (من جهة المتصفّح، IndexedDB) مضبوط على مزوّد مسموح به."
+    config_surface: ui_setting
+    setting_path: "Settings → AI Provider"
+    must_be_one_of: [anthropic, deepseek, kimi, ollama-local, openrouter, opencode-zen, payperq]
+    must_not_be_one_of: [openai, xai]
+verification_steps:
+  - description: "بعد إعداد المزوّد، استخدم التطبيق لمدة 5 دقائق وتأكّد من عدم وصول أي طلب إلى المضيفين المستبعَدين."
+    method: network_observation
+    duration_minutes: 5
+    blocked_hosts: [api.openai.com, api.x.ai]
+sidebar:
+  label: Shakespeare (BYOK)
+  # مُبعَد عن الشريط الجانبي؛ يمكن الوصول إليه من نظرة عامة على الوصفات وعبر الرابط.
+  hidden: true
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+[Shakespeare](/ar/catalog/shakespeare/) **يُمنَع منعاً صارماً من استخدام أي
+مزوّد تملكه Meta أو OpenAI أو xAI.** *يمكن* توجيه مُنتقي "أحضِر مفتاحك الخاص" لديه
+إلى OpenAI أو xAI — لذا يُسمَح بـ Shakespeare في الفهرس
+**فقط** بموجب هذه الوصفة المُلزِمة، التي تقفل المُنتقي على مزوّدين مسموح بهم
+وتتحقّق آلياً من أن المستبعَدين غير قابلين للوصول. هذا إنفاذٌ
+للاستبعاد، لا إعفاءٌ منه.
+
+<Aside type="note" title="المصدر المرجعي">
+يعيش Shakespeare على **GitLab**، لا على GitHub:
+[gitlab.com/soapbox-pub/shakespeare](https://gitlab.com/soapbox-pub/shakespeare)،
+رخصة AGPL-3.0، والفرع الافتراضي `main`. مُثبَّت لهذه الوصفة عند الإيداع
+[`a824677f`](https://gitlab.com/soapbox-pub/shakespeare/-/commit/a824677fe2d1b4cdd9815873559ae83b3971bdde)
+(12 يونيو 2026).
+</Aside>
+
+## الإعداد (≈ دقيقتان)
+
+<Steps>
+
+1. افتح Shakespeare على [shakespeare.diy](https://shakespeare.diy).
+
+2. اذهب إلى **Settings → AI Provider**.
+
+3. اختر مزوّداً **مسموحاً به** — واحداً من: Anthropic، أو DeepSeek، أو Kimi (Moonshot)،
+   أو OpenRouter، أو OpenCode Zen، أو PayPerQ، أو **Ollama** المحلي.
+
+4. الصِق مفتاح API الخاص بك لذلك المزوّد (BYOK). يُخزَّن محلياً في
+   IndexedDB الخاص بمتصفّحك — ولا يُرسَل إلى خوادم Shakespeare.
+
+5. **لا** تختر OpenAI أو xAI.
+
+</Steps>
+
+## التحقّق (≈ 5 دقائق)
+
+لا يكون الإعداد جديراً بالثقة إلا إذا تأكّدت منه. راقب الشبكة بينما
+تستخدم التطبيق:
+
+```sh
+# في علامة تبويب Network ضمن أدوات مطوّري المتصفّح، أو عبر وكيل/مُفتّش،
+# استخدم Shakespeare لنحو 5 دقائق وتأكّد من عدم وجود أي طلبات إلى:
+#   api.openai.com
+#   api.x.ai
+```
+
+إن اخترت Anthropic، فينبغي أن ترى حركة مرور إلى `api.anthropic.com` ولا
+شيء إلى أي مضيف مستبعَد. وإن اخترت Ollama المحلي، فينبغي أن ترى حركة مرور
+إلى `localhost` فقط.
+
+<Aside type="caution" title="إغلاق، لا ثغرة">
+لا تجعل هذه الوصفة من Shakespeare أداةً "موثوقة"، ولا تمنح أي
+إذن بملامسة المزوّدين المستبعَدين. إنها العكس: قيدٌ مُلزِم
+**يمنعهم**.
+[عقد الوصفة](/ar/policies/enforcement/#locking-down-configurable-tools-recipes)
+يشترط أن يظهر كل مزوّد LLM مستبعَد في
+<code>must_not_be_one_of</code> وأن تحجب خطوات التحقّق نقاط
+نهايته — بحيث تُرفَض بواسطة CI أي وصفة أخفقت بصمتٍ في منع OpenAI.
+</Aside>
+
+## تطبيق النمط ذاته في أماكن أخرى
+
+أي حِزام وكيل تستخدمه للبناء مع هذا الفهرس — Goose، أو Claude Code، أو Aider —
+ينبغي أن يتبع انضباط BYOK ذاته: اختر مزوّداً مسموحاً به، وزوّد مفتاحك
+الخاص، وتحقّق من الشبكة. انظر [البدء السريع](/ar/start/quickstart/).

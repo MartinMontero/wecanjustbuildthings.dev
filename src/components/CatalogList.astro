@@ -10,6 +10,19 @@ interface Props {
 
 const { category, protocol, pie, limit } = Astro.props;
 
+// Localize the one user-facing chrome string from the page locale (the tool data
+// it renders — names, statuses, descriptions — stays untranslated). Small inline
+// table per the house i18n convention.
+type Lang = 'en' | 'es' | 'ar';
+const locale = (Astro.currentLocale ?? 'en').slice(0, 2);
+const lang: Lang = locale === 'es' || locale === 'ar' ? locale : 'en';
+const STRINGS: Record<Lang, { empty: string }> = {
+  en: { empty: 'No catalog entries match this filter yet.' },
+  es: { empty: 'Aún no hay entradas del catálogo que coincidan con este filtro.' },
+  ar: { empty: 'لا توجد بعد مدخلات في الكتالوج تطابق هذا المرشّح.' },
+};
+const t = STRINGS[lang];
+
 const CATALOG_TYPES = new Set(['tool', 'framework', 'library', 'service', 'protocol']);
 
 let entries = await getCollection('docs', ({ data }) => {
@@ -30,7 +43,7 @@ if (limit) entries = entries.slice(0, limit);
 {
   entries.length === 0 ? (
     <p>
-      <em>No catalog entries match this filter yet.</em>
+      <em>{t.empty}</em>
     </p>
   ) : (
     <ul class="wcb-catalog-list">

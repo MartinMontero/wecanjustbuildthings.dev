@@ -1,0 +1,239 @@
+---
+/**
+ * GuidedSteps.astro — an on-brand, plain-language "guided flow" explainer.
+ *
+ * A vertical numbered timeline built entirely from the design tokens
+ * (tokens.css) and the display face already loaded site-wide, so it reads as a
+ * native part of the page rather than an embedded diagram. The final node uses
+ * the single marigold --signal spot as the destination accent.
+ *
+ * Data-driven and reusable: pass `steps` (and an optional `privacy` line). Icons
+ * are a small built-in set referenced by name. `not-content` opts the block out
+ * of Starlight's markdown styling so the scoped styles below own the look.
+ */
+type IconName = 'chat' | 'shield' | 'idea' | 'send' | 'spark' | 'lock';
+
+interface Step {
+  title: string;
+  /** Plain HTML — keep it short; <b> marks the one phrase that matters. */
+  body: string;
+  icon?: IconName;
+}
+
+interface Props {
+  steps: Step[];
+  privacy?: string;
+}
+
+const ICONS: Record<IconName, string> = {
+  chat: '<path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>',
+  shield: '<path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/>',
+  idea: '<path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.8 1 1.5 1 2.5h6c0-1 .3-1.7 1-2.5A6 6 0 0 0 12 3z"/>',
+  send: '<path d="M21 3 10 14"/><path d="M21 3l-7 18-4-8-8-4 19-6z"/>',
+  spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>',
+  lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+};
+
+const { steps, privacy } = Astro.props as Props;
+---
+
+<div class="guided not-content">
+  <ol class="timeline">
+    {
+      steps.map((s, i) => (
+        <li class="step">
+          <div class="node">{i + 1}</div>
+          <div class="card">
+            <h3 class="gs-title">
+              {s.icon && (
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  set:html={ICONS[s.icon]}
+                />
+              )}
+              <span>{s.title}</span>
+            </h3>
+            <p class="gs-body" set:html={s.body} />
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+
+  {
+    privacy && (
+      <p class="gs-privacy">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          set:html={ICONS.lock}
+        />
+        <span set:html={privacy} />
+      </p>
+    )
+  }
+</div>
+
+<style>
+  /* theme-aware elevation (base = dark; light override) */
+  .guided {
+    --gs-shadow: 0 1px 2px rgb(0 0 0 / 0.25), 0 12px 28px -16px rgb(0 0 0 / 0.55);
+    margin-block: var(--space-xl);
+  }
+  :global([data-theme='light']) .guided {
+    --gs-shadow: 0 1px 2px rgb(20 33 27 / 0.05), 0 12px 28px -16px rgb(20 33 27 / 0.18);
+  }
+
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-lg);
+  }
+
+  .step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: var(--space-md);
+    align-items: start;
+  }
+  /* the connecting spine */
+  .step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 23px;
+    top: 52px;
+    bottom: calc(-1 * var(--space-lg));
+    width: 2px;
+    border-radius: 2px;
+    background: var(--edge-strong);
+  }
+
+  .node {
+    z-index: 1;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    background: var(--structure);
+    color: var(--on-structure);
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--step-1);
+    box-shadow: var(--gs-shadow);
+  }
+  /* the one marigold spot — the destination */
+  .step:last-child .node {
+    background: var(--signal);
+    color: var(--on-signal);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--gs-shadow);
+    transition:
+      border-color var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
+  }
+  .card:hover {
+    border-color: var(--structure);
+    transform: translateY(-2px);
+  }
+
+  .gs-title {
+    margin: 0 0 var(--space-2xs);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--step-2);
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .gs-title svg {
+    flex: none;
+    width: 1.15em;
+    height: 1.15em;
+    color: var(--structure);
+  }
+  .step:last-child .gs-title svg {
+    color: var(--signal);
+  }
+
+  .gs-body {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step-0);
+    line-height: 1.6;
+  }
+  .gs-body :global(b) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .gs-body :global(a) {
+    color: var(--structure);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+  }
+  .gs-body :global(a:hover) {
+    text-decoration-thickness: 2px;
+  }
+
+  .gs-privacy {
+    margin: var(--space-xl) 0 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .gs-privacy svg {
+    flex: none;
+    width: 1.2em;
+    height: 1.2em;
+    color: var(--structure);
+  }
+
+  @media (max-width: 30rem) {
+    .step {
+      grid-template-columns: 40px 1fr;
+      gap: var(--space-sm);
+    }
+    .step:not(:last-child)::before {
+      inset-inline-start: 19px;
+    }
+    .node {
+      width: 40px;
+      height: 40px;
+      font-size: var(--step-0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card {
+      transition: none;
+    }
+    .card:hover {
+      transform: none;
+    }
+  }
+</style>

@@ -1,0 +1,106 @@
+---
+title: La política de exclusión
+description: "La línea que el catálogo mantiene en solidaridad con las comunidades a las que sirve: qué se deja fuera, por qué y cómo puedes verificarlo por ti mismo."
+entry_type: policy
+sidebar:
+  order: 1
+  label: La política de exclusión
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+El sentido de construir tus propias herramientas es la soberanía. Así que sería
+una traición silenciosa que aquello que construiste para proteger a tu comunidad
+enrutara los datos de tu gente directamente de vuelta a través de la
+infraestructura de publicidad y vigilancia que intentan esquivar. La mayoría de
+los catálogos se mantienen neutrales respecto a quién se beneficia de las
+herramientas que listan; para las personas para las que esto está construido, la
+neutralidad es su propia forma de fracaso.
+
+Por eso mantenemos una línea —en solidaridad con las personas que están aguas
+abajo— y, igual de importante, **te dejamos comprobarlo tú mismo** en lugar de
+pedirte que confíes en las buenas intenciones de nadie.
+
+## Qué dejamos fuera, y por qué
+
+Una dependencia se deja fuera del catálogo si es **propiedad de**, o **enruta
+datos hacia**, cualquiera de los siguientes:
+
+| Organización | Por qué |
+|---|---|
+| **Meta** (Facebook, Instagram, WhatsApp, Threads, Reality Labs, Oculus) | Modelo de negocio de publicidad y vigilancia; la infraestructura que muchas de estas comunidades intentan esquivar. |
+| **OpenAI** | Proveedor de modelos cerrados con una postura sobre el uso de datos incompatible con las comunidades a las que se sirve aquí. |
+| **xAI** (Grok) | Las mismas preocupaciones de proveedor cerrado. |
+
+La lista autoritativa y legible por máquina vive en el repositorio en
+`enforcement/excluded-organizations.yaml`, con señales por ecosistema (scopes de
+npm, paquetes de PyPI, grupos de Maven, prefijos de módulos de Go, etc.). Es el
+mismo archivo que lee el [motor de aplicación](/es/policies/enforcement/).
+
+<Aside type="caution" title="Esto trata sobre la propiedad y el flujo de datos, no sobre vibras">
+La política excluye organizaciones, no temas. Una biblioteca que *menciona* a una
+de estas empresas está bien; una biblioteca *publicada por* una de ellas, o una
+que incluye un cliente que envía datos *hacia* una de ellas, no lo está. Esa
+distinción es lo que comprueban respectivamente la Capa 1 (propiedad), la Capa 2
+(propiedad transitiva) y la Capa 3 (cadenas de flujo de datos).
+</Aside>
+
+## Herramientas configurables: la receta de bloqueo de proveedor
+
+La exclusión anterior es **absoluta: nada se gana una exención de ella.** Pero
+algunas herramientas son en sí mismas *configurables* para alcanzar un proveedor
+excluido en tiempo de ejecución. El ejemplo canónico es **Shakespeare**, el
+constructor de aplicaciones Nostr basado en navegador: su selector de "trae tu
+propia clave" *puede* apuntarse tanto a OpenAI o xAI como a Anthropic, DeepSeek,
+Kimi, OpenRouter o un Ollama local.
+
+Una herramienta así se admite en el catálogo **únicamente** bajo una **receta de
+bloqueo de proveedor** (`recipe_type: configuration`): una configuración
+documentada y comprobada por máquina que **prohíbe todo proveedor excluido**, fija
+la herramienta a los permitidos y prescribe cómo verificar que ningún tráfico
+llega a un endpoint excluido.
+
+Esto **no** es una laguna legal ni una excepción de "herramienta de confianza". Es
+lo contrario: un requisito **más estricto** que existe precisamente porque la
+herramienta *podría* de otro modo colarse más allá de la Capa 3. **A Shakespeare
+se le prohíbe estrictamente usar cualquier dependencia o proveedor propiedad de
+Meta, OpenAI o xAI**: la receta es el mecanismo vinculante y aplicado que lo
+garantiza. Consulta la
+[receta de bloqueo de Shakespeare](/es/recipes/shakespeare-byok-configuration/) y
+el [contrato de la receta](/es/policies/enforcement/#locking-down-configurable-tools-recipes).
+
+## Advertencias de origen (construido por Meta, con licencia permisiva)
+
+Existe un terreno intermedio estrecho y deliberado para las bibliotecas que están
+**construidas por una organización excluida pero tienen licencia permisiva y no
+enrutan datos de usuario** hacia ella, sobre todo **React, React Native, Lexical y
+Metro**, que Meta creó y liberó como código abierto bajo licencia MIT.
+
+Estas se **incluyen** en el catálogo, pero cada una lleva una insignia visible de
+**advertencia `meta-origin`** y una nota, para que tomes la decisión de dependencia
+con los ojos abiertos. El razonamiento:
+
+- La preocupación central de la política de exclusión es que los datos fluyan hacia
+  la infraestructura de publicidad y vigilancia. Una biblioteca con licencia
+  permisiva que compilas dentro de tu propia aplicación no hace eso.
+- El equipo de And Other Stuff realmente publica sobre estas herramientas; un
+  catálogo que las ocultara sería menos honesto respecto al stack real.
+- La transparencia (una advertencia) sirve mejor a quien construye que una omisión
+  silenciosa.
+
+Esto **no** es una laguna legal para los SDK que enrutan datos: el
+`facebook-nodejs-business-sdk` de Meta y similares siguen estando **bloqueados**
+por el filtro de nombres. Y **no** se extiende a los proveedores de LLM: cualquier
+cosa propiedad de **OpenAI o xAI está bloqueada de forma absoluta**, lleve
+advertencia o no.
+
+## La vía de apelación
+
+Las decisiones de exclusión se pueden impugnar. Si crees que una herramienta está
+excluida erróneamente —por ejemplo, un paquete de `@react-native-community` que es
+genuinamente propiedad de la comunidad y no está publicado por Meta— abre una
+incidencia. La coincidencia por contexto de importación de la Capa 3 existe
+precisamente para desambiguar estos casos, y los falsos positivos se registran y
+corrigen en lugar de dejarse pasar. El juicio editorial, la estructura de
+categorías nuevas y las exclusiones impugnadas son las cosas que deciden las
+personas; todo lo que es comprobable lo comprueban las herramientas.

@@ -1,0 +1,36 @@
+---
+title: Recetas
+description: Recetas de bloqueo de proveedores — configuraciones vinculantes y verificables por máquina que prohíben los proveedores excluidos en herramientas que de otro modo podrían alcanzarlos.
+sidebar:
+  order: 0
+  label: Visión general
+---
+
+import { Aside, LinkCard } from '@astrojs/starlight/components';
+
+La exclusión de Meta, OpenAI y xAI es **absoluta**. Las recetas no son una
+excepción a ella — son la forma en que el catálogo la *hace cumplir* en herramientas que de
+otro modo podrían escabullirse. La mayoría de las herramientas son sencillamente limpias o no lo son. Unas pocas son *configurables*
+para alcanzar un proveedor excluido en tiempo de ejecución (un selector del tipo "trae tu propia clave", por ejemplo); una
+receta **prohíbe** esos proveedores y verifica por máquina que son inalcanzables.
+
+<Aside type="note" title="Una receta prohíbe — nunca permite">
+Una receta debe apuntar a una entrada del catálogo marcada como `provider_agnostic: true` (una herramienta con
+un selector de proveedor configurable), nombrar a **todos** los proveedores de LLM excluidos en su
+lista `must_not_be_one_of`, e incluir pasos de verificación que bloqueen los puntos de acceso de los
+proveedores excluidos. Una receta que no logre prohibir OpenAI es **rechazada** por CI.
+Consulta [cómo funciona la aplicación](/es/policies/enforcement/#locking-down-configurable-tools-recipes).
+</Aside>
+
+## Recetas
+
+<LinkCard
+  title="Shakespeare — bloqueo de proveedores (BYOK)"
+  href="/es/recipes/shakespeare-byok-configuration/"
+  description="Bloquea Shakespeare para que use únicamente proveedores de modelos permitidos, y verifica que ningún tráfico llegue a OpenAI o xAI."
+/>
+
+## Proponer una receta
+
+Si conoces una herramienta del catálogo que puede configurarse de forma limpia, propón una receta mediante un
+[pull request](/es/contribute/). El validador de recetas se ejecuta en cada PR.

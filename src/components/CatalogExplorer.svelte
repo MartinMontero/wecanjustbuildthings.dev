@@ -21,6 +21,204 @@
   // rebuild it for every item on every keystroke (~2k items × 6 reactive passes).
   type IndexedItem = Item & { _hay: string };
 
+  // ---------- i18n ----------
+  // House convention: an inline Record<Lang, …> string table keyed by id plus a
+  // `lang` prop (mirrors model-compass/ui/i18n.ts and BuildStudio.svelte).
+  type Lang = 'en' | 'es' | 'ar';
+  let { lang: initialLang = 'en' }: { lang?: string } = $props();
+  function normalizeLang(raw: string | undefined | null): Lang {
+    const v = (raw ?? '').toLowerCase().slice(0, 2);
+    return v === 'es' || v === 'ar' ? v : 'en';
+  }
+  const lang: Lang = normalizeLang(initialLang);
+
+  interface CatalogStrings {
+    ctaBold: string;
+    ctaRest: string;
+    ctaGo: string;
+    intro1: string;
+    introBlocks: string; // the bold word inside intro1 ("building blocks")
+    intro2: string;
+    legendVerified: string;
+    legendVerifiedText: string;
+    legendUnderReview: string;
+    legendUnderReviewText: string;
+    legendActive: string;
+    legendActiveText: string;
+    legendOrigin: string;
+    legendOriginText: string;
+    searchLabel: string; // sr-only
+    sort: string;
+    sortUses: string;
+    sortName: string;
+    loading: string;
+    loadFailed: string;
+    clearAll: string;
+    facetType: string;
+    facetNetwork: string;
+    facetEcosystem: string;
+    facetVerification: string;
+    facetCategory: string;
+    filters: string; // aria-label
+    empty: string;
+  }
+  const STRINGS: Record<Lang, CatalogStrings> = {
+    en: {
+      ctaBold: 'New here? Don’t browse — let the Build Studio choose for you.',
+      ctaRest: 'Tell it what you want to build in a sentence, and it picks the few tools you need and shows how they fit together.',
+      ctaGo: 'Open the Build Studio →',
+      intro1: 'Think of this as a vetted shelf of',
+      introBlocks: 'building blocks',
+      intro2: '— ready-made tools, libraries, and services your project (and your AI agent) can use instead of building from scratch. Every entry here has already been checked two ways: nothing owned by Meta, OpenAI, or xAI gets in, and each one’s license was confirmed. Search by what it does, or use the filters to narrow things down. Not sure what something is? Open it — each page explains it in plain terms.',
+      legendVerified: 'verified',
+      legendVerifiedText: 'license confirmed at a specific version',
+      legendUnderReview: 'under review',
+      legendUnderReviewText: 'looks right, not yet fully confirmed',
+      legendActive: 'active',
+      legendActiveText: 'recently kept up to date',
+      legendOrigin: 'origin',
+      legendOriginText: 'made by an excluded company but safe & freely licensed — your call',
+      searchLabel: 'Search the catalog',
+      sort: 'Sort',
+      sortUses: 'Most used',
+      sortName: 'A–Z',
+      loading: 'Loading the catalog…',
+      loadFailed: 'Couldn’t load the catalog. Try refreshing the page.',
+      clearAll: 'Clear all',
+      facetType: 'Type',
+      facetNetwork: 'Network',
+      facetEcosystem: 'Language / platform',
+      facetVerification: 'How thoroughly checked',
+      facetCategory: 'Category',
+      filters: 'Filters',
+      empty: 'No tools match these filters.',
+    },
+    es: {
+      ctaBold: '¿Nuevo por aquí? No explores — deja que el Build Studio elija por ti.',
+      ctaRest: 'Cuéntale en una frase qué quieres construir y elige las pocas herramientas que necesitas y te muestra cómo encajan.',
+      ctaGo: 'Abrir el Build Studio →',
+      intro1: 'Piensa en esto como un estante verificado de',
+      introBlocks: 'bloques de construcción',
+      intro2: '— herramientas, librerías y servicios ya hechos que tu proyecto (y tu agente de IA) pueden usar en vez de construir desde cero. Cada entrada ya ha sido revisada de dos maneras: no entra nada propiedad de Meta, OpenAI o xAI, y se confirmó la licencia de cada una. Busca por lo que hace, o usa los filtros para acotar. ¿No sabes qué es algo? Ábrelo — cada página lo explica en términos sencillos.',
+      legendVerified: 'verificado',
+      legendVerifiedText: 'licencia confirmada en una versión concreta',
+      legendUnderReview: 'en revisión',
+      legendUnderReviewText: 'parece correcto, aún no confirmado del todo',
+      legendActive: 'activo',
+      legendActiveText: 'actualizado recientemente',
+      legendOrigin: 'origen',
+      legendOriginText: 'hecho por una empresa excluida pero seguro y con licencia libre — tú decides',
+      searchLabel: 'Buscar en el catálogo',
+      sort: 'Ordenar',
+      sortUses: 'Más usadas',
+      sortName: 'A–Z',
+      loading: 'Cargando el catálogo…',
+      loadFailed: 'No se pudo cargar el catálogo. Prueba a recargar la página.',
+      clearAll: 'Limpiar todo',
+      facetType: 'Tipo',
+      facetNetwork: 'Red',
+      facetEcosystem: 'Lenguaje / plataforma',
+      facetVerification: 'Qué tan a fondo se revisó',
+      facetCategory: 'Categoría',
+      filters: 'Filtros',
+      empty: 'Ninguna herramienta coincide con estos filtros.',
+    },
+    ar: {
+      ctaBold: 'جديد هنا؟ لا تتصفّح — دع Build Studio يختار لك.',
+      ctaRest: 'أخبره في جملة بما تريد بناءه، فيختار الأدوات القليلة التي تحتاجها ويُظهر كيف تتكامل معاً.',
+      ctaGo: 'افتح Build Studio ←',
+      intro1: 'اعتبر هذا رفّاً مُدقَّقاً من',
+      introBlocks: 'اللبنات',
+      intro2: '— أدوات ومكتبات وخدمات جاهزة يمكن لمشروعك (ولوكيل الذكاء الاصطناعي) استخدامها بدل البناء من الصفر. كل مدخل هنا فُحص بطريقتين: لا يدخل أي شيء تملكه Meta أو OpenAI أو xAI، وتُؤكَّد ترخيص كلٍّ منها. ابحث بحسب ما تفعله، أو استخدم المرشّحات لتضييق النتائج. لا تعرف ما هو شيء ما؟ افتحه — كل صفحة تشرحه بعبارات بسيطة.',
+      legendVerified: 'مُتحقَّق',
+      legendVerifiedText: 'الترخيص مؤكَّد عند إصدار محدّد',
+      legendUnderReview: 'قيد المراجعة',
+      legendUnderReviewText: 'يبدو صحيحاً، لم يُؤكَّد بالكامل بعد',
+      legendActive: 'نشط',
+      legendActiveText: 'محدَّث مؤخراً',
+      legendOrigin: 'المنشأ',
+      legendOriginText: 'من صنع شركة مُستبعَدة لكنه آمن وبترخيص حر — القرار لك',
+      searchLabel: 'ابحث في الكتالوج',
+      sort: 'ترتيب',
+      sortUses: 'الأكثر استخداماً',
+      sortName: 'أ–ي',
+      loading: 'جارٍ تحميل الكتالوج…',
+      loadFailed: 'تعذّر تحميل الكتالوج. حاول إعادة تحميل الصفحة.',
+      clearAll: 'مسح الكل',
+      facetType: 'النوع',
+      facetNetwork: 'الشبكة',
+      facetEcosystem: 'اللغة / المنصّة',
+      facetVerification: 'مدى دقّة الفحص',
+      facetCategory: 'الفئة',
+      filters: 'المرشّحات',
+      empty: 'لا توجد أدوات تطابق هذه المرشّحات.',
+    },
+  };
+  const t = STRINGS[lang];
+
+  // Localized labels for status DATA VALUES, keyed by the ORIGINAL english value
+  // so the visible badge text is translated while the `badge--{status}` CSS class
+  // (keyed on the english value) is preserved untouched. Falls back to a
+  // space-normalized english value for any status not listed.
+  const VERIFICATION_LABELS: Record<Lang, Record<string, string>> = {
+    en: { verified: 'verified', under_review: 'under review', blocked: 'blocked' },
+    es: { verified: 'verificado', under_review: 'en revisión', blocked: 'bloqueado' },
+    ar: { verified: 'مُتحقَّق', under_review: 'قيد المراجعة', blocked: 'محظور' },
+  };
+  const MAINTENANCE_LABELS: Record<Lang, Record<string, string>> = {
+    en: { active: 'active', minimal: 'minimal', dormant: 'dormant', abandoned: 'abandoned' },
+    es: { active: 'activo', minimal: 'mínimo', dormant: 'inactivo', abandoned: 'abandonado' },
+    ar: { active: 'نشط', minimal: 'محدود', dormant: 'خامل', abandoned: 'مهجور' },
+  };
+  function verificationLabel(v: string): string {
+    return VERIFICATION_LABELS[lang]?.[v] ?? v.replace('_', ' ');
+  }
+  function maintenanceLabel(v: string): string {
+    return MAINTENANCE_LABELS[lang]?.[v] ?? v;
+  }
+  // "{advisory}-origin" — the advisory value (e.g. "meta") stays as-is; only the
+  // "-origin" suffix word is localized.
+  function originLabel(advisory: string): string {
+    if (lang === 'es') return `origen ${advisory}`;
+    if (lang === 'ar') return `من منشأ ${advisory}`;
+    return `${advisory}-origin`;
+  }
+  // Search placeholder with the live tool count interpolated.
+  function searchPlaceholder(n: number): string {
+    const count = n || '';
+    if (lang === 'es') return `Busca entre ${count} herramientas por nombre o por lo que hacen…`;
+    if (lang === 'ar') return `ابحث في ${count} أداة بالاسم أو بما تفعله…`;
+    return `Search ${count} tools by name or what they do…`;
+  }
+  // "{filtered} of {items}" header count.
+  function countLabel(shown: number, total: number): string {
+    if (lang === 'es') return `de ${total}`;
+    if (lang === 'ar') return `من ${total}`;
+    return `of ${total}`;
+  }
+  // "Clear all ({n})" — active-filter count badge.
+  function clearAllCount(n: number): string {
+    return `${t.clearAll} (${n})`;
+  }
+  // "used in {n} audited project(s)" — pluralized per language.
+  function usedIn(n: number): string {
+    if (lang === 'es') return n === 1 ? `usada en ${n} proyecto auditado` : `usada en ${n} proyectos auditados`;
+    if (lang === 'ar') {
+      // Arabic plural rules: 1 → singular, 2 → dual, 3–10 → plural, 11+ → singular noun.
+      if (n === 1) return `مُستخدَمة في مشروع مُدقَّق واحد`;
+      if (n === 2) return `مُستخدَمة في مشروعين مُدقَّقين`;
+      if (n >= 3 && n <= 10) return `مُستخدَمة في ${n} مشاريع مُدقَّقة`;
+      return `مُستخدَمة في ${n} مشروعاً مُدقَّقاً`;
+    }
+    return `used in ${n} audited project${n === 1 ? '' : 's'}`;
+  }
+  // "Show more ({n} remaining)".
+  function showMore(n: number): string {
+    if (lang === 'es') return `Mostrar más (${n} restantes)`;
+    if (lang === 'ar') return `عرض المزيد (${n} متبقية)`;
+    return `Show more (${n} remaining)`;
+  }
+
   let items = $state<IndexedItem[]>([]);
   let loading = $state(true);
   let failed = $state(false);
@@ -106,55 +304,49 @@
 
 <div class="explorer">
   <a class="cat-cta" href="/build/">
-    <span><strong>New here? Don’t browse — let the Build Studio choose for you.</strong> Tell it what you
-    want to build in a sentence, and it picks the few tools you need and shows how they fit together.</span>
-    <span class="cat-cta-go">Open the Build Studio →</span>
+    <span><strong>{t.ctaBold}</strong> {t.ctaRest}</span>
+    <span class="cat-cta-go">{t.ctaGo}</span>
   </a>
   <div class="cat-intro">
     <p>
-      Think of this as a vetted shelf of <strong>building blocks</strong> — ready-made tools,
-      libraries, and services your project (and your AI agent) can use instead of building from
-      scratch. Every entry here has already been checked two ways: nothing owned by Meta, OpenAI,
-      or xAI gets in, and each one’s license was confirmed. Search by what it does, or use the
-      filters to narrow things down. Not sure what something is? Open it — each page explains it in
-      plain terms.
+      {t.intro1} <strong>{t.introBlocks}</strong> {t.intro2}
     </p>
     <ul class="cat-legend">
-      <li><span class="badge badge--verified">verified</span> license confirmed at a specific version</li>
-      <li><span class="badge badge--under_review">under review</span> looks right, not yet fully confirmed</li>
-      <li><span class="badge badge--active">active</span> recently kept up to date</li>
-      <li><span class="badge badge--advisory">origin</span> made by an excluded company but safe &amp; freely licensed — your call</li>
+      <li><span class="badge badge--verified">{t.legendVerified}</span> {t.legendVerifiedText}</li>
+      <li><span class="badge badge--under_review">{t.legendUnderReview}</span> {t.legendUnderReviewText}</li>
+      <li><span class="badge badge--active">{t.legendActive}</span> {t.legendActiveText}</li>
+      <li><span class="badge badge--advisory">{t.legendOrigin}</span> {t.legendOriginText}</li>
     </ul>
   </div>
   <div class="toolbar">
     <label class="search">
-      <span class="sr-only">Search the catalog</span>
+      <span class="sr-only">{t.searchLabel}</span>
       <input
         type="search"
-        placeholder="Search {items.length || ''} tools by name or what they do…"
+        placeholder={searchPlaceholder(items.length)}
         bind:value={q}
         oninput={() => (limit = 60)}
       />
     </label>
     <label class="sort">
-      Sort
+      {t.sort}
       <select bind:value={sort}>
-        <option value="uses">Most used</option>
-        <option value="name">A–Z</option>
+        <option value="uses">{t.sortUses}</option>
+        <option value="name">{t.sortName}</option>
       </select>
     </label>
   </div>
 
   {#if loading}
-    <p class="status">Loading the catalog…</p>
+    <p class="status">{t.loading}</p>
   {:else if failed}
-    <p class="status">Couldn’t load the catalog. Try refreshing the page.</p>
+    <p class="status">{t.loadFailed}</p>
   {:else}
     <div class="layout">
-      <aside class="facets" aria-label="Filters">
+      <aside class="facets" aria-label={t.filters}>
         <div class="facets-head">
-          <strong>{filtered.length}</strong> of {items.length}
-          {#if activeCount}<button class="link" onclick={clearAll}>Clear all ({activeCount})</button>{/if}
+          <strong>{filtered.length}</strong> {countLabel(filtered.length, items.length)}
+          {#if activeCount}<button class="link" onclick={clearAll}>{clearAllCount(activeCount)}</button>{/if}
         </div>
 
         {#snippet group(title: string, options: [string, number][], sel: Set<string>, apply: (s: Set<string>) => void)}
@@ -172,16 +364,16 @@
           </fieldset>
         {/snippet}
 
-        {@render group('Type', kindFacet, selKind, (s) => (selKind = s))}
-        {@render group('Network', protocolFacet, selProtocol, (s) => (selProtocol = s))}
-        {@render group('Language / platform', ecosystemFacet, selEcosystem, (s) => (selEcosystem = s))}
-        {@render group('How thoroughly checked', verificationFacet, selVerification, (s) => (selVerification = s))}
-        {@render group('Category', categoryFacet, selCategory, (s) => (selCategory = s))}
+        {@render group(t.facetType, kindFacet, selKind, (s) => (selKind = s))}
+        {@render group(t.facetNetwork, protocolFacet, selProtocol, (s) => (selProtocol = s))}
+        {@render group(t.facetEcosystem, ecosystemFacet, selEcosystem, (s) => (selEcosystem = s))}
+        {@render group(t.facetVerification, verificationFacet, selVerification, (s) => (selVerification = s))}
+        {@render group(t.facetCategory, categoryFacet, selCategory, (s) => (selCategory = s))}
       </aside>
 
       <div class="results">
         {#if filtered.length === 0}
-          <p class="status">No tools match these filters. <button class="link" onclick={clearAll}>Clear all</button></p>
+          <p class="status">{t.empty} <button class="link" onclick={clearAll}>{t.clearAll}</button></p>
         {/if}
         <ul class="cards">
           {#each filtered.slice(0, limit) as it (it.url)}
@@ -189,21 +381,21 @@
               <div class="card-top">
                 <a class="card-name" href={it.url}>{it.name}</a>
                 <span class="badges">
-                  <span class="badge badge--{it.verification}">{it.verification.replace('_', ' ')}</span>
-                  <span class="badge badge--{it.maintenance}">{it.maintenance}</span>
-                  {#if it.advisory}<span class="badge badge--advisory">{it.advisory}-origin</span>{/if}
+                  <span class="badge badge--{it.verification}">{verificationLabel(it.verification)}</span>
+                  <span class="badge badge--{it.maintenance}">{maintenanceLabel(it.maintenance)}</span>
+                  {#if it.advisory}<span class="badge badge--advisory">{originLabel(it.advisory)}</span>{/if}
                 </span>
               </div>
               <p class="card-desc">{it.desc}</p>
               <div class="card-meta">
                 <span>{it.ecosystem}</span> · <span>{it.license}</span> · <span>{it.category}</span>
-                {#if it.uses > 0}· <span>used in {it.uses} audited project{it.uses === 1 ? '' : 's'}</span>{/if}
+                {#if it.uses > 0}· <span>{usedIn(it.uses)}</span>{/if}
               </div>
             </li>
           {/each}
         </ul>
         {#if filtered.length > limit}
-          <button class="more" onclick={() => (limit += 60)}>Show more ({filtered.length - limit} remaining)</button>
+          <button class="more" onclick={() => (limit += 60)}>{showMore(filtered.length - limit)}</button>
         {/if}
       </div>
     </div>

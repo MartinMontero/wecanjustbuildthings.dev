@@ -1,0 +1,18 @@
+---
+title: Build Studio
+description: Describe tu proyecto y el Studio ensambla un stack que cumple la política, luego genera una constitución, una especificación, un prompt para el agente y un repositorio inicial descargable.
+tableOfContents: false
+sidebar:
+  order: 0
+  label: Build Studio
+---
+
+import BuildStudio from '../../../components/BuildStudio.svelte';
+
+Dile al Studio qué estás construyendo. Extrae del catálogo un stack que coincide y
+**cumple la política**, luego te entrega todo lo que un agente de IA necesita para
+empezar: una **constitución** del proyecto, una **especificación**, un **prompt**
+listo para pegar y un **repositorio inicial descargable** conectado al motor de
+cumplimiento. Nada de aquí puede incorporar una dependencia de Meta / OpenAI / xAI.
+
+<BuildStudio client:load lang="es" />
