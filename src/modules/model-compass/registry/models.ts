@@ -33,7 +33,7 @@ export const MODELS: readonly ModelEntry[] = [
     licenseSpdx: 'Apache-2.0',
     selfHostable: true,
     contextWindow: 256_000, // confirmed via mistral.ai/news/mistral-3
-    costPerMTok: { input: null, output: null }, // EU-hosted API price — TODO: confirm
+    costPerMTok: { input: 0.5, output: 1.5 }, // La Plateforme (mistral.ai/pricing) — confirm on sign-off
     codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://mistral.ai/news/mistral-3/', vendorReported: true }, // score TODO: confirm
     caution: { level: 'none', jurisdiction: null, reason: null, mitigation: null },
     sourceUrl: 'https://mistral.ai/news/mistral-3/',
@@ -49,7 +49,7 @@ export const MODELS: readonly ModelEntry[] = [
     licenseSpdx: 'Apache-2.0',
     selfHostable: true,
     contextWindow: 128_000, // confirmed via cohere.com/blog/command-a-plus
-    costPerMTok: { input: null, output: null }, // TODO: confirm
+    costPerMTok: { input: null, output: null }, // no public per-token price (quote-only, cohere.com/pricing) — self-host the Apache-2.0 weights instead
     codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://cohere.com/blog/command-a-plus', vendorReported: true }, // score TODO: confirm
     caution: {
       level: 'advisory',
@@ -114,7 +114,7 @@ export const MODELS: readonly ModelEntry[] = [
     licenseSpdx: 'MIT',
     selfHostable: true,
     contextWindow: 1_000_000, // confirmed via huggingface.co/deepseek-ai/DeepSeek-V4-Pro
-    costPerMTok: { input: null, output: null }, // hosted API price — TODO: confirm
+    costPerMTok: { input: 1.74, output: 3.48 }, // standard list (api-docs.deepseek.com/quick_start/pricing); a recurring 75%-off promo drops it to $0.435/$0.87
     codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro', vendorReported: true }, // score TODO: confirm
     caution: {
       level: 'warning',
@@ -178,7 +178,7 @@ export const MODELS: readonly ModelEntry[] = [
     licenseSpdx: null, // proprietary
     selfHostable: false,
     contextWindow: 1_000_000, // confirmed via ai.google.dev Gemini models
-    costPerMTok: { input: null, output: null }, // hosted API price — TODO: confirm
+    costPerMTok: { input: 2, output: 12 }, // ≤200K-token prompts (ai.google.dev/gemini-api/docs/pricing); prompts >200K bill $4/$18
     codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://ai.google.dev/gemini-api/docs/models', vendorReported: true }, // score TODO: confirm
     caution: {
       level: 'warning',
