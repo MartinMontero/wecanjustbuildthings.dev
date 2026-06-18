@@ -80,6 +80,7 @@ export default defineConfig({
           translations: { es: 'Empieza aquí', ar: 'ابدأ هنا' },
           items: [
             { label: 'What this is', translations: { es: 'Qué es esto', ar: 'ما هذا' }, link: '/start/' },
+            { label: 'How it works', translations: { es: 'Cómo funciona', ar: 'كيف يعمل' }, link: '/start/how-it-works/' },
             { label: 'Why not just use Goose?', translations: { es: '¿Por qué no usar solo Goose?', ar: 'لماذا لا تكتفي بـ Goose؟' }, link: '/start/vs-harness/' },
             { label: 'Quickstart with an agent', translations: { es: 'Inicio rápido con un agente', ar: 'بداية سريعة مع وكيل' }, link: '/start/quickstart/' },
           ],
