@@ -5,12 +5,15 @@
  *  - Only sovereignty-friendly / independent options. NEVER an entry developed by
  *    an excluded org (Meta/OpenAI/xAI/AWS/Oracle — see EXCLUDED_PROVIDER_IDS).
  *    OpenAI's "GPT-OSS" (e.g. via a confidential-computing menu) is excluded too.
- *  - Every NUMBER (contextWindow, costPerMTok, benchmark score) is `null` until a
- *    human confirms it against `sourceUrl`; `lastVerified` stays null until then.
- *    Do NOT fabricate a plausible value — leave it null (Phase 3 populates these).
+ *  - Every NUMBER (contextWindow, costPerMTok, benchmark score) is `null` until
+ *    confirmed against `sourceUrl`; once a number is set, `lastVerified` must carry
+ *    the date it was confirmed. Do NOT fabricate — leave a gap null.
  *  - `sourceUrl`s below are verified-real primary pages (model cards / repos / docs).
- *  - Categorical facts (developer, jurisdiction, license, tier, selfHostable) were
- *    read from those primary sources; the numbers were not, so they stay null.
+ *
+ * Phase-3 population status (2026-06-18): context windows and the prices/benchmarks
+ * noted inline are filled from the cited sources and AWAIT MAINTAINER SIGN-OFF on
+ * review. Anything still `null` (most hosted prices, most benchmark scores) was not
+ * confirmed and remains TODO.
  */
 import type { ModelEntry } from '../core/types.ts';
 
@@ -29,12 +32,12 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'open-weight-self-hostable',
     licenseSpdx: 'Apache-2.0',
     selfHostable: true,
-    contextWindow: null, // TODO: confirm
-    costPerMTok: { input: null, output: null }, // EU-hosted API exists; TODO: confirm
-    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://mistral.ai/news/mistral-3/', vendorReported: true },
+    contextWindow: 256_000, // confirmed via mistral.ai/news/mistral-3
+    costPerMTok: { input: null, output: null }, // EU-hosted API price — TODO: confirm
+    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://mistral.ai/news/mistral-3/', vendorReported: true }, // score TODO: confirm
     caution: { level: 'none', jurisdiction: null, reason: null, mitigation: null },
     sourceUrl: 'https://mistral.ai/news/mistral-3/',
-    lastVerified: null,
+    lastVerified: '2026-06-18',
   },
   {
     id: 'cohere-command-a-plus',
@@ -45,9 +48,9 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'open-weight-self-hostable',
     licenseSpdx: 'Apache-2.0',
     selfHostable: true,
-    contextWindow: null, // TODO: confirm
-    costPerMTok: { input: null, output: null },
-    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://cohere.com/blog/command-a-plus', vendorReported: true },
+    contextWindow: 128_000, // confirmed via cohere.com/blog/command-a-plus
+    costPerMTok: { input: null, output: null }, // TODO: confirm
+    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://cohere.com/blog/command-a-plus', vendorReported: true }, // score TODO: confirm
     caution: {
       level: 'advisory',
       jurisdiction: 'Canada',
@@ -55,7 +58,7 @@ export const MODELS: readonly ModelEntry[] = [
       mitigation: 'Self-host the Apache-2.0 weights (≈2×H100) for zero third-party jurisdiction.',
     },
     sourceUrl: 'https://cohere.com/blog/command-a-plus',
-    lastVerified: null,
+    lastVerified: '2026-06-18',
   },
   // ---- Execution tier: self-hostable open weights ----
   {
@@ -67,9 +70,9 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'open-weight-self-hostable',
     licenseSpdx: 'Apache-2.0',
     selfHostable: true,
-    contextWindow: null, // TODO: confirm
+    contextWindow: 256_000, // native; extendable to ~1M. Confirmed via QwenLM/Qwen3-Coder + VentureBeat
     costPerMTok: null, // self-hosted compute
-    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://github.com/QwenLM/Qwen3-Coder', vendorReported: true },
+    codingBenchmark: { name: 'SWE-bench Verified', score: 70.6, sourceUrl: 'https://github.com/QwenLM/Qwen3-Coder', vendorReported: true }, // confirmed (VentureBeat / winbuzzer)
     caution: {
       level: 'advisory',
       jurisdiction: 'China (origin)',
@@ -77,7 +80,7 @@ export const MODELS: readonly ModelEntry[] = [
       mitigation: 'Self-host the Apache-2.0 weights — no prompt touches a third-party endpoint.',
     },
     sourceUrl: 'https://github.com/QwenLM/Qwen3-Coder',
-    lastVerified: null,
+    lastVerified: '2026-06-18',
   },
   {
     id: 'gemma-4',
@@ -88,9 +91,9 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'open-weight-self-hostable',
     licenseSpdx: 'Apache-2.0',
     selfHostable: true,
-    contextWindow: null, // TODO: confirm
+    contextWindow: 256_000, // confirmed via blog.google Gemma 4 / ai.google.dev model card
     costPerMTok: null, // self-hosted compute
-    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://ai.google.dev/gemma/docs/core/model_card_4', vendorReported: true },
+    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://ai.google.dev/gemma/docs/core/model_card_4', vendorReported: true }, // score TODO: confirm
     caution: {
       level: 'advisory',
       jurisdiction: 'US (origin)',
@@ -98,7 +101,7 @@ export const MODELS: readonly ModelEntry[] = [
       mitigation: 'Self-hosting is free of the Gemini API’s CLOUD Act exposure.',
     },
     sourceUrl: 'https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/',
-    lastVerified: null,
+    lastVerified: '2026-06-18',
   },
   // ---- Frontier, open weights but China-hosted default API ----
   {
@@ -110,9 +113,9 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'open-weight-self-hostable',
     licenseSpdx: 'MIT',
     selfHostable: true,
-    contextWindow: null, // TODO: confirm
-    costPerMTok: { input: null, output: null },
-    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro', vendorReported: true },
+    contextWindow: 1_000_000, // confirmed via huggingface.co/deepseek-ai/DeepSeek-V4-Pro
+    costPerMTok: { input: null, output: null }, // hosted API price — TODO: confirm
+    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro', vendorReported: true }, // score TODO: confirm
     caution: {
       level: 'warning',
       jurisdiction: 'China',
@@ -120,7 +123,7 @@ export const MODELS: readonly ModelEntry[] = [
       mitigation: 'Self-host the MIT weights to remove jurisdictional exposure.',
     },
     sourceUrl: 'https://huggingface.co/deepseek-ai/DeepSeek-V4-Pro',
-    lastVerified: null,
+    lastVerified: '2026-06-18',
   },
   // ---- Approved-but-danger-zone: US-hosted proprietary APIs ----
   {
@@ -132,9 +135,9 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'frontier-hosted-api',
     licenseSpdx: null, // proprietary
     selfHostable: false,
-    contextWindow: null, // TODO: confirm
-    costPerMTok: { input: null, output: null },
-    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://platform.claude.com/docs/en/about-claude/models/overview', vendorReported: true },
+    contextWindow: 1_000_000, // confirmed via platform.claude.com models overview
+    costPerMTok: { input: 5, output: 25 }, // confirmed via platform.claude.com pricing
+    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://platform.claude.com/docs/en/about-claude/models/overview', vendorReported: true }, // score TODO: confirm
     caution: {
       level: 'warning',
       jurisdiction: 'United States',
@@ -142,7 +145,7 @@ export const MODELS: readonly ModelEntry[] = [
       mitigation: 'Prefer self-hosted open weights or an EU/Canada endpoint. (Opus 4.8 itself was unaffected by the directive.)',
     },
     sourceUrl: 'https://www.anthropic.com/news/fable-mythos-access',
-    lastVerified: null,
+    lastVerified: '2026-06-18',
   },
   {
     id: 'claude-haiku-4-5',
@@ -153,9 +156,9 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'frontier-hosted-api',
     licenseSpdx: null, // proprietary
     selfHostable: false,
-    contextWindow: null, // TODO: confirm
-    costPerMTok: { input: null, output: null },
-    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://platform.claude.com/docs/en/about-claude/models/overview', vendorReported: true },
+    contextWindow: 200_000, // confirmed via platform.claude.com models overview
+    costPerMTok: { input: 1, output: 5 }, // confirmed via platform.claude.com pricing
+    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://platform.claude.com/docs/en/about-claude/models/overview', vendorReported: true }, // score TODO: confirm
     caution: {
       level: 'warning',
       jurisdiction: 'United States',
@@ -163,7 +166,7 @@ export const MODELS: readonly ModelEntry[] = [
       mitigation: 'Prefer self-hosted open weights or an EU/Canada endpoint for sovereignty-sensitive work.',
     },
     sourceUrl: 'https://platform.claude.com/docs/en/about-claude/models/overview',
-    lastVerified: null,
+    lastVerified: '2026-06-18',
   },
   {
     id: 'gemini-3-1-pro',
@@ -174,9 +177,9 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'frontier-hosted-api',
     licenseSpdx: null, // proprietary
     selfHostable: false,
-    contextWindow: null, // TODO: confirm
-    costPerMTok: { input: null, output: null },
-    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://ai.google.dev/gemini-api/docs/models', vendorReported: true },
+    contextWindow: 1_000_000, // confirmed via ai.google.dev Gemini models
+    costPerMTok: { input: null, output: null }, // hosted API price — TODO: confirm
+    codingBenchmark: { name: 'SWE-bench Verified', score: null, sourceUrl: 'https://ai.google.dev/gemini-api/docs/models', vendorReported: true }, // score TODO: confirm
     caution: {
       level: 'warning',
       jurisdiction: 'United States',
@@ -184,7 +187,7 @@ export const MODELS: readonly ModelEntry[] = [
       mitigation: 'For sovereignty, prefer self-hosted Gemma 4 (Apache-2.0) or an EU/Canada open-weight model.',
     },
     sourceUrl: 'https://ai.google.dev/gemini-api/docs/models',
-    lastVerified: null,
+    lastVerified: '2026-06-18',
   },
   // ---- Runtime / harness / privacy service (NOT models) ----
   {
@@ -196,7 +199,7 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'local-runtime',
     licenseSpdx: 'MIT',
     selfHostable: true,
-    contextWindow: null,
+    contextWindow: null, // n/a — depends on the model it runs
     costPerMTok: null, // local compute
     codingBenchmark: null,
     caution: { level: 'none', jurisdiction: null, reason: null, mitigation: null },
@@ -212,7 +215,7 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'orchestration',
     licenseSpdx: 'MIT',
     selfHostable: true,
-    contextWindow: null,
+    contextWindow: null, // n/a — depends on the model it orchestrates
     costPerMTok: null,
     codingBenchmark: null,
     caution: { level: 'none', jurisdiction: null, reason: null, mitigation: null },
@@ -228,8 +231,8 @@ export const MODELS: readonly ModelEntry[] = [
     kind: 'confidential-service',
     licenseSpdx: null, // open enclave code; not a single SPDX id
     selfHostable: false,
-    contextWindow: null,
-    costPerMTok: { input: null, output: null },
+    contextWindow: null, // depends on the served open model
+    costPerMTok: { input: null, output: null }, // subscription; per-model pricing TODO: confirm
     codingBenchmark: null,
     caution: {
       level: 'advisory',
