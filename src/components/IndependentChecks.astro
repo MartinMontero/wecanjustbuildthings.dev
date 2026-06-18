@@ -1,0 +1,250 @@
+---
+/**
+ * IndependentChecks.astro — an on-brand, plain-language summary of a set of
+ * independent checks that converge on a single verdict.
+ *
+ * Sibling to GuidedSteps: same tokens, same display face, same "green badges +
+ * one marigold spot" language — but a PARALLEL grid (independent checks) rather
+ * than a sequence, ending in one marigold verdict band. Built for the
+ * enforcement story ("how we keep our promise"): claim up top, receipts below.
+ *
+ * Data-driven. Titles are styled <p>, not headings, so the block stays a visual
+ * summary and never disturbs the page's document outline. `not-content` opts it
+ * out of Starlight's markdown styling so the scoped styles below own the look.
+ */
+type IconName = 'label' | 'chain' | 'globe' | 'shield' | 'lock' | 'eye';
+
+interface Check {
+  /** Small label above the title, e.g. "Check one". */
+  eyebrow: string;
+  title: string;
+  /** Short HTML — <i> for the one word that earns emphasis. */
+  body: string;
+  /** The "in plain terms" one-liner. */
+  plain: string;
+  icon: IconName;
+}
+
+interface Verdict {
+  title: string;
+  body: string;
+  /** The trust footnote (offline / deterministic / open). */
+  trust: string;
+  icon?: IconName;
+}
+
+interface Props {
+  checks: Check[];
+  verdict: Verdict;
+}
+
+const ICONS: Record<IconName, string> = {
+  label: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  chain: '<line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9z"/>',
+  shield: '<path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/>',
+  lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+};
+
+const { checks, verdict } = Astro.props as Props;
+const vIcon = verdict.icon ?? 'shield';
+---
+
+<div class="checks-wrap not-content">
+  <ul class="checks">
+    {
+      checks.map((c) => (
+        <li class="check">
+          <div class="ck-badge">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              set:html={ICONS[c.icon]}
+            />
+          </div>
+          <p class="ck-eyebrow">{c.eyebrow}</p>
+          <p class="ck-title">{c.title}</p>
+          <p class="ck-body" set:html={c.body} />
+          <p class="ck-plain">
+            <span class="lbl">In plain terms</span> <span set:html={c.plain} />
+          </p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="verdict">
+    <div class="verdict-badge">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        set:html={ICONS[vIcon]}
+      />
+    </div>
+    <div>
+      <p class="verdict-title">{verdict.title}</p>
+      <p class="verdict-body" set:html={verdict.body} />
+      <p class="verdict-trust" set:html={verdict.trust} />
+    </div>
+  </div>
+</div>
+
+<style>
+  .checks-wrap {
+    --gs-shadow: 0 1px 2px rgb(0 0 0 / 0.25), 0 12px 28px -16px rgb(0 0 0 / 0.55);
+    margin-block: var(--space-xl);
+  }
+  :global([data-theme='light']) .checks-wrap {
+    --gs-shadow: 0 1px 2px rgb(20 33 27 / 0.05), 0 12px 28px -16px rgb(20 33 27 / 0.18);
+  }
+
+  .checks {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space-md);
+  }
+
+  .check {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    background: var(--surface);
+    border: 1px solid var(--edge);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--gs-shadow);
+    transition:
+      border-color var(--dur-2) var(--ease-out),
+      transform var(--dur-2) var(--ease-out);
+  }
+  .check:hover {
+    border-color: var(--structure);
+    transform: translateY(-2px);
+  }
+
+  .ck-badge {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-lg);
+    background: var(--structure);
+    color: var(--on-structure);
+    margin-bottom: var(--space-2xs);
+  }
+  .ck-badge svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .ck-eyebrow {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: var(--step--1);
+    color: var(--structure);
+  }
+  .ck-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--step-2);
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .ck-body {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: var(--step-0);
+    line-height: 1.55;
+  }
+  .ck-body :global(i) {
+    font-style: italic;
+  }
+  .ck-plain {
+    margin: var(--space-2xs) 0 0;
+    padding-top: var(--space-2xs);
+    border-top: 1px solid var(--edge);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .ck-plain .lbl {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .ck-plain .lbl::after {
+    content: ' \2014';
+  }
+
+  /* the one marigold spot — the decisive verdict */
+  .verdict {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+    margin-top: var(--space-lg);
+    background: var(--surface);
+    border: 1px solid var(--edge);
+    border-left: 4px solid var(--signal);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md);
+    box-shadow: var(--gs-shadow);
+  }
+  .verdict-badge {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-lg);
+    background: var(--signal);
+    color: var(--on-signal);
+  }
+  .verdict-badge svg {
+    width: 24px;
+    height: 24px;
+  }
+  .verdict-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--weight-bold);
+    font-size: var(--step-2);
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .verdict-body {
+    margin: var(--space-2xs) 0 0;
+    color: var(--ink);
+    font-size: var(--step-0);
+  }
+  .verdict-trust {
+    margin: var(--space-xs) 0 0;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+    line-height: 1.55;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .check {
+      transition: none;
+    }
+    .check:hover {
+      transform: none;
+    }
+  }
+</style>
