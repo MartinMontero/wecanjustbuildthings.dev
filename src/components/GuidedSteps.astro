@@ -114,7 +114,7 @@ const { steps, privacy } = Astro.props as Props;
   .step:not(:last-child)::before {
     content: '';
     position: absolute;
-    left: 23px;
+    inset-inline-start: 23px;
     top: 52px;
     bottom: calc(-1 * var(--space-lg));
     width: 2px;
@@ -219,7 +219,7 @@ const { steps, privacy } = Astro.props as Props;
       gap: var(--space-sm);
     }
     .step:not(:last-child)::before {
-      left: 19px;
+      inset-inline-start: 19px;
     }
     .node {
       width: 40px;
