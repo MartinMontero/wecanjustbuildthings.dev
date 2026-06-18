@@ -1,0 +1,91 @@
+---
+title: Shakespeare — bloqueo de proveedores (BYOK)
+description: La receta canónica de bloqueo de proveedores — a Shakespeare se le prohíbe usar OpenAI o xAI; bloquéalo a proveedores permitidos y verifica que son inalcanzables.
+entry_type: recipe
+recipe_type: configuration
+target_entry: Shakespeare
+target_entry_slug: shakespeare
+provider_agnostic: false
+excluded_providers_unreachable_when:
+  - description: "El selector de proveedor de Shakespeare (del lado del navegador, IndexedDB) está fijado en un proveedor permitido."
+    config_surface: ui_setting
+    setting_path: "Settings → AI Provider"
+    must_be_one_of: [anthropic, deepseek, kimi, ollama-local, openrouter, opencode-zen, payperq]
+    must_not_be_one_of: [openai, xai]
+verification_steps:
+  - description: "Tras configurar el proveedor, usa la app durante 5 minutos y confirma que ninguna solicitud llega a los hosts excluidos."
+    method: network_observation
+    duration_minutes: 5
+    blocked_hosts: [api.openai.com, api.x.ai]
+sidebar:
+  label: Shakespeare (BYOK)
+  # Mantenido fuera de la barra lateral; accesible desde la Visión general de Recetas y por URL.
+  hidden: true
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+[Shakespeare](/es/catalog/shakespeare/) tiene **estrictamente prohibido usar cualquier
+proveedor propiedad de Meta, OpenAI o xAI.** Su selector de "trae tu propia clave" *podría*
+apuntarse a OpenAI o xAI — por eso Shakespeare está permitido en el catálogo
+**solo** bajo esta receta vinculante, que bloquea el selector a proveedores permitidos
+y verifica por máquina que los excluidos son inalcanzables. Esto es aplicación
+de la exclusión, no una exención de ella.
+
+<Aside type="note" title="Fuente canónica">
+Shakespeare vive en **GitLab**, no en GitHub:
+[gitlab.com/soapbox-pub/shakespeare](https://gitlab.com/soapbox-pub/shakespeare),
+AGPL-3.0, rama por defecto `main`. Fijado para esta receta en el commit
+[`a824677f`](https://gitlab.com/soapbox-pub/shakespeare/-/commit/a824677fe2d1b4cdd9815873559ae83b3971bdde)
+(12 jun 2026).
+</Aside>
+
+## Configurar (≈2 minutos)
+
+<Steps>
+
+1. Abre Shakespeare en [shakespeare.diy](https://shakespeare.diy).
+
+2. Ve a **Settings → AI Provider**.
+
+3. Elige un proveedor **permitido** — uno de: Anthropic, DeepSeek, Kimi (Moonshot),
+   OpenRouter, OpenCode Zen, PayPerQ, u **Ollama** local.
+
+4. Pega tu propia clave de API para ese proveedor (BYOK). Se almacena localmente en
+   el IndexedDB de tu navegador — no se envía a los servidores de Shakespeare.
+
+5. **No** selecciones OpenAI ni xAI.
+
+</Steps>
+
+## Verificar (≈5 minutos)
+
+La configuración solo es fiable si la confirmas. Observa la red mientras
+usas la app:
+
+```sh
+# En la pestaña Network de las herramientas de desarrollo del navegador, o mediante un proxy/inspector,
+# usa Shakespeare durante ~5 minutos y confirma que NO hay solicitudes a:
+#   api.openai.com
+#   api.x.ai
+```
+
+Si elegiste Anthropic, deberías ver tráfico hacia `api.anthropic.com` y
+nada hacia ningún host excluido. Si elegiste Ollama local, deberías ver tráfico
+solo hacia `localhost`.
+
+<Aside type="caution" title="Un bloqueo, no un resquicio">
+Esta receta no convierte a Shakespeare en una herramienta "de confianza", y no concede ningún
+permiso para tocar proveedores excluidos. Es lo contrario: una restricción vinculante
+que los **prohíbe**. El
+[contrato de receta](/es/policies/enforcement/#locking-down-configurable-tools-recipes)
+exige que cada proveedor de LLM excluido aparezca en
+<code>must_not_be_one_of</code> y que los pasos de verificación bloqueen sus
+puntos de acceso — de modo que una receta que en silencio no lograra prohibir OpenAI es **rechazada** por CI.
+</Aside>
+
+## Aplicar el mismo patrón en otros casos
+
+Cualquier arnés de agente que uses para construir con este catálogo — Goose, Claude Code, Aider —
+debería seguir la misma disciplina BYOK: elige un proveedor permitido, aporta tu propia
+clave, y verifica la red. Consulta el [inicio rápido](/es/start/quickstart/).

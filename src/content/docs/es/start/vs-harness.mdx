@@ -1,0 +1,75 @@
+---
+title: ¿Por qué no usar Goose sin más?
+description: La diferencia entre un harness de agente de IA (Goose, Claude Code, Aider) y la capa de orquestación que decide, verifica y rechaza.
+entry_type: page
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Goose es un **harness** — un marco de propósito general para conectar un modelo de IA
+a herramientas, archivos y APIs para que pueda ejecutar tareas. Claude Code también lo es. Aider
+también. Son genuinamente útiles, y este proyecto está hecho para funcionar encima de
+ellos, no para reemplazarlos.
+
+Pero un harness no sabe qué deberías construir. No sabe qué
+dependencias son seguras. No sabe qué licencia cambió la semana pasada, y no
+tiene una opinión sobre nada de eso. **Tú** aportas la intención, la
+arquitectura, la política y los estándares de verificación. El harness aporta las
+manos.
+
+## La brecha que se abre
+
+Eso funciona para personas que ya saben lo que hacen. Un organizador comunitario
+que necesita una herramienta para documentar desalojos ilegales no puede abrir Goose y decir "constrúyeme
+lo que necesito" — no porque Goose no pueda escribir código, sino porque nadie le dijo
+a Goose:
+
+- qué debería ser realmente la cosa,
+- qué dependencias son confiables,
+- cuáles cambiaron silenciosamente a una licencia no libre el mes pasado,
+- qué patrones arquitectónicos protegen los datos de los usuarios frente a actores estatales,
+- o qué vía de despliegue no pasa por infraestructura de vigilancia.
+
+El harness ejecuta. No decide, no verifica y no
+rechaza.
+
+## Qué es este proyecto
+
+**We Can Just Build Things es la capa por encima del harness.** Es la intención
+estructurada, el catálogo de dependencias verificado, la política de exclusión con dientes para
+imponerla, y el flujo de decisión anclado en PIE que lleva a alguien desde "mi comunidad
+tiene este problema" hasta "aquí está la arquitectura, aquí están los componentes revisados,
+aquí está la receta que los ensambla bajo estas restricciones."
+
+Cuando un agente finalmente se ejecuta — ya sea Goose, Claude Code o cualquier otra cosa —
+lo hace dentro de un marco de decisiones que ya se han tomado, verificado y
+documentado. Las habilidades aquí no son prompts abiertos del tipo "haz lo que te parezca correcto";
+son flujos de trabajo acotados con archivos de política que se leen primero, disparadores de detener-y-preguntar
+cuando falta información, y un [motor de imposición de tres
+capas](/es/policies/enforcement/) que bloquea el commit si algo viola la
+política de exclusión.
+
+<Aside type="note" title="El taladro y los planos">
+La diferencia es la misma que entre darle a alguien un taladro eléctrico y darle
+un taladro eléctrico **además de** los planos, la lista de materiales con cada tabla
+inspeccionada, el código de construcción, y un capataz que no le permitirá levantar una pared con
+madera podrida. Goose es el taladro. Esto es todo lo demás. El harness es
+intercambiable; la capa de orquestación es el producto.
+</Aside>
+
+## Por qué la distinción no es académica
+
+Un harness optimiza para la cabeza corta: la demo, el primer despliegue, la
+charla de conferencia. En la cola larga — el mes seis de producción, el operador de relay
+que descubre que nunca se añadió la limitación de tasa, el organizador que se entera de que su
+canalización de moderación enviaba silenciosamente contenido de usuarios a un modelo de terceros — la
+ausencia de verificación se acumula en daño real.
+
+Este proyecto está hecho para la persona en la cola larga: aquella cuya seguridad
+depende de lo que construye, que necesita tomar decisiones con los ojos abiertos.
+Los [avisos operativos](/es/policies/), el [motor de
+imposición](/es/policies/enforcement/) y las [recetas de configuración](/es/recipes/) son
+los mecanismos que mueven la rendición de cuentas desde las buenas intenciones de un narrador hasta un
+artefacto estable que puede ser inspeccionado por la persona que asume el riesgo.

@@ -1,0 +1,44 @@
+---
+title: Apéndice
+description: El kit de herramientas y los recursos — incluido el propio catálogo verificado y las habilidades del agente.
+entry_type: pie
+sidebar:
+  order: 6
+---
+
+import { Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+El *Apéndice* del PIE Cookbook reúne estadísticas, desgloses por clase, un kit de
+herramientas y recursos. Aquí, el apéndice es sobre todo un conjunto de enlaces a las
+partes de este proyecto que usarás mientras cocinas.
+
+<Aside type="note" title="Desde la fuente">
+Esto adapta las subsecciones *Apéndice → Kit de herramientas / Recursos* del
+[PIE Cookbook](https://github.com/piepdx/pie-cookbook).
+</Aside>
+
+## El kit de herramientas
+
+<CardGrid>
+  <LinkCard title="El catálogo" href="/es/catalog/" description="Cada ingrediente evaluado, con licencia revisada en un commit." />
+  <LinkCard title="Las recetas" href="/es/recipes/" description="Patrones de configuración que conectan herramientas entre sí de forma segura." />
+  <LinkCard title="Las habilidades" href="/es/contribute/" description="Habilidades del agente y recetas de Goose que codifican la disciplina." />
+  <LinkCard title="El arquetipo" href="/es/contribute/" description="Un andamiaje de Spec Kit para clientes de Nostr + AT Protocol." />
+</CardGrid>
+
+## Recursos
+
+- **La política de exclusión** — [qué se excluye y por qué](/es/policies/).
+- **Cómo funciona la aplicación** — [el motor de tres capas en lenguaje sencillo](/es/policies/enforcement/).
+- **Privacidad y seguridad** — [cómo trata este sitio tus datos](/es/privacy/) y su
+  [postura de seguridad](/es/security/).
+- **El PIE Cookbook** — la metodología original, en
+  [github.com/piepdx/pie-cookbook](https://github.com/piepdx/pie-cookbook).
+
+## Una nota sobre las estadísticas
+
+El cookbook informa sobre cohortes y resultados. El equivalente aquí es la propia
+salud del catálogo: cuántas entradas están `verified` frente a `under_review`, y qué
+tan recientes son los datos de licencia y mantenimiento. Esos números los produce la
+automatización semanal descrita en [Acerca de y mantenimiento](/es/about/), no se
+afirman a mano.

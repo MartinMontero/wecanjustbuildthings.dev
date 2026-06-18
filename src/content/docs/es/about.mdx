@@ -1,0 +1,86 @@
+---
+title: Acerca de y mantenimiento
+description: Qué es este proyecto, cómo se mantiene actualizado y por qué está diseñado para sobrevivir a su primer responsable.
+entry_type: page
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+**We Can Just Build Things** es un catálogo verificado, con valores garantizados,
+y un flujo de construcción guiado para publicar herramientas de Nostr, AT Protocol
+y software libre en general con agentes de IA. Existe para darle a la persona que
+define lo que su comunidad necesita una forma de entregar un producto de nivel
+profesional sin tener que convertirse antes en desarrollador — y para hacer que el
+resultado rinda cuentas a las personas que dependen de él.
+
+Está construido para ser **infraestructura compartida**, no un jardín amurallado.
+La metodología es abierta, el catálogo es abierto y el motor de cumplimiento es
+abierto.
+
+## Cómo se mantiene actualizado
+
+El mantenimiento funciona en tres capas, que aumentan en coste a medida que subes.
+Todo el diseño asume que las personas son escasas y la automatización es barata —
+cualquier cosa que pueda verificarse con herramientas se verifica con herramientas.
+
+### Automatizado, semanal, gratuito
+Una GitHub Action programada se ejecuta cada lunes y:
+- **license-watcher** calcula el hash de cada `LICENSE` upstream, lo compara con la
+  licencia + commit registrados y escanea los commits recientes en busca de
+  palabras clave de cambio de licencia
+  (`relicens`, `now under`, `BSL`, `SSPL`, …) — tres señales independientes, así
+  que detecta un cambio de licencia silencioso antes de que sea una sorpresa.
+- **maintenance-checker** consulta el feed de versiones de cada entrada y
+  reclasifica el estado
+  (`active` < 90d, `minimal` < 12mo, `dormant` < 36mo, `abandoned` más allá).
+- El **motor de cumplimiento de tres capas** se vuelve a ejecutar contra el árbol
+  completo, de modo que una dependencia transitiva que de pronto incorpora un
+  proveedor excluido se detecta incluso cuando ningún manifiesto cambió.
+
+Cada una abre un PR con el diff propuesto. No se necesita ninguna persona hasta que
+el PR existe.
+
+### Revisión humana, semanal, poco esfuerzo
+Un responsable echa un vistazo a los PR del bot — normalmente ~15 minutos a la
+semana. Las contribuciones de herramientas nuevas llegan mediante
+[plantilla de issue y CMS](/es/contribute/), que ejecutan el motor de cumplimiento
+antes de que un PR sea fusionable, así que la revisión consiste sobre todo en
+"¿esto encaja, es precisa la descripción?" en lugar de "¿está esto limpio?".
+**SLA de revisión: 7 días hábiles** para la primera respuesta.
+
+### Periódico, mayor, programado
+Dos veces al año, una pasada completa de reverificación refresca cada SHA de commit
+de licencia, revalida los enlaces a las fuentes primarias y regenera los metadatos
+de adopción. Como las herramientas hacen el trabajo pesado, esto es medio día
+revisando diffs, no una auditoría desde cero.
+
+<Aside type="note" title="La parte honesta">
+Un catálogo de esta escala mantenido a mano se derrumbaría en seis meses —
+todo directorio comparable que lo ha intentado lo ha hecho. Este funciona solo
+porque la verificación está automatizada. Las personas dedican su atención a lo que
+las herramientas realmente no pueden decidir: el criterio editorial, la estructura
+de categorías nuevas y las exclusiones controvertidas.
+</Aside>
+
+## Diseñado para sobrevivir a su primer responsable
+
+Si el responsable original desaparece el día quince, otra persona puede bifurcar el
+repositorio, ejecutar los mismos flujos de trabajo, y el catálogo sigue
+verificándose a sí mismo. La
+[lista de comprobación de transferencia de acceso](https://github.com/martinmontero/wecanjustbuildthings.dev)
+del repositorio cubre el traspaso limpio de la propiedad del hosting, el DNS y la
+analítica.
+
+## Linaje y atribución
+
+- El flujo de construcción adapta el abierto [PIE Cookbook](https://github.com/piepdx/pie-cookbook)
+  del Portland Incubator Experiment.
+- El catálogo se fundamenta en lo que el colectivo **And Other Stuff** usa de hecho
+  para publicar proyectos de tecnología de la libertad.
+- El modelo de receta de bloqueo de proveedor está anclado al diseño BYOK de
+  [Shakespeare](https://gitlab.com/soapbox-pub/shakespeare).
+
+## ¿Quieres ayudar?
+
+Consulta [Contribuir](/es/contribute/) para añadir una herramienta, corregir una
+entrada o adaptar el flujo a tu propio programa.

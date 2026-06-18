@@ -1,0 +1,111 @@
+---
+title: Las Diez Preguntas
+description: El método socrático integrado — diez preguntas a través de cuatro lentes (primeros principios, intención, habilidades de agentes, la ventaja humana) más el flujo de trabajo completo de 8 pasos.
+sidebar:
+  order: 2
+  label: Las Diez Preguntas
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+> Adaptado de **The Socratic Intent Engineer** de Martin Montero. Cada pregunta
+> lleva hasta cuatro lentes — **Primeros principios**, **Intención**, **Habilidades de agentes**,
+> y la **Ventaja humana** — aplicadas allí donde se ganan su lugar. Hazlas antes de
+> apuntar un agente hacia cualquier cosa; el [Estudio de construcción](/es/build/) convierte tus respuestas
+> en una constitución de proyecto, una especificación y un prompt para el agente.
+
+## I. Entender el objetivo
+
+**1 · ¿Qué quiero exactamente que haga la IA?**
+Disecciona el resultado — ¿una pieza creativa, un resumen, código, un flujo de trabajo de múltiples pasos, una
+tarea autónoma? *Primeros principios:* ¿cuál es el problema irreducible? (No "un
+informe" sino "tres personas entienden tres riesgos en cinco minutos".) *Intención:* ¿estoy
+definiendo la tarea, o el objetivo detrás de ella? *Ventaja humana:* ¿qué necesita
+existir de verdad — lo que nadie pidió pero todos necesitan?
+
+**2 · ¿Por qué quiero este resultado?**
+El *porqué* ilumina el *qué*. *Primeros principios:* cuestiona el porqué en sí —
+¿necesitan un informe semanal, o mantenerse al tanto de los cambios? *Intención:* aquí
+es donde un indicador medible y el propósito real divergen. Conecta el trabajo con el
+objetivo antes de escribir un prompt.
+
+**3 · ¿Cuáles son las restricciones y las métricas de éxito?**
+Audiencia, conocimiento previo, impacto emocional, criterios medibles. *Primeros principios:*
+para cada restricción — ¿requisito ineludible, o "como se ha hecho siempre"?
+*Intención:* fija las métricas a la altura correcta (valor de por vida, no tiempo de resolución).
+*Habilidades de agentes:* incorpora la evaluación dentro de la habilidad — autocontroles y reglas de escalado.
+
+## II. Definir la entrada
+
+**4 · ¿Qué información esencial necesita la IA?**
+No supongas que comparte tu conocimiento. *Intención:* para los agentes, el contexto es
+conocimiento organizativo — valores, jerarquías de compromisos, límites de decisión,
+no solo datos. *Ventaja humana:* tu experiencia vivida — los lanzamientos que fracasaron —
+es contexto que ningún conjunto de entrenamiento contiene.
+
+**5 · ¿Cómo debería presentar esta información?**
+Datos estructurados como JSON/CSV; texto largo con una jerarquía clara. *Intención:* a escala
+de agentes esto es arquitectura — estructuras de objetivos, marcos de delegación con límites de
+decisión, bucles de retroalimentación que se cierran.
+
+## III. Dar forma al resultado
+
+**6 · ¿Cuál es el formato ideal?**
+*Primeros principios:* no "¿qué formato?" sino "¿qué necesita *hacer* el destinatario,
+y qué le quita la mayor fricción a esa acción?" *Habilidades de agentes:* una habilidad
+podría emitir una hoja de cálculo con fórmulas en vivo, o un panel, no una tabla estática.
+
+**7 · ¿Cuáles son el estilo y el tono precisos?**
+Referencias específicas, no descriptores vagos. *Ventaja humana:* el estilo es el gusto hecho
+visible — nombra la voz exacta, y reconócela cuando llegue.
+
+**8 · ¿Cuáles son los criterios de éxito innegociables?**
+Decláralos antes de ejecutar nada. *Intención:* ¿estás midiendo lo correcto?
+El tiempo de resolución parecía correcto hasta que dejó de serlo. Define el éxito al nivel del
+propósito, no de la finalización de la tarea.
+
+## IV. Refinamiento iterativo
+
+**9 · ¿El resultado cumplió de verdad mis criterios?**
+*Primeros principios:* cuando falla, resiste el impulso de retocar la superficie — ¿el fallo está en
+el prompt, o en tus suposiciones? *Ventaja humana:* no "¿cumple los criterios?"
+sino "¿tiene esto la vitalidad que lo hace digno de ponerse en el mundo?"
+
+**10 · ¿Cómo reviso para guiar a la IA hacia el resultado?**
+Refina las restricciones, añade ejemplos, cambia de técnica. *Intención:* cierra el bucle —
+¿estuvo la decisión del agente alineada con la intención, y cómo mides la deriva con el tiempo?
+
+<Aside type="tip" title="Operativizadas en el Estudio de construcción">
+No tienes que tener las diez en la cabeza. El [Estudio de construcción](/es/build/) hace las
+que dan forma a la construcción — el objetivo, el *porqué* detrás de él, los criterios de éxito — y
+pliega tus respuestas en la constitución, la especificación y el prompt del agente generados, para que el
+agente apunte a tu intención real desde el primer commit.
+</Aside>
+
+## El flujo de trabajo completo
+
+Una secuencia práctica siempre que diseñes un prompt, construyas una habilidad o diseñes un
+flujo de trabajo de agentes:
+
+<Steps>
+
+1. **Identifica el problema fundamental** — quita el formato y la convención; escribe
+   la necesidad irreducible en una sola frase.
+2. **Conecta con la intención organizativa** — ¿a qué objetivo sirve esto? Codifica el
+   objetivo, no solo la tarea (compromisos, límites, escalado).
+3. **Cuestiona cada suposición heredada** — ¿verdad fundamental, o hábito?
+4. **Descompón en componentes irreducibles** — las unidades más pequeñas, un propósito cada una.
+5. **Reconstruye desde primeros principios** — ensambla las piezas que resuelven *tu*
+   problema; no copies una plantilla.
+6. **Aplica tu gusto** — ¿refleja esto tu intención real y tu lectura de
+   lo que la audiencia necesita?
+7. **Prueba contra la realidad** — escenarios reales, casos límite, entradas adversarias;
+   evalúa contra los criterios que fijaste de antemano.
+8. **Itera con disciplina y coraje** — una brecha por pasada; a veces lo correcto
+   es tirarlo porque la dirección estaba equivocada. Luego cierra el bucle.
+
+</Steps>
+
+Luego entrégalo al agente — a través de [PIE](/es/pie/cooking/) y el
+[Estudio de construcción](/es/build/) — y mantén cada cambio en verde con el
+[motor de aplicación](/es/policies/enforcement/).

@@ -1,0 +1,103 @@
+---
+title: بداية سريعة مع وكيل
+description: استخدم الكتالوج والمهارات والوصفات مع Goose أو Claude Code لبناء أداة Nostr أو AT Protocol — مع فرض سياسة الاستبعاد قبل إطلاق أي شيء.
+entry_type: page
+sidebar:
+  order: 3
+---
+
+import { Steps, Tabs, TabItem, Aside, Code } from '@astrojs/starlight/components';
+
+ينقلك هذا من الصفر إلى نقطة بداية مدقَّقة ونظيفة من حيث السياسات لأداة Nostr أو
+AT Protocol، باستخدام وكيل ذكاء اصطناعي كمتعاون ماهر. لا يفترض شيئًا
+سوى وجود طرفية (terminal).
+
+<Aside type="caution" title="أحضر مفتاح النموذج الخاص بك — وأبقِه نظيفًا">
+الغرض الكامل من هذا المشروع هو ألا يمر ما تبنيه عبر مزوِّدين
+مُستبعَدين. عند تهيئة الوكيل، استخدم مزوِّد نموذج مسموحًا به
+(Anthropic أو DeepSeek أو Kimi أو OpenRouter أو Ollama المحلي). راجع
+[وصفة Shakespeare BYOK](/ar/recipes/shakespeare-byok-configuration/) لمعرفة
+النمط وكيفية التحقق منه.
+</Aside>
+
+## 1. ثبّت هيكل تشغيل
+
+<Tabs>
+  <TabItem label="Goose">
+    Goose هو هيكل تشغيل وكيل مفتوح المصدر تتولى الإشراف عليه الآن مؤسسة Linux
+    Foundation. ثبّته وهيّئه مع مزوِّد **مسموح به**:
+
+    ```sh
+    # See https://block.github.io/goose/ for the current installer
+    curl -fsSL https://block.github.io/goose/install.sh | bash
+    goose configure   # choose Anthropic / OpenRouter / Ollama — not OpenAI or xAI
+    ```
+  </TabItem>
+  <TabItem label="Claude Code">
+    ```sh
+    npm install -g @anthropic-ai/claude-code
+    claude            # in your project directory
+    ```
+  </TabItem>
+</Tabs>
+
+## 2. أنشئ السقالة من النموذج الأصلي لـ Nostr / AT Protocol
+
+يأتي المستودع مع [نموذج أصلي لـ Spec Kit](/ar/contribute/) لعميل ويب Nostr + AT
+Protocol يحظر دستوره التبعيات المُستبعَدة ويربط
+محرك الفرض.
+
+```sh
+git clone https://github.com/martinmontero/wecanjustbuildthings.dev
+cp -r wecanjustbuildthings.dev/templates/spec-kit/nostr-web-client my-app
+cd my-app
+```
+
+## 3. اختر المكونات من الكتالوج، لا من الذاكرة
+
+لا تسأل الوكيل "أي مكتبة ينبغي أن أستخدم لـ Nostr؟" — اسأل الكتالوج.
+كل مدخل [تم التحقق من ترخيصه عند commit](/ar/policies/) وفُحص مقابل
+[سياسة الاستبعاد](/ar/policies/enforcement/).
+
+<Steps>
+
+1. تصفّح [الكتالوج](/ar/catalog/) أو [مرحلة مسار البناء](/ar/pie/cooking/) ذات الصلة.
+2. دوّن المكونات التي تريدها (مثل `nostr-tools`، `@noble/curves`،
+   `@atproto/api`).
+3. سلِّم الوكيل القائمة **و**القيد: *"استخدم هذه فقط، وشغّل
+   محرك الفرض قبل عمل commit."*
+
+</Steps>
+
+## 4. دع الوكيل يبني داخل الحواجز الواقية
+
+تأتي [المهارات](/ar/contribute/) كمهارات Claude Code ووصفات Goose على حد سواء.
+تقرأ السياسة أولًا، وتتوقف وتسأل عند نقص المعلومات، وترفض
+عمل commit عند انتهاك السياسة.
+
+```sh
+# After the agent makes changes, the same gate CI runs:
+npm run enforce        # catalog + recipe checks
+npx tsx enforcement/cli.ts all --tree .   # scan this project's own tree
+```
+
+إذا كانت تبعية ما — أو إحدى تبعياتها *هي* — مملوكة لـ Meta أو OpenAI أو
+xAI، يطبع المحرك السلسلة الدقيقة ويخرج بقيمة غير صفرية. لا يُطلق شيء حتى
+يصبح أخضر.
+
+## 5. تحقق من الموقف تجاه المزوِّدين
+
+قبل النشر، تأكد من أن التطبيق العامل لا يتواصل مع أي نقطة نهاية مُستبعَدة. تصف
+الوصفات فحص مراقبة شبكة مدته 5 دقائق؛ المبدأ بسيط:
+
+```sh
+# Watch outbound connections while exercising the app; none should hit
+# api.openai.com, api.x.ai, or graph.facebook.com
+```
+
+<Aside type="tip" title="ما تنتهي إليه">
+أثر مستقر يمكن لشخص ما تدقيقه: تبعيات مثبَّتة وتم التحقق من تراخيصها؛ وموقف
+نظيف تجاه المزوِّدين؛ وترخيص حقيقي؛ وبناء يفشل بصوت عالٍ إذا تراجع أي
+من ذلك. هذا هو الفرق بين "وكيل كتب بعض الكود" و
+"أطلقنا شيئًا يمكن مساءلته."
+</Aside>

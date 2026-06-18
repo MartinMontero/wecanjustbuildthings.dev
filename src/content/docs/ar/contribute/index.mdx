@@ -1,0 +1,93 @@
+---
+title: إضافة أداة
+description: كيف تساهم بأداة أو وصفة أو تصحيح — وكيف يضبط محرّك الإنفاذ كل مساهمة قبل أن تتمكّن من الدمج.
+entry_type: page
+sidebar:
+  order: 1
+  label: إضافة أداة
+---
+
+import { Steps, Tabs, TabItem, Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+هذه بنية تحتية مشتركة للحركة، وتتحسّن في كل مرة يضيف فيها أحدهم الأداة التي كان
+يتمنّى لو وجدها. والأفضل من ذلك كلّه أن البوابة **آلية، لا اجتماعية** — لا شِلَل،
+ولا حُرّاس بوابات: **تدخل الأداة إذا اجتازت [محرّك الإنفاذ](/ar/policies/enforcement/)
+ووُصِفت بدقّة.** سؤال "هل هذا الاعتماد نظيف؟" يجيب عليه الـ CI سلفًا، فتنحصر
+مهمّة الإنسان في "هل يناسب هذا، وهل وُصِف بأمانة." مساهمتك تساعد الشخص المنظِّم
+التالي الذي يحتاجها.
+
+## إضافة أداة
+
+<Tabs>
+  <TabItem label="قالب issue">
+    المسار الأقل احتكاكًا. افتح issue باسم **New tool** واملأ اسم الاعتماد،
+    والنظام البيئي، ورابط المصدر الأولي، والرخصة المُعلَنة. القالب منظَّم بحيث
+    يستطيع القائم على الصيانة (أو skill وكيل) تحويله إلى مدخل موثَّق.
+
+    [افتح issue أداة جديدة →](https://github.com/martinmontero/wecanjustbuildthings.dev/issues/new?template=new-tool.yml)
+  </TabItem>
+  <TabItem label="CMS (بدون Git)">
+    لغير المطوّرين، يأتي الموقع مزوّدًا بنظام إدارة محتوى قائم على Git
+    (**Sveltia**) على `/admin/`. سجّل الدخول عبر GitHub، واملأ الحقول، وسيفتح
+    لك طلب سحب — طلب السحب نفسه الذي يفتحه المطوّر، فيُشغَّل الـ CI نفسه.
+  </TabItem>
+  <TabItem label="Pull request">
+    ولّد مدخلًا بأدوات الفهرس وافتح طلب سحب:
+
+    ```sh
+    # add your tool to data/seed-catalog.json, then:
+    npm run data:fetch          # fetches license @ commit, maintenance, metadata
+    npm run enforce             # must pass
+    npm run check               # astro schema validation
+    ```
+  </TabItem>
+</Tabs>
+
+## ما الذي يفحصه الـ CI قبل الدمج
+
+<Steps>
+
+1. **`astro check`** — يطابق frontmatter مدخلك المخطّط (يجب أن يثبّت المدخل
+   الموثَّق كوميت رخصة؛ ويجب أن يذكر المدخل المحظور السبب).
+
+2. **طبقة الإنفاذ 1** — الأداة ليست مملوكة لمنظمة مستبعَدة.
+
+3. **عقد الوصفة** (إذا أضفت وصفة) — يستهدف مدخلًا من نوع `provider_agnostic`
+   ويستبعد فعليًا مزوّدي نماذج اللغة الكبيرة.
+
+4. **فحص الروابط الميتة** — تُحَلّ روابط مصدرك الأولي ورخصتك.
+
+</Steps>
+
+<Aside type="caution" title="المحرّك ليس استشاريًا">
+إذا أدخلت مساهمتك اعتمادًا على Meta أو OpenAI أو xAI — بشكل مباشر أو عابر —
+يفشل طلب السحب ولا يمكن دمجه. هذه ميزة. استخدم
+[وصفة مستقلّة عن المزوّد](/ar/recipes/shakespeare-byok-configuration/) إذا كانت
+الأداة تدعم بشكل مشروع مزوّدًا مسموحًا به.
+</Aside>
+
+## ابنِ بالـ skills والنموذج الأصلي
+
+يأتي المستودع أيضًا مزوّدًا بأصول قابلة لإعادة الاستخدام للبناء *مع* وكيل:
+
+<CardGrid>
+  <LinkCard
+    title="Skills الوكيل"
+    href="https://github.com/martinmontero/wecanjustbuildthings.dev/tree/main/skills"
+    description="catalog-entry-author، license-watcher، maintenance-checker — بصفتها skills لـ Claude Code ووصفات Goose. تشغّل كلٌّ منها محرّك الإنفاذ قبل الكوميت."
+  />
+  <LinkCard
+    title="نموذج Spec Kit الأصلي"
+    href="https://github.com/martinmontero/wecanjustbuildthings.dev/tree/main/templates/spec-kit/nostr-web-client"
+    description="هيكل لعميل ويب لـ Nostr + AT Protocol يحظر دستوره الاعتمادات المستبعَدة."
+  />
+</CardGrid>
+
+اطّلع على [البدء السريع](/ar/start/quickstart/) لاستخدامها مع Goose أو Claude
+Code، و[إرشادات المساهمة](https://github.com/martinmontero/wecanjustbuildthings.dev/blob/main/CONTRIBUTING.md)
+للتدفّق الكامل.
+
+## الصيانة والحوكمة
+
+كيف يبقى الفهرس محدّثًا، واتفاقيات مستوى خدمة المراجعة، وكيف صُمّم ليتجاوز عمر
+القائم على صيانته الأول — كلّها موثّقة في [حول المشروع والصيانة](/ar/about/).

@@ -1,0 +1,74 @@
+---
+title: Conecta GitHub (repo con un clic)
+description: Crea una cuenta de GitHub y usa el botón de un clic del Build Studio para enviar tu plantilla generada directamente a un repositorio nuevo — además de la configuración para el responsable de mantenimiento.
+sidebar:
+  order: 2
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+La opción **Crear repo de GitHub** del [Build Studio](/es/build/) envía tu
+plantilla generada (constitución, especificación, prompt del agente, receta, `package.json`) directamente a un
+repositorio totalmente nuevo — sin zip, sin terminal.
+
+<Aside type="tip" title="Es tu cuenta, tu repo">
+Cada builder conecta **su propia** cuenta de GitHub. Cuando haces clic en *Conectar
+GitHub*, inicias sesión como tú mismo, el repo se crea en **tu** cuenta, y el
+token de acceso vive solo en tu navegador durante unos minutos — nunca en nuestro servidor,
+nunca se comparte con nadie más. El responsable de mantenimiento registra la app una sola vez (paso
+más abajo); después de eso, cada builder la autoriza por sí mismo.
+</Aside>
+
+## Para builders
+
+<Steps>
+
+1. **Crea una cuenta de GitHub** (gratis): ve a
+   [github.com/signup](https://github.com/signup), introduce un correo, una contraseña y un
+   nombre de usuario, y verifica tu correo. Eso es todo.
+2. En el [Build Studio](/es/build/), completa los pasos 1–2, luego en **Generar** elige
+   **Crear repo de GitHub**.
+3. Haz clic en **Conectar GitHub y crear repo**. GitHub te pide autorizar la app
+   con permiso para crear un repositorio público — revísalo y apruébalo.
+4. Vuelves al Studio; haz clic en **Crear**. Tu nuevo repo se abre con todos
+   los archivos de la plantilla dentro. Clónalo y apunta tu agente a él.
+
+</Steps>
+
+<Aside type="note" title="A qué puede acceder">
+La autorización solicita únicamente `public_repo` — lo justo para crear un repo público
+y añadir archivos. No puede tocar tus repos privados. El token es de corta duración y
+se mantiene solo durante el momento de la creación.
+</Aside>
+
+## Para el responsable de mantenimiento (configuración única)
+
+El botón de un clic necesita **una** app OAuth de GitHub y dos secretos del Worker — registrados
+una vez, para todo el despliegue. Esto es la *identidad* de la app (el nombre que los builders
+ven en la pantalla de autorización de GitHub), no un token de acceso personal: simplemente
+permite que cualquier builder autorice con su propia cuenta. Hasta que se configuren, el
+Studio muestra un mensaje de "no configurado" y ofrece el `.zip` en su lugar.
+
+<Steps>
+
+1. **Registra una app OAuth:** GitHub → Settings → Developer settings →
+   **OAuth Apps → New OAuth App**.
+   - Homepage URL: `https://wecanjustbuildthings.dev`
+   - Authorization callback URL: `https://wecanjustbuildthings.dev/api/github/callback`
+2. Copia el **Client ID** y genera un **Client secret**.
+3. Añádelos como secretos del Worker (panel de Cloudflare → tu Worker → Settings →
+   Variables and Secrets), o por CLI:
+   ```sh
+   npx wrangler secret put GITHUB_OAUTH_CLIENT_ID
+   npx wrangler secret put GITHUB_OAUTH_CLIENT_SECRET
+   ```
+4. Vuelve a desplegar. `/api/github/status` reportará `configured: true` y el botón de un clic
+   se activa.
+
+</Steps>
+
+<Aside type="tip" title="¿Sin configuración? Sigue siendo totalmente usable">
+Sin la app OAuth, todos los demás métodos de entrega funcionan: **Descargar .zip**, **Ejecutar con
+Goose** y **Arrancar con IA (BYOK)**. El botón de un clic es una comodidad, no un
+requisito.
+</Aside>

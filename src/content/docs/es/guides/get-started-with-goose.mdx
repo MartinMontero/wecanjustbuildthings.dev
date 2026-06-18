@@ -1,0 +1,73 @@
+---
+title: Empieza con Goose
+description: Descarga e instala Goose, configura un proveedor permitido de tipo bring-your-own-key, y ejecuta una receta exportada desde el Build Studio — un comando para empezar localmente.
+sidebar:
+  order: 1
+---
+
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+[Goose](https://block.github.io/goose/) es un agente de IA gratuito y de código abierto que se ejecuta
+en **tu** máquina — así puede crear archivos y ejecutar código de verdad, algo que una
+app web no puede. El [Build Studio](/es/build/) exporta una **receta de Goose** que lo configura
+con la constitución, el stack verificado y la intención de tu proyecto.
+
+<Aside type="caution" title="Trae un proveedor permitido">
+Configura Goose con un proveedor de modelos permitido, de tipo bring-your-own-key — **Anthropic,
+DeepSeek, Kimi, OpenRouter, o Ollama local**. **No** uses OpenAI ni xAI; eso
+rompería la propia política bajo la que estás construyendo.
+</Aside>
+
+## 1. Instala Goose
+
+<Tabs>
+  <TabItem label="macOS / Linux">
+    ```sh
+    curl -fsSL https://block.github.io/goose/install.sh | bash
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    Usa WSL, luego ejecuta el comando de macOS/Linux de arriba. (Consulta los
+    [docs oficiales](https://block.github.io/goose/docs/getting-started/installation/)
+    para el instalador más reciente.)
+  </TabItem>
+</Tabs>
+
+## 2. Configura un proveedor permitido (BYOK)
+
+<Steps>
+
+1. Consigue una clave de API de un proveedor permitido (p. ej. una cuenta de Anthropic, DeepSeek u
+   OpenRouter). Le pagas al proveedor directamente — tu clave se queda en tu
+   máquina.
+2. Ejecuta el configurador y elige ese proveedor:
+   ```sh
+   goose configure
+   ```
+   Elige **Anthropic / OpenRouter / DeepSeek / Ollama** — *no* OpenAI ni xAI.
+
+</Steps>
+
+## 3. Ejecuta la receta de tu proyecto
+
+<Steps>
+
+1. En el [Build Studio](/es/build/), elige **Ejecutar con Goose** en el paso Generar
+   y **Descargar receta de Goose** (un `.goose-recipe.yaml`).
+2. Desde la carpeta de tu proyecto, ejecuta:
+   ```sh
+   goose run --recipe my-app.goose-recipe.yaml
+   ```
+3. Goose lee la constitución y la intención de la receta, usa solo el stack verificado,
+   y empieza a construir. Mantén cada cambio limpio:
+   ```sh
+   npx tsx ./enforcement/cli.ts all --tree .
+   ```
+
+</Steps>
+
+<Aside type="tip" title="¿Prefieres no instalar nada?">
+También puedes **Descargar .zip** (ábrelo con cualquier agente), usar **Crear repo de GitHub**
+para un arranque remoto con un clic, o **Arrancar con IA (BYOK)** para generar un
+plan desde el navegador. El Studio te deja elegir.
+</Aside>

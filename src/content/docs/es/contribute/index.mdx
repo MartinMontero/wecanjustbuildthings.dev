@@ -1,0 +1,102 @@
+---
+title: Añadir una herramienta
+description: Cómo contribuir con una herramienta, una receta o una corrección — y cómo el motor de cumplimiento controla cada contribución antes de que pueda fusionarse.
+entry_type: page
+sidebar:
+  order: 1
+  label: Añadir una herramienta
+---
+
+import { Steps, Tabs, TabItem, Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+Esto es infraestructura compartida para el movimiento, y mejora cada vez que
+alguien añade la herramienta que ojalá hubiera encontrado. Lo mejor de todo es que
+el control es **mecánico, no social** — sin camarillas, sin guardianes:
+**una herramienta entra si pasa el [motor de cumplimiento](/es/policies/enforcement/)
+y se describe con precisión.** El "¿está limpia esta dependencia?" ya lo responde
+CI, así que el único trabajo de una persona es "¿esto encaja, está descrito con
+honestidad?". Tu contribución ayuda a la siguiente persona organizadora que la
+necesite.
+
+## Añadir una herramienta
+
+<Tabs>
+  <TabItem label="Plantilla de issue">
+    El camino con menos fricción. Abre un issue **New tool** y rellena el nombre de
+    la dependencia, el ecosistema, la URL de la fuente primaria y la licencia
+    declarada. La plantilla está estructurada para que un responsable (o una skill
+    de agente) pueda convertirla en una entrada verificada.
+
+    [Abrir un issue de herramienta nueva →](https://github.com/martinmontero/wecanjustbuildthings.dev/issues/new?template=new-tool.yml)
+  </TabItem>
+  <TabItem label="CMS (sin Git)">
+    Para quienes no son desarrolladores, el sitio incluye un CMS basado en Git
+    (**Sveltia**) en `/admin/`. Inicia sesión con GitHub, rellena los campos y abre
+    un pull request por ti — el mismo PR que abriría un desarrollador, así que se
+    ejecuta el mismo CI.
+  </TabItem>
+  <TabItem label="Pull request">
+    Genera una entrada con las herramientas del catálogo y abre un PR:
+
+    ```sh
+    # add your tool to data/seed-catalog.json, then:
+    npm run data:fetch          # fetches license @ commit, maintenance, metadata
+    npm run enforce             # must pass
+    npm run check               # astro schema validation
+    ```
+  </TabItem>
+</Tabs>
+
+## Qué comprueba CI antes de una fusión
+
+<Steps>
+
+1. **`astro check`** — el frontmatter de tu entrada coincide con el esquema (una
+   entrada verificada debe fijar un commit de licencia; una entrada bloqueada debe
+   decir por qué).
+
+2. **Capa de cumplimiento 1** — la herramienta no es propiedad de una organización
+   excluida.
+
+3. **Contrato de receta** (si añadiste una receta) — apunta a una entrada
+   `provider_agnostic` y de hecho excluye a los proveedores de LLM.
+
+4. **Comprobación de enlaces rotos** — tus URLs de fuente primaria y de licencia
+   resuelven.
+
+</Steps>
+
+<Aside type="caution" title="El motor no es consultivo">
+Si tu contribución introduce una dependencia de Meta, OpenAI o xAI — directa o
+transitivamente — el PR falla y no puede fusionarse. Eso es una característica. Usa
+una [receta independiente del proveedor](/es/recipes/shakespeare-byok-configuration/)
+si la herramienta admite legítimamente un proveedor permitido.
+</Aside>
+
+## Construye con las skills y el arquetipo
+
+El repositorio también incluye recursos reutilizables para construir *con* un
+agente:
+
+<CardGrid>
+  <LinkCard
+    title="Skills de agente"
+    href="https://github.com/martinmontero/wecanjustbuildthings.dev/tree/main/skills"
+    description="catalog-entry-author, license-watcher, maintenance-checker — como skills de Claude Code y recetas de Goose. Cada una ejecuta el motor de cumplimiento antes de confirmar."
+  />
+  <LinkCard
+    title="Arquetipo de Spec Kit"
+    href="https://github.com/martinmontero/wecanjustbuildthings.dev/tree/main/templates/spec-kit/nostr-web-client"
+    description="Un andamiaje para un cliente web de Nostr + AT Protocol cuya constitución prohíbe las dependencias excluidas."
+  />
+</CardGrid>
+
+Consulta el [inicio rápido](/es/start/quickstart/) para usarlos con Goose o Claude
+Code, y las [pautas de contribución](https://github.com/martinmontero/wecanjustbuildthings.dev/blob/main/CONTRIBUTING.md)
+para el flujo completo.
+
+## Mantenimiento y gobernanza
+
+Cómo se mantiene actualizado el catálogo, los SLA de revisión y cómo está diseñado
+para sobrevivir a su primer responsable están documentados en
+[Acerca de y mantenimiento](/es/about/).

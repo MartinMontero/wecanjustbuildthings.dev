@@ -1,0 +1,18 @@
+---
+title: Comprobar una dependencia
+description: Pega un package.json o una lista de dependencias y compruébalas contra la política de exclusión en vivo, en tu navegador, con búsquedas de licencia desde el edge.
+tableOfContents: false
+sidebar:
+  order: 1
+  label: Comprobar una dependencia
+---
+
+import PolicyChecker from '../../../components/PolicyChecker.svelte';
+
+¿Ya tienes un stack — o le tienes el ojo echado a una nueva dependencia? Pégala
+aquí. La política de exclusión se ejecuta **en tu navegador** (la misma lista que
+usa el motor de CI), y las licencias se buscan en vivo. Nada de lo que pegues sale
+de tu dispositivo salvo los nombres de los paquetes enviados a los registros
+públicos para la búsqueda de licencias.
+
+<PolicyChecker client:load lang="es" />
