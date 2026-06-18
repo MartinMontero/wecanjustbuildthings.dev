@@ -84,6 +84,8 @@ export default defineConfig({
         Hero: './src/components/overrides/Hero.astro',
         PageTitle: './src/components/overrides/PageTitle.astro',
         SocialIcons: './src/components/overrides/SocialIcons.astro',
+        // Appends the persistent compact-viewport bottom nav on every page.
+        Header: './src/components/overrides/Header.astro',
       },
       customCss: ['./src/styles/tokens.css', './src/styles/theme.css', './src/styles/components.css'],
       sidebar: [
