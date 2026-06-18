@@ -70,8 +70,17 @@ npm run translate:catalog -- --provider anthropic            # real translation 
 npm run translate:catalog -- --provider anthropic --lang es --limit 50   # a first wave
 ```
 
-- **Requirements to run for real:** `ANTHROPIC_API_KEY` in the environment (and
-  optionally `ANTHROPIC_BASE_URL`), plus a network policy that permits the API.
+**In CI (recommended):** the `Translate catalog` workflow
+(`.github/workflows/translate-catalog.yml`) runs the pipeline on demand
+(`workflow_dispatch`) using an `ANTHROPIC_API_KEY` repository secret, then opens a
+pull request with the generated entries for native review — translations are
+never merged automatically. Inputs let you pick languages, a per-run `limit`
+(translate in waves), the model, and `force`. Because the generator skips entries
+that already have output files, each run continues where the last left off.
+
+- **Requirements to run for real:** `ANTHROPIC_API_KEY` (a repo secret for CI, or
+  in the environment for a local run; optionally `ANTHROPIC_BASE_URL`), plus
+  network access to the API.
 - **Resumable / incremental:** skips entries whose output already exists (use
   `--force` to overwrite) and caches every distinct string in
   `.cache/catalog-i18n.<lang>.json`, so the repeated boilerplate is translated
