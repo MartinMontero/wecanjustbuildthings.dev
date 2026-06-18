@@ -124,14 +124,18 @@
     display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; align-items: center;
     border: 1px solid var(--sl-color-gray-5, #888); border-radius: 0.5rem;
     padding: 0.6rem 0.9rem; margin-block-end: 1rem;
+    /* <fieldset> defaults to min-inline-size: min-content, which refuses to
+       shrink below its widest child (the tier <select>) and dragged the page
+       wider than the viewport. Override it so the box can fit a phone. */
+    min-inline-size: 0;
   }
   .mc__filters legend { padding-inline: 0.4rem; font-weight: 600; }
   .mc__filters label { display: inline-flex; align-items: center; gap: 0.35rem; min-inline-size: 0; }
-  /* The tier <select> sized to its widest <option> and would not shrink, forcing
-     the whole page wider than the viewport (worst in ES, where labels are longer).
-     Let the control take a flexible row and cap the select to its container. */
-  .mc__tier { flex: 1 1 16rem; min-inline-size: 0; }
-  .mc__filters select { flex: 1 1 auto; min-inline-size: 0; max-inline-size: 100%; font-size: max(16px, 1rem); }
+  /* The tier <select> sized to its widest <option> and would not shrink (worst in
+     ES, longer labels). Give it its own full-width row and a zero flex-basis so
+     it takes only the available space, capped to its container. */
+  .mc__tier { flex: 1 1 100%; min-inline-size: 0; }
+  .mc__filters select { flex: 1 1 0; min-inline-size: 0; max-inline-size: 100%; font-size: max(16px, 1rem); }
   .mc__list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.9rem; }
   .mc__card {
     border: 1px solid var(--sl-color-gray-5, #888); border-inline-start-width: 4px;
