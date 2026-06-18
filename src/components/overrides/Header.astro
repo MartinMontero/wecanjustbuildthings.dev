@@ -1,0 +1,14 @@
+---
+/**
+ * Header override — render Starlight's default header, then append the persistent
+ * mobile BottomNav. The nav is position:fixed, so its placement after the header
+ * is irrelevant to layout; routing it through the Header override simply
+ * guarantees it on every page, including the splash homepage (which renders the
+ * header but no Footer).
+ */
+import Default from '@astrojs/starlight/components/Header.astro';
+import BottomNav from '../BottomNav.astro';
+---
+
+<Default><slot /></Default>
+<BottomNav />

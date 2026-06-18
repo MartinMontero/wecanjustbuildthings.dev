@@ -1,0 +1,141 @@
+---
+/**
+ * BottomNav — a persistent, thumb-reachable bottom navigation bar for compact
+ * (<600px, Material 3 compact window class) viewports. It surfaces the four
+ * primary interactive destinations so a phone user can switch between the tools
+ * without opening the hamburger menu; at >=600px it is hidden and Starlight's
+ * own sidebar/menu takes over.
+ *
+ * Scope: navigation ONLY. It carries no cross-component "build session" state
+ * (that is a separate, deferred task) — just locale-aware links + an active
+ * marker.
+ *
+ * Destinations are adapted to what actually ships (see docs/mobile-audit.md): the
+ * brief's "Mentor Engine" is a library inside Build Studio and "Skills Creator"
+ * is a step inside it, so the real top-level destinations are Home, Build
+ * (Studio), Catalog, and Check. Model Compass / Cost Estimator are sub-tools
+ * reached from Build.
+ */
+type Lang = 'en' | 'es' | 'ar';
+const current = Astro.url.pathname;
+const cl = (Astro.currentLocale ?? 'en').slice(0, 2);
+const lang: Lang = cl === 'es' || cl === 'ar' ? cl : 'en';
+const prefix = lang === 'en' ? '' : `/${lang}`;
+
+const L: Record<Lang, { home: string; build: string; catalog: string; check: string; label: string }> = {
+  en: { home: 'Home', build: 'Build', catalog: 'Catalog', check: 'Check', label: 'Primary' },
+  es: { home: 'Inicio', build: 'Construir', catalog: 'Catálogo', check: 'Verificar', label: 'Navegación principal' },
+  ar: { home: 'الرئيسية', build: 'ابنِ', catalog: 'الكتالوج', check: 'افحص', label: 'التنقل الرئيسي' },
+};
+const t = L[lang];
+
+const ICONS = {
+  home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/>',
+  build: '<path d="M14.5 6.5l3 3"/><path d="M5 19l4-1L18 8.5a2.12 2.12 0 0 0-3-3L6 15l-1 4z"/>',
+  catalog: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8.5h8M8 12h8M8 15.5h5"/>',
+  check: '<path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/>',
+};
+
+const items = [
+  { key: 'home', href: `${prefix}/`, label: t.home, icon: ICONS.home },
+  { key: 'build', href: `${prefix}/build/`, label: t.build, icon: ICONS.build },
+  { key: 'catalog', href: `${prefix}/catalog/`, label: t.catalog, icon: ICONS.catalog },
+  { key: 'check', href: `${prefix}/check/`, label: t.check, icon: ICONS.check },
+];
+
+// Active when the current path is, or sits under, an item's href (so
+// /build/models keeps Build lit). Home only matches the locale root exactly.
+const norm = (s: string) => (s.endsWith('/') ? s : `${s}/`);
+const cur = norm(current);
+const root = norm(`${prefix}/`);
+function isActive(href: string): boolean {
+  const h = norm(href);
+  return h === root ? cur === root : cur === h || cur.startsWith(h);
+}
+---
+
+<nav class="wcb-bottomnav" aria-label={t.label}>
+  <ul>
+    {items.map((it) => (
+      <li>
+        <a
+          href={it.href}
+          class:list={['wcb-bn-link', { 'is-active': isActive(it.href) }]}
+          aria-current={isActive(it.href) ? 'page' : undefined}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={it.icon} />
+          <span>{it.label}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  /* Hidden by default; shown only on compact (<600px = 37.5em). At >=600px
+     Starlight's sidebar/menu is the navigation, so the bar steps aside. */
+  .wcb-bottomnav { display: none; }
+
+  @media (max-width: 37.49em) {
+    .wcb-bottomnav {
+      display: block;
+      position: fixed;
+      inset-inline: 0;
+      inset-block-end: 0;
+      z-index: 50; /* above chrome (Starlight tops out at 20); below the search <dialog> top layer */
+      background: var(--bg);
+      border-block-start: 2px solid var(--structure);
+      /* notch / home-indicator safe area (env() is 0 where unneeded) */
+      padding-block: var(--space-3xs);
+      padding-block-end: max(var(--space-3xs), env(safe-area-inset-bottom));
+      padding-inline:
+        max(var(--space-3xs), env(safe-area-inset-left))
+        max(var(--space-3xs), env(safe-area-inset-right));
+    }
+    .wcb-bottomnav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex; /* logical row — auto-mirrors under dir=rtl */
+    }
+    .wcb-bottomnav li {
+      flex: 1 1 0;
+      min-inline-size: 0; /* let labels shrink/wrap rather than overflow */
+    }
+    /* Keep the fixed bar from covering the last content / footer. */
+    :global(body) {
+      padding-block-end: calc(3.75rem + env(safe-area-inset-bottom));
+    }
+  }
+
+  .wcb-bn-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-block-size: 3rem; /* 48px thumb target */
+    padding: var(--space-3xs) var(--space-2xs);
+    text-decoration: none;
+    color: var(--ink-soft);
+    border-radius: var(--radius-sm);
+    font-size: 0.7rem;
+    line-height: 1.15;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .wcb-bn-link svg {
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    flex: none;
+  }
+  .wcb-bn-link:hover { color: var(--ink); }
+  .wcb-bn-link.is-active { color: var(--structure); font-weight: var(--weight-bold); }
+  /* Arabic needs a little more line height so labels aren't clipped. */
+  :global(:lang(ar)) .wcb-bn-link { line-height: 1.5; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wcb-bn-link { transition: none; }
+  }
+</style>

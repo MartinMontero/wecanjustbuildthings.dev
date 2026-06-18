@@ -248,7 +248,7 @@
   .grid label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; }
   .grid label.need span::after { content: ' *'; color: var(--sl-color-text-accent); }
   .grid em.derived { color: var(--sl-color-gray-3); font-style: normal; font-size: 0.8rem; }
-  input, select { padding: 0.4rem 0.5rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.35rem; background: var(--sl-color-black); color: inherit; }
+  input, select { padding: 0.4rem 0.5rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.35rem; background: var(--sl-color-black); color: inherit; font-size: max(16px, 1rem); }
   .seg { display: inline-flex; gap: 0; }
   .seg button { padding: 0.4rem 0.8rem; border: 1px solid var(--sl-color-gray-5); background: transparent; color: inherit; cursor: pointer; }
   .seg button:first-child { border-start-start-radius: 0.35rem; border-end-start-radius: 0.35rem; }
@@ -273,4 +273,6 @@
   .lines td { padding: 0.15rem 0; text-align: start; }
   .lines td.q { color: var(--sl-color-gray-3); text-align: end; white-space: nowrap; padding-inline-start: 0.5rem; }
   .lines td.a { text-align: end; white-space: nowrap; padding-inline-start: 0.5rem; }
+  /* Touch targets. */
+  .go, .seg button, input, select { min-block-size: 2.75rem; }
 </style>
