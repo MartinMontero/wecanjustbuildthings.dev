@@ -1441,10 +1441,10 @@ manuals with the knowledge-to-skills-pipeline).
   .pick-name { font-weight: 700; }
   .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
-  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
-  .vbadge--verified { border-left-color: var(--ok-edge); }
-  .vbadge--under_review { border-left-color: var(--warn-edge); }
-  .vbadge--blocked { border-left-color: var(--danger-edge); }
+  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-inline-start-width: 3px; }
+  .vbadge--verified { border-inline-start-color: var(--ok-edge); }
+  .vbadge--under_review { border-inline-start-color: var(--warn-edge); }
+  .vbadge--blocked { border-inline-start-color: var(--danger-edge); }
   .examples { display: flex; flex-direction: column; gap: 0.4rem; }
   .chip.ex { text-align: start; font-size: 0.82rem; max-width: 100%; white-space: normal; line-height: 1.3; }
   .mentor { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-sm); background: color-mix(in srgb, var(--structure) 4%, transparent); }

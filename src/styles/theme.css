@@ -80,8 +80,24 @@ site-title,
   }
 }
 
-/* ---- Status pills (catalog + PIE). Meaning is carried by the text label AND a
-   left edge — never colour alone — so the label uses high-contrast body ink. ---- */
+/* ---- Right-to-left (Arabic). Starlight already mirrors layout via dir="rtl";
+   these are the script-level fixes logical properties can't do. ---- */
+
+/* Arabic is cursive — letter-spacing breaks glyph joining. Reset it everywhere
+   for :lang(ar), overriding the display/mono tracking set above. */
+:lang(ar) * { letter-spacing: 0 !important; }
+
+/* Mirror directional glyphs (arrows / chevrons) in RTL. Opt-in: add .mirror-rtl
+   to a purely directional icon. Most arrows here are per-locale text already. */
+:dir(rtl) .mirror-rtl { transform: scaleX(-1); }
+
+/* ---- Media safety net. The site is text + inline SVG (the only <img> is the
+   logo, already sized), but keep any future/markdown image from overflowing its
+   column and preserve aspect ratio. ---- */
+img { max-inline-size: 100%; block-size: auto; }
+
+/* ---- Status pills (catalog + PIE). Meaning is carried by the text label AND an
+   inline-start edge — never colour alone — so the label uses high-contrast body ink. ---- */
 .wcb-badges {
   display: flex;
   flex-wrap: wrap;
@@ -98,18 +114,18 @@ site-title,
   padding: 0.32rem 0.55rem;
   border-radius: var(--radius-pill);
   border: 1px solid var(--edge);
-  border-left-width: 4px;
+  border-inline-start-width: 4px;
   background: var(--surface);
   color: var(--ink);
 }
-.wcb-badge--verified { border-left-color: var(--ok-edge); }
-.wcb-badge--blocked { border-left-color: var(--danger-edge); }
-.wcb-badge--under_review { border-left-color: var(--warn-edge); }
-.wcb-badge--active { border-left-color: var(--ok-edge); }
-.wcb-badge--minimal { border-left-color: var(--warn-edge); }
-.wcb-badge--dormant { border-left-color: var(--signal); }
-.wcb-badge--abandoned { border-left-color: var(--danger-edge); }
-.wcb-badge--advisory { border-left-color: var(--signal); }
+.wcb-badge--verified { border-inline-start-color: var(--ok-edge); }
+.wcb-badge--blocked { border-inline-start-color: var(--danger-edge); }
+.wcb-badge--under_review { border-inline-start-color: var(--warn-edge); }
+.wcb-badge--active { border-inline-start-color: var(--ok-edge); }
+.wcb-badge--minimal { border-inline-start-color: var(--warn-edge); }
+.wcb-badge--dormant { border-inline-start-color: var(--signal); }
+.wcb-badge--abandoned { border-inline-start-color: var(--danger-edge); }
+.wcb-badge--advisory { border-inline-start-color: var(--signal); }
 
 /* Compact definition grid for catalog entry metadata. */
 .wcb-meta {

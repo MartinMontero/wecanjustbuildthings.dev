@@ -157,9 +157,9 @@
   .summary { padding: 0.7rem 0.9rem; border-radius: 0.5rem; border: 1px solid var(--ok-edge); color: var(--sl-color-text); background: var(--sl-color-gray-6); }
   .summary.bad { border-color: var(--danger-edge); }
   table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-  th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--sl-color-gray-6); }
+  th, td { text-align: start; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--sl-color-gray-6); }
   tr.blocked { background: color-mix(in srgb, var(--danger-edge) 8%, transparent); }
-  .tag { font-size: 0.78rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; border-left: 4px solid; }
+  .tag { font-size: 0.78rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; border-inline-start: 4px solid; }
   .tag.ok { border-color: var(--ok-edge); }
   .tag.bad { border-color: var(--danger-edge); }
   .note { color: var(--sl-color-gray-2); font-size: 0.82rem; }
