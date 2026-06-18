@@ -1,0 +1,39 @@
+---
+title: Catálogo
+description: "Un catálogo en vivo y filtrable de herramientas de tecnología para la libertad verificadas — busca y filtra por protocolo, ecosistema, categoría y verificación, todo en tu navegador."
+sidebar:
+  order: 0
+  label: Explorar el catálogo
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import CatalogExplorer from '../../../../components/CatalogExplorer.svelte';
+import CatalogList from '../../../../components/CatalogList.astro';
+
+Más de mil bloques de construcción para las herramientas que tu comunidad necesita —
+los mismos con los que el equipo de And Other Stuff envía tecnología para la libertad,
+cada uno con la **licencia verificada en un commit** y filtrado para que no pueda
+traicionar en silencio a las personas para las que construyes — además de
+**más de 800 conjuntos de datos públicos** indexados desde
+[awesome-public-datasets](https://github.com/awesomedata/awesome-public-datasets).
+Usa el filtro **Tipo** para alternar entre herramientas y conjuntos de datos. Filtra en
+vivo abajo, o pasa una lista corta directamente al [Build Studio](/es/build/).
+
+<CatalogExplorer client:load lang="es" />
+
+<Aside type="tip" title="Convierte una lista corta en un proyecto">
+¿Encontraste tu stack? El [Build Studio](/es/build/) convierte una selección de estas
+herramientas en un repositorio inicial, una constitución del proyecto y un prompt listo
+para el agente — todo limpio según la política por construcción.
+</Aside>
+
+## Destacados (funciona sin JavaScript)
+
+### Nostr y Lightning
+<CatalogList protocol="nostr" limit={12} />
+
+### AT Protocol
+<CatalogList protocol="atproto" limit={12} />
+
+### IA y agentes
+<CatalogList category="AI & Agents" limit={12} />

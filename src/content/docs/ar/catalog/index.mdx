@@ -1,0 +1,36 @@
+---
+title: الكتالوج
+description: "كتالوج حيّ وقابل للتصفية لأدوات تقنية الحرية المُتحقَّق منها — ابحث وصفِّ بحسب البروتوكول والنظام البيئي والفئة والتحقق، كل ذلك في متصفحك."
+sidebar:
+  order: 0
+  label: تصفّح الكتالوج
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import CatalogExplorer from '../../../../components/CatalogExplorer.svelte';
+import CatalogList from '../../../../components/CatalogList.astro';
+
+أكثر من ألف لبنة بناء للأدوات التي يحتاجها مجتمعك — ذاتها التي يشحن بها فريق
+And Other Stuff تقنية الحرية، ولكلٍّ منها **ترخيص مُتحقَّق عند commit** وقد جرى فحصها
+كي لا تخون في صمت الأشخاص الذين تبني لأجلهم — إضافة إلى **أكثر من 800 مجموعة بيانات عامة**
+مفهرسة من [awesome-public-datasets](https://github.com/awesomedata/awesome-public-datasets).
+استخدم مرشّح **النوع** للتبديل بين الأدوات ومجموعات البيانات. صفِّ مباشرة في الأسفل،
+أو سلّم قائمة قصيرة مباشرة إلى [Build Studio](/ar/build/).
+
+<CatalogExplorer client:load lang="ar" />
+
+<Aside type="tip" title="حوّل قائمة قصيرة إلى مشروع">
+وجدت حزمتك؟ يحوّل [Build Studio](/ar/build/) مجموعة مختارة من هذه الأدوات إلى مستودع
+بداية، ودستور للمشروع، وموجّه جاهز للوكيل — وكلها نظيفة وفق السياسة بحكم بنيتها.
+</Aside>
+
+## مختارات (تعمل دون JavaScript)
+
+### Nostr وLightning
+<CatalogList protocol="nostr" limit={12} />
+
+### AT Protocol
+<CatalogList protocol="atproto" limit={12} />
+
+### الذكاء الاصطناعي والوكلاء
+<CatalogList category="AI & Agents" limit={12} />

@@ -14,13 +14,18 @@ const TOOL_TYPES = new Set(['tool', 'framework', 'library', 'service', 'protocol
 const isTool = Boolean(data.entry_type && TOOL_TYPES.has(data.entry_type));
 const seedName = data.dependency_name ?? data.title;
 const buildHref = `/build/?seed=${encodeURIComponent(seedName)}`;
+
+// Localize the button label from the page locale (house i18n convention).
+const locale = (Astro.currentLocale ?? 'en').slice(0, 2);
+const buildLabel =
+  locale === 'es' ? 'Construir con esto' : locale === 'ar' ? 'ابدأ البناء بهذه' : 'Build with this';
 ---
 
 <h1 id="_top">{data.title}</h1>
 {
   isTool && (
     <a class="build-with-this" href={buildHref}>
-      Build with this
+      {buildLabel}
       <span aria-hidden="true">→</span>
     </a>
   )
