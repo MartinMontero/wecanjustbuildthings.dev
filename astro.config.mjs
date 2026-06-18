@@ -48,6 +48,18 @@ export default defineConfig({
       head: [
         ...plausibleHead,
         {
+          // Override Starlight's default viewport meta (Starlight dedups by
+          // name): opt into the display safe-area (viewport-fit=cover, paired
+          // with env(safe-area-inset-*) in CSS) and let the on-screen keyboard
+          // resize the layout viewport instead of overlapping fixed UI.
+          tag: 'meta',
+          attrs: {
+            name: 'viewport',
+            content:
+              'width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content',
+          },
+        },
+        {
           tag: 'meta',
           attrs: { property: 'og:image', content: `${site}/og.png` },
         },
