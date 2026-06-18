@@ -10,15 +10,15 @@
   },
 
   // --- Auth storage (Sign in with Nostr / Bluesky) ---
-  // The ids below are PLACEHOLDERS. Create the resources on your Cloudflare
-  // account and paste the returned ids (see the commands handed over with Phase 1).
-  // Until then `wrangler deploy` will fail fast on the unknown ids — by design.
+  // Provisioned resources (two KV namespaces + one D1 database). To recreate on a
+  // different Cloudflare account, run the commands in docs/AUTH_PROVISIONING.md and
+  // paste the returned ids below.
   "kv_namespaces": [
-    { "binding": "SESSIONS", "id": "PLACEHOLDER_SESSIONS_KV_ID" },
-    { "binding": "ATPROTO", "id": "PLACEHOLDER_ATPROTO_KV_ID" }
+    { "binding": "SESSIONS", "id": "4646df2e5e3c4182b0d654a4a0664e40" },
+    { "binding": "ATPROTO", "id": "a8da5109ae3046c88d726288d59aaa96" }
   ],
   "d1_databases": [
-    { "binding": "DB", "database_name": "wcjbt-auth", "database_id": "PLACEHOLDER_D1_DATABASE_ID", "migrations_dir": "migrations" }
+    { "binding": "DB", "database_name": "wcjbt-auth", "database_id": "d3240389-b265-4229-bff0-b8ab94c4d78d", "migrations_dir": "migrations" }
   ],
   "vars": {
     // Canonical prod origin (used for OAuth client metadata + redirects). Local dev
