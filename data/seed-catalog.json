@@ -133,5 +133,16 @@
     "protocols": ["general"],
     "pie_anchor": "§4 Cooking → Pressure",
     "what_it_does": "A pluggable linter that enforces code quality and catches bugs statically. A baseline quality gate for any shippable codebase."
+  },
+  {
+    "name": "AnythingLLM",
+    "ecosystem": "js",
+    "entry_type": "tool",
+    "category": "AI & Agents",
+    "protocols": ["general"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "source_url": "https://github.com/Mintplex-Labs/anything-llm",
+    "license_hint": "MIT",
+    "what_it_does": "An all-in-one, self-hostable orchestration and RAG application: connect bring-your-own local (Ollama, LM Studio) or independent cloud models, with workspaces, document pipelines, multi-user support, and agent/MCP wiring. A BYO-agent cockpit, not a model itself."
   }
 ]
