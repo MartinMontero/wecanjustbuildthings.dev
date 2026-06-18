@@ -91,6 +91,7 @@ export default defineConfig({
             { label: 'Build Studio', translations: { es: 'Estudio de construcción', ar: 'استوديو البناء' }, link: '/build/', badge: { text: 'new', variant: 'default' } },
             { label: 'Check a dependency', translations: { es: 'Verifica una dependencia', ar: 'افحص اعتمادية' }, link: '/check/' },
             { label: 'Hosting cost estimator', translations: { es: 'Estimador de costes de alojamiento', ar: 'مُقدّر تكاليف الاستضافة' }, link: '/build/cost/' },
+            { label: 'Model Compass', translations: { es: 'Brújula de modelos', ar: 'بوصلة النماذج' }, link: '/build/models/' },
           ],
         },
         {
