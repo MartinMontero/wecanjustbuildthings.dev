@@ -421,7 +421,7 @@
   }
   .sort { display: flex; gap: 0.4rem; align-items: center; color: var(--sl-color-text); font-size: 0.9rem; }
   .sort select { padding: 0.4rem; font-size: max(16px, 1rem); border-radius: 0.4rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-black); color: var(--sl-color-white); }
-  .layout { display: grid; grid-template-columns: 16rem 1fr; gap: 1.5rem; align-items: start; }
+  .layout { display: grid; grid-template-columns: 16rem minmax(0, 1fr); gap: 1.5rem; align-items: start; }
   @media (max-width: 50rem) { .layout { grid-template-columns: 1fr; } }
   .facets { position: sticky; top: 1rem; }
   .facets-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--sl-color-text); }
@@ -438,7 +438,7 @@
   .cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
   .card { border: 1px solid var(--sl-color-gray-6); border-radius: 0.6rem; padding: 0.85rem 1rem; }
   .card-top { display: flex; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; align-items: baseline; }
-  .card-name { font-weight: 700; font-size: 1.02rem; }
+  .card-name { font-weight: 700; font-size: 1.02rem; overflow-wrap: anywhere; }
   .card-desc { margin: 0.35rem 0; color: var(--sl-color-text); font-size: 0.92rem; }
   .card-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }

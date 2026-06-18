@@ -130,10 +130,12 @@ img { max-inline-size: 100%; block-size: auto; }
 /* Compact definition grid for catalog entry metadata. */
 .wcb-meta {
   display: grid;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: var(--space-3xs) var(--space-sm);
   margin: var(--space-sm) 0 var(--space-md);
   font-size: var(--step-0);
 }
 .wcb-meta dt { font-weight: var(--weight-bold); color: var(--ink-soft); }
-.wcb-meta dd { margin: 0; }
+/* Registry/source values are long unbreakable URLs — let them wrap instead of
+   pushing the page wider than a phone viewport. */
+.wcb-meta dd { margin: 0; min-inline-size: 0; overflow-wrap: anywhere; }

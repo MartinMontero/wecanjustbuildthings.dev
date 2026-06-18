@@ -1437,8 +1437,8 @@ manuals with the knowledge-to-skills-pipeline).
   .picklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
   .pick { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.7rem; }
   .pick.on { border-color: var(--sl-color-accent); }
-  .pick label { display: grid; grid-template-columns: auto 1fr auto; gap: 0.2rem 0.6rem; align-items: baseline; cursor: pointer; }
-  .pick-name { font-weight: 700; }
+  .pick label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.2rem 0.6rem; align-items: baseline; cursor: pointer; }
+  .pick-name { font-weight: 700; overflow-wrap: anywhere; }
   .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
   .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-inline-start-width: 3px; }

@@ -152,7 +152,8 @@
 /* Designed long-form reading — chunky callout cards + display headings + a
    marigold masthead tick. Deliberately NOT a hairline broadsheet. */
 .content-panel h1#_top {
-  font-size: clamp(var(--step-5), 5vw, var(--step-7));
+  /* Fluid, but keep a rem term (never pure vw) so 200% zoom still scales it. */
+  font-size: clamp(var(--step-5), 1.5rem + 2vw, var(--step-7));
   line-height: 1.05;
 }
 .content-panel h1#_top::before {

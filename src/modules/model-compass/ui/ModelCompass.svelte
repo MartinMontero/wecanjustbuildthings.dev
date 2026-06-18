@@ -126,7 +126,12 @@
     padding: 0.6rem 0.9rem; margin-block-end: 1rem;
   }
   .mc__filters legend { padding-inline: 0.4rem; font-weight: 600; }
-  .mc__filters label { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .mc__filters label { display: inline-flex; align-items: center; gap: 0.35rem; min-inline-size: 0; }
+  /* The tier <select> sized to its widest <option> and would not shrink, forcing
+     the whole page wider than the viewport (worst in ES, where labels are longer).
+     Let the control take a flexible row and cap the select to its container. */
+  .mc__tier { flex: 1 1 16rem; min-inline-size: 0; }
+  .mc__filters select { flex: 1 1 auto; min-inline-size: 0; max-inline-size: 100%; font-size: max(16px, 1rem); }
   .mc__list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.9rem; }
   .mc__card {
     border: 1px solid var(--sl-color-gray-5, #888); border-inline-start-width: 4px;
