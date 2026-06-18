@@ -79,7 +79,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2xs);
-  min-height: 2.75rem; /* 44px target */
+  min-block-size: 3rem; /* 48px primary working target */
   padding: 0 var(--space-md);
   border-radius: var(--radius);
   font-weight: var(--weight-bold);

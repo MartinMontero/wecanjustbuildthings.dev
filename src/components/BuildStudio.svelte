@@ -1522,4 +1522,9 @@ manuals with the knowledge-to-skills-pipeline).
   summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; }
   pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: 0.75rem; border-radius: 0.4rem; }
   .out { max-height: 28rem; }
+  /* Touch targets: primary actions reach ~44px; dense in-flow controls stay
+     above the 24px floor (axe target-size already passes; this honours the
+     48/24 working-target guidance). */
+  .steps button, .nav button, .primary, .tabs button { min-block-size: 2.75rem; }
+  .lang, .chip, .toggle, .apply { min-block-size: 1.75rem; }
 </style>

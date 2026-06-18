@@ -448,4 +448,7 @@
   .badge--blocked, .badge--abandoned { border-inline-start-color: var(--danger-edge); }
   .badge--dormant, .badge--advisory { border-inline-start-color: var(--signal); }
   .more { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
+  /* Touch targets. */
+  .search input, .sort select, .more { min-block-size: 2.75rem; }
+  .opt { min-block-size: 1.75rem; }
 </style>

@@ -153,4 +153,6 @@
   .mc__hint { opacity: 0.65; font-size: 0.85em; }
   .mc__caution { margin-top: 0.7rem; font-size: 0.9rem; }
   .mc__caution p { margin: 0.15rem 0; }
+  /* Touch target on the one select control. */
+  .mc__filters select { min-block-size: 2.75rem; }
 </style>

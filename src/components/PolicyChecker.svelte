@@ -163,4 +163,6 @@
   .tag.ok { border-color: var(--ok-edge); }
   .tag.bad { border-color: var(--danger-edge); }
   .note { color: var(--sl-color-gray-2); font-size: 0.82rem; }
+  /* Touch targets. */
+  .primary, select { min-block-size: 2.75rem; }
 </style>

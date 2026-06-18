@@ -273,4 +273,6 @@
   .lines td { padding: 0.15rem 0; text-align: start; }
   .lines td.q { color: var(--sl-color-gray-3); text-align: end; white-space: nowrap; padding-inline-start: 0.5rem; }
   .lines td.a { text-align: end; white-space: nowrap; padding-inline-start: 0.5rem; }
+  /* Touch targets. */
+  .go, .seg button, input, select { min-block-size: 2.75rem; }
 </style>
