@@ -188,6 +188,15 @@ const { steps, privacy } = Astro.props as Props;
     color: var(--ink);
     font-weight: 600;
   }
+  .gs-body :global(a) {
+    color: var(--structure);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-thickness: 1px;
+  }
+  .gs-body :global(a:hover) {
+    text-decoration-thickness: 2px;
+  }
 
   .gs-privacy {
     margin: var(--space-xl) 0 0;
