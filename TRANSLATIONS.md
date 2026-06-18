@@ -45,7 +45,40 @@ speaker's pass for tone and idiom before being considered final:
   `guides/knowledge-to-skills`
 - `about`, `build`, `check`, `contribute/index`
 
-### Not yet localized
-- **Catalog entries** (~2,182): chrome to be localized; per-entry prose to be
-  machine-translated via a pipeline (code/identifiers left intact), then
-  native-reviewed.
+### Catalog
+- **Chrome — done (es + ar).** The catalog UI/frame is fully localized: the
+  explorer (`CatalogExplorer.svelte`) via a `Record<Lang, …>` string table, the
+  list view, the "Build with this" button, and the catalog landing pages.
+- **Entry prose (~2,182 entries) — pipeline built, run pending.** A standalone
+  generator translates each entry's free text (`description`, `what_it_does`) and
+  body prose into es + ar, preserving all markup, code, identifiers, URLs, and
+  metadata values, localizing internal links, and stamping
+  `machine_translated: true` for native review. See below.
+
+## Catalog translation pipeline (`scripts/translate-catalog.ts`)
+
+A **separate** generator from the Astro build — the build stays offline and
+deterministic; this script emits committed `.mdx` files that override Starlight's
+English fallback for `es`/`ar`. The translation engine is **Claude** (Anthropic);
+excluded providers (OpenAI, xAI, Meta) are deliberately not used, in keeping with
+the catalog's own policy.
+
+```sh
+npm run translate:catalog                      # dry-run (identity, no network) — verifies plumbing
+npm run translate:catalog -- --tag             # dry-run with [es]/[ar] markers to inspect segmentation
+npm run translate:catalog -- --provider anthropic            # real translation (needs ANTHROPIC_API_KEY)
+npm run translate:catalog -- --provider anthropic --lang es --limit 50   # a first wave
+```
+
+- **Requirements to run for real:** `ANTHROPIC_API_KEY` in the environment (and
+  optionally `ANTHROPIC_BASE_URL`), plus a network policy that permits the API.
+- **Resumable / incremental:** skips entries whose output already exists (use
+  `--force` to overwrite) and caches every distinct string in
+  `.cache/catalog-i18n.<lang>.json`, so the repeated boilerplate is translated
+  once and re-runs only touch new/changed entries. Safe to run in waves.
+- **What it preserves:** all MDX/JSX/HTML tags + attributes, `<code>` and
+  fenced/inline code, URLs, and the data values inside `<dl class="wcb-meta">`
+  and the badges. Internal links get the locale prefix; `title` and every other
+  frontmatter field are copied verbatim.
+- Generated entries carry `machine_translated: true` and still need a native
+  speaker's pass before being considered final.
