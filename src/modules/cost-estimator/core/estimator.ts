@@ -1,6 +1,6 @@
 import type {
-  CostEstimate, CostEstimateTier, EstimateDataSource, Fetcher,
-  PricingProviderAdapter, ResolvedUsage, TierId, UsageProfile,
+  ComputePosture, CostEstimate, CostEstimateTier, EstimateDataSource, Fetcher,
+  PricingProviderAdapter, ResolvedUsage, TierId, UsageField, UsageProfile,
 } from './types.ts';
 import { TIERS, type TierConfig } from '../config/tiers.ts';
 
@@ -10,6 +10,45 @@ import { TIERS, type TierConfig } from '../config/tiers.ts';
  */
 
 const TIER_LABEL: Record<TierId, string> = { seed: 'Seed', growth: 'Growth', scale: 'Scale' };
+
+const COMPUTE_POSTURES: readonly ComputePosture[] = ['edge', 'serverless', 'always-on'];
+const USAGE_FIELDS: readonly UsageField[] = ['monthlyActiveUsers', 'bandwidthGB', 'storageGB', 'compute', 'database'];
+
+/** A finite, non-negative number, or null. NaN / Infinity / negative / non-number
+ *  all become null, so the estimator falls back to the tier baseline instead of
+ *  multiplying garbage into a total. */
+const finiteNonNeg = (v: unknown): number | null =>
+  typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null;
+
+/**
+ * Coerce an untrusted value into a valid UsageProfile before any arithmetic runs.
+ * Both inputs are untrusted: the Path-A `/api/pricing` endpoint is unauthenticated,
+ * and the Path-C source is localStorage (writable by the user, extensions, and any
+ * same-origin script). Every field is normalised to its declared type — invalid
+ * numbers → null (→ baseline), unknown compute/database/source shapes → dropped —
+ * so a hostile or corrupt profile can never poison an estimate with NaN/Infinity/
+ * negatives. A well-formed profile passes through unchanged.
+ */
+export function coerceUsageProfile(input: unknown): UsageProfile {
+  const u = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
+  const db = u.database && typeof u.database === 'object' ? (u.database as Record<string, unknown>) : null;
+  const rawSource = u.source && typeof u.source === 'object' && !Array.isArray(u.source)
+    ? (u.source as Record<string, unknown>)
+    : {};
+  const source: UsageProfile['source'] = {};
+  for (const f of USAGE_FIELDS) {
+    const marker = rawSource[f];
+    if (marker === 'manual' || marker === 'derived') source[f] = marker;
+  }
+  return {
+    monthlyActiveUsers: finiteNonNeg(u.monthlyActiveUsers),
+    bandwidthGB: finiteNonNeg(u.bandwidthGB),
+    storageGB: finiteNonNeg(u.storageGB),
+    compute: COMPUTE_POSTURES.includes(u.compute as ComputePosture) ? (u.compute as ComputePosture) : null,
+    database: db ? { needed: db.needed === true, sizeGB: finiteNonNeg(db.sizeGB) } : null,
+    source,
+  };
+}
 
 /** Project the builder's usage onto one tier: entered values scale by the tier's
  *  factor; un-entered values fall back to the tier's baseline band. */

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { estimate, resolveUsageForTier } from './estimator.ts';
+import { estimate, resolveUsageForTier, coerceUsageProfile } from './estimator.ts';
 import type { Fetcher, PricingProviderAdapter, ResolvedUsage, UsageProfile } from './types.ts';
 import { TIERS } from '../config/tiers.ts';
 
@@ -58,4 +58,52 @@ test('estimate computes line-item math + confirmed totals across all three tiers
   // Scale (scale 50): storage 200*2 + bandwidth 500*0.5 = 650.
   const scale = est.tiers[2]!.quotes[0]!;
   assert.equal(scale.confirmedTotal, 650);
+});
+
+test('coerceUsageProfile passes a well-formed profile through unchanged', () => {
+  const valid: UsageProfile = {
+    monthlyActiveUsers: 0, bandwidthGB: 12.5, storageGB: 4,
+    compute: 'serverless', database: { needed: true, sizeGB: 2 },
+    source: { monthlyActiveUsers: 'manual', database: 'derived' },
+  };
+  assert.deepEqual(coerceUsageProfile(valid), valid);
+});
+
+test('coerceUsageProfile nulls invalid numbers (negative / Infinity / NaN / string)', () => {
+  const u = coerceUsageProfile({
+    monthlyActiveUsers: -5, bandwidthGB: Number.POSITIVE_INFINITY, storageGB: 'lots',
+    compute: 'serverless', database: { needed: true, sizeGB: Number.NaN }, source: {},
+  });
+  assert.equal(u.monthlyActiveUsers, null);
+  assert.equal(u.bandwidthGB, null);
+  assert.equal(u.storageGB, null);
+  assert.equal(u.database?.needed, true); // needed is boolean-coerced, kept
+  assert.equal(u.database?.sizeGB, null); // NaN size dropped
+});
+
+test('coerceUsageProfile drops unknown compute and non-object database/source', () => {
+  const u = coerceUsageProfile({ compute: 'quantum', database: 'yes', source: ['x'] });
+  assert.equal(u.compute, null);
+  assert.equal(u.database, null);
+  assert.deepEqual(u.source, {});
+});
+
+test('coerceUsageProfile keeps only valid manual/derived source markers', () => {
+  const u = coerceUsageProfile({ source: { monthlyActiveUsers: 'manual', bandwidthGB: 'bogus', storageGB: 'derived' } });
+  assert.deepEqual(u.source, { monthlyActiveUsers: 'manual', storageGB: 'derived' });
+});
+
+test('coerceUsageProfile maps garbage input to an all-null profile (→ all baselines)', () => {
+  assert.deepEqual(coerceUsageProfile(null), {
+    monthlyActiveUsers: null, bandwidthGB: null, storageGB: null,
+    compute: null, database: null, source: {},
+  });
+});
+
+test('a sanitized hostile profile yields a finite estimate, never NaN/Infinity', async () => {
+  const dirty = coerceUsageProfile({ monthlyActiveUsers: -1, bandwidthGB: 'x', storageGB: Number.POSITIVE_INFINITY, source: {} });
+  const est = await estimate({ usage: dirty, adapters: [fixtureAdapter], fetcher: noopFetch, dataSource: 'pathA-function' });
+  for (const tier of est.tiers) {
+    for (const quote of tier.quotes) assert.ok(Number.isFinite(quote.confirmedTotal), 'total must be finite');
+  }
 });

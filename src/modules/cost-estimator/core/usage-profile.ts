@@ -10,6 +10,7 @@
  */
 import type { BuildSession } from '../../../lib/build-session.ts';
 import { updateSession } from '../../../lib/build-session.ts';
+import { coerceUsageProfile } from './estimator.ts';
 import type { ComputePosture, CostEstimate, UsageField, UsageProfile } from './types.ts';
 
 function deriveCompute(constraints: Set<string>, signals: Set<string>): ComputePosture {
@@ -36,7 +37,8 @@ export function deriveUsageFromSession(session: BuildSession): UsageProfile {
     source: { compute: 'derived', database: 'derived' },
   };
 
-  const stored = session.usage ?? null;
+  // session.usage comes from localStorage (untrusted) — sanitize before merging.
+  const stored = session.usage ? coerceUsageProfile(session.usage) : null;
   return stored ? mergeUsage(derived, stored) : derived;
 }
 

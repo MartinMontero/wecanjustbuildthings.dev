@@ -33,7 +33,7 @@ import {
   blueskyClientMetadata, blueskyAuthorizeUrl, blueskyCallback, isValidHandle, type BlueskyEnv,
 } from './auth/bluesky.ts';
 import { getOrCreateUserByIdentity } from './auth/db.ts';
-import { estimate } from '../src/modules/cost-estimator/core/estimator.ts';
+import { estimate, coerceUsageProfile } from '../src/modules/cost-estimator/core/estimator.ts';
 import { ALL_ADAPTERS } from '../src/modules/cost-estimator/adapters/index.ts';
 import type { UsageProfile } from '../src/modules/cost-estimator/core/types.ts';
 import { SECURITY_HEADERS, CSP_REPORT_PATH, CSP_REPORT_MAX_BYTES, summariseCspReport } from '../src/lib/security-headers.ts';
@@ -213,8 +213,9 @@ async function kickoffHandler(request: Request): Promise<Response> {
 async function pricingHandler(request: Request): Promise<Response> {
   let body: any;
   try { body = await request.json(); } catch { return json({ error: 'invalid JSON' }, 400); }
-  const usage = body?.usage as UsageProfile | undefined;
-  if (!usage || typeof usage !== 'object') return json({ error: 'missing usage profile' }, 400);
+  if (!body?.usage || typeof body.usage !== 'object') return json({ error: 'missing usage profile' }, 400);
+  // Untrusted, unauthenticated input — normalise every field before any arithmetic.
+  const usage: UsageProfile = coerceUsageProfile(body.usage);
   const est = await estimate({ usage, adapters: ALL_ADAPTERS, fetcher: (u, init) => fetch(u, init), dataSource: 'pathA-function' });
   return json(est);
 }
