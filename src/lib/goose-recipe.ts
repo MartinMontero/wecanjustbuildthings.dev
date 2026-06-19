@@ -26,6 +26,23 @@ export interface ExtensionAllowlist {
   byId: Record<string, GooseExtensionRef>;
 }
 
+/** Minimal shape of a Catalog 'extension' entry the allowlist builder reads — a subset
+ *  of the content-collection entry, kept here so this module stays free of astro:content. */
+export interface ExtensionEntry {
+  id: string;
+  data: {
+    entry_type?: string;
+    verification_status?: string;
+    dependency_name?: string;
+    title?: string;
+    goose_extension_type?: 'builtin' | 'stdio' | 'sse';
+    goose_extension_command?: string;
+    goose_extension_args?: string[];
+    goose_extension_uri?: string;
+    goose_extension_timeout?: number;
+  };
+}
+
 export interface GooseParameter {
   key: string;
   description: string;
@@ -118,6 +135,33 @@ export function buildGooseRecipe(input: RecipeInput, allow: ExtensionAllowlist):
     activities: activitiesFor(input.slug),
     response: { json_schema: RESPONSE_JSON_SCHEMA },
   };
+}
+
+/**
+ * Build the vetted-extension allowlist from Catalog entries — the MCP trust GATE. An
+ * entry is included ONLY when it is entry_type 'extension' AND verification_status
+ * 'verified' AND well-formed for its kind (stdio needs a command, sse needs a uri).
+ * Keyed by entry id (the catalogId a session references). Pure; /extensions.json feeds
+ * it getCollection() results, and it is unit-tested directly.
+ */
+export function buildExtensionAllowlist(entries: ExtensionEntry[]): ExtensionAllowlist {
+  const byId: Record<string, GooseExtensionRef> = {};
+  for (const { id, data: d } of entries) {
+    if (d.entry_type !== 'extension' || d.verification_status !== 'verified') continue;
+    const name = d.dependency_name ?? d.title;
+    if (!name) continue;
+    let ref: GooseExtensionRef | null = null;
+    if (d.goose_extension_type === 'builtin') ref = { type: 'builtin', name };
+    else if (d.goose_extension_type === 'stdio' && d.goose_extension_command) {
+      ref = { type: 'stdio', name, cmd: d.goose_extension_command, args: d.goose_extension_args ?? [] };
+    } else if (d.goose_extension_type === 'sse' && d.goose_extension_uri) {
+      ref = { type: 'sse', name, uri: d.goose_extension_uri };
+    }
+    if (!ref) continue;
+    if (d.goose_extension_timeout != null) ref.timeout = d.goose_extension_timeout;
+    byId[id] = ref;
+  }
+  return { byId };
 }
 
 // ---- YAML rendering (for the downloadable *.goose-recipe.yaml) -------------------

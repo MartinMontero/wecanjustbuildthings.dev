@@ -1,37 +1,19 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { buildExtensionAllowlist, type ExtensionEntry } from '../lib/goose-recipe.ts';
 
 /**
- * Static allowlist of VETTED Goose extensions — the MCP trust boundary. Only
- * entry_type 'extension' entries that are verification_status 'verified' are exposed to
- * the client recipe serializer, shaped as { byId: { [slug]: GooseExtensionRef } } so
- * buildGooseRecipe() can resolve a session's extension references to vetted config.
- * Raw config never reaches a non-dev's screen — it flows from here straight into the
- * recipe Goose runs.
+ * Static allowlist of VETTED Goose extensions — the MCP trust boundary. The verified-
+ * only gate + shaping lives in buildExtensionAllowlist() (pure + unit-tested); here we
+ * just feed it the catalog's 'extension' entries. Raw config never reaches a non-dev's
+ * screen — it flows from a verified Catalog entry straight into the recipe Goose runs.
  */
 export const GET: APIRoute = async () => {
-  const entries = await getCollection(
-    'docs',
-    ({ data }) => data.entry_type === 'extension' && data.verification_status === 'verified',
+  const entries = await getCollection('docs', ({ data }) => data.entry_type === 'extension');
+  const allow = buildExtensionAllowlist(
+    entries.map((e) => ({ id: e.id, data: e.data as ExtensionEntry['data'] })),
   );
-
-  const byId: Record<string, unknown> = {};
-  for (const e of entries) {
-    const type = e.data.goose_extension_type as 'builtin' | 'stdio' | 'sse' | undefined;
-    if (!type) continue;
-    const name = (e.data.dependency_name as string) ?? e.data.title;
-    const timeout = e.data.goose_extension_timeout as number | undefined;
-
-    let ref: Record<string, unknown> | null = null;
-    if (type === 'builtin') ref = { type, name };
-    else if (type === 'stdio') ref = { type, name, cmd: e.data.goose_extension_command, args: (e.data.goose_extension_args as string[]) ?? [] };
-    else if (type === 'sse') ref = { type, name, uri: e.data.goose_extension_uri };
-    if (!ref) continue;
-    if (timeout != null) ref.timeout = timeout;
-    byId[e.id] = ref;
-  }
-
-  return new Response(JSON.stringify({ byId }), {
+  return new Response(JSON.stringify(allow), {
     headers: { 'content-type': 'application/json; charset=utf-8' },
   });
 };

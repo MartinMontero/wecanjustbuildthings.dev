@@ -3,9 +3,11 @@ import assert from 'node:assert/strict';
 import { parse as parseYaml } from 'yaml';
 import {
   buildGooseRecipe,
+  buildExtensionAllowlist,
   recipeToYaml,
   RESPONSE_JSON_SCHEMA,
   type ExtensionAllowlist,
+  type ExtensionEntry,
   type RecipeInput,
 } from './goose-recipe.ts';
 import type { SessionExtension } from './build-session.ts';
@@ -94,6 +96,42 @@ test('recipeToYaml emits valid YAML that round-trips the recipe', () => {
   assert.equal(parsed.extensions.length, 3);
   assert.ok(parsed.extensions.some((e: any) => e.type === 'stdio' && Array.isArray(e.args)));
   assert.deepEqual(parsed.response.json_schema.required, ['constraints', 'proposals']);
+});
+
+test('recipeToYaml preserves an indented, bulleted prompt (the real agent-prompt shape)', () => {
+  // Mirrors BuildStudio's agentPrompt: flush-left lines, a blank line, and 4-space
+  // sub-bullets — the indentation-inside-a-block-scalar case most likely to break.
+  const prompt = [
+    'You are building "Tenant Reporter".',
+    '',
+    'RULES (binding):',
+    '- Read the constitution first.',
+    '    - ★ ndk (js)',
+    '    - svelte (js)',
+    '- No Meta/OpenAI/xAI — directly or transitively.',
+  ].join('\n');
+  const r = buildGooseRecipe(baseInput({ prompt }), allow);
+  const lines = String((parseYaml(recipeToYaml(r)) as Record<string, any>).prompt).split('\n');
+  assert.ok(lines.includes('- Read the constitution first.'), 'column-0 list item preserved');
+  assert.ok(lines.includes('    - ★ ndk (js)'), 'deeper 4-space bullet preserved exactly');
+  assert.ok(lines.includes('    - svelte (js)'), 'second 4-space bullet preserved');
+  assert.ok(lines.includes('- No Meta/OpenAI/xAI — directly or transitively.'), 'back to column 0 preserved');
+});
+
+test('buildExtensionAllowlist: only verified, well-formed extensions pass the trust gate', () => {
+  const entries: ExtensionEntry[] = [
+    { id: 'fs', data: { entry_type: 'extension', verification_status: 'verified', dependency_name: 'filesystem', goose_extension_type: 'stdio', goose_extension_command: 'npx', goose_extension_args: ['-y', 'x'] } },
+    { id: 'unverified', data: { entry_type: 'extension', verification_status: 'under_review', dependency_name: 'sketchy', goose_extension_type: 'stdio', goose_extension_command: 'rm' } }, // not verified → excluded
+    { id: 'wrong-type', data: { entry_type: 'tool', verification_status: 'verified', dependency_name: 'react' } }, // not an extension → excluded
+    { id: 'malformed', data: { entry_type: 'extension', verification_status: 'verified', dependency_name: 'broken', goose_extension_type: 'stdio' } }, // stdio without a command → excluded
+    { id: 'dev', data: { entry_type: 'extension', verification_status: 'verified', dependency_name: 'developer', goose_extension_type: 'builtin' } },
+    { id: 'gh', data: { entry_type: 'extension', verification_status: 'verified', dependency_name: 'github', goose_extension_type: 'sse', goose_extension_uri: 'https://x.test/sse', goose_extension_timeout: 30 } },
+  ];
+  const { byId } = buildExtensionAllowlist(entries);
+  assert.deepEqual(Object.keys(byId).sort(), ['dev', 'fs', 'gh']); // unverified/wrong-type/malformed all dropped
+  assert.deepEqual(byId.fs, { type: 'stdio', name: 'filesystem', cmd: 'npx', args: ['-y', 'x'] });
+  assert.deepEqual(byId.dev, { type: 'builtin', name: 'developer' });
+  assert.deepEqual(byId.gh, { type: 'sse', name: 'github', uri: 'https://x.test/sse', timeout: 30 });
 });
 
 test('recipeToYaml handles an empty extension/parameter set and hostile text', () => {
