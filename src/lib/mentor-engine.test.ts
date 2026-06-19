@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { detectSignals, pickQuestions, reflect, QUESTIONS, type SignalId, type ConstraintId } from './mentor-engine.ts';
+import { detectSignals, pickQuestions, reflect, reflectFromResponse, QUESTIONS, type SignalId, type ConstraintId } from './mentor-engine.ts';
 
 test('detectSignals reads the curated lexicon', () => {
   const s = detectSignals('A private way for tenants to report evictions without exposing who they are.');
@@ -119,4 +119,46 @@ test('detectSignals ignores unknown protocols and surfaces known ones', () => {
 test('pickQuestions never exceeds the default cap of three', () => {
   const qs = pickQuestions(['privacy', 'payments', 'storage', 'identity', 'community'], {});
   assert.ok(qs.length <= 3);
+});
+
+// ---- reflectFromResponse: the deterministic structured-reflection step (no model) ----
+
+test('reflectFromResponse normalises a well-formed Goose response', () => {
+  const r = reflectFromResponse({
+    constraints: ['anonymity-first', 'durable-data'],
+    proposals: [
+      { action: 'add', name: 'ndk', why: 'Nostr connectivity' },
+      { action: 'swap', name: 'pouchdb', why: 'local-first storage' },
+    ],
+  });
+  assert.deepEqual(r, {
+    schemaVersion: 1,
+    constraints: ['anonymity-first', 'durable-data'],
+    proposals: [
+      { action: 'add', name: 'ndk', why: 'Nostr connectivity' },
+      { action: 'swap', name: 'pouchdb', why: 'local-first storage' },
+    ],
+  });
+});
+
+test('reflectFromResponse drops malformed entries and never throws (untrusted paste)', () => {
+  const r = reflectFromResponse({
+    constraints: ['ok', 5, null, 'fine'], // non-strings dropped
+    proposals: [
+      { action: 'add', name: 'good', why: 'yes' },
+      { action: 'teleport', name: 'bad-action', why: 'no' }, // invalid action → dropped
+      { action: 'remove', name: 'no-why' },                  // missing why → dropped
+      'not-an-object',                                        // dropped
+    ],
+  });
+  assert.deepEqual(r.constraints, ['ok', 'fine']);
+  assert.deepEqual(r.proposals, [{ action: 'add', name: 'good', why: 'yes' }]);
+  assert.equal(r.schemaVersion, 1);
+});
+
+test('reflectFromResponse returns an empty reflection for garbage input', () => {
+  for (const bad of [null, undefined, 'string', 42, [], {}]) {
+    const r = reflectFromResponse(bad);
+    assert.deepEqual(r, { schemaVersion: 1, constraints: [], proposals: [] });
+  }
 });

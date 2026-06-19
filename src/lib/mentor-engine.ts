@@ -14,6 +14,8 @@
  * agent. This layer's job is to route pre-encoded human judgment into it.
  */
 
+import type { SessionMentorReflection } from './build-session.ts';
+
 export type SignalId =
   | 'privacy'
   | 'identity'
@@ -183,4 +185,34 @@ export function reflect(signals: SignalId[], answers: Record<string, string> = {
     'direct-payment', 'org-custody', 'durable-data', 'local-first', 'community-owned', 'safety-tooling',
   ];
   return { signals, constraints: ORDER.filter((c) => constraints.has(c)) };
+}
+
+const PROPOSAL_ACTIONS = new Set(['add', 'swap', 'remove']);
+
+/**
+ * Deterministically turn a recipe `response.json_schema` result — the structured JSON
+ * the builder brings back from their OWN Goose run — into a SessionMentorReflection.
+ *
+ * THIS IS THE ONE PERMITTED "structured-reflection" STEP, and it makes NO model/API
+ * call: it only reads and normalises already-produced structured output (Path A). The
+ * input is untrusted (pasted by the builder), so every field is validated and malformed
+ * entries are dropped — it never throws. Mirrors goose-recipe's RESPONSE_JSON_SCHEMA
+ * ({ constraints, proposals }); the schemaVersion is added here, not expected from the model.
+ */
+export function reflectFromResponse(response: unknown): SessionMentorReflection {
+  const r = (response && typeof response === 'object' ? response : {}) as Record<string, unknown>;
+  const constraints = Array.isArray(r.constraints)
+    ? r.constraints.filter((x): x is string => typeof x === 'string')
+    : [];
+  const proposals: SessionMentorReflection['proposals'] = [];
+  if (Array.isArray(r.proposals)) {
+    for (const item of r.proposals) {
+      if (!item || typeof item !== 'object') continue;
+      const p = item as Record<string, unknown>;
+      if (typeof p.action !== 'string' || !PROPOSAL_ACTIONS.has(p.action)) continue;
+      if (typeof p.name !== 'string' || typeof p.why !== 'string') continue;
+      proposals.push({ action: p.action as 'add' | 'swap' | 'remove', name: p.name, why: p.why });
+    }
+  }
+  return { schemaVersion: 1, constraints, proposals };
 }
