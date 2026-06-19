@@ -12,9 +12,13 @@ false positive/negative, a failing test case is the most useful report.
 
 ## Scope
 
-This is a **static site**: no server-side app, no database, no user accounts, no
-runtime user data. The attack surface is the build pipeline, the dependencies,
-and the hosting configuration.
+The site is **statically generated** (Astro) and served from Cloudflare. A thin
+Cloudflare Worker backs a few live, **model-free** endpoints — registry license
+lookups, the deterministic hosting-cost estimator, the GitHub one-click, and
+optional *Sign in with Nostr / Bluesky* (identity only, backed by D1 + KV). No
+model-provider keys are required or stored; anything that talks to a model does
+so client-side, BYOK. The attack surface is the build pipeline, the dependencies,
+the Worker endpoints, and the hosting configuration.
 
 ## What we enforce on ourselves
 
@@ -33,9 +37,10 @@ and the hosting configuration.
   produced for every build of `main`, verifiable with `gh attestation verify`,
   `cosign`, or `slsa-verifier`.
 - **The CI pipeline is hardened**: every GitHub Action is pinned to a full commit
-  SHA (enforced by zizmor), each runner is hardened with egress monitoring
-  (harden-runner), Node versions are pinned, and a dead-link check runs on every
-  PR. Trivy is deliberately excluded (CVE-2026-33634).
+  SHA (enforced by zizmor), most runners are hardened with egress monitoring
+  (harden-runner) — the two frozen PR-gate workflows (`verify`, `quality`) are
+  the current exception — Node versions are pinned, and a dead-link check runs on
+  every PR. Trivy is deliberately excluded (CVE-2026-33634).
 - **Security response headers + CSP**: every response carries HSTS, `nosniff`,
   `Referrer-Policy`, `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy`, and a
   `Permissions-Policy` lockdown. HTML pages additionally carry a strict,
