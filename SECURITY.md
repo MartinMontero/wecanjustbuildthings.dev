@@ -36,6 +36,28 @@ and the hosting configuration.
   SHA (enforced by zizmor), each runner is hardened with egress monitoring
   (harden-runner), Node versions are pinned, and a dead-link check runs on every
   PR. Trivy is deliberately excluded (CVE-2026-33634).
+- **Security response headers + CSP**: every response carries HSTS, `nosniff`,
+  `Referrer-Policy`, `X-Frame-Options: DENY`, `Cross-Origin-Opener-Policy`, and a
+  `Permissions-Policy` lockdown. HTML pages additionally carry a strict,
+  hash-based **Content-Security-Policy** (`default-src 'none'`; `script-src 'self'`
+  + a per-build hash for each inline framework script, no `'unsafe-inline'`;
+  `connect-src 'self'`). It is generated at build into `dist/_headers` from a
+  single source (`src/lib/security-headers.ts`) and ships **Report-Only** first —
+  see the rollout note below.
+
+### Rolling the CSP from Report-Only to enforce
+
+1. Deploy with the default (`Content-Security-Policy-Report-Only`) and exercise the
+   live flows: Sign in with Nostr/Bluesky, the GitHub one-click in Build Studio,
+   catalog search, and the `/admin/` CMS. Violations are logged to the Worker at
+   `/api/csp-report` (visible via `wrangler tail`) and in the browser console.
+2. The `/admin/` CMS (Sveltia) calls GitHub from the browser, so it needs a broader
+   `connect-src` than the rest of the site. Cloudflare `_headers` *combines*
+   overlapping rules (it cannot send a second, narrower CSP for `/admin/*` only),
+   so give the admin route its own policy via the Worker before enforcing — confirm
+   the exact hosts from the Report-Only violations rather than guessing.
+3. Once the reports are clean, build with `CSP_MODE=enforce` (flips the header name
+   to `Content-Security-Policy`) and redeploy.
 
 ## Accepted risk
 
