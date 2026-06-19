@@ -57,6 +57,22 @@ test('a persona is prepended to the recipe instructions (carried in the deeplink
   assert.ok(!buildGooseRecipe(baseInput(), allow).instructions.includes('Act as the build mentor'));
 });
 
+test('recipeToYaml round-trips a persona recipe (multi-line instructions block scalar)', () => {
+  // D-2a made `instructions` multi-line; prove the YAML block scalar survives it
+  // (same class as the prompt bullet-indent case).
+  const persona = {
+    name: 'mentor',
+    description: 'A Socratic build mentor.',
+    method: ['Reflect the real problem first.', 'Offer choices with honest trade-offs.', 'Keep the builder in control.'],
+  };
+  const r = buildGooseRecipe(baseInput({ persona }), allow);
+  const lines = String((parseYaml(recipeToYaml(r)) as Record<string, any>).instructions).split('\n');
+  assert.ok(lines.includes('Act as the build mentor — A Socratic build mentor.'), 'persona header preserved');
+  assert.ok(lines.includes('1. Reflect the real problem first.'), 'numbered persona step preserved');
+  assert.ok(lines.includes('3. Keep the builder in control.'), 'last persona step preserved');
+  assert.ok(lines.some((l) => l.includes('policy-clean')), 'base instructions still present after the persona');
+});
+
 test('the recipe forces the structured response the Mentor Engine will read (Slice D)', () => {
   const r = buildGooseRecipe(baseInput(), allow);
   assert.deepEqual(r.response.json_schema, RESPONSE_JSON_SCHEMA);
