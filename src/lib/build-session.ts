@@ -51,6 +51,25 @@ export interface SessionConverged {
   signals: string[];
 }
 
+/** A vetted Goose extension chosen for the build. Sourced (allowlisted) from the
+ *  Catalog in Slice B; kept here so the recipe serializer can reference it. */
+export interface SessionExtension {
+  /** Slug of the verified Catalog entry this came from (the trust anchor). */
+  catalogId: string;
+  name: string;
+  /** Resolved from the Catalog, never user-typed. */
+  kind: 'builtin' | 'mcp_stdio' | 'mcp_sse';
+}
+
+/** Deterministic structured-reflection output (Movement 1 ↔ Goose). Written by the
+ *  Mentor Engine in Slice D from a `response.json_schema`-conformant result the builder
+ *  brings back from their own Goose run — never an LLM call from the platform. */
+export interface SessionMentorReflection {
+  schemaVersion: 1;
+  constraints: string[];
+  proposals: Array<{ action: 'add' | 'swap' | 'remove'; name: string; why: string }>;
+}
+
 export interface BuildSession {
   v: 1;
   updatedAt: string;
@@ -87,6 +106,10 @@ export interface BuildSession {
    *  v1-compatible: absent until the builder opens the estimator. */
   usage?: UsageProfile | null;
   costEstimate?: CostEstimate | null;
+  /** Vetted Goose extensions chosen for the build (Catalog-allowlisted, Slice B). */
+  extensions: SessionExtension[];
+  /** Deterministic structured-reflection result (Slice D); null until a run returns. */
+  mentorReflection: SessionMentorReflection | null;
 }
 
 const KEY = 'wcb.build-session.v1';
@@ -106,6 +129,8 @@ export function defaultSession(): BuildSession {
     handoff: 'zip',
     usage: null,
     costEstimate: null,
+    extensions: [],
+    mentorReflection: null,
   };
 }
 
@@ -147,6 +172,38 @@ const asConverged = (v: unknown): SessionConverged | null => {
 
 const asMovement = (v: unknown): 1 | 2 | 3 | 4 => (v === 2 || v === 3 || v === 4 ? v : 1);
 
+const EXTENSION_KINDS = ['builtin', 'mcp_stdio', 'mcp_sse'] as const;
+const asExtensions = (v: unknown): SessionExtension[] => {
+  if (!Array.isArray(v)) return [];
+  const out: SessionExtension[] = [];
+  for (const e of v) {
+    if (!e || typeof e !== 'object') continue;
+    const x = e as Record<string, unknown>;
+    if (typeof x.catalogId !== 'string' || typeof x.name !== 'string') continue;
+    if (!(EXTENSION_KINDS as readonly string[]).includes(x.kind as string)) continue;
+    out.push({ catalogId: x.catalogId, name: x.name, kind: x.kind as SessionExtension['kind'] });
+  }
+  return out;
+};
+
+const PROPOSAL_ACTIONS = ['add', 'swap', 'remove'] as const;
+const asMentorReflection = (v: unknown): SessionMentorReflection | null => {
+  if (!v || typeof v !== 'object') return null;
+  const r = v as Record<string, unknown>;
+  if (r.schemaVersion !== 1) return null;
+  const proposals: SessionMentorReflection['proposals'] = [];
+  if (Array.isArray(r.proposals)) {
+    for (const item of r.proposals) {
+      if (!item || typeof item !== 'object') continue;
+      const pr = item as Record<string, unknown>;
+      if (!(PROPOSAL_ACTIONS as readonly string[]).includes(pr.action as string)) continue;
+      if (typeof pr.name !== 'string' || typeof pr.why !== 'string') continue;
+      proposals.push({ action: pr.action as 'add' | 'swap' | 'remove', name: pr.name, why: pr.why });
+    }
+  }
+  return { schemaVersion: 1, constraints: asStringArray(r.constraints), proposals };
+};
+
 /**
  * Coerce arbitrary stored JSON into a valid BuildSession, filling any missing
  * keys from the default. Forward-only: anything that isn't v1 starts fresh.
@@ -187,6 +244,8 @@ export function migrate(parsed: unknown): BuildSession {
     handoff: asString(p.handoff) || d.handoff,
     usage: p.usage ?? null,
     costEstimate: p.costEstimate ?? null,
+    extensions: asExtensions(p.extensions),
+    mentorReflection: asMentorReflection(p.mentorReflection),
   };
 }
 
@@ -253,4 +312,19 @@ export function subscribeSession(cb: (s: BuildSession) => void): () => void {
     window.removeEventListener(EVENT, onEvent);
     window.removeEventListener('storage', onStorage);
   };
+}
+
+/**
+ * Add or remove a Catalog tool from the build via the `adjustments.extra` channel the
+ * Build Studio restores on mount (see BuildStudio.svelte). Adding also seeds the tool
+ * so the Studio opens at it; removing the current seed clears it. Pure — the Catalog
+ * island calls `updateSession((s) => toggleExtraTool(s, name))`.
+ */
+export function toggleExtraTool(session: BuildSession, name: string): BuildSession {
+  const has = session.adjustments.extra.includes(name);
+  const extra = has
+    ? session.adjustments.extra.filter((n) => n !== name)
+    : [...session.adjustments.extra, name];
+  const seededTool = has ? (session.seededTool === name ? null : session.seededTool) : name;
+  return { ...session, adjustments: { ...session.adjustments, extra }, seededTool };
 }

@@ -9,6 +9,7 @@ import {
   clearSession,
   hasSession,
   subscribeSession,
+  toggleExtraTool,
 } from './build-session.ts';
 
 test('defaultSession has the expected shape', () => {
@@ -201,4 +202,77 @@ test('saveSession degrades silently when the write throws (quota) but still noti
     assert.equal(loadSession().intent.problem, ''); // nothing persisted
     off();
   }, { failWrites: true });
+});
+
+// ---- Slice A: extensions + mentorReflection fields; Catalog ↔ session wiring ----
+
+test('defaultSession carries the Slice-A fields', () => {
+  const s = defaultSession();
+  assert.deepEqual(s.extensions, []);
+  assert.equal(s.mentorReflection, null);
+});
+
+test('migrate coerces extensions: keeps valid, drops malformed / unknown-kind', () => {
+  const m = migrate({
+    v: 1,
+    extensions: [
+      { catalogId: 'ndk', name: 'NDK', kind: 'mcp_stdio' }, // valid
+      { catalogId: 'x', name: 'X', kind: 'telepathy' },     // bad kind → dropped
+      { name: 'no-id', kind: 'builtin' },                   // missing catalogId → dropped
+      'nope',                                               // not an object → dropped
+    ],
+  });
+  assert.deepEqual(m.extensions, [{ catalogId: 'ndk', name: 'NDK', kind: 'mcp_stdio' }]);
+  assert.deepEqual(migrate({ v: 1, extensions: 'not-an-array' }).extensions, []);
+});
+
+test('migrate validates mentorReflection shape or nulls it', () => {
+  assert.equal(migrate({ v: 1, mentorReflection: { schemaVersion: 2 } }).mentorReflection, null); // wrong version
+  assert.equal(migrate({ v: 1, mentorReflection: 'x' }).mentorReflection, null);
+  const ok = migrate({
+    v: 1,
+    mentorReflection: {
+      schemaVersion: 1,
+      constraints: ['anonymity-first', 5], // non-strings filtered
+      proposals: [
+        { action: 'add', name: 'ndk', why: 'connect' },
+        { action: 'teleport', name: 'x', why: 'no' }, // bad action → dropped
+        { action: 'remove', name: 'y' },              // missing why → dropped
+      ],
+    },
+  }).mentorReflection;
+  assert.deepEqual(ok, {
+    schemaVersion: 1,
+    constraints: ['anonymity-first'],
+    proposals: [{ action: 'add', name: 'ndk', why: 'connect' }],
+  });
+});
+
+test('toggleExtraTool adds, then removes, maintaining seededTool; pure', () => {
+  const s0 = defaultSession();
+  const s1 = toggleExtraTool(s0, 'ndk');
+  assert.deepEqual(s1.adjustments.extra, ['ndk']);
+  assert.equal(s1.seededTool, 'ndk'); // adding seeds it (the Studio opens at it)
+  const s2 = toggleExtraTool(s1, 'svelte');
+  assert.deepEqual(s2.adjustments.extra, ['ndk', 'svelte']);
+  assert.equal(s2.seededTool, 'svelte');
+  const s3 = toggleExtraTool(s2, 'svelte'); // remove the current seed
+  assert.deepEqual(s3.adjustments.extra, ['ndk']);
+  assert.equal(s3.seededTool, null); // removing the seed clears it
+  // removing a non-seed leaves seededTool intact
+  const s5 = toggleExtraTool(toggleExtraTool(toggleExtraTool(s0, 'a'), 'b'), 'a');
+  assert.deepEqual(s5.adjustments.extra, ['b']);
+  assert.equal(s5.seededTool, 'b');
+  assert.deepEqual(s0.adjustments.extra, []); // original untouched
+});
+
+test('Catalog → BuildStudio channel: a catalog write is visible to a Studio-side read', () => {
+  withFakeDom(() => {
+    // The Catalog island writes via updateSession(toggleExtraTool)…
+    updateSession((s) => toggleExtraTool(s, 'ndk'));
+    // …and the Build Studio reads adjustments.extra + seededTool on mount.
+    const seen = loadSession();
+    assert.ok(seen.adjustments.extra.includes('ndk'));
+    assert.equal(seen.seededTool, 'ndk');
+  });
 });
