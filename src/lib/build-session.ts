@@ -113,9 +113,48 @@ function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof localStorage !== 'undefined';
 }
 
+const asString = (v: unknown): string => (typeof v === 'string' ? v : '');
+
+const asStringArray = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+
+const asStringRecord = (v: unknown): Record<string, string> => {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return {};
+  const out: Record<string, string> = {};
+  for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+    if (typeof val === 'string') out[k] = val;
+  }
+  return out;
+};
+
+/** Mentor answers: each value is free-text (string) or a multi-select (string[]). */
+const asAnswers = (v: unknown): Record<string, string | string[]> => {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return {};
+  const out: Record<string, string | string[]> = {};
+  for (const [k, val] of Object.entries(v as Record<string, unknown>)) {
+    if (typeof val === 'string') out[k] = val;
+    else if (Array.isArray(val)) out[k] = val.filter((x): x is string => typeof x === 'string');
+  }
+  return out;
+};
+
+const asConverged = (v: unknown): SessionConverged | null => {
+  if (!v || typeof v !== 'object') return null;
+  const c = v as Partial<SessionConverged>;
+  if (typeof c.statement !== 'string') return null;
+  return { statement: c.statement, constraints: asStringArray(c.constraints), signals: asStringArray(c.signals) };
+};
+
+const asMovement = (v: unknown): 1 | 2 | 3 | 4 => (v === 2 || v === 3 || v === 4 ? v : 1);
+
 /**
  * Coerce arbitrary stored JSON into a valid BuildSession, filling any missing
  * keys from the default. Forward-only: anything that isn't v1 starts fresh.
+ *
+ * localStorage is writable by the user, browser extensions, and any same-origin
+ * script, so every field is normalised to its declared type rather than trusted —
+ * notably the ones consumers feed straight into `new Set(...)` (intent.protocols,
+ * converged.constraints/signals), where a non-iterable would otherwise throw.
  */
 export function migrate(parsed: unknown): BuildSession {
   const d = defaultSession();
@@ -126,15 +165,26 @@ export function migrate(parsed: unknown): BuildSession {
     ...d,
     ...p,
     v: 1,
-    intent: { ...d.intent, ...(p.intent ?? {}), answers: { ...(p.intent?.answers ?? {}) } },
-    converged: p.converged ?? null,
+    updatedAt: asString(p.updatedAt) || d.updatedAt,
+    movement: asMovement(p.movement),
+    intent: {
+      projectName: asString(p.intent?.projectName),
+      problem: asString(p.intent?.problem),
+      goal: asString(p.intent?.goal),
+      success: asString(p.intent?.success),
+      protocols: asStringArray(p.intent?.protocols),
+      answers: asAnswers(p.intent?.answers),
+    },
+    converged: asConverged(p.converged),
     adjustments: {
-      swaps: { ...(p.adjustments?.swaps ?? {}) },
-      removed: [...(p.adjustments?.removed ?? [])],
-      extra: [...(p.adjustments?.extra ?? [])],
+      swaps: asStringRecord(p.adjustments?.swaps),
+      removed: asStringArray(p.adjustments?.removed),
+      extra: asStringArray(p.adjustments?.extra),
     },
     stack: Array.isArray(p.stack) ? p.stack : [],
     skills: Array.isArray(p.skills) ? p.skills : [],
+    seededTool: typeof p.seededTool === 'string' ? p.seededTool : null,
+    handoff: asString(p.handoff) || d.handoff,
     usage: p.usage ?? null,
     costEstimate: p.costEstimate ?? null,
   };
