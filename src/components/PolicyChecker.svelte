@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { matchDependency } from '../../enforcement/matcher.ts';
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
+  import { parseDependencyInput } from '../lib/policy-input.ts';
 
   let orgs = $state<ExcludedOrg[]>([]);
   let policyReady = $state(false);
@@ -32,32 +33,6 @@
     }
   });
 
-  function parseInput(): { name: string; ecosystem: Ecosystem }[] {
-    const text = input.trim();
-    if (!text) return [];
-    // Try package.json first.
-    if (text.startsWith('{')) {
-      try {
-        const json = JSON.parse(text);
-        const out: { name: string; ecosystem: Ecosystem }[] = [];
-        for (const field of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
-          const block = json[field];
-          if (block && typeof block === 'object') for (const name of Object.keys(block)) out.push({ name, ecosystem: 'js' });
-        }
-        if (out.length) return out;
-      } catch { /* fall through to line parsing */ }
-    }
-    // Otherwise: one dep per line — "name" or "name <ecosystem>".
-    return text
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter((l) => l && !l.startsWith('#'))
-      .map((l) => {
-        const [name, eco] = l.split(/\s+/);
-        return { name: name!.replace(/[",]/g, ''), ecosystem: (eco as Ecosystem) || ecosystem };
-      });
-  }
-
   async function fetchLicense(name: string, eco: Ecosystem): Promise<string | undefined> {
     try {
       const res = await fetch(`/api/license?eco=${encodeURIComponent(eco)}&name=${encodeURIComponent(name)}`);
@@ -71,7 +46,7 @@
 
   async function run() {
     if (!policyReady) return;
-    const deps = parseInput();
+    const deps = parseDependencyInput(input, ecosystem);
     rows = deps.map((d) => {
       const m = matchDependency({ name: d.name, ecosystem: d.ecosystem, source_file: 'input' }, orgs);
       return {

@@ -7,6 +7,7 @@
   import { detectSignals, pickQuestions, reflect, type ConstraintId } from '../lib/mentor-engine.ts';
   import { chemistry, partnersOf } from '../lib/chemistry.ts';
   import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies } from '../lib/studio-stack.ts';
+  import { slugifySkill, skillToMd, type DraftSkill } from '../lib/skill-doc.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
@@ -925,7 +926,6 @@ manuals with the knowledge-to-skills-pipeline).
   // Pipeline output, wired into the loop: skills drafted from the builder's own
   // described methods, plus a couple of ready-made starter skills. Adding one
   // writes a SKILL.md (the knowledge-to-skills-pipeline format) into the starter.
-  interface DraftSkill { name: string; description: string; method: string[]; source?: string }
   let aiSkills = $state<DraftSkill[]>([]);
   let customSkills = $state<Record<string, string>>({});
   const STARTER_SKILLS: DraftSkill[] = [
@@ -946,14 +946,6 @@ manuals with the knowledge-to-skills-pipeline).
         'Assume anything you keep could be subpoenaed — design as if it will be.',
       ] },
   ];
-  function slugifySkill(name: string): string {
-    return (name || 'skill').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'skill';
-  }
-  function skillToMd(s: DraftSkill): string {
-    const title = slugifySkill(s.name).replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-    const steps = s.method.map((m, i) => `${i + 1}. ${m}`).join('\n');
-    return `---\nname: ${slugifySkill(s.name)}\ndescription: ${s.description}\nattribution:\n  source: "${s.source || 'Described by the builder in the Build Studio'}"\n  license: CC-BY-SA-4.0\n---\n\n# ${title}\n\n${steps}\n`;
-  }
   function addSkill(s: DraftSkill) {
     customSkills = { ...customSkills, [`skills/${slugifySkill(s.name)}.SKILL.md`]: skillToMd(s) };
   }

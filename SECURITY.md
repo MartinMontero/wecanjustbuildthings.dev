@@ -54,8 +54,11 @@ the Worker endpoints, and the hosting configuration.
 
 1. Deploy with the default (`Content-Security-Policy-Report-Only`) and exercise the
    live flows: Sign in with Nostr/Bluesky, the GitHub one-click in Build Studio,
-   catalog search, and the `/admin/` CMS. Violations are logged to the Worker at
-   `/api/csp-report` (visible via `wrangler tail`) and in the browser console.
+   catalog search, and the `/admin/` CMS. Violations are POSTed to the Worker at
+   `/api/csp-report`, which logs each one as a structured `[csp-report]` entry. With
+   Workers Logs enabled (`observability` in `wrangler.jsonc`) these persist for the
+   whole soak — review them in the Cloudflare dashboard (filter on `[csp-report]`),
+   live via `wrangler tail`, or in the browser console.
 2. The `/admin/` CMS (Sveltia) calls GitHub from the browser, so it needs a broader
    `connect-src` than the rest of the site. Cloudflare `_headers` *combines*
    overlapping rules (it cannot send a second, narrower CSP for `/admin/*` only),

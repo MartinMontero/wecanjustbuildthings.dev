@@ -56,7 +56,7 @@ export function pinnedDependencies(
 ): Record<string, string> {
   return Object.fromEntries(
     jsDeps.map((it) => {
-      const v = it.version?.replace(/^v/, '').trim();
+      const v = it.version?.trim().replace(/^v/, '');
       return [it.name, v ? `^${v}` : 'latest'];
     }),
   );

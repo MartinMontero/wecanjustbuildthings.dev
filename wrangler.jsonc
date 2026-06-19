@@ -24,5 +24,11 @@
     // Canonical prod origin (used for OAuth client metadata + redirects). Local dev
     // overrides this via .dev.vars (http://localhost:8788).
     "SITE_URL": "https://wecanjustbuildthings.dev"
-  }
+  },
+
+  // Workers Logs: persist the Worker's console output so the CSP Report-Only soak's
+  // structured `[csp-report]` entries are reviewable in the Cloudflare dashboard for
+  // the whole soak window — not just live via `wrangler tail`. Sample 100% (report
+  // volume is low and we don't want to miss a violation before flipping to enforce).
+  "observability": { "enabled": true, "head_sampling_rate": 1 }
 }

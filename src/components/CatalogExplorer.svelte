@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { catalogMatches, compareItems, facetCounts, type CatalogQuery, type FacetDim } from '../lib/catalog-filter.ts';
 
   interface Item {
     name: string;
@@ -255,31 +256,18 @@
     return next;
   }
 
-  function matches(it: IndexedItem, opts: { skip?: string } = {}): boolean {
-    const text = q.trim().toLowerCase();
-    if (text && !it._hay.includes(text)) return false;
-    if (opts.skip !== 'kind' && selKind.size && !selKind.has(it.kind)) return false;
-    if (opts.skip !== 'protocol' && selProtocol.size && !it.protocols.some((p) => selProtocol.has(p))) return false;
-    if (opts.skip !== 'ecosystem' && selEcosystem.size && !selEcosystem.has(it.ecosystem)) return false;
-    if (opts.skip !== 'category' && selCategory.size && !selCategory.has(it.category)) return false;
-    if (opts.skip !== 'verification' && selVerification.size && !selVerification.has(it.verification)) return false;
-    return true;
-  }
+  // Build the pure query object from the island's reactive state; the filter,
+  // facet, and sort logic itself lives in (and is tested in) lib/catalog-filter.ts.
+  const query = $derived<CatalogQuery>({
+    text: q,
+    facets: { kind: selKind, protocol: selProtocol, ecosystem: selEcosystem, category: selCategory, verification: selVerification },
+  });
 
   const filtered = $derived(
-    items
-      .filter((it) => matches(it))
-      .sort((a, b) => (sort === 'uses' ? b.uses - a.uses || a.name.localeCompare(b.name) : a.name.localeCompare(b.name))),
+    items.filter((it) => catalogMatches(it, query)).sort((a, b) => compareItems(sort, a, b)),
   );
 
-  function facet(dim: 'kind' | 'protocol' | 'ecosystem' | 'category' | 'verification', get: (it: Item) => string[]) {
-    const counts = new Map<string, number>();
-    for (const it of items) {
-      if (!matches(it, { skip: dim })) continue;
-      for (const v of get(it)) counts.set(v, (counts.get(v) ?? 0) + 1);
-    }
-    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-  }
+  const facet = (dim: FacetDim, get: (it: IndexedItem) => string[]) => facetCounts(items, query, dim, get);
 
   const kindFacet = $derived(facet('kind', (it) => [it.kind]));
   const protocolFacet = $derived(facet('protocol', (it) => it.protocols));
