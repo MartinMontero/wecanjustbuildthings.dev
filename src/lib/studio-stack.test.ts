@@ -20,6 +20,21 @@ test('pinnedDependencies pins to each entry\'s recorded version, not "latest" (#
   assert.ok(!Object.values(all).includes('latest'));
 });
 
+test('pinnedDependencies trims surrounding whitespace before stripping the v prefix', () => {
+  const out = pinnedDependencies([
+    { name: 'spacey', version: '  v1.2.3  ' }, // trimmed first → v stripped → valid range
+    { name: 'blank', version: '   ' }, // whitespace-only → no version → latest
+  ]);
+  assert.equal(out['spacey'], '^1.2.3'); // not '^v1.2.3' or '^ 1.2.3 '
+  assert.equal(out['blank'], 'latest');
+});
+
+test('eligibleForStack treats a candidate with no kind/verification as eligible', () => {
+  // most catalog tools omit these; absence must not exclude them from a stack
+  assert.ok(eligibleForStack({}));
+  assert.ok(eligibleForStack({ kind: 'tool' }));
+});
+
 test('eligibleForStack admits verified AND under_review, excludes blocked + datasets (#4)', () => {
   assert.ok(eligibleForStack({ kind: 'tool', verification: 'verified' }));
   // under_review passed automated policy screening — eligible, labelled, not excluded

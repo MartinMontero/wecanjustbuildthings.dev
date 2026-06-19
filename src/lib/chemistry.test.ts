@@ -41,3 +41,40 @@ test('no conflicts in a clean one-per-capability stack', () => {
   ]);
   assert.equal(c.conflicts.length, 0);
 });
+
+test('two tools filling the same capability flag a same-capability conflict', () => {
+  const c = chemistry([
+    { name: 'svelte', capId: 'app', category: 'Frameworks & Libraries' },
+    { name: 'vue', capId: 'app', category: 'Other' }, // same capId, different category
+  ]);
+  assert.ok(c.conflicts.some((x) => x.reason === 'same-capability'
+    && ((x.a === 'svelte' && x.b === 'vue') || (x.a === 'vue' && x.b === 'svelte'))));
+  // same-capability takes precedence; it is not also double-reported as same-category
+  assert.equal(c.conflicts.length, 1);
+});
+
+test('"extra" is not a real capability slot: two extras never conflict on capability', () => {
+  const c = chemistry([
+    { name: 'x', capId: 'extra', category: 'A' },
+    { name: 'y', capId: 'extra', category: 'B' }, // different categories ⇒ no conflict at all
+  ]);
+  assert.equal(c.conflicts.length, 0);
+  assert.deepEqual(c.pairs, []); // extras hold no adjacency slot
+});
+
+test('order follows CAP_ORDER regardless of input order', () => {
+  const c = chemistry([
+    { name: 's', capId: 'storage' },
+    { name: 'a', capId: 'app' },
+    { name: 'c', capId: 'connect' },
+  ]);
+  assert.deepEqual(c.order, ['connect', 'app', 'storage']); // sequenced, not input order
+});
+
+test('partnersOf returns [] for a tool that pairs with nothing', () => {
+  const c = chemistry([
+    { name: 'lonely', capId: 'payments', category: 'Z' }, // payments has no slotted adjacency here
+  ]);
+  assert.deepEqual(partnersOf('lonely', c), []);
+  assert.deepEqual(partnersOf('not-in-stack', c), []);
+});
