@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { PROVIDERS, EXCLUDED_PROVIDER_IDS, EXCLUDED_PROVIDER_ALIASES } from './providers.ts';
+import {
+  PROVIDERS, EXCLUDED_PROVIDER_IDS, EXCLUDED_PROVIDER_ALIASES, getProvider,
+  type LineKey, type PriceUnit,
+} from './providers.ts';
 
 /**
  * CI guard (registry half). The dependency-tree half — no Meta/OpenAI/xAI package
@@ -40,6 +43,33 @@ test('prices are a finite number or an explicit null; a confirmed price needs a 
       if (line.unitPrice !== null) {
         assert.ok(p.lastVerified, `confirmed price for ${p.providerId} must carry lastVerified`);
       }
+    }
+  }
+});
+
+test('getProvider resolves a known id and returns undefined otherwise', () => {
+  assert.equal(getProvider('cloudflare')?.providerId, 'cloudflare');
+  assert.equal(getProvider('nope-not-a-provider'), undefined);
+});
+
+test('provider ids are unique, so getProvider can never be ambiguous', () => {
+  const ids = PROVIDERS.map((p) => p.providerId);
+  assert.equal(new Set(ids).size, ids.length, 'duplicate providerId in the registry');
+});
+
+test('each price line uses a unit the quantity logic understands (registry ↔ math coupling)', () => {
+  // quantityForLine in _interface.ts keys off line.key and (for compute) line.unit;
+  // a drifted unit would silently mis-bill. Lock the pairings the math assumes.
+  const VALID: Record<LineKey, PriceUnit[]> = {
+    base: ['flat-month'],
+    compute: ['flat-month', '1M-requests'],
+    bandwidth: ['GB-egress'],
+    storage: ['GB-month'],
+    database: ['GB-month'],
+  };
+  for (const p of PROVIDERS) {
+    for (const line of p.lines) {
+      assert.ok(VALID[line.key].includes(line.unit), `${p.providerId}/${line.key} has unexpected unit "${line.unit}"`);
     }
   }
 });
