@@ -8,6 +8,7 @@
   import { chemistry, partnersOf } from '../lib/chemistry.ts';
   import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies } from '../lib/studio-stack.ts';
   import { slugifySkill, skillToMd, type DraftSkill } from '../lib/skill-doc.ts';
+  import { mentorPersonaSkill } from '../lib/mentor-persona.ts';
   import { buildGooseRecipe, recipeToYaml, type ExtensionAllowlist } from '../lib/goose-recipe.ts';
   import { recipeDeeplink, explainRecipe } from '../lib/goose-deeplink.ts';
 
@@ -761,7 +762,7 @@ Start by writing specs/001-${slug}/plan.md from the spec, then tasks.md, then im
   // model-agnostic (the user's Goose config picks the model). One recipe object drives
   // both the YAML download and the goose:// deeplink + explain panel (Slice C).
   const gooseRecipeObj = $derived(buildGooseRecipe(
-    { title: projectName || slug, slug, prompt: agentPrompt, extensions: sessionExtensions },
+    { title: projectName || slug, slug, prompt: agentPrompt, extensions: sessionExtensions, persona: mentorPersonaSkill(lang) },
     allowlist,
   ));
   const gooseRecipe = $derived(recipeToYaml(gooseRecipeObj));
@@ -841,6 +842,9 @@ manuals with the knowledge-to-skills-pipeline).
       [`${slug}.goose-recipe.yaml`]: gooseRecipe,
       '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; run \`npm run enforce\` before committing.\n`,
       'skills/README.md': skillsReadme,
+      // The mentor persona (Slice D): the Socratic-mentor frame for file-based agents
+      // (Claude Code reads skills/*.SKILL.md); the deeplink recipe carries it inline.
+      'skills/mentor.SKILL.md': skillToMd(mentorPersonaSkill(lang)),
       // The example is just a placeholder; once the builder has real skills, ship those instead.
       ...(skillCount ? {} : { 'skills/example.SKILL.md': skillExample }),
       ...customSkills,

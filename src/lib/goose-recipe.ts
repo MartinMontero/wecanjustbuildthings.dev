@@ -11,7 +11,7 @@
  * unrepresentable in a generated recipe.
  */
 import type { SessionExtension } from './build-session.ts';
-import { yamlDoubleQuoted } from './skill-doc.ts';
+import { yamlDoubleQuoted, type DraftSkill } from './skill-doc.ts';
 
 export type JsonSchema = Record<string, unknown>;
 
@@ -70,6 +70,9 @@ export interface RecipeInput {
   prompt: string;
   /** Candidate extensions chosen on the session; gated against the allowlist. */
   extensions: SessionExtension[];
+  /** Optional mentor persona (Slice D), prepended to the recipe instructions so the
+   *  agent adopts the Socratic-mentor frame even via the deeplink (which carries no files). */
+  persona?: DraftSkill;
 }
 
 /**
@@ -103,6 +106,12 @@ const RECIPE_INSTRUCTIONS =
   'dependencies (nothing owned by Meta, OpenAI, or xAI). Run `npm run enforce` before ' +
   'every commit. Use your own permitted, BYOK model provider.';
 
+/** Render the mentor persona as a leading instruction block (carried in the deeplink). */
+function personaToInstructions(p: DraftSkill): string {
+  const steps = p.method.map((m, i) => `${i + 1}. ${m}`).join('\n');
+  return `Act as the build mentor — ${p.description}\n${steps}`;
+}
+
 /** Deterministic next-steps shown in Goose to guide a non-dev builder. */
 function activitiesFor(slug: string): string[] {
   return [
@@ -128,7 +137,9 @@ export function buildGooseRecipe(input: RecipeInput, allow: ExtensionAllowlist):
     version: '1.0.0',
     title: input.title,
     description: `Build ${input.slug} — policy-clean (no Meta/OpenAI/xAI), via wecanjustbuildthings.dev`,
-    instructions: RECIPE_INSTRUCTIONS,
+    instructions: input.persona
+      ? `${personaToInstructions(input.persona)}\n\n${RECIPE_INSTRUCTIONS}`
+      : RECIPE_INSTRUCTIONS,
     prompt: input.prompt,
     extensions,
     parameters: [], // reserved: the prompt is fully rendered, so there are no template variables yet

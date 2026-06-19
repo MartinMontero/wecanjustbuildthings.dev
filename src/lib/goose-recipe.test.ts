@@ -47,6 +47,16 @@ test('buildGooseRecipe is deterministic and model-agnostic (no provider/model/se
   assert.deepEqual(a.parameters, []);
 });
 
+test('a persona is prepended to the recipe instructions (carried in the deeplink)', () => {
+  const persona = { name: 'mentor', description: 'A Socratic build mentor.', method: ['Reflect first.', 'Offer choices.'] };
+  const r = buildGooseRecipe(baseInput({ persona }), allow);
+  assert.match(r.instructions, /Act as the build mentor — A Socratic build mentor\./);
+  assert.match(r.instructions, /1\. Reflect first\.\n2\. Offer choices\./);
+  assert.match(r.instructions, /policy-clean/); // base instructions still present
+  // omitted persona ⇒ just the base instructions
+  assert.ok(!buildGooseRecipe(baseInput(), allow).instructions.includes('Act as the build mentor'));
+});
+
 test('the recipe forces the structured response the Mentor Engine will read (Slice D)', () => {
   const r = buildGooseRecipe(baseInput(), allow);
   assert.deepEqual(r.response.json_schema, RESPONSE_JSON_SCHEMA);
