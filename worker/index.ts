@@ -36,7 +36,7 @@ import { getOrCreateUserByIdentity } from './auth/db.ts';
 import { estimate } from '../src/modules/cost-estimator/core/estimator.ts';
 import { ALL_ADAPTERS } from '../src/modules/cost-estimator/adapters/index.ts';
 import type { UsageProfile } from '../src/modules/cost-estimator/core/types.ts';
-import { SECURITY_HEADERS, CSP_REPORT_PATH } from '../src/lib/security-headers.ts';
+import { SECURITY_HEADERS, CSP_REPORT_PATH, CSP_REPORT_MAX_BYTES, summariseCspReport } from '../src/lib/security-headers.ts';
 
 export interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -432,13 +432,21 @@ async function blueskyCallbackHandler(request: Request, url: URL, env: Env): Pro
   }
 }
 
-/** Sink for CSP violation reports during the Report-Only soak. Logs them (visible
- *  via `wrangler tail`) so a missing directive surfaces before we flip to enforce.
- *  Same-origin only — the report-uri is a local path. */
+/** Sink for CSP violation reports during the Report-Only soak. Parses each report into
+ *  a compact, whitelisted summary and logs it as structured JSON (`[csp-report]`) so it
+ *  persists in Workers Logs (observability, see wrangler.jsonc) and is reviewable for the
+ *  whole soak — not only in an ephemeral `wrangler tail`. The endpoint is unauthenticated
+ *  and same-origin: the body is size-bounded, fields are whitelisted/truncated, and it
+ *  never throws (a malformed report must not surface to the reporter). */
 async function cspReportHandler(request: Request): Promise<Response> {
   try {
-    const report = await request.text();
-    if (report) console.warn('[csp-report]', report.slice(0, 2000));
+    const declaredBytes = Number(request.headers.get('content-length') ?? '0');
+    if (!Number.isFinite(declaredBytes) || declaredBytes > CSP_REPORT_MAX_BYTES) {
+      return new Response(null, { status: 204 });
+    }
+    const raw = (await request.text()).slice(0, CSP_REPORT_MAX_BYTES);
+    const summary = summariseCspReport(raw);
+    if (summary) console.warn('[csp-report]', JSON.stringify(summary));
   } catch { /* ignore malformed reports */ }
   return new Response(null, { status: 204 });
 }

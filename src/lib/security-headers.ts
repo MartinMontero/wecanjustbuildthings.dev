@@ -25,6 +25,55 @@
 export const CSP_REPORT_PATH = '/api/csp-report';
 
 /**
+ * Max bytes of a violation-report body the Worker will parse and log. The report
+ * endpoint is unauthenticated, so this bounds the work an anonymous POST can cause;
+ * larger bodies are accepted (204) but not processed.
+ */
+export const CSP_REPORT_MAX_BYTES = 8192;
+
+/** Whitelisted, truncated subset of a CSP violation report kept for logging. */
+export interface CspReportSummary {
+  documentUri?: string;
+  effectiveDirective?: string;
+  blockedUri?: string;
+  sourceFile?: string;
+  lineNumber?: number;
+  disposition?: string;
+}
+
+const CSP_FIELD_MAX = 300;
+const truncField = (value: unknown): string | undefined =>
+  typeof value === 'string' && value !== '' ? value.slice(0, CSP_FIELD_MAX) : undefined;
+
+/**
+ * Parse a CSP violation-report body into a compact, whitelisted summary for logging.
+ * Handles the `report-uri` payload shape (`{ "csp-report": { … } }`, CSP Level 2/3),
+ * which is what our `report-uri` directive elicits. The endpoint is public, so we keep
+ * only known keys and cap their length rather than echoing the raw body back into logs.
+ * Returns null for anything that isn't a recognisable report.
+ */
+export function summariseCspReport(rawBody: string): CspReportSummary | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawBody);
+  } catch {
+    return null;
+  }
+  const report = (parsed as { 'csp-report'?: Record<string, unknown> } | null)?.['csp-report'];
+  if (!report || typeof report !== 'object') return null;
+  const line = report['line-number'];
+  const summary: CspReportSummary = {
+    documentUri: truncField(report['document-uri']),
+    effectiveDirective: truncField(report['effective-directive'] ?? report['violated-directive']),
+    blockedUri: truncField(report['blocked-uri']),
+    sourceFile: truncField(report['source-file']),
+    lineNumber: typeof line === 'number' ? line : undefined,
+    disposition: truncField(report['disposition']),
+  };
+  return Object.values(summary).some((value) => value !== undefined) ? summary : null;
+}
+
+/**
  * Always-on headers (transport security, clickjacking, isolation, feature lockdown).
  * The CSP is delivered separately because it carries per-build inline-script hashes.
  */

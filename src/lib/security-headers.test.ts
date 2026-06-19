@@ -4,6 +4,8 @@ import { createHash } from 'node:crypto';
 import {
   SECURITY_HEADERS,
   CSP_REPORT_PATH,
+  CSP_REPORT_MAX_BYTES,
+  summariseCspReport,
   buildContentSecurityPolicy,
   renderHeadersFile,
   extractInlineScriptBodies,
@@ -82,4 +84,51 @@ test('renderHeadersFile mode=enforce switches the header name', () => {
   const file = renderHeadersFile({ hashes: ['sha256-abc'], mode: 'enforce' });
   assert.match(file, /\n {2}Content-Security-Policy: /);
   assert.ok(!file.includes('Report-Only'));
+});
+
+test('summariseCspReport whitelists + truncates a report-uri payload', () => {
+  const summary = summariseCspReport(
+    JSON.stringify({
+      'csp-report': {
+        'document-uri': 'https://wecanjustbuildthings.dev/build/',
+        'effective-directive': 'script-src-elem',
+        'violated-directive': 'script-src-elem',
+        'blocked-uri': 'inline',
+        'source-file': 'https://wecanjustbuildthings.dev/build/',
+        'line-number': 42,
+        disposition: 'report',
+        'original-policy': 'x'.repeat(5000), // not whitelisted — must be dropped
+      },
+    }),
+  );
+  assert.deepEqual(summary, {
+    documentUri: 'https://wecanjustbuildthings.dev/build/',
+    effectiveDirective: 'script-src-elem',
+    blockedUri: 'inline',
+    sourceFile: 'https://wecanjustbuildthings.dev/build/',
+    lineNumber: 42,
+    disposition: 'report',
+  });
+});
+
+test('summariseCspReport caps field length and prefers effective- over violated-directive', () => {
+  const summary = summariseCspReport(
+    JSON.stringify({
+      'csp-report': { 'blocked-uri': 'z'.repeat(1000), 'effective-directive': 'img-src', 'violated-directive': 'default-src' },
+    }),
+  );
+  assert.equal(summary?.blockedUri?.length, 300);
+  assert.equal(summary?.effectiveDirective, 'img-src');
+});
+
+test('summariseCspReport returns null for malformed / non-report bodies', () => {
+  assert.equal(summariseCspReport('not json'), null);
+  assert.equal(summariseCspReport('{}'), null); // no csp-report key
+  assert.equal(summariseCspReport(JSON.stringify({ 'csp-report': {} })), null); // no usable fields
+  assert.equal(summariseCspReport(JSON.stringify({ 'csp-report': 'x' })), null); // wrong type
+  assert.equal(summariseCspReport(''), null);
+});
+
+test('CSP_REPORT_MAX_BYTES is a sane, bounded limit', () => {
+  assert.ok(CSP_REPORT_MAX_BYTES > 0 && CSP_REPORT_MAX_BYTES <= 64 * 1024);
 });
