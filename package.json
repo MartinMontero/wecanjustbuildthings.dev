@@ -31,6 +31,8 @@
     "enforce:layer3": "tsx enforcement/cli.ts layer3 --catalog src/content/docs/catalog --recipes src/content/docs/recipes",
     "test": "node --import tsx --test \"enforcement/tests/**/*.test.ts\" \"worker/tests/**/*.test.ts\" \"src/**/*.test.ts\"",
     "a11y": "node scripts/a11y-check.mjs",
+    "test:e2e": "node scripts/e2e-check.mjs",
+    "check:path-a": "node scripts/path-a-check.mjs",
     "audit:mobile": "node scripts/mobile-audit.mjs",
     "lhci": "lhci autorun",
     "typecheck:tools": "tsc -p enforcement/tsconfig.json",

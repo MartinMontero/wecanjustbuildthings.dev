@@ -52,3 +52,20 @@ collections:
       - { name: recipe_type, label: Recipe type, widget: select, options: [configuration, integration, deployment] }
       - { name: target_entry_slug, label: Target catalog entry slug, widget: string }
       - { name: body, label: Body (Markdown), widget: markdown }
+
+  - name: skills
+    label: Skills (your own methods)
+    label_singular: Skill
+    folder: src/content/docs/skills
+    extension: mdx
+    format: frontmatter
+    create: true
+    fields:
+      - { name: title, label: Skill name, widget: string }
+      - { name: description, label: One line — what it does, widget: text }
+      - { name: entry_type, label: Entry type, widget: hidden, default: skill }
+      - { name: skill_method, label: The steps (one per item), widget: list, field: { name: step, label: Step, widget: string } }
+      - { name: skill_source, label: Where it came from (optional), widget: string, required: false }
+      - { name: skill_license, label: License, widget: string, default: CC-BY-SA-4.0 }
+      - { name: verification_status, label: Verification status, widget: select, options: [verified, under_review, blocked], default: under_review }
+      - { name: body, label: Body (Markdown), widget: markdown }

@@ -1,13 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { zipSync, strToU8 } from 'fflate';
-  import { loadSession, updateSession, hasSession, clearSession, type SessionStackItem } from '../lib/build-session.ts';
+  import { loadSession, updateSession, hasSession, clearSession, type SessionStackItem, type SessionExtension, type SessionMentorReflection } from '../lib/build-session.ts';
   import { matchDependency } from '../../enforcement/matcher.ts';
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
-  import { detectSignals, pickQuestions, reflect, type ConstraintId } from '../lib/mentor-engine.ts';
+  import { detectSignals, pickQuestions, reflect, reflectFromResponse, type ConstraintId } from '../lib/mentor-engine.ts';
   import { chemistry, partnersOf } from '../lib/chemistry.ts';
   import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies } from '../lib/studio-stack.ts';
   import { slugifySkill, skillToMd, type DraftSkill } from '../lib/skill-doc.ts';
+  import { mentorPersonaSkill } from '../lib/mentor-persona.ts';
+  import { buildGooseRecipe, recipeToYaml, skillToSubRecipe, skillSubRecipePath, type ExtensionAllowlist } from '../lib/goose-recipe.ts';
+  import { recipeDeeplink, explainRecipe } from '../lib/goose-deeplink.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
@@ -28,7 +31,7 @@
       problem: 'What problem does it solve, and for whom? Say it like you would out loud — one short paragraph.',
       why: 'Why does this matter? The real change you want — not just “ship an app.”',
       success: 'How will you know it’s working? What’s different for your community when it does.',
-      protocols: 'Which network does it live on?', focus: 'What kind of thing are you building?',
+      protocols: 'Which network does it live on?',
       tenq: 'Start with the why. Answer these the way you’d explain the project to a friend — the clearer you are, the better your AI agent builds.',
       protoHelp: 'A “network” (protocol) is the shared, open rulebook your tool plugs into — owned by no single company. Nostr and AT Protocol (Bluesky) are open social networks; pick “general” if it isn’t a social tool.',
       choose: 'Show me the blueprint →', back: '← Back', gen: 'Build it →', backStack: '← Back to the blueprint',
@@ -37,42 +40,38 @@
       bpAdvanced: 'Power user? Browse and add tools yourself', bpEmpty: 'Tell me what you want to build first — go back and describe it in a sentence or two.',
       bpLead: 'You don’t need to know any of these by name. I picked a small, proven set for what you described and wired them together. Keep it as-is, or swap any piece — every option is safe and license-checked.',
       examples: 'Not sure where to start? Try one:',
-      suggested: '',
       add: 'Need something specific? Search the full catalog', selected: 'building blocks chosen', loading: 'Loading the catalog…',
       handoff: 'How do you want to get started?', zip: 'Download a starter folder', github: 'Save it to GitHub',
-      goose: 'Run it with Goose', kickoff: 'Try a step with AI',
+      goose: 'Run it with Goose',
       dlzip: '⬇ Download your starter folder (.zip)', copyPrompt: 'Copy the instructions for your AI agent',
       runLocal: 'New to Goose? Start here →', ghGuide: 'How to connect GitHub →',
-      apikey: 'Your AI key (sent straight to the model, never stored by us)',
-      provider: 'Who makes the model', run: 'Run it', running: 'Working…',
       ghError: 'Connecting to GitHub didn’t finish. Try again, or download the folder below.',
-      stackIntro: 'Your “stack” is just the set of ready-made building blocks — tools other people have already built and tested — that your project is made from. Choosing good ones means you and your AI agent don’t start from scratch: you assemble proven parts instead of reinventing them, which saves months and avoids dead ends. Below is a starting set picked for what you described. Not sure? Keep the ones marked ★ and the defaults — you can’t pick “wrong” here, because everything listed is already safe and checked. Add or remove anything; nothing is final.',
-      legendPrimary: '★ the recommended starting point for your network',
-      legendClean: 'every option is safe to use (no Meta/OpenAI/xAI) and license-checked',
-      showMore: 'Show more tools', showFewer: 'Show fewer', showing: 'Showing', of: 'of',
-      modelTitle: 'Choose your AI model',
-      modelIntro: 'This runs one planning step with your own AI key, so you can feel it work before you commit. Your key and your project go straight to the model — never stored by us, and never routed through Meta, OpenAI, or xAI. The options below are chosen for that: models trained accountably, open models you can run yourself, or a neutral router locked to allowed models.',
-      modelLabel: 'Model',
       handoffIntro: 'Your starter is ready — everything your AI agent needs to begin, with the rules and safe tools already baked in. Pick how you’d like to take it:',
       zipDesc: 'A ready-to-open folder with everything inside: the project’s rules, the plan, the build instructions, and the list of safe tools. Hand it to Goose or Claude Code and start building.',
       gooseDl: '⬇ Download the Goose recipe', gooseCopy: 'Copy the run command',
       gooseDesc: 'A recipe is a one-file set of instructions Goose follows to build your project. Download it, then run the command below.',
+      gooseExplainIntro: 'Here’s exactly what happens when you open this in Goose:',
+      gooseExplainPrompt: 'Goose receives your plan, your rules, and the vetted tool list — nothing else.',
+      gooseExplainSkills: 'Your own captured skills are folded into this recipe, so the agent follows your methods even from a one-click link.',
+      gooseExplainConsent: 'Goose asks your permission before it runs anything (its “Trust & Execute” step). You stay in control.',
+      gooseOpen: 'Open in Goose →', gooseCopyLink: 'Copy the link',
+      gooseTooBig: 'Your own skills (and tools) are baked right into this recipe — that’s what makes it richer than a one-click link can carry. Nothing is lost: download the recipe, your skills included, and run it with the command below.',
+      gooseFallback: 'Prefer a file? Download the recipe instead',
       ghNotReady: 'Saving straight to GitHub isn’t switched on for this site yet — download the folder instead, or read',
-      ghConnectBtn: 'Connect GitHub & save my project', ghSuccess: '✓ Your project is on GitHub:', copyPlan: 'Copy the plan',
-      refineTitle: 'Want a second opinion? Ask the AI mentor (optional)',
-      refineIntro: 'It asks you a few sharp questions first, then suggests a tweak or two — only from the verified catalog, and only if it truly helps. You decide what to keep. Your answers go only to the model you choose, never stored.',
-      refineAsk: 'Ask me the sharp questions first →', refineThinking: 'Thinking…',
-      refineAnswersHint: 'Answer in a few words, or skip any — then I’ll suggest what fits.',
-      refinePropose: 'Now show me what you’d add →',
-      refineWhy: 'Why:', refineWatch: 'Watch out:',
+      ghConnectBtn: 'Connect GitHub & save my project', ghSuccess: '✓ Your project is on GitHub:',
+      refineTitle: 'Bring back your agent’s suggestions (optional)',
+      refineIntro: 'Run your build in Goose, then paste the structured suggestions it produced. We check each against the verified catalog — you decide what to keep. Nothing leaves your browser.',
+      refinePasteLabel: 'Paste your agent’s suggestions (JSON)',
+      refinePastePh: 'Paste the JSON your Goose run produced…',
+      refineApplyResponse: 'Apply suggestions',
+      refinePasteErr: 'Couldn’t read that — paste the JSON your agent produced.',
+      refineWhy: 'Why:',
       refineApply: 'Add to my blueprint', refineApplied: 'Added ✓',
       refineNone: 'Your plan already covers what you described — I wouldn’t add anything. That’s a good sign.',
-      refineErr: 'Couldn’t reach the model. Check your key and try again.', refineNeedKey: 'Enter your AI key above first.',
       skillsHint: 'Have a field guide, manual, or SOP? Turn your own know-how into a skill your agent follows →',
-      skillsDraft: 'Skills I can scaffold from what you told me', skillsReady: 'Or drop in a ready-made skill',
+      skillsReady: 'Or drop in a ready-made skill',
       skillAdd: 'Add to my project', skillAdded: 'Added ✓',
       skCaptureHead: 'You know something the agent doesn’t', skCaptureSub: 'A method only you know — how you take a report, vet a member, keep people safe. Capture it once and every build follows it.', skName: 'Skill name', skDesc: 'One line: what it does', skDescPh: 'Take an eviction report without exposing the tenant', skSteps: 'The steps, one per line', skStepsPh: 'Use a chosen handle, not a legal name\nRecord the building, not the unit\nEncrypt everything; two organizers hold keys', skSource: 'Where it came from (optional)', skSourcePh: 'Tenants Union field manual', skCaptureBtn: 'Capture as a skill', skillRemove: 'Remove',
-      skillReview: 'A draft in your words — review and refine it; you’re the expert.',
       skillsIncluded: 'skill(s) will be included in your starter',
     },
     es: {
@@ -81,7 +80,7 @@
       problem: '¿Qué problema resuelve y para quién? Dilo como lo dirías en voz alta — un párrafo corto.',
       why: '¿Por qué importa? El cambio real que buscas — no solo “lanzar una app.”',
       success: '¿Cómo sabrás que funciona? Qué cambia para tu comunidad cuando lo logra.',
-      protocols: '¿En qué red vive?', focus: '¿Qué tipo de cosa estás construyendo?',
+      protocols: '¿En qué red vive?',
       tenq: 'Empieza por el porqué. Responde como si le explicaras el proyecto a un amigo — cuanto más claro seas, mejor construye tu agente de IA.',
       protoHelp: 'Una “red” (protocolo) es el reglamento abierto y compartido al que se conecta tu herramienta — sin dueño único. Nostr y AT Protocol (Bluesky) son redes sociales abiertas; elige “general” si no es una herramienta social.',
       choose: 'Muéstrame el plano →', back: '← Atrás', gen: 'Construirlo →', backStack: '← Volver al plano',
@@ -90,42 +89,38 @@
       bpAdvanced: '¿Experto? Explora y añade herramientas tú mismo', bpEmpty: 'Primero dime qué quieres construir — vuelve y descríbelo en una o dos frases.',
       bpLead: 'No necesitas conocer ninguna de estas por su nombre. Elegí un conjunto pequeño y probado para lo que describiste y las conecté entre sí. Déjalo así, o cambia cualquier pieza — cada opción es segura y con licencia verificada.',
       examples: '¿No sabes por dónde empezar? Prueba una:',
-      suggested: '',
       add: '¿Necesitas algo específico? Busca en todo el catálogo', selected: 'bloques elegidos', loading: 'Cargando el catálogo…',
       handoff: '¿Cómo quieres empezar?', zip: 'Descargar una carpeta inicial', github: 'Guardarlo en GitHub',
-      goose: 'Ejecutarlo con Goose', kickoff: 'Probar un paso con IA',
+      goose: 'Ejecutarlo con Goose',
       dlzip: '⬇ Descargar tu carpeta inicial (.zip)', copyPrompt: 'Copiar las instrucciones para tu agente de IA',
       runLocal: '¿Nuevo en Goose? Empieza aquí →', ghGuide: 'Cómo conectar GitHub →',
-      apikey: 'Tu clave de IA (se envía directo al modelo, nunca la guardamos)',
-      provider: 'Quién hace el modelo', run: 'Ejecutar', running: 'Trabajando…',
       ghError: 'La conexión con GitHub no terminó. Inténtalo de nuevo o descarga la carpeta abajo.',
-      stackIntro: 'Tu “stack” es simplemente el conjunto de bloques ya hechos — herramientas que otras personas ya construyeron y probaron — con los que se arma tu proyecto. Elegir buenos bloques significa que tú y tu agente de IA no empiezan de cero: ensamblas piezas probadas en vez de reinventarlas, lo que ahorra meses y evita callejones sin salida. Abajo hay un conjunto inicial elegido para lo que describiste. ¿No estás seguro? Deja los marcados con ★ y los predeterminados — aquí no puedes elegir “mal”, porque todo lo listado ya es seguro y está verificado. Agrega o quita lo que quieras; nada es definitivo.',
-      legendPrimary: '★ el punto de partida recomendado para tu red',
-      legendClean: 'cada opción es segura de usar (sin Meta/OpenAI/xAI) y con licencia verificada',
-      showMore: 'Mostrar más herramientas', showFewer: 'Mostrar menos', showing: 'Mostrando', of: 'de',
-      modelTitle: 'Elige tu modelo de IA',
-      modelIntro: 'Esto ejecuta un paso de planificación con tu propia clave de IA, para que lo sientas funcionar antes de comprometerte. Tu clave y tu proyecto van directo al modelo — nunca los guardamos, y nunca pasan por Meta, OpenAI o xAI. Las opciones de abajo se eligen por eso: modelos entrenados de forma responsable, modelos abiertos que puedes ejecutar tú mismo, o un enrutador neutral limitado a modelos permitidos.',
-      modelLabel: 'Modelo',
       handoffIntro: 'Tu kit está listo — todo lo que tu agente de IA necesita para empezar, con las reglas y las herramientas seguras ya incluidas. Elige cómo quieres llevarlo:',
       zipDesc: 'Una carpeta lista para abrir con todo dentro: las reglas del proyecto, el plan, las instrucciones de construcción y la lista de herramientas seguras. Entrégala a Goose o Claude Code y empieza a construir.',
       gooseDl: '⬇ Descargar la receta de Goose', gooseCopy: 'Copiar el comando',
       gooseDesc: 'Una receta es un archivo con instrucciones que Goose sigue para construir tu proyecto. Descárgala y ejecuta el comando de abajo.',
+      gooseExplainIntro: 'Esto es exactamente lo que pasa cuando lo abres en Goose:',
+      gooseExplainPrompt: 'Goose recibe tu plan, tus reglas y la lista de herramientas verificadas — nada más.',
+      gooseExplainSkills: 'Tus propias habilidades capturadas se integran en esta receta, para que el agente siga tus métodos incluso desde un enlace de un clic.',
+      gooseExplainConsent: 'Goose pide tu permiso antes de ejecutar nada (su paso “Trust & Execute”). Mantienes el control.',
+      gooseOpen: 'Abrir en Goose →', gooseCopyLink: 'Copiar el enlace',
+      gooseTooBig: 'Tus propias habilidades (y herramientas) están integradas en esta receta — por eso es más rica de lo que cabe en un enlace de un clic. No se pierde nada: descarga la receta, con tus habilidades incluidas, y ejecútala con el comando de abajo.',
+      gooseFallback: '¿Prefieres un archivo? Descarga la receta',
       ghNotReady: 'Guardar directo en GitHub aún no está activado en este sitio — descarga la carpeta, o lee',
-      ghConnectBtn: 'Conectar GitHub y guardar mi proyecto', ghSuccess: '✓ Tu proyecto está en GitHub:', copyPlan: 'Copiar el plan',
-      refineTitle: '¿Quieres una segunda opinión? Pregunta al mentor de IA (opcional)',
-      refineIntro: 'Primero te hace unas preguntas precisas, luego sugiere uno o dos ajustes — solo del catálogo verificado y solo si de verdad ayuda. Tú decides qué conservar. Tus respuestas van solo al modelo que elijas, nunca se guardan.',
-      refineAsk: 'Hazme las preguntas clave primero →', refineThinking: 'Pensando…',
-      refineAnswersHint: 'Responde en pocas palabras, o salta las que quieras — luego sugeriré lo que encaje.',
-      refinePropose: 'Ahora muéstrame qué añadirías →',
-      refineWhy: 'Por qué:', refineWatch: 'Ojo:',
+      ghConnectBtn: 'Conectar GitHub y guardar mi proyecto', ghSuccess: '✓ Tu proyecto está en GitHub:',
+      refineTitle: 'Trae las sugerencias de tu agente (opcional)',
+      refineIntro: 'Ejecuta tu proyecto en Goose y pega las sugerencias estructuradas que produjo. Comprobamos cada una contra el catálogo verificado — tú decides qué conservar. Nada sale de tu navegador.',
+      refinePasteLabel: 'Pega las sugerencias de tu agente (JSON)',
+      refinePastePh: 'Pega el JSON que produjo tu ejecución de Goose…',
+      refineApplyResponse: 'Aplicar sugerencias',
+      refinePasteErr: 'No se pudo leer eso — pega el JSON que produjo tu agente.',
+      refineWhy: 'Por qué:',
       refineApply: 'Añadir a mi plano', refineApplied: 'Añadido ✓',
       refineNone: 'Tu plan ya cubre lo que describiste — no añadiría nada. Eso es buena señal.',
-      refineErr: 'No se pudo contactar al modelo. Revisa tu clave e inténtalo de nuevo.', refineNeedKey: 'Primero ingresa tu clave de IA arriba.',
       skillsHint: '¿Tienes una guía de campo, un manual o un procedimiento? Convierte tu propio saber en una habilidad que tu agente sigue →',
-      skillsDraft: 'Habilidades que puedo crear a partir de lo que me contaste', skillsReady: 'O agrega una habilidad lista para usar',
+      skillsReady: 'O agrega una habilidad lista para usar',
       skillAdd: 'Añadir a mi proyecto', skillAdded: 'Añadida ✓',
       skCaptureHead: 'Sabes algo que el agente no sabe', skCaptureSub: 'Un método que solo tú conoces — cómo tomas un reporte, verificas a un miembro, proteges a la gente. Captúralo una vez y cada construcción lo seguirá.', skName: 'Nombre de la habilidad', skDesc: 'Una línea: qué hace', skDescPh: 'Tomar un reporte de desalojo sin exponer al inquilino', skSteps: 'Los pasos, uno por línea', skStepsPh: 'Usa un alias elegido, no un nombre legal\nRegistra el edificio, no la unidad\nCifra todo; dos organizadores tienen las claves', skSource: 'De dónde viene (opcional)', skSourcePh: 'Manual de campo del sindicato de inquilinos', skCaptureBtn: 'Capturar como habilidad', skillRemove: 'Quitar',
-      skillReview: 'Un borrador en tus palabras — revísalo y ajústalo; tú eres quien sabe.',
       skillsIncluded: 'habilidad(es) se incluirán en tu kit inicial',
     },
     ar: {
@@ -134,7 +129,7 @@
       problem: 'ما المشكلة التي يحلها، ولمن؟ قُلها كما تقولها بصوتك — فقرة قصيرة.',
       why: 'لماذا يهمّ هذا؟ التغيير الحقيقي الذي تريده — وليس مجرد «إطلاق تطبيق».',
       success: 'كيف ستعرف أنه ينجح؟ ما الذي يتغيّر لمجتمعك عندما ينجح.',
-      protocols: 'على أي شبكة يعمل؟', focus: 'ما نوع الشيء الذي تبنيه؟',
+      protocols: 'على أي شبكة يعمل؟',
       tenq: 'ابدأ بالـ«لماذا». أجب كأنك تشرح المشروع لصديق — كلما كنت أوضح، بنى وكيل الذكاء الاصطناعي بشكل أفضل.',
       protoHelp: 'الـ«شبكة» (البروتوكول) هي القواعد المفتوحة المشتركة التي تتصل بها أداتك — لا يملكها طرف واحد. Nostr وAT Protocol (Bluesky) شبكات اجتماعية مفتوحة؛ اختر «general» إن لم تكن أداة اجتماعية.',
       choose: 'أرني المخطط ←', back: '→ رجوع', gen: 'ابنِه ←', backStack: '→ العودة للمخطط',
@@ -143,42 +138,38 @@
       bpAdvanced: 'خبير؟ تصفّح وأضف الأدوات بنفسك', bpEmpty: 'أخبرني أولاً بما تريد بناءه — ارجع وصِفه في جملة أو جملتين.',
       bpLead: 'لا حاجة لأن تعرف أيّاً منها بالاسم. اخترتُ مجموعة صغيرة ومُجرَّبة لما وصفته وربطتها معاً. اتركها كما هي، أو بدّل أي قطعة — كل خيار آمن ومُتحقَّق من ترخيصه.',
       examples: 'لا تعرف من أين تبدأ؟ جرّب واحدة:',
-      suggested: '',
       add: 'تحتاج شيئاً محدداً؟ ابحث في الكتالوج كاملاً', selected: 'لبنات مختارة', loading: 'جارٍ تحميل الكتالوج…',
       handoff: 'كيف تريد أن تبدأ؟', zip: 'تنزيل مجلد بداية', github: 'احفظه في GitHub',
-      goose: 'شغّله مع Goose', kickoff: 'جرّب خطوة بالذكاء الاصطناعي',
+      goose: 'شغّله مع Goose',
       dlzip: '⬇ نزّل مجلد البداية (.zip)', copyPrompt: 'انسخ تعليمات وكيل الذكاء الاصطناعي',
       runLocal: 'جديد على Goose؟ ابدأ هنا ←', ghGuide: 'كيفية ربط GitHub ←',
-      apikey: 'مفتاح الذكاء الاصطناعي الخاص بك (يُرسل مباشرة إلى النموذج، ولا نخزّنه أبداً)',
-      provider: 'من يصنع النموذج', run: 'شغّل', running: 'جارٍ العمل…',
       ghError: 'لم يكتمل الاتصال بـ GitHub. حاول مرة أخرى، أو نزّل المجلد أدناه.',
-      stackIntro: '«الحزمة» (stack) هي ببساطة مجموعة اللبنات الجاهزة — أدوات بناها واختبرها آخرون — التي يتكوّن منها مشروعك. اختيار لبنات جيدة يعني أنك ووكيل الذكاء الاصطناعي لا تبدآن من الصفر: تجمّع قطعاً مُجرَّبة بدل إعادة اختراعها، ما يوفّر شهوراً ويتجنّب الطرق المسدودة. في الأسفل مجموعة بداية مُختارة لما وصفته. غير متأكد؟ اترك المعلّمة بـ ★ والافتراضية — لا يمكنك الاختيار «الخطأ» هنا، فكل المُدرَج آمن ومُتحقَّق منه. أضِف أو احذف ما تشاء؛ لا شيء نهائي.',
-      legendPrimary: '★ نقطة البداية الموصى بها لشبكتك',
-      legendClean: 'كل خيار آمن للاستخدام (بلا Meta/OpenAI/xAI) ومُتحقَّق من ترخيصه',
-      showMore: 'عرض أدوات أكثر', showFewer: 'عرض أقل', showing: 'عرض', of: 'من',
-      modelTitle: 'اختر نموذج الذكاء الاصطناعي',
-      modelIntro: 'هذا يشغّل خطوة تخطيط واحدة باستخدام مفتاحك الخاص، لتشعر به يعمل قبل أن تلتزم. مفتاحك ومشروعك يذهبان مباشرة إلى النموذج — لا نخزّنهما أبداً، ولا يمران عبر Meta أو OpenAI أو xAI. الخيارات أدناه مُختارة لذلك: نماذج مُدرَّبة بمسؤولية، نماذج مفتوحة يمكنك تشغيلها بنفسك، أو موجّه محايد مقصور على النماذج المسموح بها.',
-      modelLabel: 'النموذج',
       handoffIntro: 'حزمتك جاهزة — كل ما يحتاجه وكيل الذكاء الاصطناعي للبدء، مع القواعد والأدوات الآمنة مُضمّنة سلفاً. اختر كيف تريد أخذها:',
       zipDesc: 'مجلد جاهز للفتح يحوي كل شيء: قواعد المشروع، والخطة، وتعليمات البناء، وقائمة الأدوات الآمنة. سلّمه لـ Goose أو Claude Code وابدأ البناء.',
       gooseDl: '⬇ تنزيل وصفة Goose', gooseCopy: 'انسخ أمر التشغيل',
       gooseDesc: 'الوصفة ملف واحد فيه تعليمات يتبعها Goose لبناء مشروعك. نزّلها ثم شغّل الأمر أدناه.',
+      gooseExplainIntro: 'إليك بالضبط ما يحدث عند فتحه في Goose:',
+      gooseExplainPrompt: 'يتلقّى Goose خطتك وقواعدك وقائمة الأدوات الموثوقة — لا أكثر.',
+      gooseExplainSkills: 'مهاراتك التي التقطتها مُدمجة في هذه الوصفة، فيتّبع الوكيل أساليبك حتى من رابط بنقرة واحدة.',
+      gooseExplainConsent: 'يطلب Goose إذنك قبل تشغيل أي شيء (خطوة «Trust & Execute»). تبقى أنت المتحكم.',
+      gooseOpen: 'افتح في Goose ←', gooseCopyLink: 'انسخ الرابط',
+      gooseTooBig: 'مهاراتك (وأدواتك) مُدمجة مباشرةً في هذه الوصفة — لذلك هي أغنى مما يتّسع له رابط بنقرة واحدة. لا يضيع شيء: نزّل الوصفة، بمهاراتك المضمّنة، وشغّلها بالأمر أدناه.',
+      gooseFallback: 'تفضّل ملفاً؟ نزّل الوصفة',
       ghNotReady: 'الحفظ المباشر إلى GitHub غير مُفعّل في هذا الموقع بعد — نزّل المجلد بدلاً من ذلك، أو اقرأ',
-      ghConnectBtn: 'اربط GitHub واحفظ مشروعي', ghSuccess: '✓ مشروعك على GitHub:', copyPlan: 'انسخ الخطة',
-      refineTitle: 'تريد رأياً ثانياً؟ اسأل مرشد الذكاء الاصطناعي (اختياري)',
-      refineIntro: 'يطرح عليك أولاً بضعة أسئلة دقيقة، ثم يقترح تعديلاً أو اثنين — من الكتالوج المُوثَّق فقط، وفقط إن كان يساعد فعلاً. أنت تقرّر ما تُبقيه. إجاباتك تذهب إلى النموذج الذي تختاره فقط، ولا تُخزَّن أبداً.',
-      refineAsk: 'اطرح عليّ الأسئلة المهمة أولاً ←', refineThinking: 'يفكّر…',
-      refineAnswersHint: 'أجب بكلمات قليلة، أو تجاوز ما تشاء — ثم سأقترح ما يناسب.',
-      refinePropose: 'الآن أرني ما الذي ستضيفه ←',
-      refineWhy: 'لماذا:', refineWatch: 'انتبه:',
+      ghConnectBtn: 'اربط GitHub واحفظ مشروعي', ghSuccess: '✓ مشروعك على GitHub:',
+      refineTitle: 'أحضِر اقتراحات وكيلك (اختياري)',
+      refineIntro: 'شغّل مشروعك في Goose ثم الصق الاقتراحات المنظَّمة التي أنتجها. نتحقق من كلٍّ منها مقابل الكتالوج المُوثَّق — أنت تقرّر ما تُبقيه. لا شيء يغادر متصفحك.',
+      refinePasteLabel: 'الصق اقتراحات وكيلك (JSON)',
+      refinePastePh: 'الصق JSON الذي أنتجته جلسة Goose…',
+      refineApplyResponse: 'طبّق الاقتراحات',
+      refinePasteErr: 'تعذّرت قراءة ذلك — الصق JSON الذي أنتجه وكيلك.',
+      refineWhy: 'لماذا:',
       refineApply: 'أضِف إلى مخططي', refineApplied: 'أُضيف ✓',
       refineNone: 'مخططك يغطّي ما وصفته بالفعل — لن أضيف شيئاً. هذه علامة جيدة.',
-      refineErr: 'تعذّر الوصول إلى النموذج. تحقّق من مفتاحك وحاول مجدداً.', refineNeedKey: 'أدخل مفتاح الذكاء الاصطناعي أعلاه أولاً.',
       skillsHint: 'لديك دليل ميداني أو كُتيّب أو إجراء عمل؟ حوّل معرفتك إلى مهارة يتّبعها وكيلك ←',
-      skillsDraft: 'مهارات يمكنني إنشاؤها مما أخبرتني به', skillsReady: 'أو أضِف مهارة جاهزة',
+      skillsReady: 'أو أضِف مهارة جاهزة',
       skillAdd: 'أضِف إلى مشروعي', skillAdded: 'أُضيفت ✓',
       skCaptureHead: 'أنت تعرف شيئاً لا يعرفه الوكيل', skCaptureSub: 'طريقة تعرفها أنت وحدك — كيف تأخذ بلاغاً، تتحقّق من عضو، تحمي الناس. التقطها مرّة وسيتّبعها كل بناء.', skName: 'اسم المهارة', skDesc: 'سطر واحد: ماذا تفعل', skDescPh: 'أخذ بلاغ إخلاء دون كشف هوية المستأجر', skSteps: 'الخطوات، واحدة في كل سطر', skStepsPh: 'استخدم اسماً مستعاراً، لا اسماً قانونياً\nسجّل المبنى، لا الوحدة\nشفّر كل شيء؛ منظّمان يحملان المفاتيح', skSource: 'من أين أتت (اختياري)', skSourcePh: 'دليل ميداني لنقابة المستأجرين', skCaptureBtn: 'التقطها كمهارة', skillRemove: 'إزالة',
-      skillReview: 'مسودة بكلماتك — راجعها وحسّنها؛ أنت صاحب الخبرة.',
       skillsIncluded: 'مهارة ستُضمَّن في حزمتك المبدئية',
     },
   };
@@ -197,13 +188,17 @@
   let success = $state('');
   let protocols = $state<Set<string>>(new Set(['nostr']));
   let addQuery = $state('');
-  let handoff = $state<'zip' | 'github' | 'goose' | 'kickoff'>('zip');
+  let handoff = $state<'zip' | 'github' | 'goose'>('zip');
   // Builder's adjustments to the recommended blueprint: a swapped alternative per
   // piece, pieces switched off, and any extra tools added by hand (advanced).
   let swaps = $state<Record<string, string>>({});
   let removed = $state<Set<string>>(new Set());
   let extra = $state<Set<string>>(new Set());
   let seededTool = $state<string | null>(null);
+  // Slice B: the vetted Goose-extension allowlist (from /extensions.json) and the
+  // extensions staged on the session — both feed the recipe serializer.
+  let allowlist = $state<ExtensionAllowlist>({ byId: {} });
+  let sessionExtensions = $state<SessionExtension[]>([]);
 
   const ALL_PROTOCOLS = ['nostr', 'atproto', 'lightning', 'cashu', 'general'];
   const PROTO_PRIORITY: Record<string, string[]> = {
@@ -230,6 +225,7 @@
     // Done BEFORE the catalog fetch so a late-resolving await can never clobber
     // restored input, and before the builder can type. The persistence $effect
     // stays inert until `loading` flips false, so this hydration is not echoed.
+    let restoredReflection: SessionMentorReflection | null = null;
     if (hasSession()) {
       const s = loadSession();
       if (s.intent.projectName) projectName = s.intent.projectName;
@@ -250,6 +246,8 @@
         for (const sk of authoredSkills) addSkill(sk);
       }
       if (s.handoff) handoff = s.handoff as typeof handoff;
+      sessionExtensions = s.extensions ?? [];
+      restoredReflection = s.mentorReflection;
     }
 
     // Only fully verified tool entries are eligible for a generated stack (#4):
@@ -259,6 +257,17 @@
     // Load the same excluded-org policy the dependency checker uses, so the
     // Studio can re-verify its own assembled stack in-browser (Movement 4).
     try { const pr = await fetch('/policy.json'); policyOrgs = (await pr.json()).orgs ?? []; } catch { /* offline: stack stays unverified in-browser, flow still works */ }
+    try { const er = await fetch('/extensions.json'); allowlist = await er.json(); } catch { /* offline: empty allowlist, recipe still valid */ }
+
+    // Re-surface the structured reflection imported in a previous session (it persisted
+    // in the session object). Mapped here, AFTER `items` resolves, so proposals gate
+    // against the same verified catalog the live paste flow uses. Keeps the "survives
+    // reload" promise whole; the applied-state checkmarks reset, but the stack edits
+    // those clicks produced (removed/extra) were themselves persisted.
+    if (restoredReflection && restoredReflection.proposals.length) {
+      aiProposals = reflectionToProposals(restoredReflection);
+      aiReflected = aiProposals.length > 0;
+    }
     loading = false;
 
     const params = new URLSearchParams(location.search);
@@ -730,16 +739,23 @@ ${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the pri
 
 Start by writing specs/001-${slug}/plan.md from the spec, then tasks.md, then implement task by task, keeping each change green.`);
 
-  const gooseRecipe = $derived(`version: "1.0.0"
-title: "${(projectName || slug).replace(/"/g, "'")}"
-description: "Build ${slug} — policy-clean (no Meta/OpenAI/xAI), via wecanjustbuildthings.dev"
-instructions: |
-  Read the constitution below and never violate it. Use only the listed,
-  policy-clean dependencies. Run \`npm run enforce\`
-  before every commit. Use a permitted BYOK provider only.
-prompt: |
-${agentPrompt.split('\n').map((l) => '  ' + l).join('\n')}
-`);
+  // Movement 4 — the Goose recipe, assembled by the pure serializer (Slice B): the
+  // agent prompt + a Catalog-allowlisted extension set + a forced response.json_schema,
+  // model-agnostic (the user's Goose config picks the model). The builder's own skills
+  // (Slice E) ride two ways, because Goose sub_recipes are path-based files:
+  //   • ZIP   → skills as standalone sub-recipe FILES, referenced via sub_recipes (paths
+  //             resolve on disk).
+  //   • LINK  → skills folded INLINE into instructions, so the deeplink stays self-contained
+  //             (a URL carries no files). May grow it past budget → copy/download fallback.
+  const gooseInput = $derived({
+    title: projectName || slug, slug, prompt: agentPrompt,
+    extensions: sessionExtensions, persona: mentorPersonaSkill(lang), skills: authoredSkills,
+  });
+  const gooseRecipeObj = $derived(buildGooseRecipe(gooseInput, allowlist, { skills: 'subrecipes' }));
+  const gooseRecipe = $derived(recipeToYaml(gooseRecipeObj));
+  const gooseLinkObj = $derived(buildGooseRecipe(gooseInput, allowlist, { skills: 'inline' }));
+  const gooseLink = $derived(recipeDeeplink(gooseLinkObj));
+  const gooseExplain = $derived(explainRecipe(gooseLinkObj));
 
   const readme = $derived(`# ${projectName || slug}
 
@@ -814,9 +830,16 @@ manuals with the knowledge-to-skills-pipeline).
       [`${slug}.goose-recipe.yaml`]: gooseRecipe,
       '.claude/CLAUDE.md': `# Project context\n\nRead @.specify/memory/constitution.md first; read skills/*.SKILL.md and follow them; run \`npm run enforce\` before committing.\n`,
       'skills/README.md': skillsReadme,
+      // The mentor persona (Slice D): the Socratic-mentor frame for file-based agents
+      // (Claude Code reads skills/*.SKILL.md); the deeplink recipe carries it inline.
+      'skills/mentor.SKILL.md': skillToMd(mentorPersonaSkill(lang)),
       // The example is just a placeholder; once the builder has real skills, ship those instead.
       ...(skillCount ? {} : { 'skills/example.SKILL.md': skillExample }),
       ...customSkills,
+      // Slice E: each authored skill ALSO as a standalone Goose sub-recipe file, referenced
+      // by the main recipe's sub_recipes (so Goose runs the method as a vetted sub-task).
+      // SKILL.md (above) serves file-based agents; the sub-recipe serves Goose.
+      ...Object.fromEntries(authoredSkills.map((s) => [skillSubRecipePath(s), recipeToYaml(skillToSubRecipe(s))])),
     };
     return files;
   }
@@ -864,69 +887,15 @@ manuals with the knowledge-to-skills-pipeline).
     } catch (e) { ghResult = `error:${e}`; } finally { ghBusy = false; }
   }
 
-  // ---------- AI model picker (BYOK kickoff) ----------
-  // Each option is framed in the project's ethos: accountable training, open
-  // weights you can self-host, or a neutral router constrained to permitted
-  // models. No Meta / OpenAI / xAI model is offered or reachable.
-  interface ModelOpt { id: string; label: string; note: string }
-  const MODELS: Record<string, ModelOpt[]> = {
-    anthropic: [
-      { id: 'claude-opus-4-8', label: 'Claude Opus 4.8 — most capable', note: 'Top capability for hard planning and refactors. Trained with Constitutional AI — a published, inspectable value set — which fits a tool built to be accountable by default. Your key, your data, no middle layer.' },
-      { id: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6 — balanced (recommended)', note: 'The everyday default: fast and strong for building, at lower cost than Opus. Same values alignment.' },
-      { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 — fastest', note: 'Cheapest and quickest — ideal for tight edit/run loops and small teams watching their budget.' },
-    ],
-    deepseek: [
-      { id: 'deepseek-chat', label: 'DeepSeek V3 — open weights', note: 'Open-weight: you can download and self-host it, so you are never locked to one vendor. The strongest sovereignty story here — own your whole stack.' },
-      { id: 'deepseek-reasoner', label: 'DeepSeek R1 — open-weight reasoner', note: 'Open-weight reasoning model for harder planning steps. Self-hostable, same independence from any platform.' },
-    ],
-    openrouter: [
-      { id: 'anthropic/claude-sonnet-4.6', label: 'Claude Sonnet 4.6 (via OpenRouter)', note: 'A neutral router so you avoid single-vendor lock-in. We constrain it to permitted models — Meta, OpenAI, and xAI are refused even if requested.' },
-      { id: 'deepseek/deepseek-chat', label: 'DeepSeek V3 (via OpenRouter)', note: 'Open-weight model through the router — pay-as-you-go without a separate account per provider.' },
-      { id: 'qwen/qwen-2.5-72b-instruct', label: 'Qwen 2.5 72B (via OpenRouter)', note: 'Open-weight alternative; routing stays within permitted, non-excluded providers.' },
-    ],
-  };
-
-  // ---------- BYOK kickoff ----------
-  let kProvider = $state('anthropic');
-  let kModel = $state<string>(MODELS.anthropic[0]!.id);
-  const kModels = $derived(MODELS[kProvider] ?? []);
-  // Keep the selected model valid when the provider changes.
-  $effect(() => { if (!kModels.some((m) => m.id === kModel)) kModel = kModels[0]?.id ?? ''; });
-  const kModelNote = $derived(kModels.find((m) => m.id === kModel)?.note ?? '');
-  let kKey = $state('');
-  let kBusy = $state(false);
-  let kOutput = $state('');
-  let kError = $state('');
-  async function kickoffRun() {
-    kBusy = true; kOutput = ''; kError = '';
-    const prompt = `${constitution}\n\n---\n\n${spec}\n\n---\n\nProduce specs/001-${slug}/plan.md: a concrete, step-by-step implementation plan honoring the constitution above (especially Article 0 intent and Article I exclusions). Then list the first 5 implementation tasks. Output Markdown only.`;
-    try {
-      const res = await fetch('/api/agent/kickoff', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ provider: kProvider, model: kModel, apiKey: kKey, prompt }) });
-      const d = await res.json();
-      if (d.output) kOutput = d.output; else kError = d.error + (d.detail ? `: ${JSON.stringify(d.detail).slice(0, 200)}` : '');
-    } catch (e) { kError = String(e); } finally { kBusy = false; }
-  }
-
-  // ---------- AI refinement (Morpheus → JARVIS): Socratic questions, then
-  // grounded, gated proposals. The model only ever sees real, pre-screened
-  // catalog tools and may only reference them by exact name; every suggestion is
-  // verified against the catalog before the builder sees it, and nothing is ever
-  // applied without an explicit click. The model advises; the builder decides. ----------
-  interface Proposal { action: 'add' | 'remove' | 'swap'; name: string; from?: string; why: string; tradeoff?: string }
-  type AiPhase = 'idle' | 'questions' | 'proposals';
-  const LANG_NAME: Record<Lang, string> = { en: 'English', es: 'Spanish', ar: 'Arabic' };
-  let aiPhase = $state<AiPhase>('idle');
-  let aiBusy = $state(false);
+  // ---------- Refine with your agent: import the structured suggestions your OWN Goose
+  // run produced (response.json_schema), reflect over them deterministically (no model
+  // call — Path A), and let the builder apply each to the stack. ----------
+  interface Proposal { action: 'add' | 'remove'; name: string; why: string }
   let aiError = $state('');
-  let aiQuestions = $state<string[]>([]);
-  let aiAnswers = $state<string[]>([]);
   let aiProposals = $state<Proposal[]>([]);
   let aiApplied = $state<Set<number>>(new Set());
-
-  // Pipeline output, wired into the loop: skills drafted from the builder's own
-  // described methods, plus a couple of ready-made starter skills. Adding one
-  // writes a SKILL.md (the knowledge-to-skills-pipeline format) into the starter.
-  let aiSkills = $state<DraftSkill[]>([]);
+  let agentResponse = $state('');
+  let aiReflected = $state(false);
   let customSkills = $state<Record<string, string>>({});
   const STARTER_SKILLS: DraftSkill[] = [
     { name: 'tenant-intake', description: 'Take a housing or eviction report without exposing the tenant.', source: 'Tenant-organizing field practice',
@@ -972,87 +941,35 @@ manuals with the knowledge-to-skills-pipeline).
     customSkills = rest;
   }
 
-  // The constrained menu the model may choose from: the current pieces and their
-  // alternatives, plus the strongest tools in each relevant capability category.
-  // Everything here is already in the verified, policy-screened catalog.
-  const AI_CATS = ['Frameworks & Libraries', 'Auth Identity & Keys', 'Security & Privacy', 'Databases & Storage', 'Bitcoin Lightning Nostr', 'Hosting Infra & Deploy', 'Dev Environment & Tooling'];
-  const aiCandidates = $derived.by<Item[]>(() => {
-    if (!items.length) return [];
-    const out = new Map<string, Item>();
-    const add = (it: Item) => { if (!out.has(it.name)) out.set(it.name, it); };
-    for (const p of blueprint) { add(p.item); p.alts.forEach(add); }
-    for (const c of AI_CATS) {
-      // Don't offer Meta/OpenAI/xAI-origin tools as new suggestions (they're in
-      // the catalog only with an advisory); the mentor shouldn't push them.
-      items.filter((x) => x.category === c && !x.advisory)
-        .sort((a, b) => protoMatch(b) - protoMatch(a) || b.uses - a.uses)
-        .slice(0, 8).forEach(add);
-    }
-    return [...out.values()].slice(0, 50);
-  });
 
-  function intentBlock(): string {
-    return `PROJECT: ${projectName || slug}\nPROBLEM: ${problem || '(not given)'}\nGOAL: ${goal || '(not given)'}\nSUCCESS: ${success || '(not given)'}\nNETWORKS: ${protoList.join(', ') || 'general'}`;
-  }
-  function planBlock(): string {
-    return blueprint.filter((p) => !removed.has(p.capId)).map((p) => `- ${p.role}: ${p.item.name} (${p.item.license})`).join('\n') || '- (nothing yet)';
-  }
-  const MENTOR = 'You are a wise, calm mentor for community organizers and non-developers building freedom tech — think Morpheus, not Clippy. You help people see their own intent more clearly. You never lecture, never hype, never pad. You value accuracy, security, and the project ethos (no tools owned by Meta, OpenAI, or xAI) over sounding agreeable.';
-
-  function socraticPrompt(): string {
-    return `${MENTOR}\n\n${intentBlock()}\n\nCURRENT PLAN:\n${planBlock()}\n\nAsk 3 to 5 short, plain-language questions that surface things this builder probably has not said yet but that would change what they should build — for example: who must NEVER see this data, whether people are on cheap phones or offline, what happens if it suddenly gets popular, what must still work in a year, accessibility, or safety. Tailor every question to THIS project; no generic questions. One sentence each, no jargon, no preamble.\n\nRespond in ${LANG_NAME[lang]}. Output ONLY a JSON object: {"questions": ["...", "..."]}`;
-  }
-  function proposalPrompt(): string {
-    const qa = aiQuestions.map((q, i) => `Q: ${q}\nA: ${aiAnswers[i]?.trim() || '(skipped)'}`).join('\n');
-    const cands = aiCandidates.map((c) => `- ${c.name} | ${c.category} | ${c.license} | ${c.verification} | ${(c.desc || '').slice(0, 90)}`).join('\n');
-    return `${MENTOR} The builder answered your questions. Suggest concrete refinements to their plan — but only what genuinely helps.\n\n${intentBlock()}\n\nCURRENT PLAN:\n${planBlock()}\n\nTHEIR ANSWERS:\n${qa}\n\nYou may ONLY recommend tools from this CANDIDATES list, by their exact name. Never invent a tool, and never propose anything owned by Meta, OpenAI, or xAI.\nCANDIDATES:\n${cands}\n\nALSO: if the builder described a repeatable method, process, or checklist OF THEIR OWN (an intake process, a moderation flow, a safety protocol, a verification routine), draft it as a "skill" — a short name, a one-line description, and 3 to 7 plain steps in THEIR words. Only capture methods they actually described or clearly implied; never invent domain procedures you don't have. If none, return an empty array. Example skill: {"name":"tenant-intake","description":"Take a housing report without exposing the tenant.","method":["Use a chosen handle, not a legal name.","Record the building, not the unit, at first.","Encrypt everything; two organizers hold keys."]}\n\nRules:\n- Prefer fewer tools. It is good to suggest nothing if the plan is already right (return empty arrays).\n- For each tool suggestion: a plain-language reason a non-developer understands, and an honest trade-off.\n- You advise; the builder decides. Be honest over agreeable.\n\nRespond in ${LANG_NAME[lang]}. Output ONLY a JSON object:\n{"proposals": [{"action": "add" | "swap" | "remove", "name": "<exact candidate name>", "from": "<name being replaced, swap only>", "why": "...", "tradeoff": "..."}], "skills": [{"name": "kebab-case-name", "description": "...", "method": ["step", "step"]}]}`;
+  // Gate a reflection's proposals down to the ones that name a real, policy-screened
+  // catalog tool (verified eligibility already applied to `items`). Shared by the live
+  // paste flow and by reload-restore, so both surface the exact same set.
+  function reflectionToProposals(reflection: SessionMentorReflection): Proposal[] {
+    return reflection.proposals
+      .map((p) => {
+        const it = items.find((x) => x.name.toLowerCase() === p.name.toLowerCase());
+        return it ? ({ action: p.action, name: it.name, why: p.why } as Proposal) : null;
+      })
+      .filter((p): p is Proposal => p !== null)
+      .slice(0, 8);
   }
 
-  async function callModel(prompt: string): Promise<string> {
-    const res = await fetch('/api/agent/kickoff', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ provider: kProvider, model: kModel, apiKey: kKey, prompt }) });
-    const d = await res.json();
-    if (typeof d.output === 'string') return d.output;
-    throw new Error(d.error || 'failed');
-  }
-  function parseObj(text: string): any {
-    const m = text.match(/\{[\s\S]*\}/);
-    return JSON.parse(m ? m[0] : text);
-  }
-
-  async function aiAsk() {
-    if (!kKey) { aiError = t.refineNeedKey; return; }
-    aiBusy = true; aiError = ''; aiProposals = []; aiSkills = []; aiApplied = new Set();
+  // The one permitted structured-reflection step: read the JSON the builder brings back
+  // from their OWN Goose run (NO model call here — Path A), reflect deterministically, and
+  // surface each proposal that maps to a real, policy-screened catalog tool. Nothing is
+  // applied without an explicit click (applyProposal).
+  function applyAgentResponse() {
+    aiError = ''; aiApplied = new Set();
+    let parsed: unknown;
     try {
-      const j = parseObj(await callModel(socraticPrompt()));
-      aiQuestions = (Array.isArray(j.questions) ? j.questions : []).map(String).slice(0, 5);
-      aiAnswers = aiQuestions.map(() => '');
-      aiPhase = 'questions';
-    } catch { aiError = t.refineErr; } finally { aiBusy = false; }
-  }
-  async function aiPropose() {
-    aiBusy = true; aiError = ''; aiApplied = new Set();
-    try {
-      const j = parseObj(await callModel(proposalPrompt()));
-      const raw: any[] = Array.isArray(j.proposals) ? j.proposals : [];
-      // Verification gate: keep only proposals whose tool is a real catalog entry
-      // (catalog membership === already policy-screened). Canonicalize the name.
-      aiProposals = raw
-        .map((p) => {
-          const it = items.find((x) => x.name.toLowerCase() === String(p?.name || '').toLowerCase());
-          if (!it) return null;
-          if (p.action === 'swap' && !blueprint.some((b) => !removed.has(b.capId) && b.item.name === p.from)) return null;
-          return { action: ['add', 'remove', 'swap'].includes(p.action) ? p.action : 'add', name: it.name, from: p.from, why: String(p.why || ''), tradeoff: p.tradeoff ? String(p.tradeoff) : undefined } as Proposal;
-        })
-        .filter((p): p is Proposal => p !== null)
-        .slice(0, 6);
-      // Pipeline output: skills the model drafted from the builder's own words.
-      const rawSkills: any[] = Array.isArray(j.skills) ? j.skills : [];
-      aiSkills = rawSkills
-        .filter((s) => s && s.name && Array.isArray(s.method) && s.method.length)
-        .map((s) => ({ name: String(s.name), description: String(s.description || ''), method: s.method.map(String).slice(0, 8) }))
-        .slice(0, 3);
-      aiPhase = 'proposals';
-    } catch { aiError = t.refineErr; } finally { aiBusy = false; }
+      const m = agentResponse.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(m ? m[0] : agentResponse);
+    } catch { aiError = t.refinePasteErr; aiReflected = false; return; }
+    const reflection = reflectFromResponse(parsed);
+    updateSession((s) => ({ ...s, mentorReflection: reflection }));
+    aiProposals = reflectionToProposals(reflection);
+    aiReflected = true;
   }
   function applyProposal(p: Proposal, i: number) {
     // Apply idempotently (fix carried over from main's review pass): 'add'/'remove'
@@ -1068,9 +985,6 @@ manuals with the knowledge-to-skills-pipeline).
       const bp = pieceFor(p.name);
       if (bp) { const r = new Set(removed); r.add(bp.capId); removed = r; }
       else { const n = new Set(extra); n.delete(p.name); extra = n; }
-    } else if (p.action === 'swap') {
-      const bp = pieceFor(p.from ?? '');
-      if (bp) swapPiece(bp.capId, p.name); else { const n = new Set(extra); n.add(p.name); extra = n; }
     }
     const a = new Set(aiApplied); a.add(i); aiApplied = a;
   }
@@ -1219,63 +1133,26 @@ manuals with the knowledge-to-skills-pipeline).
       <details class="refine">
         <summary>{t.refineTitle}</summary>
         <p class="hint">{t.refineIntro}</p>
-        <div class="modelgrid">
-          <label class="field"><span>{t.provider}</span><select bind:value={kProvider}><option value="anthropic">Anthropic</option><option value="deepseek">DeepSeek</option><option value="openrouter">OpenRouter</option></select></label>
-          <label class="field"><span>{t.modelLabel}</span><select bind:value={kModel}>{#each kModels as m (m.id)}<option value={m.id}>{m.label}</option>{/each}</select></label>
-        </div>
-        <label class="field"><span>{t.apikey}</span><input type="password" bind:value={kKey} placeholder="sk-…" /></label>
-
-        {#if aiPhase === 'idle'}
-          <button class="primary" onclick={aiAsk} disabled={aiBusy || !kKey}>{aiBusy ? t.refineThinking : t.refineAsk}</button>
-        {/if}
+        <label class="field"><span>{t.refinePasteLabel}</span><textarea bind:value={agentResponse} rows="5" placeholder={t.refinePastePh}></textarea></label>
+        <button class="primary" onclick={applyAgentResponse} disabled={!agentResponse.trim()}>{t.refineApplyResponse}</button>
         {#if aiError}<p class="err">{aiError}</p>{/if}
 
-        {#if aiQuestions.length}
-          <ol class="qs">
-            {#each aiQuestions as q, i}
-              <li><p class="q">{q}</p><textarea bind:value={aiAnswers[i]} rows="2"></textarea></li>
-            {/each}
-          </ol>
-          {#if aiPhase === 'questions'}
-            <p class="hint">{t.refineAnswersHint}</p>
-            <button class="primary" onclick={aiPropose} disabled={aiBusy}>{aiBusy ? t.refineThinking : t.refinePropose}</button>
-          {/if}
-        {/if}
-
-        {#if aiPhase === 'proposals'}
-          {#if aiProposals.length === 0 && aiSkills.length === 0}
+        {#if aiReflected}
+          {#if aiProposals.length === 0}
             <p class="hint">{t.refineNone}</p>
-          {/if}
-          {#if aiProposals.length}
+          {:else}
             <ul class="proposals">
               {#each aiProposals as p, i (i)}
                 {@const it = items.find((x) => x.name === p.name)}
                 <li class="proposal">
                   <div class="prop-head">
-                    <span class="prop-name">{p.action === 'add' ? '+ ' : p.action === 'remove' ? '– ' : '⇄ '}{p.name}{p.from ? ` (↳ ${p.from})` : ''}{#if it} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span> <span class="tool-meta">{it.license}</span>{/if}</span>
+                    <span class="prop-name">{p.action === 'add' ? '+ ' : '– '}{p.name}{#if it} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span> <span class="tool-meta">{it.license}</span>{/if}</span>
                     {#if aiApplied.has(i)}<span class="applied">{t.refineApplied}</span>{:else}<button class="apply" onclick={() => applyProposal(p, i)}>{t.refineApply}</button>{/if}
                   </div>
                   <p class="prop-why"><strong>{t.refineWhy}</strong> {p.why}</p>
-                  {#if p.tradeoff}<p class="prop-watch"><strong>{t.refineWatch}</strong> {p.tradeoff}</p>{/if}
                 </li>
               {/each}
             </ul>
-          {/if}
-          {#if aiSkills.length}
-            <p class="bp-sub">{t.skillsDraft}</p>
-            <ul class="skilllist">
-              {#each aiSkills as s (s.name)}
-                {@const key = `skills/${slugifySkill(s.name)}.SKILL.md`}
-                <li class="skillcard">
-                  <div class="skill-head"><span class="skill-name">{s.name}.SKILL.md</span>
-                    {#if customSkills[key]}<span class="applied">{t.skillAdded}</span>{:else}<button class="apply" onclick={() => addSkill(s)}>{t.skillAdd}</button>{/if}
-                  </div>
-                  <p class="skill-desc">{s.description}</p>
-                  <ol class="skill-steps">{#each s.method as m}<li>{m}</li>{/each}</ol>
-                </li>
-              {/each}
-            </ul>
-            <p class="hint">{t.skillReview}</p>
           {/if}
         {/if}
       </details>
@@ -1333,7 +1210,6 @@ manuals with the knowledge-to-skills-pipeline).
         <button class:on={handoff === 'zip'} onclick={() => (handoff = 'zip')}>{t.zip}</button>
         <button class:on={handoff === 'github'} onclick={() => (handoff = 'github')}>{t.github}</button>
         <button class:on={handoff === 'goose'} onclick={() => (handoff = 'goose')}>{t.goose}</button>
-        <button class:on={handoff === 'kickoff'} onclick={() => (handoff = 'kickoff')}>{t.kickoff}</button>
       </div>
 
       {#if handoff === 'zip'}
@@ -1357,24 +1233,33 @@ manuals with the knowledge-to-skills-pipeline).
         </div>
       {:else if handoff === 'goose'}
         <div class="hpanel">
-          <button class="primary big" onclick={() => blobDownload(`${slug}.goose-recipe.yaml`, gooseRecipe, 'text/yaml')}>{t.gooseDl}</button>
-          <button onclick={() => copy('cmd', `goose run --recipe ${slug}.goose-recipe.yaml`)}>{copied === 'cmd' ? '✓' : t.gooseCopy}</button>
-          <pre><code>goose run --recipe {slug}.goose-recipe.yaml</code></pre>
+          <!-- Explain-before-launch: the builder sees exactly what will happen before
+               they open Goose, and that Goose asks consent before running anything. -->
+          <p class="hint">{t.gooseExplainIntro}</p>
+          <ul class="goose-explain">
+            <li>{t.gooseExplainPrompt}</li>
+            {#if authoredSkills.length}<li>{t.gooseExplainSkills}</li>{/if}
+            {#each gooseExplain.extensions as x (x.name)}
+              <li><strong>{x.name}</strong> — {x.why}</li>
+            {/each}
+            <li>{t.gooseExplainConsent}</li>
+          </ul>
+          {#if gooseLink.withinBudget}
+            <a class="primary big" href={gooseLink.url}>{t.gooseOpen}</a>
+            <button onclick={() => copy('link', gooseLink.url)}>{copied === 'link' ? '✓' : t.gooseCopyLink}</button>
+            <details class="goose-fallback">
+              <summary>{t.gooseFallback}</summary>
+              <button onclick={() => blobDownload(`${slug}.goose-recipe.yaml`, gooseRecipe, 'text/yaml')}>{t.gooseDl}</button>
+              <button onclick={() => copy('cmd', `goose run --recipe ${slug}.goose-recipe.yaml`)}>{copied === 'cmd' ? '✓' : t.gooseCopy}</button>
+              <pre><code>goose run --recipe {slug}.goose-recipe.yaml</code></pre>
+            </details>
+          {:else}
+            <p class="hint">{t.gooseTooBig}</p>
+            <button class="primary big" onclick={() => blobDownload(`${slug}.goose-recipe.yaml`, gooseRecipe, 'text/yaml')}>{t.gooseDl}</button>
+            <button onclick={() => copy('cmd', `goose run --recipe ${slug}.goose-recipe.yaml`)}>{copied === 'cmd' ? '✓' : t.gooseCopy}</button>
+            <pre><code>goose run --recipe {slug}.goose-recipe.yaml</code></pre>
+          {/if}
           <p class="hint">{t.gooseDesc} <a href="/guides/get-started-with-goose/">{t.runLocal}</a></p>
-        </div>
-      {:else}
-        <div class="hpanel">
-          <h4 class="mtitle">{t.modelTitle}</h4>
-          <p class="hint">{t.modelIntro}</p>
-          <div class="modelgrid">
-            <label class="field"><span>{t.provider}</span><select bind:value={kProvider}><option value="anthropic">Anthropic</option><option value="deepseek">DeepSeek</option><option value="openrouter">OpenRouter</option></select></label>
-            <label class="field"><span>{t.modelLabel}</span><select bind:value={kModel}>{#each kModels as m (m.id)}<option value={m.id}>{m.label}</option>{/each}</select></label>
-          </div>
-          {#if kModelNote}<p class="modelnote">{kModelNote}</p>{/if}
-          <label class="field"><span>{t.apikey}</span><input type="password" bind:value={kKey} placeholder="sk-…" /></label>
-          <button class="primary" onclick={kickoffRun} disabled={kBusy || !kKey}>{kBusy ? t.running : t.run}</button>
-          {#if kError}<p class="err">{kError}</p>{/if}
-          {#if kOutput}<pre class="out"><code>{kOutput}</code></pre><button onclick={() => copy('ko', kOutput)}>{copied === 'ko' ? '✓ copied' : t.copyPlan}</button>{/if}
         </div>
       {/if}
 
@@ -1450,17 +1335,13 @@ manuals with the knowledge-to-skills-pipeline).
   .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .refine { border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.6rem 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent); }
   .refine > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 700; }
-  .qs { list-style: none; counter-reset: q; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
-  .qs li { counter-increment: q; }
-  .qs .q { margin: 0 0 0.3rem; font-weight: 600; }
-  .qs .q::before { content: counter(q) '. '; color: var(--sl-color-text-accent); }
   .proposals { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
   .proposal { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.6rem 0.8rem; }
   .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
   .prop-name { font-weight: 700; }
   .apply { background: var(--sl-color-accent); color: var(--on-structure); border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
   .applied { font-size: 0.78rem; font-weight: 700; color: var(--ok-text); }
-  .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
+  .prop-why { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
   .skill-capture { border: 1px solid var(--edge); border-inline-start: 3px solid var(--signal); border-radius: var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-2xs); background: color-mix(in srgb, var(--signal) 5%, transparent); }
   .skill-capture-head { margin: 0; font-size: 1.02rem; font-family: var(--font-display); }
   .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
@@ -1498,25 +1379,28 @@ manuals with the knowledge-to-skills-pipeline).
   .swap ul { list-style: none; padding: 0.4rem 0 0; margin: 0; display: grid; gap: 0.3rem; }
   .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.6rem 0.85rem; }
   .fits p { margin: 0.3rem 0 0; font-size: 0.92rem; }
-  .mtitle { margin: 0; font-size: 1.05rem; }
-  .modelgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
-  @media (max-width: 34rem) { .modelgrid { grid-template-columns: 1fr; } }
-  .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: 0.5rem; background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
   .nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; }
   .nav button { padding: 0.55rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
   .primary { background: var(--sl-color-accent); color: var(--on-structure); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }
   .big { font-size: 1.05rem; padding: 0.7rem 1.3rem; }
   .hint { color: var(--sl-color-gray-2); font-size: 0.9rem; }
+  /* "Open in Goose" is an <a> styled as the primary button. */
+  a.primary { display: inline-block; text-decoration: none; text-align: center; }
+  .goose-explain { margin: 0.2rem 0 0.4rem; padding-inline-start: 1.1rem; color: var(--sl-color-gray-2); font-size: 0.9rem; }
+  .goose-explain li { margin: 0.25rem 0; }
+  .goose-explain strong { color: var(--sl-color-text-accent); }
+  .goose-fallback { font-size: 0.9rem; }
+  .goose-fallback summary { cursor: pointer; color: var(--sl-color-gray-2); }
+  .goose-fallback > :not(summary) { margin-top: 0.5rem; }
   .err { color: var(--danger-text); font-size: 0.9rem; }
   .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; text-decoration: underline; font: inherit; }
   .copyp { align-self: flex-start; }
   details { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; }
   summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; }
   pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: 0.75rem; border-radius: 0.4rem; }
-  .out { max-height: 28rem; }
-  /* Touch targets: primary actions reach ~44px; dense in-flow controls stay
-     above the 24px floor (axe target-size already passes; this honours the
-     48/24 working-target guidance). */
+  /* Touch targets (merged from the mobile-responsiveness work): primary actions reach
+     ~44px; dense in-flow controls stay above the 24px floor (axe target-size already
+     passes; this honours the 48/24 working-target guidance). */
   .steps button, .nav button, .primary, .tabs button { min-block-size: 2.75rem; }
   .lang, .chip, .toggle, .apply { min-block-size: 1.75rem; }
 </style>

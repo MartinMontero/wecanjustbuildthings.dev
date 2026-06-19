@@ -67,7 +67,7 @@ export interface SessionExtension {
 export interface SessionMentorReflection {
   schemaVersion: 1;
   constraints: string[];
-  proposals: Array<{ action: 'add' | 'swap' | 'remove'; name: string; why: string }>;
+  proposals: Array<{ action: 'add' | 'remove'; name: string; why: string }>;
 }
 
 export interface BuildSession {
@@ -186,7 +186,7 @@ const asExtensions = (v: unknown): SessionExtension[] => {
   return out;
 };
 
-const PROPOSAL_ACTIONS = ['add', 'swap', 'remove'] as const;
+const PROPOSAL_ACTIONS = ['add', 'remove'] as const;
 const asMentorReflection = (v: unknown): SessionMentorReflection | null => {
   if (!v || typeof v !== 'object') return null;
   const r = v as Record<string, unknown>;
@@ -198,7 +198,7 @@ const asMentorReflection = (v: unknown): SessionMentorReflection | null => {
       const pr = item as Record<string, unknown>;
       if (!(PROPOSAL_ACTIONS as readonly string[]).includes(pr.action as string)) continue;
       if (typeof pr.name !== 'string' || typeof pr.why !== 'string') continue;
-      proposals.push({ action: pr.action as 'add' | 'swap' | 'remove', name: pr.name, why: pr.why });
+      proposals.push({ action: pr.action as 'add' | 'remove', name: pr.name, why: pr.why });
     }
   }
   return { schemaVersion: 1, constraints: asStringArray(r.constraints), proposals };

@@ -1,0 +1,29 @@
+name: Path A (zero inference)
+
+# Additive gate (NOT part of the protected operational_advisory set). Fails the build if
+# any model-inference host appears in the app code: the deployed platform must call no
+# model — inference runs in the user's own Goose. Mirrors the pinned-action + harden-runner
+# setup of the other workflows; does not touch verify / security-pr / quality.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  path-a:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22'
+      - name: Path-A invariant (no model-inference hosts in app code)
+        run: node scripts/path-a-check.mjs
