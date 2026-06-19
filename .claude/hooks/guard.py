@@ -55,8 +55,9 @@ PROTECTED_TOKEN = "operational_advisory"
 # token-based RULE 2 above (PROTECTED_TOKEN) therefore matches nothing today and
 # is kept verbatim as a forward guard. To honour Constraint 4 ("never weaken the
 # blocking CI gate; additive CI only") we instead protect the actual PR-blocking
-# gate workflows identified with evidence. CONFIRM/CORRECT with the maintainer
-# which file truly carries `operational_advisory`, then narrow this list if needed.
+# gate workflows identified with evidence (the three `on: pull_request` gates).
+# RESOLVED 2026-06-19 (maintainer confirmation): the protected `operational_advisory`
+# gate is the FULL set of three PR-blocking workflows below — do NOT narrow it.
 PROTECTED_CI_PATHS = [
     ".github/workflows/verify.yml",       # Enforcement & checks — 3-layer Meta/OpenAI/xAI exclusion gate (npm run enforce)
     ".github/workflows/security-pr.yml",  # Security PR gate — OSV-Scanner CRITICAL-only blocking gate
