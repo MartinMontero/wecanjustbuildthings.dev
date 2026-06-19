@@ -1,8 +1,33 @@
 // @ts-check
+import { copyFileSync, mkdirSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
+
+// Self-host the Sveltia CMS bundle from our own origin instead of a CDN. The
+// package is pinned in package-lock.json, so it rides the same OSV/Grype/SBOM
+// supply-chain checks as every other dependency; the admin page loads it with a
+// Subresource Integrity hash (a tampered bundle fails closed). Emitting it from
+// the build keeps the ~1.9 MB vendor blob out of the committed tree while
+// guaranteeing it lands at /admin/sveltia-cms.js, next to public/admin/index.html.
+function vendorSveltiaCms() {
+  return {
+    name: 'vendor-sveltia-cms',
+    hooks: {
+      /** @param {{ dir: URL, logger: { info: (msg: string) => void } }} ctx */
+      'astro:build:done': ({ dir, logger }) => {
+        const src = fileURLToPath(
+          new URL('node_modules/@sveltia/cms/dist/sveltia-cms.js', import.meta.url),
+        );
+        mkdirSync(fileURLToPath(new URL('admin/', dir)), { recursive: true });
+        copyFileSync(src, fileURLToPath(new URL('admin/sveltia-cms.js', dir)));
+        logger.info('vendored Sveltia CMS → /admin/sveltia-cms.js');
+      },
+    },
+  };
+}
 
 // The production origin. Override with SITE_URL for preview deploys if desired.
 const site = process.env.SITE_URL ?? 'https://wecanjustbuildthings.dev';
@@ -145,5 +170,6 @@ export default defineConfig({
     }),
     sitemap(),
     svelte(),
+    vendorSveltiaCms(),
   ],
 });

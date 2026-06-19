@@ -34,7 +34,11 @@ export function compileSignals(signals: ProviderSignals[]): CompiledSignal[] {
   const compiled: CompiledSignal[] = [];
   for (const s of signals) {
     for (const ep of s.endpoints) {
-      compiled.push({ org_key: s.key, kind: 'endpoint', re: new RegExp(escapeRegExp(ep)) });
+      // Endpoints are DNS hostnames, which are case-insensitive by spec, so the
+      // match must be too — otherwise an upper/mixed-case spelling of the host
+      // evades a case-sensitive pattern. Config keys (env-var names) and import
+      // patterns stay case-sensitive: those identifiers are case-significant.
+      compiled.push({ org_key: s.key, kind: 'endpoint', re: new RegExp(escapeRegExp(ep), 'i') });
     }
     for (const ck of s.config_keys) {
       compiled.push({ org_key: s.key, kind: 'config_key', re: new RegExp(`\\b${escapeRegExp(ck)}\\b`) });

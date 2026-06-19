@@ -26,6 +26,14 @@ test('detects endpoints and config keys', () => {
   assert.ok(code.some((f) => f.org_key === 'openai' && f.signal_kind === 'endpoint'));
 });
 
+test('endpoint matching is case-insensitive (DNS hosts)', () => {
+  // DNS hostnames are case-insensitive, so an upper/mixed-case spelling of an
+  // excluded host must still be caught — otherwise it is a trivial evasion.
+  // api.grok.com is an xAI endpoint in the signal set.
+  const code = scanText(`fetch("https://API.GROK.COM/v1/messages");\n`, 'a.ts', compiled);
+  assert.ok(code.some((f) => f.org_key === 'xai' && f.signal_kind === 'endpoint'));
+});
+
 test('detects Meta business SDK import', () => {
   const py = scanText(`from facebook_business.api import FacebookAdsApi\n`, 'a.py', compiled);
   assert.ok(py.some((f) => f.org_key === 'meta' && f.signal_kind === 'import'));

@@ -53,6 +53,7 @@
     "@axe-core/playwright": "^4.11.3",
     "@iarna/toml": "^2.2.5",
     "@lhci/cli": "^0.15.1",
+    "@sveltia/cms": "0.167.3",
     "@types/node": "^22.10.0",
     "@yarnpkg/lockfile": "^1.1.0",
     "@yarnpkg/parsers": "^3.0.3",
