@@ -29,6 +29,7 @@
     "enforce:layer1": "tsx enforcement/cli.ts layer1 --catalog src/content/docs/catalog",
     "enforce:layer2": "tsx enforcement/cli.ts layer2 --catalog src/content/docs/catalog",
     "enforce:layer3": "tsx enforcement/cli.ts layer3 --catalog src/content/docs/catalog --recipes src/content/docs/recipes",
+    "enforce:skills": "tsx enforcement/cli.ts skill --skills src/content/docs/skills",
     "test": "node --import tsx --test \"enforcement/tests/**/*.test.ts\" \"worker/tests/**/*.test.ts\" \"src/**/*.test.ts\"",
     "a11y": "node scripts/a11y-check.mjs",
     "test:e2e": "node scripts/e2e-check.mjs",
@@ -37,7 +38,7 @@
     "lhci": "lhci autorun",
     "typecheck:tools": "tsc -p enforcement/tsconfig.json",
     "typecheck:worker": "tsc -p worker/tsconfig.json",
-    "verify:all": "npm run check && npm run typecheck:tools && npm run typecheck:worker && npm run test && npm run enforce && npm run build"
+    "verify:all": "npm run check && npm run typecheck:tools && npm run typecheck:worker && npm run test && npm run enforce && npm run enforce:skills && npm run build"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",

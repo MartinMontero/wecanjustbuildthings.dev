@@ -253,3 +253,26 @@ test('a sub-recipe with hostile text stays valid YAML', () => {
   const hostile = skill({ name: 'Weird: "x"', description: 'has "quotes": and #hash', method: ['do: a\tthing'] });
   assert.doesNotThrow(() => parseYaml(recipeToYaml(skillToSubRecipe(hostile))));
 });
+
+test('the zip bundle is internally consistent: every sub_recipes path is a written, valid-YAML file', () => {
+  const skills = [skill(), skill({ name: 'Vet Member' }), skill({ name: 'Safe Data!! Handling' })];
+  const main = buildGooseRecipe(baseInput({ skills }), allow, { skills: 'subrecipes' });
+
+  // The files BuildStudio writes alongside the main recipe (skillSubRecipePath ↔ skillToSubRecipe).
+  const written = new Map(skills.map((s) => [skillSubRecipePath(s), recipeToYaml(skillToSubRecipe(s))]));
+
+  assert.equal(main.subRecipes?.length, skills.length);
+  for (const ref of main.subRecipes ?? []) {
+    assert.ok(written.has(ref.path), `sub_recipes path ${ref.path} has a written file`);
+    assert.doesNotThrow(() => parseYaml(written.get(ref.path)!), `${ref.path} is valid YAML`);
+  }
+
+  // No two skills collide on one file, and the rendered main YAML references exactly those paths.
+  const paths = (main.subRecipes ?? []).map((r) => r.path);
+  assert.equal(new Set(paths).size, paths.length, 'sub-recipe paths are unique');
+  const parsed = parseYaml(recipeToYaml(main)) as Record<string, any>;
+  assert.deepEqual(
+    parsed.sub_recipes.map((s: { path: string }) => s.path).sort(),
+    [...paths].sort(),
+  );
+});

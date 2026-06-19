@@ -1,0 +1,32 @@
+name: Skills enforcement (provider exclusion)
+
+# Additive gate (NOT part of the protected operational_advisory set). Runs the enforcement
+# engine's skill scan over contributed skills (src/content/docs/skills): a skill ships
+# verbatim and the agent follows it, so it must never route to Meta/OpenAI/xAI. Mirrors the
+# pinned-action + harden-runner setup of the other workflows; does not touch verify /
+# security-pr / quality.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - name: Provider-exclusion scan of contributed skills
+        run: npm run enforce:skills
