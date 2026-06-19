@@ -34,6 +34,7 @@ export const ENTRY_TYPES = [
   'dataset',
   'recipe',
   'extension',
+  'skill',
   'archetype',
   'policy',
   'pie',
@@ -141,6 +142,14 @@ export const catalogFields = z.object({
   goose_extension_args: z.array(z.string()).default([]),
   goose_extension_uri: z.url().optional(),
   goose_extension_timeout: z.number().int().positive().optional(),
+
+  // ---- Skill contract (required when entry_type === 'skill') ----
+  // A contributed, reusable method (Movement 3 / Slice E): the builder's own know-how,
+  // captured as numbered steps. Surfaced as a vetted Goose sub-recipe only when
+  // verification_status === 'verified' — the same trust gate the extensions use.
+  skill_method: z.array(z.string().min(1)).default([]),
+  skill_source: z.string().min(1).optional(),
+  skill_license: z.string().min(1).optional(),
 });
 
 /**
@@ -224,6 +233,15 @@ export const catalogExtend = catalogFields.superRefine((data, ctx) => {
     }
     if (data.goose_extension_type === 'sse' && !data.goose_extension_uri) {
       ctx.addIssue({ code: "custom", path: ['goose_extension_uri'], message: 'An sse extension requires goose_extension_uri.' });
+    }
+  }
+
+  if (data.entry_type === 'skill') {
+    if (!data.skill_method || data.skill_method.length === 0) {
+      ctx.addIssue({ code: "custom", path: ['skill_method'], message: 'A skill requires at least one skill_method step.' });
+    }
+    if (!data.skill_license) {
+      ctx.addIssue({ code: "custom", path: ['skill_license'], message: 'A skill requires skill_license (e.g. CC-BY-SA-4.0).' });
     }
   }
 });

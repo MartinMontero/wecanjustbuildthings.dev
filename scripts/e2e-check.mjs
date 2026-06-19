@@ -212,6 +212,59 @@ const TESTS = [
       }
     },
   },
+  {
+    name: 'Build Studio: an authored skill persists to the session and folds into the Goose deeplink (Slice E)',
+    async run(browser) {
+      const ctx = await browser.newContext();
+      const page = await ctx.newPage();
+      try {
+        await page.goto(`${BASE}/build/`, { waitUntil: 'load' });
+        await page.waitForFunction(
+          () => {
+            const b = document.querySelector('ol.steps li:nth-child(2) button');
+            return b && !b.disabled;
+          },
+          { timeout: 20000 },
+        );
+        await page.locator('ol.steps li:nth-child(2) button').click();
+
+        // Author a skill via the capture form (name + steps, one per line).
+        const step = 'Encrypt everything; two organizers hold the keys';
+        await page.locator('.skill-capture input').nth(0).fill('Vault Handling');
+        await page.locator('.skill-capture input').nth(1).fill('Keep member data sealed');
+        await page.locator('.skill-capture textarea').fill(`Use a chosen handle\n${step}`);
+        await page.locator('.skill-capture button.primary').click();
+
+        // It renders as an authored skill card and persists to the shared session.
+        await page.locator('.skill-capture .skillcard').first().waitFor({ state: 'visible', timeout: 5000 });
+        const session = await readSession(page);
+        assert.equal(session.skills?.length, 1, 'skill persisted to the session');
+        assert.equal(session.skills[0].name, 'vault-handling', 'skill stored slug-named');
+        assert.deepEqual(session.skills[0].steps, ['Use a chosen handle', step], 'method captured verbatim');
+
+        // Hand off to Goose: the deeplink recipe must carry the method INLINE (Option 2),
+        // and the explain panel must orient the builder that their skills are folded in.
+        await page.locator('ol.steps li:nth-child(3) button').click();
+        await page.getByText('Run it with Goose', { exact: true }).click();
+        await page.locator('.goose-explain').waitFor({ state: 'visible', timeout: 5000 });
+        assert.match(
+          await page.locator('.goose-explain').innerText(),
+          /folded into this recipe/,
+          'explain panel tells the builder their skills are folded in',
+        );
+
+        const href = await page.locator('a.primary[href^="goose://recipe?config="]').getAttribute('href');
+        assert.ok(href, 'a one-click deeplink exists (one small skill stays within budget)');
+        const config = decodeURIComponent(href.slice('goose://recipe?config='.length));
+        const recipe = JSON.parse(Buffer.from(config, 'base64').toString('utf8'));
+        assert.match(recipe.instructions, /Skill — Vault Handling/, 'skill folded into the deeplink instructions');
+        assert.ok(recipe.instructions.includes(step), 'the actual method step rides inside the deeplink');
+        assert.ok(!recipe.sub_recipes, 'no path-based sub_recipes travel in a URL');
+      } finally {
+        await ctx.close();
+      }
+    },
+  },
 ];
 
 const server = spawn('npm', ['run', 'preview', '--', '--port', String(PORT)], { stdio: 'ignore', detached: false });

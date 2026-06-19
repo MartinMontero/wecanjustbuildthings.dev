@@ -11,7 +11,7 @@
  * unrepresentable in a generated recipe.
  */
 import type { SessionExtension } from './build-session.ts';
-import { yamlDoubleQuoted, type DraftSkill } from './skill-doc.ts';
+import { yamlDoubleQuoted, slugifySkill, type DraftSkill } from './skill-doc.ts';
 
 export type JsonSchema = Record<string, unknown>;
 
@@ -50,6 +50,17 @@ export interface GooseParameter {
   default?: string;
 }
 
+/** A reference from the main recipe to a standalone sub-recipe FILE (Slice E). Goose's
+ *  `sub_recipes` are path-based: each entry names another recipe YAML on disk. Verified
+ *  against the aaif-goose `SubRecipe` struct — `name` and `path` are both required; there
+ *  is no inline form, so a sub-recipe only works where its file exists (the zip, not a
+ *  deeplink). */
+export interface SubRecipeRef {
+  name: string;
+  path: string;
+  description?: string;
+}
+
 export interface GooseRecipe {
   version: string;
   title: string;
@@ -59,7 +70,12 @@ export interface GooseRecipe {
   extensions: GooseExtensionRef[];
   parameters: GooseParameter[];
   activities: string[];
-  response: { json_schema: JsonSchema };
+  /** Path-based references to standalone skill sub-recipe files (Slice E). Omitted when
+   *  there are none, or when skills are folded inline (the deeplink). */
+  subRecipes?: SubRecipeRef[];
+  /** The forced structured result (main recipe only). A sub-recipe carries a method, not
+   *  a reflection contract, so it omits this — `response` is Optional in Goose. */
+  response?: { json_schema: JsonSchema };
 }
 
 /** Session-derived inputs the serializer needs (narrow + pure for testability). */
@@ -73,6 +89,19 @@ export interface RecipeInput {
   /** Optional mentor persona (Slice D), prepended to the recipe instructions so the
    *  agent adopts the Socratic-mentor frame even via the deeplink (which carries no files). */
   persona?: DraftSkill;
+  /** Skills the builder authored (Slice E). How they ride the recipe is set by
+   *  RecipeOptions.skills — as path-based sub-recipes (zip) or folded inline (deeplink). */
+  skills?: DraftSkill[];
+}
+
+/** How authored skills are embedded (Slice E). The transport decides:
+ *  - 'subrecipes': reference standalone files via `sub_recipes` — for the ZIP, where the
+ *    files exist on disk and resolve.
+ *  - 'inline': fold each method into `instructions` so the recipe is self-contained — for
+ *    the DEEPLINK, which carries no files (may grow it past the deeplink budget).
+ *  - omitted: skills are not embedded in the recipe (back-compat). */
+export interface RecipeOptions {
+  skills?: 'subrecipes' | 'inline';
 }
 
 /**
@@ -112,6 +141,48 @@ function personaToInstructions(p: DraftSkill): string {
   return `Act as the build mentor — ${p.description}\n${steps}`;
 }
 
+/** Canonical in-zip path for a skill's standalone sub-recipe file. Keeps the parent's
+ *  `sub_recipes[].path` and the file actually written to the zip in lock-step. */
+export function skillSubRecipePath(s: DraftSkill): string {
+  return `recipes/${slugifySkill(s.name)}.goose-recipe.yaml`;
+}
+
+/** A skill → the parent recipe's `sub_recipes` reference (path-based; the file is written
+ *  separately by the caller). Pure. */
+export function subRecipeRef(s: DraftSkill): SubRecipeRef {
+  return { name: slugifySkill(s.name), path: skillSubRecipePath(s), description: s.description };
+}
+
+/** Project a DraftSkill into a standalone, self-contained Goose recipe — a sub-recipe FILE
+ *  is just a recipe. Pure, deterministic, model-free: the skill's numbered method becomes
+ *  the instructions; no extensions, no response contract. */
+export function skillToSubRecipe(s: DraftSkill): GooseRecipe {
+  const slug = slugifySkill(s.name);
+  const title = slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const steps = s.method.map((m, i) => `${i + 1}. ${m}`).join('\n');
+  return {
+    version: '1.0.0',
+    title,
+    description: s.description,
+    instructions: `Apply the builder's own method — ${s.description}\nFollow these steps exactly, in order; never skip one:\n${steps}`,
+    prompt: `Apply the "${title}" method to the task at hand.`,
+    extensions: [],
+    parameters: [],
+    activities: [],
+  };
+}
+
+/** Fold authored skills into a single instructions block (the 'inline' transport, for the
+ *  deeplink — no files travel in a URL). Each method is numbered and attributed by name. */
+function skillsToInstructions(skills: DraftSkill[]): string {
+  return skills
+    .map((s) => {
+      const steps = s.method.map((m, i) => `${i + 1}. ${m}`).join('\n');
+      return `Skill — ${s.name}: ${s.description}\n${steps}`;
+    })
+    .join('\n\n');
+}
+
 /** Deterministic next-steps shown in Goose to guide a non-dev builder. */
 function activitiesFor(slug: string): string[] {
   return [
@@ -126,24 +197,40 @@ function activitiesFor(slug: string): string[] {
  * Pure + deterministic. Extensions absent from `allow` are dropped (trust boundary);
  * never emits a model/provider (Goose is model-agnostic).
  */
-export function buildGooseRecipe(input: RecipeInput, allow: ExtensionAllowlist): GooseRecipe {
+export function buildGooseRecipe(
+  input: RecipeInput,
+  allow: ExtensionAllowlist,
+  opts: RecipeOptions = {},
+): GooseRecipe {
   const seen = new Set<string>();
   const extensions = input.extensions
     .map((e) => allow.byId[e.catalogId]) // vetted config only — the session is reference-only
     .filter((ref): ref is GooseExtensionRef => Boolean(ref))
     .filter((ref) => (seen.has(ref.name) ? false : (seen.add(ref.name), true)));
 
+  let instructions = input.persona
+    ? `${personaToInstructions(input.persona)}\n\n${RECIPE_INSTRUCTIONS}`
+    : RECIPE_INSTRUCTIONS;
+  const skills = input.skills ?? [];
+  let subRecipes: SubRecipeRef[] | undefined;
+  if (skills.length && opts.skills === 'inline') {
+    // Self-contained (deeplink): the methods travel in the instructions themselves.
+    instructions = `${instructions}\n\nApply the builder's own captured methods:\n\n${skillsToInstructions(skills)}`;
+  } else if (skills.length && opts.skills === 'subrecipes') {
+    // Modular (zip): reference the standalone files the caller writes alongside.
+    subRecipes = skills.map(subRecipeRef);
+  }
+
   return {
     version: '1.0.0',
     title: input.title,
     description: `Build ${input.slug} — policy-clean (no Meta/OpenAI/xAI), via wecanjustbuildthings.dev`,
-    instructions: input.persona
-      ? `${personaToInstructions(input.persona)}\n\n${RECIPE_INSTRUCTIONS}`
-      : RECIPE_INSTRUCTIONS,
+    instructions,
     prompt: input.prompt,
     extensions,
     parameters: [], // reserved: the prompt is fully rendered, so there are no template variables yet
     activities: activitiesFor(input.slug),
+    ...(subRecipes ? { subRecipes } : {}),
     response: { json_schema: RESPONSE_JSON_SCHEMA },
   };
 }
@@ -190,9 +277,16 @@ function extToYaml(e: GooseExtensionRef): string {
   return `  - { ${parts.join(', ')} }`;
 }
 
-/** Render a GooseRecipe as YAML. Deterministic; valid YAML for any input. */
+function subRecipeToYaml(s: SubRecipeRef): string {
+  const parts = [`name: ${yamlDoubleQuoted(s.name)}`, `path: ${yamlDoubleQuoted(s.path)}`];
+  if (s.description) parts.push(`description: ${yamlDoubleQuoted(s.description)}`);
+  return `  - { ${parts.join(', ')} }`;
+}
+
+/** Render a GooseRecipe as YAML. Deterministic; valid YAML for any input. `sub_recipes`
+ *  and `response` are emitted only when present (both Optional in Goose). */
 export function recipeToYaml(r: GooseRecipe): string {
-  const lines = [
+  const lines: (string | null)[] = [
     `version: ${yamlDoubleQuoted(r.version)}`,
     `title: ${yamlDoubleQuoted(r.title)}`,
     `description: ${yamlDoubleQuoted(r.description)}`,
@@ -211,7 +305,8 @@ export function recipeToYaml(r: GooseRecipe): string {
           .join('\n')
       : 'parameters: []',
     r.activities.length ? 'activities:\n' + r.activities.map((a) => `  - ${yamlDoubleQuoted(a)}`).join('\n') : 'activities: []',
-    `response: ${JSON.stringify(r.response)}`,
+    r.subRecipes && r.subRecipes.length ? 'sub_recipes:\n' + r.subRecipes.map(subRecipeToYaml).join('\n') : null,
+    r.response ? `response: ${JSON.stringify(r.response)}` : null,
   ];
-  return lines.join('\n') + '\n';
+  return lines.filter((l): l is string => l !== null).join('\n') + '\n';
 }

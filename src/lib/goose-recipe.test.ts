@@ -5,12 +5,23 @@ import {
   buildGooseRecipe,
   buildExtensionAllowlist,
   recipeToYaml,
+  skillToSubRecipe,
+  subRecipeRef,
+  skillSubRecipePath,
   RESPONSE_JSON_SCHEMA,
   type ExtensionAllowlist,
   type ExtensionEntry,
   type RecipeInput,
 } from './goose-recipe.ts';
 import type { SessionExtension } from './build-session.ts';
+import type { DraftSkill } from './skill-doc.ts';
+
+const skill = (over: Partial<DraftSkill> = {}): DraftSkill => ({
+  name: 'Tenant Intake',
+  description: 'Take an eviction report without exposing the tenant',
+  method: ['Use a chosen handle, not a legal name', 'Record the building, not the unit'],
+  ...over,
+});
 
 const allow: ExtensionAllowlist = {
   byId: {
@@ -75,6 +86,7 @@ test('recipeToYaml round-trips a persona recipe (multi-line instructions block s
 
 test('the recipe forces the structured response the Mentor Engine will read (Slice D)', () => {
   const r = buildGooseRecipe(baseInput(), allow);
+  assert.ok(r.response, 'the main recipe always carries a response contract');
   assert.deepEqual(r.response.json_schema, RESPONSE_JSON_SCHEMA);
   const schema = r.response.json_schema as { required: string[] };
   assert.deepEqual(schema.required, ['constraints', 'proposals']);
@@ -171,4 +183,73 @@ test('recipeToYaml handles an empty extension/parameter set and hostile text', (
   const parsed = parseYaml(yaml) as Record<string, any>;
   assert.equal(parsed.title, 'Weird: "quotes" & colons'); // survives YAML round-trip
   assert.match(parsed.prompt, /line2: with colon/);
+});
+
+// ---- Slice E: authored skills → sub-recipes (path-based) or inline ------------------
+
+test('skillToSubRecipe is a self-contained recipe: numbered method, no extensions/response', () => {
+  const a = skillToSubRecipe(skill());
+  const b = skillToSubRecipe(skill());
+  assert.deepEqual(a, b); // deterministic
+  assert.equal(a.title, 'Tenant Intake');
+  assert.deepEqual(a.extensions, []);
+  assert.equal(a.response, undefined); // a sub-recipe carries a method, not a reflection contract
+  assert.equal(a.subRecipes, undefined);
+  assert.match(a.instructions, /1\. Use a chosen handle/);
+  assert.match(a.instructions, /2\. Record the building/);
+});
+
+test('skillToSubRecipe round-trips through YAML with no response key', () => {
+  const yaml = recipeToYaml(skillToSubRecipe(skill()));
+  const parsed = parseYaml(yaml) as Record<string, any>;
+  assert.equal(parsed.title, 'Tenant Intake');
+  assert.equal('response' in parsed, false); // omitted, not null
+  assert.equal('sub_recipes' in parsed, false);
+  assert.match(String(parsed.instructions), /Record the building, not the unit/);
+});
+
+test('subRecipeRef / skillSubRecipePath agree and are slug-based', () => {
+  const s = skill({ name: 'Safe Data!! Handling' });
+  assert.equal(skillSubRecipePath(s), 'recipes/safe-data-handling.goose-recipe.yaml');
+  assert.deepEqual(subRecipeRef(s), {
+    name: 'safe-data-handling',
+    path: 'recipes/safe-data-handling.goose-recipe.yaml',
+    description: s.description,
+  });
+});
+
+test("skills 'subrecipes' mode references files; the method is NOT folded into instructions", () => {
+  const r = buildGooseRecipe(baseInput({ skills: [skill(), skill({ name: 'Vet Member' })] }), allow, {
+    skills: 'subrecipes',
+  });
+  assert.equal(r.subRecipes?.length, 2);
+  assert.deepEqual(r.subRecipes?.map((s) => s.path), [
+    'recipes/tenant-intake.goose-recipe.yaml',
+    'recipes/vet-member.goose-recipe.yaml',
+  ]);
+  assert.ok(!r.instructions.includes('Use a chosen handle')); // referenced, not inlined
+  const parsed = parseYaml(recipeToYaml(r)) as Record<string, any>;
+  assert.equal(parsed.sub_recipes.length, 2);
+  assert.equal(parsed.sub_recipes[0].name, 'tenant-intake');
+  assert.equal(parsed.sub_recipes[0].path, 'recipes/tenant-intake.goose-recipe.yaml');
+});
+
+test("skills 'inline' mode folds methods into instructions and emits NO sub_recipes (deeplink-safe)", () => {
+  const r = buildGooseRecipe(baseInput({ skills: [skill()] }), allow, { skills: 'inline' });
+  assert.equal(r.subRecipes, undefined);
+  assert.match(r.instructions, /Skill — Tenant Intake/);
+  assert.match(r.instructions, /1\. Use a chosen handle/);
+  const yaml = recipeToYaml(r);
+  assert.ok(!yaml.includes('sub_recipes:')); // nothing path-based travels in a URL
+});
+
+test('omitting the skills option embeds nothing (back-compat) even when skills are present', () => {
+  const r = buildGooseRecipe(baseInput({ skills: [skill()] }), allow);
+  assert.equal(r.subRecipes, undefined);
+  assert.ok(!r.instructions.includes('Tenant Intake'));
+});
+
+test('a sub-recipe with hostile text stays valid YAML', () => {
+  const hostile = skill({ name: 'Weird: "x"', description: 'has "quotes": and #hash', method: ['do: a\tthing'] });
+  assert.doesNotThrow(() => parseYaml(recipeToYaml(skillToSubRecipe(hostile))));
 });

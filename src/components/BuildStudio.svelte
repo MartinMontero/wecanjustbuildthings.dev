@@ -9,7 +9,7 @@
   import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies } from '../lib/studio-stack.ts';
   import { slugifySkill, skillToMd, type DraftSkill } from '../lib/skill-doc.ts';
   import { mentorPersonaSkill } from '../lib/mentor-persona.ts';
-  import { buildGooseRecipe, recipeToYaml, type ExtensionAllowlist } from '../lib/goose-recipe.ts';
+  import { buildGooseRecipe, recipeToYaml, skillToSubRecipe, skillSubRecipePath, type ExtensionAllowlist } from '../lib/goose-recipe.ts';
   import { recipeDeeplink, explainRecipe } from '../lib/goose-deeplink.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
@@ -52,9 +52,10 @@
       gooseDesc: 'A recipe is a one-file set of instructions Goose follows to build your project. Download it, then run the command below.',
       gooseExplainIntro: 'Here’s exactly what happens when you open this in Goose:',
       gooseExplainPrompt: 'Goose receives your plan, your rules, and the vetted tool list — nothing else.',
+      gooseExplainSkills: 'Your own captured skills are folded into this recipe, so the agent follows your methods even from a one-click link.',
       gooseExplainConsent: 'Goose asks your permission before it runs anything (its “Trust & Execute” step). You stay in control.',
       gooseOpen: 'Open in Goose →', gooseCopyLink: 'Copy the link',
-      gooseTooBig: 'This build is large, so the one-click link won’t fit. Download the recipe and run it instead:',
+      gooseTooBig: 'Your own skills (and tools) are baked right into this recipe — that’s what makes it richer than a one-click link can carry. Nothing is lost: download the recipe, your skills included, and run it with the command below.',
       gooseFallback: 'Prefer a file? Download the recipe instead',
       ghNotReady: 'Saving straight to GitHub isn’t switched on for this site yet — download the folder instead, or read',
       ghConnectBtn: 'Connect GitHub & save my project', ghSuccess: '✓ Your project is on GitHub:',
@@ -100,9 +101,10 @@
       gooseDesc: 'Una receta es un archivo con instrucciones que Goose sigue para construir tu proyecto. Descárgala y ejecuta el comando de abajo.',
       gooseExplainIntro: 'Esto es exactamente lo que pasa cuando lo abres en Goose:',
       gooseExplainPrompt: 'Goose recibe tu plan, tus reglas y la lista de herramientas verificadas — nada más.',
+      gooseExplainSkills: 'Tus propias habilidades capturadas se integran en esta receta, para que el agente siga tus métodos incluso desde un enlace de un clic.',
       gooseExplainConsent: 'Goose pide tu permiso antes de ejecutar nada (su paso “Trust & Execute”). Mantienes el control.',
       gooseOpen: 'Abrir en Goose →', gooseCopyLink: 'Copiar el enlace',
-      gooseTooBig: 'Este proyecto es grande y el enlace de un clic no cabe. Descarga la receta y ejecútala:',
+      gooseTooBig: 'Tus propias habilidades (y herramientas) están integradas en esta receta — por eso es más rica de lo que cabe en un enlace de un clic. No se pierde nada: descarga la receta, con tus habilidades incluidas, y ejecútala con el comando de abajo.',
       gooseFallback: '¿Prefieres un archivo? Descarga la receta',
       ghNotReady: 'Guardar directo en GitHub aún no está activado en este sitio — descarga la carpeta, o lee',
       ghConnectBtn: 'Conectar GitHub y guardar mi proyecto', ghSuccess: '✓ Tu proyecto está en GitHub:',
@@ -148,9 +150,10 @@
       gooseDesc: 'الوصفة ملف واحد فيه تعليمات يتبعها Goose لبناء مشروعك. نزّلها ثم شغّل الأمر أدناه.',
       gooseExplainIntro: 'إليك بالضبط ما يحدث عند فتحه في Goose:',
       gooseExplainPrompt: 'يتلقّى Goose خطتك وقواعدك وقائمة الأدوات الموثوقة — لا أكثر.',
+      gooseExplainSkills: 'مهاراتك التي التقطتها مُدمجة في هذه الوصفة، فيتّبع الوكيل أساليبك حتى من رابط بنقرة واحدة.',
       gooseExplainConsent: 'يطلب Goose إذنك قبل تشغيل أي شيء (خطوة «Trust & Execute»). تبقى أنت المتحكم.',
       gooseOpen: 'افتح في Goose ←', gooseCopyLink: 'انسخ الرابط',
-      gooseTooBig: 'هذا المشروع كبير، لذا لا يتّسع رابط النقرة الواحدة. نزّل الوصفة وشغّلها بدلاً من ذلك:',
+      gooseTooBig: 'مهاراتك (وأدواتك) مُدمجة مباشرةً في هذه الوصفة — لذلك هي أغنى مما يتّسع له رابط بنقرة واحدة. لا يضيع شيء: نزّل الوصفة، بمهاراتك المضمّنة، وشغّلها بالأمر أدناه.',
       gooseFallback: 'تفضّل ملفاً؟ نزّل الوصفة',
       ghNotReady: 'الحفظ المباشر إلى GitHub غير مُفعّل في هذا الموقع بعد — نزّل المجلد بدلاً من ذلك، أو اقرأ',
       ghConnectBtn: 'اربط GitHub واحفظ مشروعي', ghSuccess: '✓ مشروعك على GitHub:',
@@ -738,15 +741,21 @@ Start by writing specs/001-${slug}/plan.md from the spec, then tasks.md, then im
 
   // Movement 4 — the Goose recipe, assembled by the pure serializer (Slice B): the
   // agent prompt + a Catalog-allowlisted extension set + a forced response.json_schema,
-  // model-agnostic (the user's Goose config picks the model). One recipe object drives
-  // both the YAML download and the goose:// deeplink + explain panel (Slice C).
-  const gooseRecipeObj = $derived(buildGooseRecipe(
-    { title: projectName || slug, slug, prompt: agentPrompt, extensions: sessionExtensions, persona: mentorPersonaSkill(lang) },
-    allowlist,
-  ));
+  // model-agnostic (the user's Goose config picks the model). The builder's own skills
+  // (Slice E) ride two ways, because Goose sub_recipes are path-based files:
+  //   • ZIP   → skills as standalone sub-recipe FILES, referenced via sub_recipes (paths
+  //             resolve on disk).
+  //   • LINK  → skills folded INLINE into instructions, so the deeplink stays self-contained
+  //             (a URL carries no files). May grow it past budget → copy/download fallback.
+  const gooseInput = $derived({
+    title: projectName || slug, slug, prompt: agentPrompt,
+    extensions: sessionExtensions, persona: mentorPersonaSkill(lang), skills: authoredSkills,
+  });
+  const gooseRecipeObj = $derived(buildGooseRecipe(gooseInput, allowlist, { skills: 'subrecipes' }));
   const gooseRecipe = $derived(recipeToYaml(gooseRecipeObj));
-  const gooseLink = $derived(recipeDeeplink(gooseRecipeObj));
-  const gooseExplain = $derived(explainRecipe(gooseRecipeObj));
+  const gooseLinkObj = $derived(buildGooseRecipe(gooseInput, allowlist, { skills: 'inline' }));
+  const gooseLink = $derived(recipeDeeplink(gooseLinkObj));
+  const gooseExplain = $derived(explainRecipe(gooseLinkObj));
 
   const readme = $derived(`# ${projectName || slug}
 
@@ -827,6 +836,10 @@ manuals with the knowledge-to-skills-pipeline).
       // The example is just a placeholder; once the builder has real skills, ship those instead.
       ...(skillCount ? {} : { 'skills/example.SKILL.md': skillExample }),
       ...customSkills,
+      // Slice E: each authored skill ALSO as a standalone Goose sub-recipe file, referenced
+      // by the main recipe's sub_recipes (so Goose runs the method as a vetted sub-task).
+      // SKILL.md (above) serves file-based agents; the sub-recipe serves Goose.
+      ...Object.fromEntries(authoredSkills.map((s) => [skillSubRecipePath(s), recipeToYaml(skillToSubRecipe(s))])),
     };
     return files;
   }
@@ -1225,6 +1238,7 @@ manuals with the knowledge-to-skills-pipeline).
           <p class="hint">{t.gooseExplainIntro}</p>
           <ul class="goose-explain">
             <li>{t.gooseExplainPrompt}</li>
+            {#if authoredSkills.length}<li>{t.gooseExplainSkills}</li>{/if}
             {#each gooseExplain.extensions as x (x.name)}
               <li><strong>{x.name}</strong> — {x.why}</li>
             {/each}
