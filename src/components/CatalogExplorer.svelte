@@ -65,6 +65,13 @@
     empty: string;
     addToBuild: string;
     inBuild: string;
+    addAria: string;
+    removeAria: string;
+    statusAdded: string;
+    statusRemoved: string;
+    trayLabel: string;
+    trayCta: string;
+    trayHint: string;
   }
   const STRINGS: Record<Lang, CatalogStrings> = {
     en: {
@@ -98,6 +105,13 @@
       empty: 'No tools match these filters.',
       addToBuild: '+ Add to build',
       inBuild: '✓ In your build',
+      addAria: 'Add to your build',
+      removeAria: 'Remove from your build',
+      statusAdded: 'added',
+      statusRemoved: 'removed',
+      trayLabel: 'in your build',
+      trayCta: 'Review in the Build Studio →',
+      trayHint: 'These travel with you into the Build Studio — open it when you’re ready.',
     },
     es: {
       ctaBold: '¿Nuevo por aquí? No explores — deja que el Build Studio elija por ti.',
@@ -130,6 +144,13 @@
       empty: 'Ninguna herramienta coincide con estos filtros.',
       addToBuild: '+ Añadir al proyecto',
       inBuild: '✓ En tu proyecto',
+      addAria: 'Añadir a tu proyecto',
+      removeAria: 'Quitar de tu proyecto',
+      statusAdded: 'añadido',
+      statusRemoved: 'eliminado',
+      trayLabel: 'en tu proyecto',
+      trayCta: 'Revisar en el Build Studio →',
+      trayHint: 'Te acompañan al Build Studio — ábrelo cuando estés listo.',
     },
     ar: {
       ctaBold: 'جديد هنا؟ لا تتصفّح — دع Build Studio يختار لك.',
@@ -162,6 +183,13 @@
       empty: 'لا توجد أدوات تطابق هذه المرشّحات.',
       addToBuild: '+ أضف إلى المشروع',
       inBuild: '✓ في مشروعك',
+      addAria: 'أضف إلى مشروعك',
+      removeAria: 'أزل من مشروعك',
+      statusAdded: 'أُضيفت',
+      statusRemoved: 'أُزيلت',
+      trayLabel: 'في مشروعك',
+      trayCta: 'راجِع في استوديو البناء ←',
+      trayHint: 'تنتقل معك إلى استوديو البناء — افتحه عندما تكون جاهزاً.',
     },
   };
   const t = STRINGS[lang];
@@ -241,14 +269,31 @@
   let selVerification = $state<Set<string>>(new Set());
   let sort = $state<'uses' | 'name'>('uses');
 
-  // Catalog ↔ shared build session: which tools are already in the build (the
-  // `adjustments.extra` channel BuildStudio restores on mount). Read on mount and
-  // kept in sync (incl. other tabs) via subscribeSession.
+  // Catalog ↔ shared build session. `inBuild` = tools already staged (the
+  // adjustments.extra channel BuildStudio restores on mount); `buildSeed` = the tool
+  // the Studio will open at; `buildStatus` feeds an aria-live region so every add/
+  // remove is announced. Synced on mount + across tabs via subscribeSession.
   let inBuild = $state<Set<string>>(new Set());
-  const syncBuild = (s: BuildSession) => { inBuild = new Set(s.adjustments.extra); };
+  let buildSeed = $state<string | null>(null);
+  let buildStatus = $state('');
+  const syncBuild = (s: BuildSession) => {
+    inBuild = new Set(s.adjustments.extra);
+    buildSeed = s.seededTool;
+  };
   onMount(() => { syncBuild(loadSession()); return subscribeSession(syncBuild); });
+
+  // Open the Build Studio oriented at a real tool: ?seed= jumps it to the blueprint
+  // focused there (same path a tool page's "Build with this" uses).
+  const buildBase = lang === 'en' ? '/build/' : `/${lang}/build/`;
+  const buildHref = $derived.by(() => {
+    const seed = buildSeed ?? [...inBuild][0];
+    return seed ? `${buildBase}?seed=${encodeURIComponent(seed)}` : buildBase;
+  });
+
   function toggleBuild(name: string) {
+    const wasIn = inBuild.has(name);
     syncBuild(updateSession((s) => toggleExtraTool(s, name)));
+    buildStatus = `${name} ${wasIn ? t.statusRemoved : t.statusAdded} — ${inBuild.size} ${t.trayLabel}`;
   }
   let limit = $state(60);
 
@@ -404,6 +449,7 @@
                   class="card-build"
                   class:on={inBuild.has(it.name)}
                   aria-pressed={inBuild.has(it.name)}
+                  aria-label={`${inBuild.has(it.name) ? t.removeAria : t.addAria}: ${it.name}`}
                   onclick={() => toggleBuild(it.name)}
                 >{inBuild.has(it.name) ? t.inBuild : t.addToBuild}</button>
               {/if}
@@ -414,6 +460,19 @@
           <button class="more" onclick={() => (limit += 60)}>{showMore(filtered.length - limit)}</button>
         {/if}
       </div>
+    </div>
+  {/if}
+
+  <!-- Always-present live region: announces every add/remove to screen readers. -->
+  <p class="sr-only" role="status" aria-live="polite">{buildStatus}</p>
+
+  <!-- Persistent, sticky "build tray": keeps the builder oriented (what's staged) and
+       in control (when to move on), with a guided next step into the Build Studio. -->
+  {#if inBuild.size}
+    <div class="build-tray">
+      <span class="build-tray__count"><strong>{inBuild.size}</strong> {t.trayLabel}</span>
+      <span class="build-tray__hint">{t.trayHint}</span>
+      <a class="build-tray__cta" href={buildHref}>{t.trayCta}</a>
     </div>
   {/if}
 </div>
@@ -465,6 +524,27 @@
   .card-build:hover { border-color: var(--sl-color-text-accent); }
   .card-build.on { border-color: var(--sl-color-text-accent); color: var(--sl-color-text-accent); font-weight: 600; }
   .card-build:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
+
+  /* Sticky "build tray" — stays in view as the builder scrolls, so they always know
+     what's staged and have a one-click, oriented way into the Build Studio. */
+  .build-tray {
+    position: sticky; bottom: 0.6rem; z-index: 5;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.9rem;
+    margin-top: 1rem; padding: 0.7rem 1rem;
+    background: var(--sl-color-bg-nav, var(--sl-color-bg)); color: var(--sl-color-text);
+    border: 1px solid var(--sl-color-accent); border-radius: 0.6rem;
+    box-shadow: 0 6px 24px rgb(0 0 0 / 0.18);
+  }
+  .build-tray__count { font-size: 0.92rem; }
+  .build-tray__count strong { color: var(--sl-color-text-accent); }
+  .build-tray__hint { flex: 1 1 16rem; font-size: 0.82rem; color: var(--sl-color-gray-2); }
+  .build-tray__cta {
+    font-weight: 700; white-space: nowrap; text-decoration: none;
+    color: var(--sl-color-text-accent);
+    padding: 0.3rem 0.7rem; border-radius: 0.4rem; border: 1px solid var(--sl-color-accent);
+  }
+  .build-tray__cta:hover { background: color-mix(in srgb, var(--sl-color-accent) 14%, transparent); }
+  .build-tray__cta:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
   .badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
   .badge { font-size: 0.72rem; font-weight: 600; padding: 0.18rem 0.45rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 4px; background: var(--sl-color-gray-6); color: var(--sl-color-text); }
   .badge--verified, .badge--active { border-left-color: var(--ok-edge); }
