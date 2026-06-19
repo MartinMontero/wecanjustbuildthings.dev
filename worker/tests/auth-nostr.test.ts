@@ -131,3 +131,12 @@ test('sanitizeDisplayName drops control chars, trims, caps length, and nulls emp
   assert.equal(sanitizeDisplayName(null), null);
   assert.equal(sanitizeDisplayName(undefined), null);
 });
+
+test('sanitizeDisplayName preserves non-Latin names (es/ar/emoji), stripping only control chars', () => {
+  // The audience is trilingual: Arabic, accented Latin, and emoji must survive intact…
+  assert.equal(sanitizeDisplayName('Café Niño'), 'Café Niño');
+  assert.equal(sanitizeDisplayName('أبو محمد'), 'أبو محمد');
+  assert.equal(sanitizeDisplayName('Ada 😀'), 'Ada 😀');
+  // …while an interior C0 control char (here a bell, U+0007) is still removed.
+  assert.equal(sanitizeDisplayName('Aha Lee'), 'Aha Lee');
+});

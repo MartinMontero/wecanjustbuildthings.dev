@@ -98,6 +98,14 @@ test('resolveSession returns null for no cookie, unknown id, and dangling user',
   assert.equal(await resolveSession(withCookie('orphan'), env), null);
 });
 
+test('resolveSession rejects a tampered/corrupt session record (malformed JSON or no userId)', async () => {
+  const env = envOf();
+  await env.SESSIONS.put('sess:garbage', 'not json{');                        // unparseable
+  assert.equal(await resolveSession(withCookie('garbage'), env), null);
+  await env.SESSIONS.put('sess:nouser', JSON.stringify({ createdAt: 1 }));    // valid JSON, no userId
+  assert.equal(await resolveSession(withCookie('nouser'), env), null);
+});
+
 test('destroySession invalidates the session', async () => {
   const env = envOf();
   const user = await getOrCreateUserByIdentity(env.DB, 'nostr', 'pubkeyB', null);
