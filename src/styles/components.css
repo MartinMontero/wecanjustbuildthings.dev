@@ -79,7 +79,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2xs);
-  min-height: 2.75rem; /* 44px target */
+  min-block-size: 3rem; /* 48px primary working target */
   padding: 0 var(--space-md);
   border-radius: var(--radius);
   font-weight: var(--weight-bold);
@@ -152,7 +152,8 @@
 /* Designed long-form reading — chunky callout cards + display headings + a
    marigold masthead tick. Deliberately NOT a hairline broadsheet. */
 .content-panel h1#_top {
-  font-size: clamp(var(--step-5), 5vw, var(--step-7));
+  /* Fluid, but keep a rem term (never pure vw) so 200% zoom still scales it. */
+  font-size: clamp(var(--step-5), 1.5rem + 2vw, var(--step-7));
   line-height: 1.05;
 }
 .content-panel h1#_top::before {
@@ -274,6 +275,7 @@
   background: var(--surface);
   color: var(--ink);
   font: inherit;
+  font-size: max(16px, 1rem); /* never below 16px — avoids iOS focus auto-zoom */
   transition: border-color var(--dur-1) var(--ease-out);
 }
 .field :is(input, textarea, select):focus { border-color: var(--structure); }

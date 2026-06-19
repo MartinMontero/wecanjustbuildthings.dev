@@ -1303,7 +1303,7 @@ manuals with the knowledge-to-skills-pipeline).
   .panel { display: flex; flex-direction: column; gap: var(--space-sm); }
   .field { display: flex; flex-direction: column; gap: 0.35rem; }
   .field > span { font-weight: var(--weight-bold); font-size: 0.9rem; color: var(--ink); }
-  input, textarea, select { padding: 0.6rem 0.75rem; border: 1px solid var(--control-edge); border-radius: var(--radius); background: var(--surface-2); color: var(--ink); font: inherit; transition: border-color var(--dur-1) var(--ease-out); }
+  input, textarea, select { padding: 0.6rem 0.75rem; border: 1px solid var(--control-edge); border-radius: var(--radius); background: var(--surface-2); color: var(--ink); font: inherit; font-size: max(16px, 1rem); transition: border-color var(--dur-1) var(--ease-out); }
   :is(input, textarea, select):focus { border-color: var(--structure); }
   .chips, .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .chip { padding: 0.35rem 0.8rem; border-radius: var(--radius-pill); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink); cursor: pointer; }
@@ -1314,14 +1314,14 @@ manuals with the knowledge-to-skills-pipeline).
   .picklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
   .pick { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.7rem; }
   .pick.on { border-color: var(--sl-color-accent); }
-  .pick label { display: grid; grid-template-columns: auto 1fr auto; gap: 0.2rem 0.6rem; align-items: baseline; cursor: pointer; }
-  .pick-name { font-weight: 700; }
+  .pick label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.2rem 0.6rem; align-items: baseline; cursor: pointer; }
+  .pick-name { font-weight: 700; overflow-wrap: anywhere; }
   .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
-  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 3px; }
-  .vbadge--verified { border-left-color: var(--ok-edge); }
-  .vbadge--under_review { border-left-color: var(--warn-edge); }
-  .vbadge--blocked { border-left-color: var(--danger-edge); }
+  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-inline-start-width: 3px; }
+  .vbadge--verified { border-inline-start-color: var(--ok-edge); }
+  .vbadge--under_review { border-inline-start-color: var(--warn-edge); }
+  .vbadge--blocked { border-inline-start-color: var(--danger-edge); }
   .examples { display: flex; flex-direction: column; gap: 0.4rem; }
   .chip.ex { text-align: start; font-size: 0.82rem; max-width: 100%; white-space: normal; line-height: 1.3; }
   .mentor { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-sm); background: color-mix(in srgb, var(--structure) 4%, transparent); }
@@ -1398,4 +1398,9 @@ manuals with the knowledge-to-skills-pipeline).
   details { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; }
   summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; }
   pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: 0.75rem; border-radius: 0.4rem; }
+  /* Touch targets (merged from the mobile-responsiveness work): primary actions reach
+     ~44px; dense in-flow controls stay above the 24px floor (axe target-size already
+     passes; this honours the 48/24 working-target guidance). */
+  .steps button, .nav button, .primary, .tabs button { min-block-size: 2.75rem; }
+  .lang, .chip, .toggle, .apply { min-block-size: 1.75rem; }
 </style>

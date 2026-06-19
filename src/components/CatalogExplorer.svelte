@@ -490,13 +490,13 @@
   .toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end; margin-bottom: 1rem; }
   .search { flex: 1 1 18rem; }
   .search input {
-    width: 100%; padding: 0.55rem 0.75rem; font-size: 1rem;
+    width: 100%; padding: 0.55rem 0.75rem; font-size: max(16px, 1rem);
     border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem;
     background: var(--sl-color-black); color: var(--sl-color-white);
   }
   .sort { display: flex; gap: 0.4rem; align-items: center; color: var(--sl-color-text); font-size: 0.9rem; }
-  .sort select { padding: 0.4rem; border-radius: 0.4rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-black); color: var(--sl-color-white); }
-  .layout { display: grid; grid-template-columns: 16rem 1fr; gap: 1.5rem; align-items: start; }
+  .sort select { padding: 0.4rem; font-size: max(16px, 1rem); border-radius: 0.4rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-black); color: var(--sl-color-white); }
+  .layout { display: grid; grid-template-columns: 16rem minmax(0, 1fr); gap: 1.5rem; align-items: start; }
   @media (max-width: 50rem) { .layout { grid-template-columns: 1fr; } }
   .facets { position: sticky; top: 1rem; }
   .facets-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--sl-color-text); }
@@ -513,7 +513,7 @@
   .cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
   .card { border: 1px solid var(--sl-color-gray-6); border-radius: 0.6rem; padding: 0.85rem 1rem; }
   .card-top { display: flex; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; align-items: baseline; }
-  .card-name { font-weight: 700; font-size: 1.02rem; }
+  .card-name { font-weight: 700; font-size: 1.02rem; overflow-wrap: anywhere; }
   .card-desc { margin: 0.35rem 0; color: var(--sl-color-text); font-size: 0.92rem; }
   .card-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .card-build {
@@ -546,10 +546,13 @@
   .build-tray__cta:hover { background: color-mix(in srgb, var(--sl-color-accent) 14%, transparent); }
   .build-tray__cta:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
   .badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
-  .badge { font-size: 0.72rem; font-weight: 600; padding: 0.18rem 0.45rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-left-width: 4px; background: var(--sl-color-gray-6); color: var(--sl-color-text); }
-  .badge--verified, .badge--active { border-left-color: var(--ok-edge); }
-  .badge--under_review, .badge--minimal { border-left-color: var(--warn-edge); }
-  .badge--blocked, .badge--abandoned { border-left-color: var(--danger-edge); }
-  .badge--dormant, .badge--advisory { border-left-color: var(--signal); }
+  .badge { font-size: 0.72rem; font-weight: 600; padding: 0.18rem 0.45rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-inline-start-width: 4px; background: var(--sl-color-gray-6); color: var(--sl-color-text); }
+  .badge--verified, .badge--active { border-inline-start-color: var(--ok-edge); }
+  .badge--under_review, .badge--minimal { border-inline-start-color: var(--warn-edge); }
+  .badge--blocked, .badge--abandoned { border-inline-start-color: var(--danger-edge); }
+  .badge--dormant, .badge--advisory { border-inline-start-color: var(--signal); }
   .more { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
+  /* Touch targets. */
+  .search input, .sort select, .more { min-block-size: 2.75rem; }
+  .opt { min-block-size: 1.75rem; }
 </style>

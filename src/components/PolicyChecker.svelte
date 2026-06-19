@@ -123,7 +123,7 @@
 <style>
   .checker { margin: 1rem 0 2rem; display: flex; flex-direction: column; gap: 0.9rem; }
   .field { display: flex; flex-direction: column; gap: 0.4rem; }
-  textarea, select { padding: 0.55rem 0.7rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; background: var(--sl-color-black); color: var(--sl-color-white); font: inherit; }
+  textarea, select { padding: 0.55rem 0.7rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; background: var(--sl-color-black); color: var(--sl-color-white); font: inherit; font-size: max(16px, 1rem); }
   textarea { font-family: var(--sl-font-mono); }
   .controls { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
   .controls label { display: flex; gap: 0.4rem; align-items: center; color: var(--sl-color-text); font-size: 0.9rem; }
@@ -132,10 +132,12 @@
   .summary { padding: 0.7rem 0.9rem; border-radius: 0.5rem; border: 1px solid var(--ok-edge); color: var(--sl-color-text); background: var(--sl-color-gray-6); }
   .summary.bad { border-color: var(--danger-edge); }
   table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-  th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--sl-color-gray-6); }
+  th, td { text-align: start; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--sl-color-gray-6); }
   tr.blocked { background: color-mix(in srgb, var(--danger-edge) 8%, transparent); }
-  .tag { font-size: 0.78rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; border-left: 4px solid; }
+  .tag { font-size: 0.78rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; border-inline-start: 4px solid; }
   .tag.ok { border-color: var(--ok-edge); }
   .tag.bad { border-color: var(--danger-edge); }
   .note { color: var(--sl-color-gray-2); font-size: 0.82rem; }
+  /* Touch targets. */
+  .primary, select { min-block-size: 2.75rem; }
 </style>
