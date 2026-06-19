@@ -4,7 +4,6 @@
  *
  *   GET  /api/health
  *   GET  /api/license?eco=&name=            → live registry license lookup
- *   POST /api/agent/kickoff                 → one-shot, BYOK agent kickoff (permitted providers only)
  *   GET  /api/github/status                 → is the GitHub one-click configured?
  *   GET  /api/github/start?redirect=        → begin GitHub OAuth
  *   GET  /api/github/callback               → finish OAuth, set short-lived token cookie
@@ -63,71 +62,6 @@ export interface Env {
 
 const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';
 
-// Permitted model providers only — OpenAI/xAI are excluded by policy and are not
-// reachable through this endpoint, even with a key.
-export const PROVIDERS: Record<string, { url: string; build: (model: string, prompt: string, key: string) => RequestInit; pick: (j: any) => string; defaultModel: string }> = {
-  anthropic: {
-    url: 'https://api.anthropic.com/v1/messages',
-    defaultModel: 'claude-sonnet-4-6',
-    build: (model, prompt, key) => ({
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model, max_tokens: 2000, messages: [{ role: 'user', content: prompt }] }),
-    }),
-    pick: (j) => j?.content?.[0]?.text ?? '',
-  },
-  openrouter: {
-    url: 'https://openrouter.ai/api/v1/chat/completions',
-    defaultModel: 'anthropic/claude-3.5-sonnet',
-    build: (model, prompt, key) => ({
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${key}`, 'HTTP-Referer': 'https://wecanjustbuildthings.dev', 'X-Title': 'We Can Just Build Things' },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }] }),
-    }),
-    pick: (j) => j?.choices?.[0]?.message?.content ?? '',
-  },
-  deepseek: {
-    url: 'https://api.deepseek.com/chat/completions',
-    defaultModel: 'deepseek-chat',
-    build: (model, prompt, key) => ({
-      method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }] }),
-    }),
-    pick: (j) => j?.choices?.[0]?.message?.content ?? '',
-  },
-};
-
-// OpenRouter is a gateway to every vendor — including excluded ones — so a BYOK
-// caller could otherwise route to a Meta/OpenAI/xAI model through it. Gate brokered
-// models with a default-deny ALLOWLIST of permitted vendor families: stronger than
-// a denylist, since a new excluded vendor, alias, or typo can't slip through. The
-// list is curated and intentionally conservative — add vendors deliberately.
-const PERMITTED_ROUTER_VENDORS = new Set([
-  'anthropic', 'google', 'deepseek', 'mistralai', 'mistral', 'qwen', 'qwen2',
-  'cohere', 'nousresearch', 'microsoft', 'nvidia', 'amazon', 'ai21', 'perplexity', 'liquid',
-]);
-
-/** Vendor segment of an OpenRouter model id ("anthropic/claude-3.5" → "anthropic"). */
-function routerVendor(model: string): string {
-  return model.trim().toLowerCase().split('/')[0] ?? '';
-}
-
-/** Owned by an excluded org (Meta/OpenAI/xAI) — a hard block, even if a vendor is
- *  mistakenly added to the allowlist. Belt-and-suspenders for the policy-critical case. */
-export function isExcludedRouterModel(provider: string, model: string): boolean {
-  if (provider !== 'openrouter') return false;
-  return /^(openai|meta-llama|meta|x-ai|xai)$/i.test(routerVendor(model));
-}
-
-/** Default-deny: through the OpenRouter broker, only vetted non-excluded vendor
- *  families may be requested. Direct providers hit a hardcoded safe host, so they
- *  are already constrained and always pass. (Google is NOT excluded.) */
-export function isPermittedRouterModel(provider: string, model: string): boolean {
-  if (provider !== 'openrouter') return true;
-  if (isExcludedRouterModel(provider, model)) return false;
-  return PERMITTED_ROUTER_VENDORS.has(routerVendor(model));
-}
 
 function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(data), {
@@ -177,33 +111,6 @@ async function licenseHandler(url: URL): Promise<Response> {
     if (d) { version = d.releases?.[0]?.version; license = d.meta?.licenses?.[0]; }
   }
   return json({ name, eco, license: license ?? null, version: version ?? null, repo: repo ?? null });
-}
-
-async function kickoffHandler(request: Request): Promise<Response> {
-  let body: any;
-  try { body = await request.json(); } catch { return json({ error: 'invalid JSON' }, 400); }
-  const provider = String(body.provider || '').toLowerCase();
-  const apiKey = String(body.apiKey || '');
-  const prompt = String(body.prompt || '');
-  if (!provider || !PROVIDERS[provider]) {
-    return json({ error: `Provider must be one of: ${Object.keys(PROVIDERS).join(', ')} (OpenAI/xAI are excluded by policy).` }, 400);
-  }
-  if (!apiKey) return json({ error: 'missing apiKey (bring your own key)' }, 400);
-  if (!prompt) return json({ error: 'missing prompt' }, 400);
-  const p = PROVIDERS[provider];
-  const model = String(body.model || p.defaultModel);
-  if (!isPermittedRouterModel(provider, model)) {
-    return json({ error: `Model "${model}" is not on the permitted list for the OpenRouter broker — only vetted, non-excluded vendor families are allowed (Meta/OpenAI/xAI are blocked by policy). Pick a permitted model.` }, 400);
-  }
-  try {
-    const res = await fetch(p.url, { ...p.build(model, prompt, apiKey), signal: AbortSignal.timeout(60000) });
-    const text = await res.text();
-    let parsed: any; try { parsed = JSON.parse(text); } catch { parsed = null; }
-    if (!res.ok) return json({ error: `Provider returned ${res.status}`, detail: parsed?.error ?? text.slice(0, 300) }, 502);
-    return json({ provider, model, output: p.pick(parsed) });
-  } catch (e) {
-    return json({ error: `Request to ${provider} failed`, detail: String(e) }, 502);
-  }
 }
 
 /** Path A for the Hosting Cost Estimator: compute pricing server-side at request
@@ -469,7 +376,6 @@ async function routeRequest(request: Request, env: Env): Promise<Response> {
     if (path === CSP_REPORT_PATH && request.method === 'POST') return cspReportHandler(request);
     if (path === '/api/license') return licenseHandler(url);
     if (path === '/api/pricing' && request.method === 'POST') return pricingHandler(request);
-    if (path === '/api/agent/kickoff' && request.method === 'POST') return kickoffHandler(request);
     if (path === '/api/github/status') return json({ configured: Boolean(env.GITHUB_OAUTH_CLIENT_ID) });
     if (path === '/api/github/start') return githubStart(url, env);
     if (path === '/api/github/callback') return githubCallback(request, url, env);
