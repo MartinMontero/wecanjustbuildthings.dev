@@ -42,6 +42,26 @@ test('recipeDeeplink flags an over-budget recipe so the UI falls back', () => {
   assert.ok(dl.bytes > DEEPLINK_MAX_BYTES);
 });
 
+test('skills folded inline can push the deeplink over budget (Option 2 → copy/download fallback)', () => {
+  const longStep = 'Document every step the organizer takes, in plain language, verbatim. '.repeat(6);
+  const skills = Array.from({ length: 12 }, (_, i) => ({
+    name: `Captured Method ${i}`,
+    description: 'A field method the agent must follow verbatim',
+    method: [longStep, longStep, longStep],
+  }));
+  const input: RecipeInput = { title: 'T', slug: 't', prompt: 'P', extensions: [], skills };
+
+  // Inline (the deeplink transport): the methods travel in the URL and blow the budget.
+  const inline = recipeDeeplink(buildGooseRecipe(input, allow, { skills: 'inline' }));
+  assert.equal(inline.withinBudget, false, `expected over budget, got ${inline.bytes} bytes`);
+  assert.ok(inline.bytes > DEEPLINK_MAX_BYTES);
+
+  // Subrecipes (the zip transport): only short path references travel, so it stays far
+  // smaller — which is exactly why the deeplink can't carry skills as files.
+  const lean = recipeDeeplink(buildGooseRecipe(input, allow, { skills: 'subrecipes' }));
+  assert.ok(lean.bytes < inline.bytes, 'path-based sub_recipes are smaller than inlined methods');
+});
+
 test('explainRecipe lists every extension in plain language, never raw config', () => {
   const r = mk({ extensions: [ext('mcp-fs'), ext('dev')] });
   const x = explainRecipe(r);

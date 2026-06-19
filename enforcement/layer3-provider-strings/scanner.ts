@@ -20,7 +20,7 @@ const CONFIG_EXT = new Set([
 ]);
 const MAX_BYTES = 2 * 1024 * 1024;
 
-interface CompiledSignal {
+export interface CompiledSignal {
   org_key: string;
   kind: Layer3Finding['signal_kind'];
   re: RegExp;
