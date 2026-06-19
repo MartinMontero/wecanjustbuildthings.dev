@@ -92,7 +92,7 @@ export const RESPONSE_JSON_SCHEMA: JsonSchema = {
         additionalProperties: false,
         required: ['action', 'name', 'why'],
         properties: {
-          action: { type: 'string', enum: ['add', 'swap', 'remove'] },
+          action: { type: 'string', enum: ['add', 'remove'] },
           name: { type: 'string' },
           why: { type: 'string' },
         },

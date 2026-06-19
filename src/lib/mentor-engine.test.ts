@@ -128,7 +128,7 @@ test('reflectFromResponse normalises a well-formed Goose response', () => {
     constraints: ['anonymity-first', 'durable-data'],
     proposals: [
       { action: 'add', name: 'ndk', why: 'Nostr connectivity' },
-      { action: 'swap', name: 'pouchdb', why: 'local-first storage' },
+      { action: 'remove', name: 'pouchdb', why: 'replace with local-first storage' },
     ],
   });
   assert.deepEqual(r, {
@@ -136,7 +136,7 @@ test('reflectFromResponse normalises a well-formed Goose response', () => {
     constraints: ['anonymity-first', 'durable-data'],
     proposals: [
       { action: 'add', name: 'ndk', why: 'Nostr connectivity' },
-      { action: 'swap', name: 'pouchdb', why: 'local-first storage' },
+      { action: 'remove', name: 'pouchdb', why: 'replace with local-first storage' },
     ],
   });
 });
@@ -146,7 +146,7 @@ test('reflectFromResponse drops malformed entries and never throws (untrusted pa
     constraints: ['ok', 5, null, 'fine'], // non-strings dropped
     proposals: [
       { action: 'add', name: 'good', why: 'yes' },
-      { action: 'teleport', name: 'bad-action', why: 'no' }, // invalid action → dropped
+      { action: 'swap', name: 'bad-action', why: 'no' },     // 'swap' no longer accepted → dropped
       { action: 'remove', name: 'no-why' },                  // missing why → dropped
       'not-an-object',                                        // dropped
     ],

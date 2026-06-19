@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { zipSync, strToU8 } from 'fflate';
-  import { loadSession, updateSession, hasSession, clearSession, type SessionStackItem, type SessionExtension } from '../lib/build-session.ts';
+  import { loadSession, updateSession, hasSession, clearSession, type SessionStackItem, type SessionExtension, type SessionMentorReflection } from '../lib/build-session.ts';
   import { matchDependency } from '../../enforcement/matcher.ts';
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
   import { detectSignals, pickQuestions, reflect, reflectFromResponse, type ConstraintId } from '../lib/mentor-engine.ts';
@@ -31,7 +31,7 @@
       problem: 'What problem does it solve, and for whom? Say it like you would out loud — one short paragraph.',
       why: 'Why does this matter? The real change you want — not just “ship an app.”',
       success: 'How will you know it’s working? What’s different for your community when it does.',
-      protocols: 'Which network does it live on?', focus: 'What kind of thing are you building?',
+      protocols: 'Which network does it live on?',
       tenq: 'Start with the why. Answer these the way you’d explain the project to a friend — the clearer you are, the better your AI agent builds.',
       protoHelp: 'A “network” (protocol) is the shared, open rulebook your tool plugs into — owned by no single company. Nostr and AT Protocol (Bluesky) are open social networks; pick “general” if it isn’t a social tool.',
       choose: 'Show me the blueprint →', back: '← Back', gen: 'Build it →', backStack: '← Back to the blueprint',
@@ -40,22 +40,12 @@
       bpAdvanced: 'Power user? Browse and add tools yourself', bpEmpty: 'Tell me what you want to build first — go back and describe it in a sentence or two.',
       bpLead: 'You don’t need to know any of these by name. I picked a small, proven set for what you described and wired them together. Keep it as-is, or swap any piece — every option is safe and license-checked.',
       examples: 'Not sure where to start? Try one:',
-      suggested: '',
       add: 'Need something specific? Search the full catalog', selected: 'building blocks chosen', loading: 'Loading the catalog…',
       handoff: 'How do you want to get started?', zip: 'Download a starter folder', github: 'Save it to GitHub',
-      goose: 'Run it with Goose', kickoff: 'Try a step with AI',
+      goose: 'Run it with Goose',
       dlzip: '⬇ Download your starter folder (.zip)', copyPrompt: 'Copy the instructions for your AI agent',
       runLocal: 'New to Goose? Start here →', ghGuide: 'How to connect GitHub →',
-      apikey: 'Your AI key (sent straight to the model, never stored by us)',
-      provider: 'Who makes the model', run: 'Run it', running: 'Working…',
       ghError: 'Connecting to GitHub didn’t finish. Try again, or download the folder below.',
-      stackIntro: 'Your “stack” is just the set of ready-made building blocks — tools other people have already built and tested — that your project is made from. Choosing good ones means you and your AI agent don’t start from scratch: you assemble proven parts instead of reinventing them, which saves months and avoids dead ends. Below is a starting set picked for what you described. Not sure? Keep the ones marked ★ and the defaults — you can’t pick “wrong” here, because everything listed is already safe and checked. Add or remove anything; nothing is final.',
-      legendPrimary: '★ the recommended starting point for your network',
-      legendClean: 'every option is safe to use (no Meta/OpenAI/xAI) and license-checked',
-      showMore: 'Show more tools', showFewer: 'Show fewer', showing: 'Showing', of: 'of',
-      modelTitle: 'Choose your AI model',
-      modelIntro: 'This runs one planning step with your own AI key, so you can feel it work before you commit. Your key and your project go straight to the model — never stored by us, and never routed through Meta, OpenAI, or xAI. The options below are chosen for that: models trained accountably, open models you can run yourself, or a neutral router locked to allowed models.',
-      modelLabel: 'Model',
       handoffIntro: 'Your starter is ready — everything your AI agent needs to begin, with the rules and safe tools already baked in. Pick how you’d like to take it:',
       zipDesc: 'A ready-to-open folder with everything inside: the project’s rules, the plan, the build instructions, and the list of safe tools. Hand it to Goose or Claude Code and start building.',
       gooseDl: '⬇ Download the Goose recipe', gooseCopy: 'Copy the run command',
@@ -67,25 +57,20 @@
       gooseTooBig: 'This build is large, so the one-click link won’t fit. Download the recipe and run it instead:',
       gooseFallback: 'Prefer a file? Download the recipe instead',
       ghNotReady: 'Saving straight to GitHub isn’t switched on for this site yet — download the folder instead, or read',
-      ghConnectBtn: 'Connect GitHub & save my project', ghSuccess: '✓ Your project is on GitHub:', copyPlan: 'Copy the plan',
+      ghConnectBtn: 'Connect GitHub & save my project', ghSuccess: '✓ Your project is on GitHub:',
       refineTitle: 'Bring back your agent’s suggestions (optional)',
       refineIntro: 'Run your build in Goose, then paste the structured suggestions it produced. We check each against the verified catalog — you decide what to keep. Nothing leaves your browser.',
       refinePasteLabel: 'Paste your agent’s suggestions (JSON)',
       refinePastePh: 'Paste the JSON your Goose run produced…',
       refineApplyResponse: 'Apply suggestions',
       refinePasteErr: 'Couldn’t read that — paste the JSON your agent produced.',
-      refineAsk: 'Ask me the sharp questions first →', refineThinking: 'Thinking…',
-      refineAnswersHint: 'Answer in a few words, or skip any — then I’ll suggest what fits.',
-      refinePropose: 'Now show me what you’d add →',
-      refineWhy: 'Why:', refineWatch: 'Watch out:',
+      refineWhy: 'Why:',
       refineApply: 'Add to my blueprint', refineApplied: 'Added ✓',
       refineNone: 'Your plan already covers what you described — I wouldn’t add anything. That’s a good sign.',
-      refineErr: 'Couldn’t reach the model. Check your key and try again.', refineNeedKey: 'Enter your AI key above first.',
       skillsHint: 'Have a field guide, manual, or SOP? Turn your own know-how into a skill your agent follows →',
-      skillsDraft: 'Skills I can scaffold from what you told me', skillsReady: 'Or drop in a ready-made skill',
+      skillsReady: 'Or drop in a ready-made skill',
       skillAdd: 'Add to my project', skillAdded: 'Added ✓',
       skCaptureHead: 'You know something the agent doesn’t', skCaptureSub: 'A method only you know — how you take a report, vet a member, keep people safe. Capture it once and every build follows it.', skName: 'Skill name', skDesc: 'One line: what it does', skDescPh: 'Take an eviction report without exposing the tenant', skSteps: 'The steps, one per line', skStepsPh: 'Use a chosen handle, not a legal name\nRecord the building, not the unit\nEncrypt everything; two organizers hold keys', skSource: 'Where it came from (optional)', skSourcePh: 'Tenants Union field manual', skCaptureBtn: 'Capture as a skill', skillRemove: 'Remove',
-      skillReview: 'A draft in your words — review and refine it; you’re the expert.',
       skillsIncluded: 'skill(s) will be included in your starter',
     },
     es: {
@@ -94,7 +79,7 @@
       problem: '¿Qué problema resuelve y para quién? Dilo como lo dirías en voz alta — un párrafo corto.',
       why: '¿Por qué importa? El cambio real que buscas — no solo “lanzar una app.”',
       success: '¿Cómo sabrás que funciona? Qué cambia para tu comunidad cuando lo logra.',
-      protocols: '¿En qué red vive?', focus: '¿Qué tipo de cosa estás construyendo?',
+      protocols: '¿En qué red vive?',
       tenq: 'Empieza por el porqué. Responde como si le explicaras el proyecto a un amigo — cuanto más claro seas, mejor construye tu agente de IA.',
       protoHelp: 'Una “red” (protocolo) es el reglamento abierto y compartido al que se conecta tu herramienta — sin dueño único. Nostr y AT Protocol (Bluesky) son redes sociales abiertas; elige “general” si no es una herramienta social.',
       choose: 'Muéstrame el plano →', back: '← Atrás', gen: 'Construirlo →', backStack: '← Volver al plano',
@@ -103,22 +88,12 @@
       bpAdvanced: '¿Experto? Explora y añade herramientas tú mismo', bpEmpty: 'Primero dime qué quieres construir — vuelve y descríbelo en una o dos frases.',
       bpLead: 'No necesitas conocer ninguna de estas por su nombre. Elegí un conjunto pequeño y probado para lo que describiste y las conecté entre sí. Déjalo así, o cambia cualquier pieza — cada opción es segura y con licencia verificada.',
       examples: '¿No sabes por dónde empezar? Prueba una:',
-      suggested: '',
       add: '¿Necesitas algo específico? Busca en todo el catálogo', selected: 'bloques elegidos', loading: 'Cargando el catálogo…',
       handoff: '¿Cómo quieres empezar?', zip: 'Descargar una carpeta inicial', github: 'Guardarlo en GitHub',
-      goose: 'Ejecutarlo con Goose', kickoff: 'Probar un paso con IA',
+      goose: 'Ejecutarlo con Goose',
       dlzip: '⬇ Descargar tu carpeta inicial (.zip)', copyPrompt: 'Copiar las instrucciones para tu agente de IA',
       runLocal: '¿Nuevo en Goose? Empieza aquí →', ghGuide: 'Cómo conectar GitHub →',
-      apikey: 'Tu clave de IA (se envía directo al modelo, nunca la guardamos)',
-      provider: 'Quién hace el modelo', run: 'Ejecutar', running: 'Trabajando…',
       ghError: 'La conexión con GitHub no terminó. Inténtalo de nuevo o descarga la carpeta abajo.',
-      stackIntro: 'Tu “stack” es simplemente el conjunto de bloques ya hechos — herramientas que otras personas ya construyeron y probaron — con los que se arma tu proyecto. Elegir buenos bloques significa que tú y tu agente de IA no empiezan de cero: ensamblas piezas probadas en vez de reinventarlas, lo que ahorra meses y evita callejones sin salida. Abajo hay un conjunto inicial elegido para lo que describiste. ¿No estás seguro? Deja los marcados con ★ y los predeterminados — aquí no puedes elegir “mal”, porque todo lo listado ya es seguro y está verificado. Agrega o quita lo que quieras; nada es definitivo.',
-      legendPrimary: '★ el punto de partida recomendado para tu red',
-      legendClean: 'cada opción es segura de usar (sin Meta/OpenAI/xAI) y con licencia verificada',
-      showMore: 'Mostrar más herramientas', showFewer: 'Mostrar menos', showing: 'Mostrando', of: 'de',
-      modelTitle: 'Elige tu modelo de IA',
-      modelIntro: 'Esto ejecuta un paso de planificación con tu propia clave de IA, para que lo sientas funcionar antes de comprometerte. Tu clave y tu proyecto van directo al modelo — nunca los guardamos, y nunca pasan por Meta, OpenAI o xAI. Las opciones de abajo se eligen por eso: modelos entrenados de forma responsable, modelos abiertos que puedes ejecutar tú mismo, o un enrutador neutral limitado a modelos permitidos.',
-      modelLabel: 'Modelo',
       handoffIntro: 'Tu kit está listo — todo lo que tu agente de IA necesita para empezar, con las reglas y las herramientas seguras ya incluidas. Elige cómo quieres llevarlo:',
       zipDesc: 'Una carpeta lista para abrir con todo dentro: las reglas del proyecto, el plan, las instrucciones de construcción y la lista de herramientas seguras. Entrégala a Goose o Claude Code y empieza a construir.',
       gooseDl: '⬇ Descargar la receta de Goose', gooseCopy: 'Copiar el comando',
@@ -130,25 +105,20 @@
       gooseTooBig: 'Este proyecto es grande y el enlace de un clic no cabe. Descarga la receta y ejecútala:',
       gooseFallback: '¿Prefieres un archivo? Descarga la receta',
       ghNotReady: 'Guardar directo en GitHub aún no está activado en este sitio — descarga la carpeta, o lee',
-      ghConnectBtn: 'Conectar GitHub y guardar mi proyecto', ghSuccess: '✓ Tu proyecto está en GitHub:', copyPlan: 'Copiar el plan',
+      ghConnectBtn: 'Conectar GitHub y guardar mi proyecto', ghSuccess: '✓ Tu proyecto está en GitHub:',
       refineTitle: 'Trae las sugerencias de tu agente (opcional)',
       refineIntro: 'Ejecuta tu proyecto en Goose y pega las sugerencias estructuradas que produjo. Comprobamos cada una contra el catálogo verificado — tú decides qué conservar. Nada sale de tu navegador.',
       refinePasteLabel: 'Pega las sugerencias de tu agente (JSON)',
       refinePastePh: 'Pega el JSON que produjo tu ejecución de Goose…',
       refineApplyResponse: 'Aplicar sugerencias',
       refinePasteErr: 'No se pudo leer eso — pega el JSON que produjo tu agente.',
-      refineAsk: 'Hazme las preguntas clave primero →', refineThinking: 'Pensando…',
-      refineAnswersHint: 'Responde en pocas palabras, o salta las que quieras — luego sugeriré lo que encaje.',
-      refinePropose: 'Ahora muéstrame qué añadirías →',
-      refineWhy: 'Por qué:', refineWatch: 'Ojo:',
+      refineWhy: 'Por qué:',
       refineApply: 'Añadir a mi plano', refineApplied: 'Añadido ✓',
       refineNone: 'Tu plan ya cubre lo que describiste — no añadiría nada. Eso es buena señal.',
-      refineErr: 'No se pudo contactar al modelo. Revisa tu clave e inténtalo de nuevo.', refineNeedKey: 'Primero ingresa tu clave de IA arriba.',
       skillsHint: '¿Tienes una guía de campo, un manual o un procedimiento? Convierte tu propio saber en una habilidad que tu agente sigue →',
-      skillsDraft: 'Habilidades que puedo crear a partir de lo que me contaste', skillsReady: 'O agrega una habilidad lista para usar',
+      skillsReady: 'O agrega una habilidad lista para usar',
       skillAdd: 'Añadir a mi proyecto', skillAdded: 'Añadida ✓',
       skCaptureHead: 'Sabes algo que el agente no sabe', skCaptureSub: 'Un método que solo tú conoces — cómo tomas un reporte, verificas a un miembro, proteges a la gente. Captúralo una vez y cada construcción lo seguirá.', skName: 'Nombre de la habilidad', skDesc: 'Una línea: qué hace', skDescPh: 'Tomar un reporte de desalojo sin exponer al inquilino', skSteps: 'Los pasos, uno por línea', skStepsPh: 'Usa un alias elegido, no un nombre legal\nRegistra el edificio, no la unidad\nCifra todo; dos organizadores tienen las claves', skSource: 'De dónde viene (opcional)', skSourcePh: 'Manual de campo del sindicato de inquilinos', skCaptureBtn: 'Capturar como habilidad', skillRemove: 'Quitar',
-      skillReview: 'Un borrador en tus palabras — revísalo y ajústalo; tú eres quien sabe.',
       skillsIncluded: 'habilidad(es) se incluirán en tu kit inicial',
     },
     ar: {
@@ -157,7 +127,7 @@
       problem: 'ما المشكلة التي يحلها، ولمن؟ قُلها كما تقولها بصوتك — فقرة قصيرة.',
       why: 'لماذا يهمّ هذا؟ التغيير الحقيقي الذي تريده — وليس مجرد «إطلاق تطبيق».',
       success: 'كيف ستعرف أنه ينجح؟ ما الذي يتغيّر لمجتمعك عندما ينجح.',
-      protocols: 'على أي شبكة يعمل؟', focus: 'ما نوع الشيء الذي تبنيه؟',
+      protocols: 'على أي شبكة يعمل؟',
       tenq: 'ابدأ بالـ«لماذا». أجب كأنك تشرح المشروع لصديق — كلما كنت أوضح، بنى وكيل الذكاء الاصطناعي بشكل أفضل.',
       protoHelp: 'الـ«شبكة» (البروتوكول) هي القواعد المفتوحة المشتركة التي تتصل بها أداتك — لا يملكها طرف واحد. Nostr وAT Protocol (Bluesky) شبكات اجتماعية مفتوحة؛ اختر «general» إن لم تكن أداة اجتماعية.',
       choose: 'أرني المخطط ←', back: '→ رجوع', gen: 'ابنِه ←', backStack: '→ العودة للمخطط',
@@ -166,22 +136,12 @@
       bpAdvanced: 'خبير؟ تصفّح وأضف الأدوات بنفسك', bpEmpty: 'أخبرني أولاً بما تريد بناءه — ارجع وصِفه في جملة أو جملتين.',
       bpLead: 'لا حاجة لأن تعرف أيّاً منها بالاسم. اخترتُ مجموعة صغيرة ومُجرَّبة لما وصفته وربطتها معاً. اتركها كما هي، أو بدّل أي قطعة — كل خيار آمن ومُتحقَّق من ترخيصه.',
       examples: 'لا تعرف من أين تبدأ؟ جرّب واحدة:',
-      suggested: '',
       add: 'تحتاج شيئاً محدداً؟ ابحث في الكتالوج كاملاً', selected: 'لبنات مختارة', loading: 'جارٍ تحميل الكتالوج…',
       handoff: 'كيف تريد أن تبدأ؟', zip: 'تنزيل مجلد بداية', github: 'احفظه في GitHub',
-      goose: 'شغّله مع Goose', kickoff: 'جرّب خطوة بالذكاء الاصطناعي',
+      goose: 'شغّله مع Goose',
       dlzip: '⬇ نزّل مجلد البداية (.zip)', copyPrompt: 'انسخ تعليمات وكيل الذكاء الاصطناعي',
       runLocal: 'جديد على Goose؟ ابدأ هنا ←', ghGuide: 'كيفية ربط GitHub ←',
-      apikey: 'مفتاح الذكاء الاصطناعي الخاص بك (يُرسل مباشرة إلى النموذج، ولا نخزّنه أبداً)',
-      provider: 'من يصنع النموذج', run: 'شغّل', running: 'جارٍ العمل…',
       ghError: 'لم يكتمل الاتصال بـ GitHub. حاول مرة أخرى، أو نزّل المجلد أدناه.',
-      stackIntro: '«الحزمة» (stack) هي ببساطة مجموعة اللبنات الجاهزة — أدوات بناها واختبرها آخرون — التي يتكوّن منها مشروعك. اختيار لبنات جيدة يعني أنك ووكيل الذكاء الاصطناعي لا تبدآن من الصفر: تجمّع قطعاً مُجرَّبة بدل إعادة اختراعها، ما يوفّر شهوراً ويتجنّب الطرق المسدودة. في الأسفل مجموعة بداية مُختارة لما وصفته. غير متأكد؟ اترك المعلّمة بـ ★ والافتراضية — لا يمكنك الاختيار «الخطأ» هنا، فكل المُدرَج آمن ومُتحقَّق منه. أضِف أو احذف ما تشاء؛ لا شيء نهائي.',
-      legendPrimary: '★ نقطة البداية الموصى بها لشبكتك',
-      legendClean: 'كل خيار آمن للاستخدام (بلا Meta/OpenAI/xAI) ومُتحقَّق من ترخيصه',
-      showMore: 'عرض أدوات أكثر', showFewer: 'عرض أقل', showing: 'عرض', of: 'من',
-      modelTitle: 'اختر نموذج الذكاء الاصطناعي',
-      modelIntro: 'هذا يشغّل خطوة تخطيط واحدة باستخدام مفتاحك الخاص، لتشعر به يعمل قبل أن تلتزم. مفتاحك ومشروعك يذهبان مباشرة إلى النموذج — لا نخزّنهما أبداً، ولا يمران عبر Meta أو OpenAI أو xAI. الخيارات أدناه مُختارة لذلك: نماذج مُدرَّبة بمسؤولية، نماذج مفتوحة يمكنك تشغيلها بنفسك، أو موجّه محايد مقصور على النماذج المسموح بها.',
-      modelLabel: 'النموذج',
       handoffIntro: 'حزمتك جاهزة — كل ما يحتاجه وكيل الذكاء الاصطناعي للبدء، مع القواعد والأدوات الآمنة مُضمّنة سلفاً. اختر كيف تريد أخذها:',
       zipDesc: 'مجلد جاهز للفتح يحوي كل شيء: قواعد المشروع، والخطة، وتعليمات البناء، وقائمة الأدوات الآمنة. سلّمه لـ Goose أو Claude Code وابدأ البناء.',
       gooseDl: '⬇ تنزيل وصفة Goose', gooseCopy: 'انسخ أمر التشغيل',
@@ -193,25 +153,20 @@
       gooseTooBig: 'هذا المشروع كبير، لذا لا يتّسع رابط النقرة الواحدة. نزّل الوصفة وشغّلها بدلاً من ذلك:',
       gooseFallback: 'تفضّل ملفاً؟ نزّل الوصفة',
       ghNotReady: 'الحفظ المباشر إلى GitHub غير مُفعّل في هذا الموقع بعد — نزّل المجلد بدلاً من ذلك، أو اقرأ',
-      ghConnectBtn: 'اربط GitHub واحفظ مشروعي', ghSuccess: '✓ مشروعك على GitHub:', copyPlan: 'انسخ الخطة',
+      ghConnectBtn: 'اربط GitHub واحفظ مشروعي', ghSuccess: '✓ مشروعك على GitHub:',
       refineTitle: 'أحضِر اقتراحات وكيلك (اختياري)',
       refineIntro: 'شغّل مشروعك في Goose ثم الصق الاقتراحات المنظَّمة التي أنتجها. نتحقق من كلٍّ منها مقابل الكتالوج المُوثَّق — أنت تقرّر ما تُبقيه. لا شيء يغادر متصفحك.',
       refinePasteLabel: 'الصق اقتراحات وكيلك (JSON)',
       refinePastePh: 'الصق JSON الذي أنتجته جلسة Goose…',
       refineApplyResponse: 'طبّق الاقتراحات',
       refinePasteErr: 'تعذّرت قراءة ذلك — الصق JSON الذي أنتجه وكيلك.',
-      refineAsk: 'اطرح عليّ الأسئلة المهمة أولاً ←', refineThinking: 'يفكّر…',
-      refineAnswersHint: 'أجب بكلمات قليلة، أو تجاوز ما تشاء — ثم سأقترح ما يناسب.',
-      refinePropose: 'الآن أرني ما الذي ستضيفه ←',
-      refineWhy: 'لماذا:', refineWatch: 'انتبه:',
+      refineWhy: 'لماذا:',
       refineApply: 'أضِف إلى مخططي', refineApplied: 'أُضيف ✓',
       refineNone: 'مخططك يغطّي ما وصفته بالفعل — لن أضيف شيئاً. هذه علامة جيدة.',
-      refineErr: 'تعذّر الوصول إلى النموذج. تحقّق من مفتاحك وحاول مجدداً.', refineNeedKey: 'أدخل مفتاح الذكاء الاصطناعي أعلاه أولاً.',
       skillsHint: 'لديك دليل ميداني أو كُتيّب أو إجراء عمل؟ حوّل معرفتك إلى مهارة يتّبعها وكيلك ←',
-      skillsDraft: 'مهارات يمكنني إنشاؤها مما أخبرتني به', skillsReady: 'أو أضِف مهارة جاهزة',
+      skillsReady: 'أو أضِف مهارة جاهزة',
       skillAdd: 'أضِف إلى مشروعي', skillAdded: 'أُضيفت ✓',
       skCaptureHead: 'أنت تعرف شيئاً لا يعرفه الوكيل', skCaptureSub: 'طريقة تعرفها أنت وحدك — كيف تأخذ بلاغاً، تتحقّق من عضو، تحمي الناس. التقطها مرّة وسيتّبعها كل بناء.', skName: 'اسم المهارة', skDesc: 'سطر واحد: ماذا تفعل', skDescPh: 'أخذ بلاغ إخلاء دون كشف هوية المستأجر', skSteps: 'الخطوات، واحدة في كل سطر', skStepsPh: 'استخدم اسماً مستعاراً، لا اسماً قانونياً\nسجّل المبنى، لا الوحدة\nشفّر كل شيء؛ منظّمان يحملان المفاتيح', skSource: 'من أين أتت (اختياري)', skSourcePh: 'دليل ميداني لنقابة المستأجرين', skCaptureBtn: 'التقطها كمهارة', skillRemove: 'إزالة',
-      skillReview: 'مسودة بكلماتك — راجعها وحسّنها؛ أنت صاحب الخبرة.',
       skillsIncluded: 'مهارة ستُضمَّن في حزمتك المبدئية',
     },
   };
@@ -267,6 +222,7 @@
     // Done BEFORE the catalog fetch so a late-resolving await can never clobber
     // restored input, and before the builder can type. The persistence $effect
     // stays inert until `loading` flips false, so this hydration is not echoed.
+    let restoredReflection: SessionMentorReflection | null = null;
     if (hasSession()) {
       const s = loadSession();
       if (s.intent.projectName) projectName = s.intent.projectName;
@@ -288,6 +244,7 @@
       }
       if (s.handoff) handoff = s.handoff as typeof handoff;
       sessionExtensions = s.extensions ?? [];
+      restoredReflection = s.mentorReflection;
     }
 
     // Only fully verified tool entries are eligible for a generated stack (#4):
@@ -298,6 +255,16 @@
     // Studio can re-verify its own assembled stack in-browser (Movement 4).
     try { const pr = await fetch('/policy.json'); policyOrgs = (await pr.json()).orgs ?? []; } catch { /* offline: stack stays unverified in-browser, flow still works */ }
     try { const er = await fetch('/extensions.json'); allowlist = await er.json(); } catch { /* offline: empty allowlist, recipe still valid */ }
+
+    // Re-surface the structured reflection imported in a previous session (it persisted
+    // in the session object). Mapped here, AFTER `items` resolves, so proposals gate
+    // against the same verified catalog the live paste flow uses. Keeps the "survives
+    // reload" promise whole; the applied-state checkmarks reset, but the stack edits
+    // those clicks produced (removed/extra) were themselves persisted.
+    if (restoredReflection && restoredReflection.proposals.length) {
+      aiProposals = reflectionToProposals(restoredReflection);
+      aiReflected = aiProposals.length > 0;
+    }
     loading = false;
 
     const params = new URLSearchParams(location.search);
@@ -910,7 +877,7 @@ manuals with the knowledge-to-skills-pipeline).
   // ---------- Refine with your agent: import the structured suggestions your OWN Goose
   // run produced (response.json_schema), reflect over them deterministically (no model
   // call — Path A), and let the builder apply each to the stack. ----------
-  interface Proposal { action: 'add' | 'remove' | 'swap'; name: string; from?: string; why: string; tradeoff?: string }
+  interface Proposal { action: 'add' | 'remove'; name: string; why: string }
   let aiError = $state('');
   let aiProposals = $state<Proposal[]>([]);
   let aiApplied = $state<Set<number>>(new Set());
@@ -962,6 +929,19 @@ manuals with the knowledge-to-skills-pipeline).
   }
 
 
+  // Gate a reflection's proposals down to the ones that name a real, policy-screened
+  // catalog tool (verified eligibility already applied to `items`). Shared by the live
+  // paste flow and by reload-restore, so both surface the exact same set.
+  function reflectionToProposals(reflection: SessionMentorReflection): Proposal[] {
+    return reflection.proposals
+      .map((p) => {
+        const it = items.find((x) => x.name.toLowerCase() === p.name.toLowerCase());
+        return it ? ({ action: p.action, name: it.name, why: p.why } as Proposal) : null;
+      })
+      .filter((p): p is Proposal => p !== null)
+      .slice(0, 8);
+  }
+
   // The one permitted structured-reflection step: read the JSON the builder brings back
   // from their OWN Goose run (NO model call here — Path A), reflect deterministically, and
   // surface each proposal that maps to a real, policy-screened catalog tool. Nothing is
@@ -975,13 +955,7 @@ manuals with the knowledge-to-skills-pipeline).
     } catch { aiError = t.refinePasteErr; aiReflected = false; return; }
     const reflection = reflectFromResponse(parsed);
     updateSession((s) => ({ ...s, mentorReflection: reflection }));
-    aiProposals = reflection.proposals
-      .map((p) => {
-        const it = items.find((x) => x.name.toLowerCase() === p.name.toLowerCase());
-        return it ? ({ action: p.action, name: it.name, why: p.why } as Proposal) : null;
-      })
-      .filter((p): p is Proposal => p !== null)
-      .slice(0, 8);
+    aiProposals = reflectionToProposals(reflection);
     aiReflected = true;
   }
   function applyProposal(p: Proposal, i: number) {
@@ -998,9 +972,6 @@ manuals with the knowledge-to-skills-pipeline).
       const bp = pieceFor(p.name);
       if (bp) { const r = new Set(removed); r.add(bp.capId); removed = r; }
       else { const n = new Set(extra); n.delete(p.name); extra = n; }
-    } else if (p.action === 'swap') {
-      const bp = pieceFor(p.from ?? '');
-      if (bp) swapPiece(bp.capId, p.name); else { const n = new Set(extra); n.add(p.name); extra = n; }
     }
     const a = new Set(aiApplied); a.add(i); aiApplied = a;
   }
@@ -1162,7 +1133,7 @@ manuals with the knowledge-to-skills-pipeline).
                 {@const it = items.find((x) => x.name === p.name)}
                 <li class="proposal">
                   <div class="prop-head">
-                    <span class="prop-name">{p.action === 'add' ? '+ ' : p.action === 'remove' ? '– ' : '⇄ '}{p.name}{#if it} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span> <span class="tool-meta">{it.license}</span>{/if}</span>
+                    <span class="prop-name">{p.action === 'add' ? '+ ' : '– '}{p.name}{#if it} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span> <span class="tool-meta">{it.license}</span>{/if}</span>
                     {#if aiApplied.has(i)}<span class="applied">{t.refineApplied}</span>{:else}<button class="apply" onclick={() => applyProposal(p, i)}>{t.refineApply}</button>{/if}
                   </div>
                   <p class="prop-why"><strong>{t.refineWhy}</strong> {p.why}</p>
@@ -1350,17 +1321,13 @@ manuals with the knowledge-to-skills-pipeline).
   .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
   .refine { border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.6rem 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent); }
   .refine > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 700; }
-  .qs { list-style: none; counter-reset: q; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
-  .qs li { counter-increment: q; }
-  .qs .q { margin: 0 0 0.3rem; font-weight: 600; }
-  .qs .q::before { content: counter(q) '. '; color: var(--sl-color-text-accent); }
   .proposals { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
   .proposal { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.6rem 0.8rem; }
   .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
   .prop-name { font-weight: 700; }
   .apply { background: var(--sl-color-accent); color: var(--on-structure); border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
   .applied { font-size: 0.78rem; font-weight: 700; color: var(--ok-text); }
-  .prop-why, .prop-watch { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
+  .prop-why { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
   .skill-capture { border: 1px solid var(--edge); border-inline-start: 3px solid var(--signal); border-radius: var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-2xs); background: color-mix(in srgb, var(--signal) 5%, transparent); }
   .skill-capture-head { margin: 0; font-size: 1.02rem; font-family: var(--font-display); }
   .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
@@ -1398,10 +1365,6 @@ manuals with the knowledge-to-skills-pipeline).
   .swap ul { list-style: none; padding: 0.4rem 0 0; margin: 0; display: grid; gap: 0.3rem; }
   .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.6rem 0.85rem; }
   .fits p { margin: 0.3rem 0 0; font-size: 0.92rem; }
-  .mtitle { margin: 0; font-size: 1.05rem; }
-  .modelgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
-  @media (max-width: 34rem) { .modelgrid { grid-template-columns: 1fr; } }
-  .modelnote { margin: 0; padding: 0.6rem 0.75rem; border-radius: 0.5rem; background: var(--sl-color-gray-6); border-inline-start: 3px solid var(--sl-color-accent); color: var(--sl-color-text); font-size: 0.88rem; }
   .nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; }
   .nav button { padding: 0.55rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
   .primary { background: var(--sl-color-accent); color: var(--on-structure); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }
@@ -1421,5 +1384,4 @@ manuals with the knowledge-to-skills-pipeline).
   details { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; }
   summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; }
   pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: 0.75rem; border-radius: 0.4rem; }
-  .out { max-height: 28rem; }
 </style>

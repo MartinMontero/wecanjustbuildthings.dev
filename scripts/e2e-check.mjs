@@ -156,6 +156,62 @@ const TESTS = [
       }
     },
   },
+  {
+    name: 'Build Studio: pasting a Goose response reflects proposals screened against the catalog',
+    async run(browser) {
+      const ctx = await browser.newContext();
+      const page = await ctx.newPage();
+      try {
+        await page.goto(`${BASE}/build/`, { waitUntil: 'load' });
+        // Reach the blueprint step (its nav button is only disabled while loading).
+        await page.waitForFunction(
+          () => {
+            const b = document.querySelector('ol.steps li:nth-child(2) button');
+            return b && !b.disabled;
+          },
+          { timeout: 20000 },
+        );
+        await page.locator('ol.steps li:nth-child(2) button').click();
+
+        // Borrow a real tool name from the rendered blueprint — guaranteed to be in the
+        // eligible catalog the reflection gates against, so the proposal must survive.
+        const tool = (await page.locator('.fits a').first().innerText()).trim();
+        assert.ok(tool.length, 'blueprint names at least one tool');
+
+        // Open the "refine with your agent" paste flow and paste a structured response
+        // shaped like the recipe's response.json_schema ({ constraints, proposals }).
+        await page.locator('details.refine > summary').click();
+        const response = JSON.stringify({
+          constraints: ['privacy-first'],
+          proposals: [{ action: 'add', name: tool, why: 'e2e: brought back from a Goose run' }],
+        });
+        await page.locator('details.refine textarea').fill(response);
+        await page.locator('details.refine button.primary').click();
+
+        // The proposal renders, screened against the verified catalog (name + a
+        // verification badge), and a click marks it applied — the full deterministic
+        // paste → reflect → apply seam, with no model call anywhere.
+        const proposal = page.locator('.proposals .proposal').first();
+        await proposal.waitFor({ state: 'visible', timeout: 5000 });
+        const propText = await proposal.locator('.prop-name').innerText();
+        assert.ok(propText.includes(tool), `proposal names the tool: ${propText}`);
+        assert.equal(await proposal.locator('.vbadge').count(), 1, 'proposal carries catalog verification metadata');
+
+        await proposal.locator('button.apply').click();
+        await proposal.locator('.applied').waitFor({ state: 'visible', timeout: 5000 });
+
+        // The reflection itself persisted to the shared session (survives reload).
+        const session = await readSession(page);
+        assert.equal(session.mentorReflection?.schemaVersion, 1, 'reflection stored on the session');
+        assert.ok(
+          session.mentorReflection.proposals.some((p) => p.name.toLowerCase() === tool.toLowerCase()),
+          'the pasted proposal is in the persisted reflection',
+        );
+      } finally {
+        await ctx.close();
+      }
+    },
+  },
 ];
 
 const server = spawn('npm', ['run', 'preview', '--', '--port', String(PORT)], { stdio: 'ignore', detached: false });

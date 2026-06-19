@@ -187,7 +187,7 @@ export function reflect(signals: SignalId[], answers: Record<string, string> = {
   return { signals, constraints: ORDER.filter((c) => constraints.has(c)) };
 }
 
-const PROPOSAL_ACTIONS = new Set(['add', 'swap', 'remove']);
+const PROPOSAL_ACTIONS = new Set(['add', 'remove']);
 
 /**
  * Deterministically turn a recipe `response.json_schema` result — the structured JSON
@@ -211,7 +211,7 @@ export function reflectFromResponse(response: unknown): SessionMentorReflection 
       const p = item as Record<string, unknown>;
       if (typeof p.action !== 'string' || !PROPOSAL_ACTIONS.has(p.action)) continue;
       if (typeof p.name !== 'string' || typeof p.why !== 'string') continue;
-      proposals.push({ action: p.action as 'add' | 'swap' | 'remove', name: p.name, why: p.why });
+      proposals.push({ action: p.action as 'add' | 'remove', name: p.name, why: p.why });
     }
   }
   return { schemaVersion: 1, constraints, proposals };
