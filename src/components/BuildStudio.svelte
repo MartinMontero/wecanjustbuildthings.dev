@@ -9,6 +9,7 @@
   import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies } from '../lib/studio-stack.ts';
   import { slugifySkill, skillToMd, type DraftSkill } from '../lib/skill-doc.ts';
   import { buildGooseRecipe, recipeToYaml, type ExtensionAllowlist } from '../lib/goose-recipe.ts';
+  import { recipeDeeplink, explainRecipe } from '../lib/goose-deeplink.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
@@ -58,6 +59,12 @@
       zipDesc: 'A ready-to-open folder with everything inside: the project’s rules, the plan, the build instructions, and the list of safe tools. Hand it to Goose or Claude Code and start building.',
       gooseDl: '⬇ Download the Goose recipe', gooseCopy: 'Copy the run command',
       gooseDesc: 'A recipe is a one-file set of instructions Goose follows to build your project. Download it, then run the command below.',
+      gooseExplainIntro: 'Here’s exactly what happens when you open this in Goose:',
+      gooseExplainPrompt: 'Goose receives your plan, your rules, and the vetted tool list — nothing else.',
+      gooseExplainConsent: 'Goose asks your permission before it runs anything (its “Trust & Execute” step). You stay in control.',
+      gooseOpen: 'Open in Goose →', gooseCopyLink: 'Copy the link',
+      gooseTooBig: 'This build is large, so the one-click link won’t fit. Download the recipe and run it instead:',
+      gooseFallback: 'Prefer a file? Download the recipe instead',
       ghNotReady: 'Saving straight to GitHub isn’t switched on for this site yet — download the folder instead, or read',
       ghConnectBtn: 'Connect GitHub & save my project', ghSuccess: '✓ Your project is on GitHub:', copyPlan: 'Copy the plan',
       refineTitle: 'Want a second opinion? Ask the AI mentor (optional)',
@@ -111,6 +118,12 @@
       zipDesc: 'Una carpeta lista para abrir con todo dentro: las reglas del proyecto, el plan, las instrucciones de construcción y la lista de herramientas seguras. Entrégala a Goose o Claude Code y empieza a construir.',
       gooseDl: '⬇ Descargar la receta de Goose', gooseCopy: 'Copiar el comando',
       gooseDesc: 'Una receta es un archivo con instrucciones que Goose sigue para construir tu proyecto. Descárgala y ejecuta el comando de abajo.',
+      gooseExplainIntro: 'Esto es exactamente lo que pasa cuando lo abres en Goose:',
+      gooseExplainPrompt: 'Goose recibe tu plan, tus reglas y la lista de herramientas verificadas — nada más.',
+      gooseExplainConsent: 'Goose pide tu permiso antes de ejecutar nada (su paso “Trust & Execute”). Mantienes el control.',
+      gooseOpen: 'Abrir en Goose →', gooseCopyLink: 'Copiar el enlace',
+      gooseTooBig: 'Este proyecto es grande y el enlace de un clic no cabe. Descarga la receta y ejecútala:',
+      gooseFallback: '¿Prefieres un archivo? Descarga la receta',
       ghNotReady: 'Guardar directo en GitHub aún no está activado en este sitio — descarga la carpeta, o lee',
       ghConnectBtn: 'Conectar GitHub y guardar mi proyecto', ghSuccess: '✓ Tu proyecto está en GitHub:', copyPlan: 'Copiar el plan',
       refineTitle: '¿Quieres una segunda opinión? Pregunta al mentor de IA (opcional)',
@@ -164,6 +177,12 @@
       zipDesc: 'مجلد جاهز للفتح يحوي كل شيء: قواعد المشروع، والخطة، وتعليمات البناء، وقائمة الأدوات الآمنة. سلّمه لـ Goose أو Claude Code وابدأ البناء.',
       gooseDl: '⬇ تنزيل وصفة Goose', gooseCopy: 'انسخ أمر التشغيل',
       gooseDesc: 'الوصفة ملف واحد فيه تعليمات يتبعها Goose لبناء مشروعك. نزّلها ثم شغّل الأمر أدناه.',
+      gooseExplainIntro: 'إليك بالضبط ما يحدث عند فتحه في Goose:',
+      gooseExplainPrompt: 'يتلقّى Goose خطتك وقواعدك وقائمة الأدوات الموثوقة — لا أكثر.',
+      gooseExplainConsent: 'يطلب Goose إذنك قبل تشغيل أي شيء (خطوة «Trust & Execute»). تبقى أنت المتحكم.',
+      gooseOpen: 'افتح في Goose ←', gooseCopyLink: 'انسخ الرابط',
+      gooseTooBig: 'هذا المشروع كبير، لذا لا يتّسع رابط النقرة الواحدة. نزّل الوصفة وشغّلها بدلاً من ذلك:',
+      gooseFallback: 'تفضّل ملفاً؟ نزّل الوصفة',
       ghNotReady: 'الحفظ المباشر إلى GitHub غير مُفعّل في هذا الموقع بعد — نزّل المجلد بدلاً من ذلك، أو اقرأ',
       ghConnectBtn: 'اربط GitHub واحفظ مشروعي', ghSuccess: '✓ مشروعك على GitHub:', copyPlan: 'انسخ الخطة',
       refineTitle: 'تريد رأياً ثانياً؟ اسأل مرشد الذكاء الاصطناعي (اختياري)',
@@ -739,12 +758,15 @@ Start by writing specs/001-${slug}/plan.md from the spec, then tasks.md, then im
 
   // Movement 4 — the Goose recipe, assembled by the pure serializer (Slice B): the
   // agent prompt + a Catalog-allowlisted extension set + a forced response.json_schema,
-  // model-agnostic (the user's Goose config picks the model). Rendered to YAML for the
-  // downloadable file; Slice C adds the goose:// deeplink from the same recipe object.
-  const gooseRecipe = $derived(recipeToYaml(buildGooseRecipe(
+  // model-agnostic (the user's Goose config picks the model). One recipe object drives
+  // both the YAML download and the goose:// deeplink + explain panel (Slice C).
+  const gooseRecipeObj = $derived(buildGooseRecipe(
     { title: projectName || slug, slug, prompt: agentPrompt, extensions: sessionExtensions },
     allowlist,
-  )));
+  ));
+  const gooseRecipe = $derived(recipeToYaml(gooseRecipeObj));
+  const gooseLink = $derived(recipeDeeplink(gooseRecipeObj));
+  const gooseExplain = $derived(explainRecipe(gooseRecipeObj));
 
   const readme = $derived(`# ${projectName || slug}
 
@@ -1362,9 +1384,31 @@ manuals with the knowledge-to-skills-pipeline).
         </div>
       {:else if handoff === 'goose'}
         <div class="hpanel">
-          <button class="primary big" onclick={() => blobDownload(`${slug}.goose-recipe.yaml`, gooseRecipe, 'text/yaml')}>{t.gooseDl}</button>
-          <button onclick={() => copy('cmd', `goose run --recipe ${slug}.goose-recipe.yaml`)}>{copied === 'cmd' ? '✓' : t.gooseCopy}</button>
-          <pre><code>goose run --recipe {slug}.goose-recipe.yaml</code></pre>
+          <!-- Explain-before-launch: the builder sees exactly what will happen before
+               they open Goose, and that Goose asks consent before running anything. -->
+          <p class="hint">{t.gooseExplainIntro}</p>
+          <ul class="goose-explain">
+            <li>{t.gooseExplainPrompt}</li>
+            {#each gooseExplain.extensions as x (x.name)}
+              <li><strong>{x.name}</strong> — {x.why}</li>
+            {/each}
+            <li>{t.gooseExplainConsent}</li>
+          </ul>
+          {#if gooseLink.withinBudget}
+            <a class="primary big" href={gooseLink.url}>{t.gooseOpen}</a>
+            <button onclick={() => copy('link', gooseLink.url)}>{copied === 'link' ? '✓' : t.gooseCopyLink}</button>
+            <details class="goose-fallback">
+              <summary>{t.gooseFallback}</summary>
+              <button onclick={() => blobDownload(`${slug}.goose-recipe.yaml`, gooseRecipe, 'text/yaml')}>{t.gooseDl}</button>
+              <button onclick={() => copy('cmd', `goose run --recipe ${slug}.goose-recipe.yaml`)}>{copied === 'cmd' ? '✓' : t.gooseCopy}</button>
+              <pre><code>goose run --recipe {slug}.goose-recipe.yaml</code></pre>
+            </details>
+          {:else}
+            <p class="hint">{t.gooseTooBig}</p>
+            <button class="primary big" onclick={() => blobDownload(`${slug}.goose-recipe.yaml`, gooseRecipe, 'text/yaml')}>{t.gooseDl}</button>
+            <button onclick={() => copy('cmd', `goose run --recipe ${slug}.goose-recipe.yaml`)}>{copied === 'cmd' ? '✓' : t.gooseCopy}</button>
+            <pre><code>goose run --recipe {slug}.goose-recipe.yaml</code></pre>
+          {/if}
           <p class="hint">{t.gooseDesc} <a href="/guides/get-started-with-goose/">{t.runLocal}</a></p>
         </div>
       {:else}
@@ -1512,6 +1556,14 @@ manuals with the knowledge-to-skills-pipeline).
   .primary { background: var(--sl-color-accent); color: var(--on-structure); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }
   .big { font-size: 1.05rem; padding: 0.7rem 1.3rem; }
   .hint { color: var(--sl-color-gray-2); font-size: 0.9rem; }
+  /* "Open in Goose" is an <a> styled as the primary button. */
+  a.primary { display: inline-block; text-decoration: none; text-align: center; }
+  .goose-explain { margin: 0.2rem 0 0.4rem; padding-inline-start: 1.1rem; color: var(--sl-color-gray-2); font-size: 0.9rem; }
+  .goose-explain li { margin: 0.25rem 0; }
+  .goose-explain strong { color: var(--sl-color-text-accent); }
+  .goose-fallback { font-size: 0.9rem; }
+  .goose-fallback summary { cursor: pointer; color: var(--sl-color-gray-2); }
+  .goose-fallback > :not(summary) { margin-top: 0.5rem; }
   .err { color: var(--danger-text); font-size: 0.9rem; }
   .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; text-decoration: underline; font: inherit; }
   .copyp { align-self: flex-start; }

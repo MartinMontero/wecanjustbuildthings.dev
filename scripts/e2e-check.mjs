@@ -126,6 +126,36 @@ const TESTS = [
       }
     },
   },
+  {
+    name: 'Build Studio: "Open in Goose" renders an explain panel + a goose:// recipe deeplink',
+    async run(browser) {
+      const ctx = await browser.newContext();
+      const page = await ctx.newPage();
+      try {
+        await page.goto(`${BASE}/build/`, { waitUntil: 'load' });
+        // Jump to the hand-off step (its nav button is only disabled while loading).
+        await page.waitForFunction(
+          () => {
+            const b = document.querySelector('ol.steps li:nth-child(3) button');
+            return b && !b.disabled;
+          },
+          { timeout: 20000 },
+        );
+        await page.locator('ol.steps li:nth-child(3) button').click();
+        await page.getByText('Run it with Goose', { exact: true }).click();
+
+        // Explain-before-launch is shown, and the one-click deeplink is a goose:// recipe URL.
+        await page.locator('.goose-explain').waitFor({ state: 'visible', timeout: 5000 });
+        const link = page.locator('a.primary[href^="goose://recipe?config="]');
+        await link.waitFor({ state: 'visible', timeout: 5000 });
+        const href = await link.getAttribute('href');
+        assert.ok(href && href.startsWith('goose://recipe?config='), 'deeplink is a goose recipe URL');
+        assert.ok(href.length > 'goose://recipe?config='.length + 40, 'config payload is non-trivial');
+      } finally {
+        await ctx.close();
+      }
+    },
+  },
 ];
 
 const server = spawn('npm', ['run', 'preview', '--', '--port', String(PORT)], { stdio: 'ignore', detached: false });
