@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { catalogMatches, compareItems, facetCounts, type CatalogQuery, type FacetDim } from '../lib/catalog-filter.ts';
+  import { loadSession, updateSession, subscribeSession, toggleExtraTool, type BuildSession } from '../lib/build-session.ts';
 
   interface Item {
     name: string;
@@ -62,6 +63,8 @@
     facetCategory: string;
     filters: string; // aria-label
     empty: string;
+    addToBuild: string;
+    inBuild: string;
   }
   const STRINGS: Record<Lang, CatalogStrings> = {
     en: {
@@ -93,6 +96,8 @@
       facetCategory: 'Category',
       filters: 'Filters',
       empty: 'No tools match these filters.',
+      addToBuild: '+ Add to build',
+      inBuild: '✓ In your build',
     },
     es: {
       ctaBold: '¿Nuevo por aquí? No explores — deja que el Build Studio elija por ti.',
@@ -123,6 +128,8 @@
       facetCategory: 'Categoría',
       filters: 'Filtros',
       empty: 'Ninguna herramienta coincide con estos filtros.',
+      addToBuild: '+ Añadir al proyecto',
+      inBuild: '✓ En tu proyecto',
     },
     ar: {
       ctaBold: 'جديد هنا؟ لا تتصفّح — دع Build Studio يختار لك.',
@@ -153,6 +160,8 @@
       facetCategory: 'الفئة',
       filters: 'المرشّحات',
       empty: 'لا توجد أدوات تطابق هذه المرشّحات.',
+      addToBuild: '+ أضف إلى المشروع',
+      inBuild: '✓ في مشروعك',
     },
   };
   const t = STRINGS[lang];
@@ -231,6 +240,16 @@
   let selCategory = $state<Set<string>>(new Set());
   let selVerification = $state<Set<string>>(new Set());
   let sort = $state<'uses' | 'name'>('uses');
+
+  // Catalog ↔ shared build session: which tools are already in the build (the
+  // `adjustments.extra` channel BuildStudio restores on mount). Read on mount and
+  // kept in sync (incl. other tabs) via subscribeSession.
+  let inBuild = $state<Set<string>>(new Set());
+  const syncBuild = (s: BuildSession) => { inBuild = new Set(s.adjustments.extra); };
+  onMount(() => { syncBuild(loadSession()); return subscribeSession(syncBuild); });
+  function toggleBuild(name: string) {
+    syncBuild(updateSession((s) => toggleExtraTool(s, name)));
+  }
   let limit = $state(60);
 
   onMount(async () => {
@@ -379,6 +398,15 @@
                 <span>{it.ecosystem}</span> · <span>{it.license}</span> · <span>{it.category}</span>
                 {#if it.uses > 0}· <span>{usedIn(it.uses)}</span>{/if}
               </div>
+              {#if it.kind !== 'dataset'}
+                <button
+                  type="button"
+                  class="card-build"
+                  class:on={inBuild.has(it.name)}
+                  aria-pressed={inBuild.has(it.name)}
+                  onclick={() => toggleBuild(it.name)}
+                >{inBuild.has(it.name) ? t.inBuild : t.addToBuild}</button>
+              {/if}
             </li>
           {/each}
         </ul>
@@ -429,6 +457,14 @@
   .card-name { font-weight: 700; font-size: 1.02rem; overflow-wrap: anywhere; }
   .card-desc { margin: 0.35rem 0; color: var(--sl-color-text); font-size: 0.92rem; }
   .card-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
+  .card-build {
+    margin-top: 0.6rem; font: inherit; font-size: 0.82rem; cursor: pointer;
+    padding: 0.25rem 0.6rem; border-radius: 0.4rem;
+    border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text);
+  }
+  .card-build:hover { border-color: var(--sl-color-text-accent); }
+  .card-build.on { border-color: var(--sl-color-text-accent); color: var(--sl-color-text-accent); font-weight: 600; }
+  .card-build:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
   .badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
   .badge { font-size: 0.72rem; font-weight: 600; padding: 0.18rem 0.45rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-inline-start-width: 4px; background: var(--sl-color-gray-6); color: var(--sl-color-text); }
   .badge--verified, .badge--active { border-inline-start-color: var(--ok-edge); }
