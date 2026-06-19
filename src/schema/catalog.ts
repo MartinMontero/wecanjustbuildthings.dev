@@ -33,6 +33,7 @@ export const ENTRY_TYPES = [
   'protocol',
   'dataset',
   'recipe',
+  'extension',
   'archetype',
   'policy',
   'pie',
@@ -131,6 +132,15 @@ export const catalogFields = z.object({
   target_entry_slug: z.string().optional(),
   excluded_providers_unreachable_when: z.array(recipeGuard).optional(),
   verification_steps: z.array(recipeVerificationStep).optional(),
+
+  // ---- Goose extension contract (required when entry_type === 'extension') ----
+  // The MCP trust boundary: vetted extension config lives here, in the Catalog, and is
+  // surfaced to recipes only when verification_status === 'verified' (see extensions.json).
+  goose_extension_type: z.enum(['builtin', 'stdio', 'sse']).optional(),
+  goose_extension_command: z.string().min(1).optional(),
+  goose_extension_args: z.array(z.string()).default([]),
+  goose_extension_uri: z.url().optional(),
+  goose_extension_timeout: z.number().int().positive().optional(),
 });
 
 /**
@@ -202,6 +212,18 @@ export const catalogExtend = catalogFields.superRefine((data, ctx) => {
         path: ['verification_steps'],
         message: 'Recipe requires at least one verification_step.',
       });
+    }
+  }
+
+  if (data.entry_type === 'extension') {
+    if (!data.goose_extension_type) {
+      ctx.addIssue({ code: "custom", path: ['goose_extension_type'], message: 'Extension requires goose_extension_type.' });
+    }
+    if (data.goose_extension_type === 'stdio' && !data.goose_extension_command) {
+      ctx.addIssue({ code: "custom", path: ['goose_extension_command'], message: 'A stdio extension requires goose_extension_command.' });
+    }
+    if (data.goose_extension_type === 'sse' && !data.goose_extension_uri) {
+      ctx.addIssue({ code: "custom", path: ['goose_extension_uri'], message: 'An sse extension requires goose_extension_uri.' });
     }
   }
 });

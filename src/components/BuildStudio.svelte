@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { zipSync, strToU8 } from 'fflate';
-  import { loadSession, updateSession, hasSession, clearSession, type SessionStackItem } from '../lib/build-session.ts';
+  import { loadSession, updateSession, hasSession, clearSession, type SessionStackItem, type SessionExtension } from '../lib/build-session.ts';
   import { matchDependency } from '../../enforcement/matcher.ts';
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
   import { detectSignals, pickQuestions, reflect, type ConstraintId } from '../lib/mentor-engine.ts';
   import { chemistry, partnersOf } from '../lib/chemistry.ts';
   import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies } from '../lib/studio-stack.ts';
   import { slugifySkill, skillToMd, type DraftSkill } from '../lib/skill-doc.ts';
+  import { buildGooseRecipe, recipeToYaml, type ExtensionAllowlist } from '../lib/goose-recipe.ts';
 
   let { lang: initialLang = 'en' }: { lang?: string } = $props();
 
@@ -204,6 +205,10 @@
   let removed = $state<Set<string>>(new Set());
   let extra = $state<Set<string>>(new Set());
   let seededTool = $state<string | null>(null);
+  // Slice B: the vetted Goose-extension allowlist (from /extensions.json) and the
+  // extensions staged on the session — both feed the recipe serializer.
+  let allowlist = $state<ExtensionAllowlist>({ byId: {} });
+  let sessionExtensions = $state<SessionExtension[]>([]);
 
   const ALL_PROTOCOLS = ['nostr', 'atproto', 'lightning', 'cashu', 'general'];
   const PROTO_PRIORITY: Record<string, string[]> = {
@@ -250,6 +255,7 @@
         for (const sk of authoredSkills) addSkill(sk);
       }
       if (s.handoff) handoff = s.handoff as typeof handoff;
+      sessionExtensions = s.extensions ?? [];
     }
 
     // Only fully verified tool entries are eligible for a generated stack (#4):
@@ -259,6 +265,7 @@
     // Load the same excluded-org policy the dependency checker uses, so the
     // Studio can re-verify its own assembled stack in-browser (Movement 4).
     try { const pr = await fetch('/policy.json'); policyOrgs = (await pr.json()).orgs ?? []; } catch { /* offline: stack stays unverified in-browser, flow still works */ }
+    try { const er = await fetch('/extensions.json'); allowlist = await er.json(); } catch { /* offline: empty allowlist, recipe still valid */ }
     loading = false;
 
     const params = new URLSearchParams(location.search);
@@ -730,16 +737,14 @@ ${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the pri
 
 Start by writing specs/001-${slug}/plan.md from the spec, then tasks.md, then implement task by task, keeping each change green.`);
 
-  const gooseRecipe = $derived(`version: "1.0.0"
-title: "${(projectName || slug).replace(/"/g, "'")}"
-description: "Build ${slug} — policy-clean (no Meta/OpenAI/xAI), via wecanjustbuildthings.dev"
-instructions: |
-  Read the constitution below and never violate it. Use only the listed,
-  policy-clean dependencies. Run \`npm run enforce\`
-  before every commit. Use a permitted BYOK provider only.
-prompt: |
-${agentPrompt.split('\n').map((l) => '  ' + l).join('\n')}
-`);
+  // Movement 4 — the Goose recipe, assembled by the pure serializer (Slice B): the
+  // agent prompt + a Catalog-allowlisted extension set + a forced response.json_schema,
+  // model-agnostic (the user's Goose config picks the model). Rendered to YAML for the
+  // downloadable file; Slice C adds the goose:// deeplink from the same recipe object.
+  const gooseRecipe = $derived(recipeToYaml(buildGooseRecipe(
+    { title: projectName || slug, slug, prompt: agentPrompt, extensions: sessionExtensions },
+    allowlist,
+  )));
 
   const readme = $derived(`# ${projectName || slug}
 
