@@ -11,7 +11,19 @@
       Sveltia CMS: a near-drop-in, modern alternative to Decap that needs no
       OAuth proxy for GitHub/GitLab backends. Edits open a pull request, so the
       same enforcement CI runs on CMS contributions as on hand-written ones.
+
+      The bundle is self-hosted from our own origin (not a CDN): pinned in
+      package-lock.json so it rides the same supply-chain checks as every other
+      dependency, emitted to /admin/sveltia-cms.js by the build (see
+      vendorSveltiaCms in astro.config.mjs), and loaded with a Subresource
+      Integrity hash so a tampered or drifted bundle fails closed. To bump the
+      version: change the pin in package.json, reinstall, then recompute the
+      hash with `openssl dgst -sha384 -binary <file> | openssl base64 -A`.
     -->
-    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js" type="module"></script>
+    <script
+      type="module"
+      src="/admin/sveltia-cms.js"
+      integrity="sha384-DX22AUN63JgB03kV9ws5yc1Y+4BGEnuS4ReIZARbhovo2KWjGUXMw6M3LXMmZB3v"
+    ></script>
   </body>
 </html>

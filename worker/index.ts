@@ -36,6 +36,7 @@ import { getOrCreateUserByIdentity } from './auth/db.ts';
 import { estimate } from '../src/modules/cost-estimator/core/estimator.ts';
 import { ALL_ADAPTERS } from '../src/modules/cost-estimator/adapters/index.ts';
 import type { UsageProfile } from '../src/modules/cost-estimator/core/types.ts';
+import { SECURITY_HEADERS, CSP_REPORT_PATH } from '../src/lib/security-headers.ts';
 
 export interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -431,11 +432,32 @@ async function blueskyCallbackHandler(request: Request, url: URL, env: Env): Pro
   }
 }
 
-export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+/** Sink for CSP violation reports during the Report-Only soak. Logs them (visible
+ *  via `wrangler tail`) so a missing directive surfaces before we flip to enforce.
+ *  Same-origin only — the report-uri is a local path. */
+async function cspReportHandler(request: Request): Promise<Response> {
+  try {
+    const report = await request.text();
+    if (report) console.warn('[csp-report]', report.slice(0, 2000));
+  } catch { /* ignore malformed reports */ }
+  return new Response(null, { status: 204 });
+}
+
+/** Attach the always-on security headers to a Worker response. Rebuilds the
+ *  response so the headers are mutable, preserving status and multi-value headers
+ *  like Set-Cookie (the auth redirects set several). The hash-based CSP for HTML
+ *  pages is delivered by the generated _headers file, not here. */
+function withSecurityHeaders(response: Response): Response {
+  const wrapped = new Response(response.body, response);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) wrapped.headers.set(name, value);
+  return wrapped;
+}
+
+async function routeRequest(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
     if (path === '/api/health') return json({ ok: true });
+    if (path === CSP_REPORT_PATH && request.method === 'POST') return cspReportHandler(request);
     if (path === '/api/license') return licenseHandler(url);
     if (path === '/api/pricing' && request.method === 'POST') return pricingHandler(request);
     if (path === '/api/agent/kickoff' && request.method === 'POST') return kickoffHandler(request);
@@ -453,5 +475,10 @@ export default {
     if (path === '/api/auth/bluesky/start') return blueskyStartHandler(url, env);
     if (path === '/api/auth/bluesky/callback') return blueskyCallbackHandler(request, url, env);
     return env.ASSETS.fetch(request);
+}
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    return withSecurityHeaders(await routeRequest(request, env));
   },
 };

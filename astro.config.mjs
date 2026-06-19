@@ -1,8 +1,72 @@
 // @ts-check
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
 import svelte from '@astrojs/svelte';
+import {
+  renderHeadersFile,
+  extractInlineScriptBodies,
+  hashInlineScript,
+} from './src/lib/security-headers.ts';
+
+// Self-host the Sveltia CMS bundle from our own origin instead of a CDN. The
+// package is pinned in package-lock.json, so it rides the same OSV/Grype/SBOM
+// supply-chain checks as every other dependency; the admin page loads it with a
+// Subresource Integrity hash (a tampered bundle fails closed). Emitting it from
+// the build keeps the ~1.9 MB vendor blob out of the committed tree while
+// guaranteeing it lands at /admin/sveltia-cms.js, next to public/admin/index.html.
+function vendorSveltiaCms() {
+  return {
+    name: 'vendor-sveltia-cms',
+    hooks: {
+      /** @param {{ dir: URL, logger: { info: (msg: string) => void } }} ctx */
+      'astro:build:done': ({ dir, logger }) => {
+        const src = fileURLToPath(
+          new URL('node_modules/@sveltia/cms/dist/sveltia-cms.js', import.meta.url),
+        );
+        mkdirSync(fileURLToPath(new URL('admin/', dir)), { recursive: true });
+        copyFileSync(src, fileURLToPath(new URL('admin/sveltia-cms.js', dir)));
+        logger.info('vendored Sveltia CMS → /admin/sveltia-cms.js');
+      },
+    },
+  };
+}
+
+// Emit the Cloudflare `_headers` file that hardens the static site: a hash-based
+// Content-Security-Policy plus the always-on transport/clickjacking headers (see
+// src/lib/security-headers.ts). Static HTML is served by the asset layer, which
+// bypasses the Worker, so headers MUST ride a `_headers` file — Workers Static
+// Assets reads it natively. The CSP ships Report-Only by default; set
+// CSP_MODE=enforce (after verifying the live auth/CMS flows) to enforce it.
+function emitSecurityHeaders() {
+  return {
+    name: 'emit-security-headers',
+    hooks: {
+      /** @param {{ dir: URL, logger: { info: (msg: string) => void } }} ctx */
+      'astro:build:done': async ({ dir, logger }) => {
+        const root = fileURLToPath(dir);
+        /** @param {string} d @returns {string[]} */
+        const htmlUnder = (d) =>
+          readdirSync(d, { withFileTypes: true }).flatMap((e) =>
+            e.isDirectory() ? htmlUnder(join(d, e.name)) : e.name.endsWith('.html') ? [join(d, e.name)] : [],
+          );
+        // Dedupe inline-script bodies across every page (thousands of pages, ~a
+        // dozen unique framework scripts), then hash only the unique ones.
+        const bodies = new Set();
+        for (const file of htmlUnder(root)) {
+          for (const body of extractInlineScriptBodies(readFileSync(file, 'utf8'))) bodies.add(body);
+        }
+        const hashes = (await Promise.all([...bodies].map(hashInlineScript))).sort();
+        const mode = process.env.CSP_MODE === 'enforce' ? 'enforce' : 'report-only';
+        writeFileSync(join(root, '_headers'), renderHeadersFile({ hashes, plausibleDomain, mode }));
+        logger.info(`emitted _headers — CSP ${mode}, ${hashes.length} inline-script hashes`);
+      },
+    },
+  };
+}
 
 // The production origin. Override with SITE_URL for preview deploys if desired.
 const site = process.env.SITE_URL ?? 'https://wecanjustbuildthings.dev';
@@ -159,5 +223,7 @@ export default defineConfig({
     }),
     sitemap(),
     svelte(),
+    vendorSveltiaCms(),
+    emitSecurityHeaders(),
   ],
 });
