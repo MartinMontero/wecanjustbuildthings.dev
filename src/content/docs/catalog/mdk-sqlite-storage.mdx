@@ -1,17 +1,18 @@
 ---
 title: "mdk-sqlite-storage"
-description: "mdk-sqlite-storage — Misc & Everything Else"
+description: "A SQLite-backed storage backend for the Marmot Development Kit (MDK) that implements its MdkStorageProvider trait, persisting MLS-over-Nostr group state to disk."
 entry_type: "library"
 dependency_name: "mdk-sqlite-storage"
 ecosystem: "rust"
 category: "Misc & Everything Else"
-what_it_does: "mdk-sqlite-storage — Misc & Everything Else (rust)."
-protocols: ["general"]
+what_it_does: "A SQLite-backed storage backend for the Marmot Development Kit (MDK) that implements its MdkStorageProvider trait, persisting MLS-over-Nostr group state to disk."
+protocols: ["nostr"]
 homepage_url: "https://github.com/marmot-protocol/mdk"
 repo_url: "https://github.com/marmot-protocol/mdk"
 registry_url: "https://crates.io/crates/mdk-sqlite-storage"
 license_spdx: "MIT"
-license_source_url: "https://github.com/marmot-protocol/mdk"
+license_source_url: "https://github.com/marmot-protocol/mdk/blob/62b5b48aec81b6fdba65b84dad88462d9f9cdb9a/LICENSE"
+license_source_commit_sha: "62b5b48aec81b6fdba65b84dad88462d9f9cdb9a"
 maintenance_status: "active"
 last_release_at: "2026-05-04T14:43:20.468260Z"
 version: "0.8.0"
@@ -19,18 +20,18 @@ aos_repos_using: 2
 aos_repos_list: ["marmot-protocol/mdk", "marmot-protocol/whitenoise-rs"]
 pie_anchor: "§3 Kitchen Prep"
 provider_agnostic: false
-verification_status: "under_review"
-verified_at: "2026-06-14"
+verification_status: "verified"
+verified_at: "2026-06-20"
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-
+A SQLite-backed storage backend for the Marmot Development Kit (MDK) that implements its MdkStorageProvider trait, persisting MLS-over-Nostr group state to disk.
 
 <div class="wcb-badges">
 <span class="wcb-badge wcb-badge--MIT">license: MIT</span>
 <span class="wcb-badge wcb-badge--active">status: active</span>
-<span class="wcb-badge wcb-badge--under_review">verification: under_review</span>
+<span class="wcb-badge wcb-badge--verified">verification: verified</span>
 
 </div>
 
@@ -43,7 +44,7 @@ import { Aside } from '@astrojs/starlight/components';
   <dt>Registry</dt><dd><a href="https://crates.io/crates/mdk-sqlite-storage">crates.io/crates/mdk-sqlite-storage</a></dd>
 </dl>
 
-<Aside type="caution" title="Pending full verification">A pinned license commit could not be retrieved automatically; this entry is <code>under_review</code> until a maintainer confirms the source.</Aside>
+<Aside type="tip" title="Verified at a commit">License read as <code>MIT</code> from <a href="https://github.com/marmot-protocol/mdk/blob/62b5b48aec81b6fdba65b84dad88462d9f9cdb9a/LICENSE">LICENSE</a> at commit <code>62b5b48aec81</code>.</Aside>
 
 
 ## Why it's in the catalog
