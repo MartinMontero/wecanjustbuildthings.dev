@@ -150,3 +150,28 @@ Path A / vendor policy are intact. Gate: `npm run verify:all`.
 `operational_advisory` + all CI unchanged (new CI = new files); every skill has a mirrored
 recipe + attribution; guides link the catalog entries **and state the real limitations**;
 translations flagged; no fabricated facts/paths/SHAs/licenses in the diff.
+
+## 12. Phase-0 investigation results (Decisions 3/4/6 — resolved from primary sources)
+
+**Decision 4 — `rust-lib-whitenoise` (RESOLVED).** Its `dependency_name` is
+`rust_lib_whitenoise` (the `flutter_rust_bridge` crate name) and `registry_url` is
+`github.com/parres-hq/whitenoise` — the White Noise **Flutter/Dart app**. So `ecosystem:
+dart` is correct (the app's bridge crate), NOT a wrong-repo mis-extraction.
+`parres-hq/whitenoise` LICENSE = **AGPL-3.0** (verified: "GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3"). → Phase 1: keep the slug + `dart`; fix `NOASSERTION → AGPL-3.0`; tag
+`["nostr"]`; replace the junk auto-description ("Misc & Everything Else (dart)") with a real
+one (the White Noise encrypted-messaging client's Rust core bridge).
+
+**Decision 3 refinement — `internet-privacy-marmot-ts`.** The slug faithfully reflects the
+real scoped npm package `@internet-privacy/marmot-ts` (repo `marmot-protocol/marmot-ts`,
+MIT). **Keep the slug** (no rename/redirect); retag `["nostr"]` + real description.
+
+**Decision 6 — Germ (QUALIFIES).** Org `github.com/germ-network` (founders Tessa Brown /
+Mark Sui; not an excluded org). `germ-network/lexicon` (Germ's ATProto lexicon) =
+**MIT, © 2026 Germ Network, Inc.** (verified). `germ-network/autonomous-comm-protocol` has
+NO readable LICENSE at `main` (404) — do NOT catalog that one. → Phase 1: add
+`germ-network/lexicon` as the atproto exemplar (`protocols: ["atproto"]`, MIT pinned at a
+SHA), described accurately as Germ's ATProto lexicon — NOT overclaimed as the full MLS
+messenger. Reference Germ-the-messenger in the guide as the live MLS-over-atproto proof
+point (cite reporting), no partnership implied.
+
