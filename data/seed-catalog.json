@@ -256,5 +256,16 @@
     "what_it_does": "The Basic Credential implementation for OpenMLS — the simple identity-credential type used to establish membership in an MLS group.",
     "aos_repos_using": 3,
     "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/nostr-openmls", "marmot-protocol/propose"]
+  },
+  {
+    "name": "openmls_rust_crypto",
+    "ecosystem": "rust",
+    "entry_type": "library",
+    "category": "Security & Privacy",
+    "protocols": ["nostr", "atproto"],
+    "pie_anchor": "§4 Cooking → Catalysts / Pressure",
+    "what_it_does": "A cryptographic backend for OpenMLS that implements the openmls_traits provider interface using RustCrypto primitives — a default crypto provider for MLS groups in Rust.",
+    "aos_repos_using": 3,
+    "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/nostr-openmls", "marmot-protocol/propose"]
   }
 ]
