@@ -301,5 +301,17 @@
     "what_it_does": "A TypeScript implementation of the Messaging Layer Security protocol (RFC 9420, MLS) — brings end-to-end-encrypted group messaging to JavaScript/TypeScript runtimes; the MLS core that Marmot's TypeScript stack can build on.",
     "aos_repos_using": 2,
     "aos_repos_list": ["marmot-protocol/marmot-ts", "marmot-protocol/marmots-web-chat"]
+  },
+  {
+    "name": "rust_lib_whitenoise",
+    "ecosystem": "dart",
+    "entry_type": "library",
+    "category": "Misc & Everything Else",
+    "protocols": ["nostr"],
+    "pie_anchor": "§3 Kitchen Prep",
+    "source_url": "https://github.com/parres-hq/whitenoise",
+    "what_it_does": "The flutter_rust_bridge crate that exposes White Noise's Rust core to its Flutter/Dart app — the encrypted Nostr group-messaging client built on Marmot/MLS. Generated for the parres-hq/whitenoise (White Noise) app.",
+    "aos_repos_using": 1,
+    "aos_repos_list": ["marmot-protocol/whitenoise"]
   }
 ]
