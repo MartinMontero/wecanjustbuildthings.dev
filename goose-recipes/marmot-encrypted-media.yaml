@@ -1,0 +1,44 @@
+version: 1.0.0
+title: Marmot encrypted media
+description: >-
+  Add encrypted media to a Marmot group (MIP-04): encrypt with a key derived from
+  the MLS exporter secret, store the blob on Blossom, and share it via an imeta tag
+  in a kind:445 group message. All cryptography is delegated to MDK / marmot-ts.
+  MIP-04 is a DRAFT (optional). Pinned from MIP-04 at commit 21a67b2.
+
+parameters:
+  - key: stack
+    input_type: string
+    requirement: required
+    description: Which implementation to drive — "rust" (MDK) or "ts" (marmot-ts)
+  - key: blossom_server
+    input_type: string
+    requirement: optional
+    description: Base URL of the Blossom server to upload to (e.g. https://blossom.example).
+
+instructions: |
+  You orchestrate encrypted-media upload + sharing for a Marmot group. You do NOT
+  implement cryptography — the exporter-secret/HKDF key derivation, ChaCha20-Poly1305
+  AEAD, and nonce generation are done by MDK / marmot-ts. MIP-04 is draft/optional:
+  surface that, gate behind a capability check, and ALWAYS use mip04-v2 (reject the
+  deprecated, nonce-reuse-vulnerable mip04-v1). Numbers pinned from
+  marmot-protocol/marmot MIP-04 at commit 21a67b2 — if one disagrees with the live
+  draft, STOP and re-pin from a named commit. Attribution: Marmot Protocol (MIT),
+  Blossom (Unlicense) / blossom-server (MIT) / blossom-client-sdk (MIT),
+  MDK/marmot-ts (MIT); imeta = NIP-92.
+
+prompt: |
+  Add encrypted media to a Marmot group on the "{{ stack }}" stack{{#if blossom_server}}, uploading to {{ blossom_server }}{{/if}}.
+  1. Let the library derive the media key from exporter_secret =
+     MLS-Exporter("marmot","encrypted-media",32) (separate from the message key),
+     bound to the file's SHA-256, MIME, and filename. Use mip04-v2 only.
+  2. Let the library ChaCha20-Poly1305-encrypt the file with a fresh random 12-byte
+     nonce; the AAD binds version, file hash, MIME, and filename.
+  3. Upload the ciphertext to Blossom (content-addressed by SHA256(encrypted_content))
+     using blossom-client-sdk with Nostr-signed upload auth.
+  4. Share it via a NIP-92 imeta tag on the kind:445 group message: url, m (mime),
+     x (file sha256), n (the random nonce, hex), v mip04-v2.
+  5. On receive, fetch by hash, re-derive the key, and decrypt via the library;
+     discard on authentication failure.
+  Then run `npm run check && npm run enforce`; commit only on green. If a step needs
+  hand-rolled cryptography, STOP and ask.
