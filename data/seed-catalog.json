@@ -313,5 +313,15 @@
     "what_it_does": "The flutter_rust_bridge crate that exposes White Noise's Rust core to its Flutter/Dart app — the encrypted Nostr group-messaging client built on Marmot/MLS. Generated for the parres-hq/whitenoise (White Noise) app.",
     "aos_repos_using": 1,
     "aos_repos_list": ["marmot-protocol/whitenoise"]
+  },
+  {
+    "name": "marmot",
+    "ecosystem": "other",
+    "entry_type": "protocol",
+    "category": "Security & Privacy",
+    "protocols": ["nostr"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "source_url": "https://github.com/marmot-protocol/marmot",
+    "what_it_does": "The Marmot Protocol — a specification for efficient, end-to-end-encrypted group messaging that combines Nostr's decentralized identity and relay network with the IETF MLS protocol. The protocol that White Noise and the Marmot Development Kit (MDK) implement."
   }
 ]
