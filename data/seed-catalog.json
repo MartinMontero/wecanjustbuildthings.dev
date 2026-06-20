@@ -188,5 +188,16 @@
     "what_it_does": "A SQLite-backed storage backend for the Marmot Development Kit (MDK) that implements its MdkStorageProvider trait, persisting MLS-over-Nostr group state to disk.",
     "aos_repos_using": 2,
     "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/whitenoise-rs"]
+  },
+  {
+    "name": "mdk-storage-traits",
+    "ecosystem": "rust",
+    "entry_type": "library",
+    "category": "Misc & Everything Else",
+    "protocols": ["nostr"],
+    "pie_anchor": "§3 Kitchen Prep",
+    "what_it_does": "The storage-abstraction traits for the Marmot Development Kit (MDK), wrapping OpenMLS storage backends so MDK can persist MLS group state across different databases.",
+    "aos_repos_using": 2,
+    "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/whitenoise-rs"]
   }
 ]
