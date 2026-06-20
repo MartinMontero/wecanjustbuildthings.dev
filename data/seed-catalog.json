@@ -290,5 +290,16 @@
     "what_it_does": "The shared trait definitions used across OpenMLS — the provider interfaces (cryptography, randomness, and storage) that let MLS group operations run on pluggable backends.",
     "aos_repos_using": 5,
     "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/nostr-openmls", "marmot-protocol/openmls-lmdb-storage", "marmot-protocol/openmls-redb-storage", "marmot-protocol/openmls-sled-storage"]
+  },
+  {
+    "name": "ts-mls",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Misc & Everything Else",
+    "protocols": ["nostr", "atproto"],
+    "pie_anchor": "§3 Kitchen Prep",
+    "what_it_does": "A TypeScript implementation of the Messaging Layer Security protocol (RFC 9420, MLS) — brings end-to-end-encrypted group messaging to JavaScript/TypeScript runtimes; the MLS core that Marmot's TypeScript stack can build on.",
+    "aos_repos_using": 2,
+    "aos_repos_list": ["marmot-protocol/marmot-ts", "marmot-protocol/marmots-web-chat"]
   }
 ]
