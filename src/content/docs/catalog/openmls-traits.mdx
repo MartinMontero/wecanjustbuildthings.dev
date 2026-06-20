@@ -1,35 +1,36 @@
 ---
 title: "openmls_traits"
-description: "openmls_traits — Security & Privacy"
+description: "The shared trait definitions used across OpenMLS — the provider interfaces (cryptography, randomness, and storage) that let MLS group operations run on pluggable backends."
 entry_type: "library"
 dependency_name: "openmls_traits"
 ecosystem: "rust"
 category: "Security & Privacy"
-what_it_does: "openmls_traits — Security & Privacy (rust)."
-protocols: ["general"]
+what_it_does: "The shared trait definitions used across OpenMLS — the provider interfaces (cryptography, randomness, and storage) that let MLS group operations run on pluggable backends."
+protocols: ["nostr", "atproto"]
 repo_url: "https://github.com/openmls/openmls/tree/main/traits"
 registry_url: "https://crates.io/crates/openmls_traits"
 license_spdx: "MIT"
-license_source_url: "https://github.com/openmls/openmls/tree/main/traits"
-maintenance_status: "minimal"
+license_source_url: "https://github.com/openmls/openmls/blob/525526d9e4e0055aa7c23ded28205e6757121a4a/LICENSE"
+license_source_commit_sha: "525526d9e4e0055aa7c23ded28205e6757121a4a"
+maintenance_status: "active"
 last_release_at: "2026-02-04T18:35:35.172970Z"
 version: "0.5.0"
 aos_repos_using: 5
 aos_repos_list: ["marmot-protocol/mdk", "marmot-protocol/nostr-openmls", "marmot-protocol/openmls-lmdb-storage", "marmot-protocol/openmls-redb-storage", "marmot-protocol/openmls-sled-storage"]
 pie_anchor: "§4 Cooking → Catalysts / Pressure"
 provider_agnostic: false
-verification_status: "under_review"
-verified_at: "2026-06-14"
+verification_status: "verified"
+verified_at: "2026-06-20"
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-
+The shared trait definitions used across OpenMLS — the provider interfaces (cryptography, randomness, and storage) that let MLS group operations run on pluggable backends.
 
 <div class="wcb-badges">
 <span class="wcb-badge wcb-badge--MIT">license: MIT</span>
-<span class="wcb-badge wcb-badge--minimal">status: minimal</span>
-<span class="wcb-badge wcb-badge--under_review">verification: under_review</span>
+<span class="wcb-badge wcb-badge--active">status: active</span>
+<span class="wcb-badge wcb-badge--verified">verification: verified</span>
 
 </div>
 
@@ -42,7 +43,7 @@ import { Aside } from '@astrojs/starlight/components';
   <dt>Registry</dt><dd><a href="https://crates.io/crates/openmls_traits">crates.io/crates/openmls_traits</a></dd>
 </dl>
 
-<Aside type="caution" title="Pending full verification">A pinned license commit could not be retrieved automatically; this entry is <code>under_review</code> until a maintainer confirms the source.</Aside>
+<Aside type="tip" title="Verified at a commit">License read as <code>MIT</code> from <a href="https://github.com/openmls/openmls/blob/525526d9e4e0055aa7c23ded28205e6757121a4a/LICENSE">LICENSE</a> at commit <code>525526d9e4e0</code>.</Aside>
 
 
 ## Why it's in the catalog

@@ -1,0 +1,153 @@
+---
+title: Build encrypted group messaging on Nostr (Marmot/MLS)
+description: >-
+  What Marmot is, why it runs MLS over Nostr, and how the pieces — MDK / marmot-ts,
+  KeyPackages, relays, and Blossom media — fit together to build end-to-end-encrypted
+  group chat, driven from the Build Studio. Includes the honest limitations and a
+  "choose your protocol by threat model" guide.
+sidebar:
+  order: 4
+security_sensitive: true
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+You want a group chat where only the members can read the messages — no central
+server, no phone numbers, and ideally not even a record of *who* is talking to
+*whom*. That is exactly what **Marmot** is for: it runs the IETF **MLS** group-
+encryption standard over **Nostr's** decentralized network. This guide explains
+what the pieces are, how they fit, and — just as importantly — where the rough
+edges are.
+
+<Aside type="caution" title="Read this first: Marmot is experimental">
+The Marmot spec says so in its own words: **"Marmot is currently experimental
+software,"** it **"has not yet undergone formal security auditing,"** and its authors
+**"recommend against using Marmot for production applications until the protocol
+reaches stable status."** Treat what you build here as a prototype to learn from and
+contribute to — not as a drop-in replacement for an audited messenger. (Pinned from
+[`marmot-protocol/marmot`](/catalog/marmot/) README at commit `21a67b2`.)
+</Aside>
+
+## What Marmot is
+
+**Marmot = MLS (the cryptography) + Nostr (the identity and transport).**
+
+- **MLS** ([RFC 9420](https://www.rfc-editor.org/rfc/rfc9420.html)) is the IETF's
+  Messaging Layer Security standard for end-to-end-encrypted *group* messaging. It
+  gives you **forward secrecy** (compromising today's keys doesn't expose past
+  messages) and **post-compromise security** (the group heals after a member
+  rotates keys).
+- **Nostr** provides the identity (your own keypair — no phone or email) and the
+  transport (relays you choose, not a central server).
+
+[Marmot](/catalog/marmot/) is the specification that ties them together — a set of
+"MIPs" (Marmot's spec documents) defining which Nostr event kinds carry MLS
+KeyPackages, group invites, and encrypted messages. [White Noise](/catalog/rust-lib-whitenoise/)
+is the production reference client built on it.
+
+## Why MLS over Nostr (and not something else)
+
+Marmot's own framing: Signal has excellent E2EE but centralized infrastructure;
+plain Nostr DMs (NIP-04/NIP-17) lack forward secrecy and real group messaging.
+Marmot aims to combine **MLS's proven group cryptography** with **Nostr's
+censorship-resistance and identity freedom** — encrypting both message *content*
+and, as a goal, the *metadata* of who is in a group.
+
+## The pieces, and how they fit
+
+You do **not** implement any of the cryptography yourself. You assemble vetted,
+license-verified libraries and wire up the Nostr event choreography. The crypto
+lives in audited code; your job is integration.
+
+| Layer | What it does | Use |
+|---|---|---|
+| **MLS core** | The actual group cryptography (RFC 9420) | [`openmls`](/catalog/openmls/) (Rust) · [`ts-mls`](/catalog/ts-mls/) (TS) |
+| **Marmot engine** | Marmot's high-level API over MLS — KeyPackages, groups, Welcomes, message encryption | [`mdk-core`](/catalog/mdk-core/) (Rust, the engine inside White Noise) · [`@internet-privacy/marmot-ts`](/catalog/internet-privacy-marmot-ts/) (TS) |
+| **Media** | Encrypted images/files, stored off-relay | [Blossom](/catalog/blossom/) protocol · a [Blossom server](/catalog/blossom-server/) · [`blossom-client-sdk`](/catalog/blossom-client-sdk/) |
+| **Reference client** | The production app that proves it works | [White Noise](/catalog/rust-lib-whitenoise/) |
+
+The moving parts, in plain terms (event kinds pinned from the MIPs at commit `21a67b2`):
+
+1. **Identity → KeyPackage.** Your Nostr keypair becomes your MLS identity. You
+   publish a **KeyPackage** (`kind:30443`) so others can invite you, and advertise
+   *where* your KeyPackages live with a **KeyPackage relay list** (`kind:10051`).
+2. **Group + Welcome.** A group is an MLS group tagged with the Marmot Group Data
+   Extension (`0xF2EE`). To add someone, you fetch their KeyPackage and send a
+   **Welcome** (`kind:444`) gift-wrapped for privacy (NIP-59).
+3. **Messages.** Group messages (`kind:445`) are encrypted with a key the MLS
+   library derives per epoch (ChaCha20-Poly1305). New members read them from the
+   relays named in their Welcome.
+4. **Media** (optional). Files are encrypted, stored on **Blossom** by their hash,
+   and shared with a small `imeta` tag in the message.
+
+The step-by-step choreography ships as four companion **skills** (and matching
+**Goose recipes**) in this repo: `marmot-group-setup`, `marmot-relay-strategy`,
+`marmot-encrypted-media`, and `marmot-push-notifications`. Each one orchestrates the
+Nostr events and **delegates every cryptographic operation to MDK / marmot-ts** —
+never reconstructing MLS by hand.
+
+## Driving it from the Build Studio
+
+Use the [Build Studio](/build/) to assemble the stack — pick your language (Rust
+via MDK, or TypeScript via marmot-ts), add the catalog entries above, and export a
+**Goose recipe**. Then run it in your own [Goose](/guides/get-started-with-goose/),
+on your machine, with your own model and keys. The platform hands Goose a recipe; it
+never sees your keys or your messages.
+
+## Honest limitations
+
+<Aside type="caution" title="Know these before you ship anything">
+
+- **It's experimental and unaudited.** The protocol has had no formal security
+  audit and its authors advise against production use (see the warning up top).
+- **The spec is still moving.** MIP-00–03 (credentials, groups, welcomes, messages)
+  are in **Review** and required; MIP-04 (media) and MIP-05 (push notifications) are
+  **optional**, with push still a **Draft**. Numbers can change — re-pin from a
+  named commit before you rely on them. (We already saw the KeyPackage kind move
+  from a legacy `443` to today's `30443`.)
+- **~150-member ceiling on Welcomes.** Per [MIP-02](/catalog/marmot/), *"for groups
+  above ~150 participants, welcome messages will become larger than is permitted by
+  many Nostr relays."* Large-group ("light Welcome") support is still being worked
+  out upstream. Plan for small-to-medium groups today.
+- **No first-class AT Protocol encryption in-repo.** Marmot's wire format is
+  Nostr-specific (kinds `30443`/`444`/`445`). The MLS core is transport-neutral, so
+  MLS *can* run over AT Protocol — but there is no Marmot AT-Protocol binding in the
+  repos today.
+- **White Noise and Germ do not interoperate.** White Noise speaks
+  Marmot-over-Nostr; [Germ](/catalog/germ-lexicon/) is MLS-style messaging over AT
+  Protocol. They share the *idea* of MLS but not the *wire* — they cannot exchange
+  messages. Pick one stack per app; never assume cross-protocol interop.
+
+</Aside>
+
+## Choose your protocol by threat model
+
+Both Nostr (Marmot) and AT Protocol (Germ-style) approaches inherit MLS's forward
+secrecy and post-compromise security. The real decision is about **transport,
+ecosystem, and maturity** — match it to *your* threat model, not to hype.
+
+- **Your users' identities already live on Nostr; you value censorship-resistance
+  and no phone/email.** → **Marmot / White Noise (Nostr).** You get decentralized
+  relays you choose and Nostr-native identity. Accept that it's experimental and
+  capped at ~150-member groups for now.
+- **Your users live on AT Protocol / Bluesky and you want E2EE there.** → the
+  **AT Protocol path** (e.g. Germ's lexicon). This is an even earlier, *separate*
+  ecosystem — and again, not wire-compatible with White Noise.
+- **You need audited, production-grade E2EE today, and decentralization is secondary.**
+  → Be honest with yourself and your users: a formally-audited messenger is the
+  safer choice right now. Come to Marmot to **build and contribute**, or when
+  decentralization and Nostr identity outweigh maturity.
+
+<Aside type="note" title="The rule">
+Choose the protocol that matches the threat your users actually face — surveillance,
+deplatforming, key compromise, metadata exposure — and tell them plainly which
+guarantees hold and which are still experimental. Never imply two stacks
+interoperate when they don't.
+</Aside>
+
+## Where to go next
+
+- Browse the verified building blocks in the [catalog](/catalog/).
+- Stand up your harness with [Get started with Goose](/guides/get-started-with-goose/).
+- Read the protocol itself: [Marmot](/catalog/marmot/) (and its MIPs), pinned at
+  commit `21a67b2`.
