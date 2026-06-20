@@ -234,5 +234,16 @@
     "what_it_does": "A TypeScript client SDK for talking to Blossom servers — the HTTP protocol for storing and fetching blobs (media) on Nostr media servers, addressed by their hash. Used to handle media in Nostr and Marmot apps.",
     "aos_repos_using": 2,
     "aos_repos_list": ["marmot-protocol/marmots-web-chat", "marmot-protocol/nostr-doctor"]
+  },
+  {
+    "name": "openmls",
+    "ecosystem": "rust",
+    "entry_type": "library",
+    "category": "Security & Privacy",
+    "protocols": ["nostr", "atproto"],
+    "pie_anchor": "§4 Cooking → Catalysts / Pressure",
+    "what_it_does": "A Rust implementation of the IETF Messaging Layer Security (MLS) protocol (RFC 9420) — the standard for end-to-end-encrypted group messaging. The MLS foundation the Marmot Development Kit builds on; the same core can carry encrypted groups over Nostr or AT Protocol.",
+    "aos_repos_using": 3,
+    "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/nostr-openmls", "marmot-protocol/propose"]
   }
 ]
