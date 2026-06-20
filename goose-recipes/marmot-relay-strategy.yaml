@@ -1,0 +1,37 @@
+version: 1.0.0
+title: Marmot relay strategy
+description: >-
+  Choose the right Nostr relay list for each Marmot surface — KeyPackage relays
+  (kind:10051, discovery) vs inbox/notification relays (kind:10050, delivery) — so
+  invites and messages arrive without leaking metadata. Kinds pinned from MIP-00
+  and MIP-05 at commit 21a67b2.
+
+parameters:
+  - key: relays
+    input_type: string
+    requirement: optional
+    description: Comma-separated candidate relay URLs the builder already uses, if any.
+
+instructions: |
+  You decide which Nostr relay LIST serves which Marmot surface. You do not
+  implement cryptography — gift-wrapping and encryption belong to MDK / marmot-ts.
+  Keep discovery (kind:10051 KeyPackage relays) and delivery (kind:10050
+  inbox/notification relays) as separate lists; never collapse them. Numbers are
+  pinned from marmot-protocol/marmot MIP-00 and MIP-05 at commit 21a67b2 (spec in
+  review/draft) — if a kind disagrees with the live spec, STOP and re-pin from a
+  named commit. Attribution: Marmot Protocol (MIT), White Noise (AGPL-3.0); relay
+  conventions NIP-65/NIP-17, gift wrap NIP-59.
+
+prompt: |
+  Set up the Marmot relay strategy{{#if relays}} using these candidate relays: {{ relays }}{{/if}}.
+  1. KeyPackage relays (discovery): publish a kind:10051 list with ["relay","wss://..."]
+     tags pointing at the relays that hold your kind:30443 KeyPackages; keep it
+     readable by anyone who might invite you, and updated.
+  2. Inbox/notification relays (delivery): maintain a kind:10050 list (NIP-17 style)
+     where gift-wrapped events (kind:1059 Welcomes and MIP-05 notification requests)
+     are delivered; choose reliable relays.
+  3. Keep the two lists distinct; do not collapse discovery into delivery.
+  4. Read the invitee's kind:10051 before fetching their KeyPackage; deliver Welcomes
+     to the recipient's kind:10050 inbox; read kind:445 group events from the relays
+     named in the Welcome's `relays` tag.
+  Then run `npm run check && npm run enforce`; commit only on green.
