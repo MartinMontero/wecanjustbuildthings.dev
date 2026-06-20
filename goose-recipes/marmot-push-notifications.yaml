@@ -1,0 +1,44 @@
+version: 1.0.0
+title: Marmot push notifications
+description: >-
+  Wire privacy-preserving push notifications for a Marmot group (MIP-05): the token
+  lifecycle (kind:447 request / 448 list / 449 removal) and the gift-wrapped
+  notification request (kind:446) to a notification server found via kind:10050.
+  All cryptography is delegated to MDK / marmot-ts. MIP-05 is a DRAFT (optional).
+  Pinned from MIP-05 at commit 21a67b2.
+
+parameters:
+  - key: stack
+    input_type: string
+    requirement: required
+    description: Which implementation to drive — "rust" (MDK) or "ts" (marmot-ts)
+  - key: server_pubkey
+    input_type: string
+    requirement: optional
+    description: The notification server's Nostr public key (usually hardcoded in the client at build time).
+
+instructions: |
+  You sequence the Marmot push-notification events. You do NOT implement
+  cryptography — gift-wrapping, ephemeral-key handling, and token encryption are done
+  by MDK / marmot-ts. MIP-05 is draft/optional and the least stable surface: surface
+  that, gate behind a capability check, and PRESERVE the privacy invariant (ephemeral
+  keypairs at every layer; token messages are unsigned application messages, never
+  signed). Numbers pinned from marmot-protocol/marmot MIP-05 at commit 21a67b2 — if
+  one disagrees with the live draft, STOP and re-pin from a named commit. Attribution:
+  Marmot Protocol (MIT), White Noise (AGPL-3.0), MDK/marmot-ts (MIT); gift wrap NIP-59,
+  inbox relays NIP-17.
+
+prompt: |
+  Wire Marmot push notifications on the "{{ stack }}" stack{{#if server_pubkey}} for notification server {{ server_pubkey }}{{/if}}.
+  1. Enroll/refresh: send a kind:447 Token Request (unsigned application message) in
+     each group; collect peers' kind:448 Token List Responses; replace a sender's
+     stored token on a newer kind:447. Refresh ~25-35 days with jitter and on OS
+     token rotation.
+  2. Remove: send kind:449 before leaving or when disabling notifications.
+  3. Notify: build a kind:446 Notification Request rumor with an EPHEMERAL keypair,
+     gift-wrap it (kind:1059, NIP-59) to the server's pubkey, and deliver to the
+     server's kind:10050 inbox relays.
+  4. Keep ephemeral keys at every layer; never sign token messages; never let the
+     server link a notification to an identity.
+  Then run `npm run check && npm run enforce`; commit only on green. If a step needs
+  hand-rolled cryptography, STOP and ask.
