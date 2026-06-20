@@ -323,5 +323,15 @@
     "pie_anchor": "§4 Cooking → Recipes",
     "source_url": "https://github.com/marmot-protocol/marmot",
     "what_it_does": "The Marmot Protocol — a specification for efficient, end-to-end-encrypted group messaging that combines Nostr's decentralized identity and relay network with the IETF MLS protocol. The protocol that White Noise and the Marmot Development Kit (MDK) implement."
+  },
+  {
+    "name": "germ-lexicon",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Frameworks & Libraries",
+    "protocols": ["atproto"],
+    "pie_anchor": "§4 Cooking → Recipes",
+    "source_url": "https://github.com/germ-network/lexicon",
+    "what_it_does": "Germ Network's AT Protocol lexicon definitions — the open-source lexicon (schema) repository for Germ, a project building MLS-style encrypted messaging on AT Protocol. This entry catalogs the lexicon only, not the full Germ messenger."
   }
 ]
