@@ -155,5 +155,16 @@
     "what_it_does": "Marmot Development Kit (MDK) core — a simplified Rust interface for building secure, end-to-end-encrypted group messaging on Nostr with the MLS protocol. The cryptographic engine used by White Noise's Rust core.",
     "aos_repos_using": 2,
     "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/whitenoise-rs"]
+  },
+  {
+    "name": "mdk-macros",
+    "ecosystem": "rust",
+    "entry_type": "library",
+    "category": "Misc & Everything Else",
+    "protocols": ["nostr"],
+    "pie_anchor": "§3 Kitchen Prep",
+    "what_it_does": "Shared declarative macros for the Marmot Development Kit (MDK) workspace — the Rust toolkit for MLS-over-Nostr encrypted group messaging.",
+    "aos_repos_using": 1,
+    "aos_repos_list": ["marmot-protocol/mdk"]
   }
 ]
