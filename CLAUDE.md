@@ -1,10 +1,10 @@
 # CLAUDE.md — wecanjustbuildthings.dev
 
-Astro Starlight site on Cloudflare Pages that guides non-developers through
+Astro Starlight site on Cloudflare that guides non-developers through
 agentic software development. Four components share ONE client-side build-session
 object: Build Studio, Mentor Engine, Skills Creator, Catalog. Plus a Hosting Cost
-Estimator module and a dataset-backed catalog pipeline (Astro 5 Content Layer Zod
-schema, ~842 YAML entries).
+Estimator module and a dataset-backed catalog pipeline (Astro 6 Content Layer Zod
+schema, 1,355 catalog entries).
 
 ## Non-negotiable constraints — YOU MUST follow these every session
 
@@ -42,6 +42,34 @@ schema, ~842 YAML entries).
 
 <!-- Build commands, scripts, and project layout: run `/init` to populate these
      from the actual repo, then keep them current here. -->
+
+## What this is & where things live (consolidated from the former `Claude.md`)
+
+- AUDIENCE: end users are NON-DEVELOPERS; contributors are technical. Every feature must
+  empower the builder, augment their ability, and protect their privacy and security.
+- It drives **Goose** — the AAIF / Linux Foundation open-source agent runtime
+  (`github.com/aaif-goose/goose`, docs `goose-docs.ai`) — as a USER-FACING runtime. Goose
+  runs on the USER's machine with the USER's own model + keys; the platform only hands it a
+  recipe. `goose serve` / ACP-over-HTTP / the TS SDK are experimental and out of scope.
+- BYOK is the builder's, not the platform's: each builder brings their own LLM keys (used
+  only in their own Goose) and their own Nostr / Bluesky / GitHub accounts. The platform
+  collects, stores, and proxies NONE of them. The only operator-set secrets are the tool's
+  OWN identity/infra (see `docs/OPERATOR-RUNBOOK.md`).
+- Stack: Astro 6 + Starlight, deployed on Cloudflare (static `dist/` served by an `/api/*`
+  Worker, with D1/KV bindings for sign-in). Catalog = Astro Content Layer + the Zod schema
+  in `src/schema/catalog.ts`.
+- ONE shared client-side build session (`src/lib/build-session.ts`) is read/written by
+  Build Studio, Mentor Engine, Skills Creator, and Catalog. Pass typed fields, not history.
+- MCP / trust boundary: the Catalog is the trust boundary; generated recipes reference ONLY
+  allowlisted, vetted extensions/skills; never surface raw MCP config to non-devs. Rely on
+  Goose "Trust & Execute" consent + the extension allowlist + least privilege.
+- Recipe serializer + deeplink: `src/lib/goose-recipe.ts`, `src/lib/goose-deeplink.ts`.
+  Always assert a deeplink starts with `goose://recipe?config=` and round-trips.
+- Every reusable workflow ships TWICE: a Claude Code skill (`skills/<n>/SKILL.md`) AND a
+  Goose recipe (`goose-recipes/<n>.yaml`). Touch one → touch the other.
+- Workflow discipline: plan → execute in vertical slices; checkpoint before a large
+  refactor; run typecheck + tests after each change; keep changes minimal and scoped.
+- Interactive islands are **Svelte, never React**.
 
 ## Internationalization (i18n) & translation governance
 
