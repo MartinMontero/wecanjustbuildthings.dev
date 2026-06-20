@@ -333,5 +333,15 @@
     "pie_anchor": "§4 Cooking → Recipes",
     "source_url": "https://github.com/germ-network/lexicon",
     "what_it_does": "Germ Network's AT Protocol lexicon definitions — the open-source lexicon (schema) repository for Germ, a project building MLS-style encrypted messaging on AT Protocol. This entry catalogs the lexicon only, not the full Germ messenger."
+  },
+  {
+    "name": "blossom",
+    "ecosystem": "other",
+    "entry_type": "protocol",
+    "category": "Databases & Storage",
+    "protocols": ["nostr"],
+    "pie_anchor": "§4 Cooking → The Oven",
+    "source_url": "https://github.com/hzrd149/blossom",
+    "what_it_does": "The Blossom protocol — a simple specification for storing and fetching binary blobs (media) on HTTP media servers, where each blob is addressed by its hash. Lets Nostr apps keep images, video, and files off-relay; Marmot uses Blossom for encrypted media (its MIP-04). ('Blobs Stored Simply on Media Servers.')"
   }
 ]
