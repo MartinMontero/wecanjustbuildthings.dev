@@ -1,0 +1,49 @@
+version: 1.0.0
+title: Marmot group setup
+description: >-
+  Orchestrate the Marmot (MLS-over-Nostr) end-to-end-encrypted group flow — the
+  protocol behind the White Noise client — delegating ALL cryptography to the
+  Marmot Development Kit (MDK) or marmot-ts and never reconstructing MLS by hand.
+  Event kinds pinned from MIP-00..05 at commit 21a67b2.
+
+parameters:
+  - key: stack
+    input_type: string
+    requirement: required
+    description: Which implementation to drive — "rust" (MDK + openmls) or "ts" (marmot-ts + ts-mls)
+  - key: role
+    input_type: string
+    requirement: optional
+    description: Either creator (start a group and invite) or joiner (accept a Welcome); default creator.
+
+instructions: |
+  You choreograph Nostr events for Marmot; you do NOT implement cryptography.
+  Never hand-roll MLS, ChaCha20-Poly1305, the exporter-secret derivation, or NIP-59
+  gift-wrapping — call MDK (mdk-core on openmls) or marmot-ts (on ts-mls). The
+  builder brings their own Nostr key; never collect, store, or proxy it.
+
+  Numbers are pinned from marmot-protocol/marmot MIP-00..05 at commit 21a67b2 and
+  the spec is in `review` — if a number disagrees with the live spec, STOP and
+  re-pin from a named commit rather than guessing. Attribution: Marmot Protocol
+  (MIT), White Noise / whitenoise-rs (AGPL-3.0), MDK/openmls/marmot-ts/ts-mls (MIT),
+  MLS = RFC 9420.
+
+prompt: |
+  Build the Marmot group flow for the "{{ stack }}" stack ({{ role }}).
+  1. Identity: use the builder's existing Nostr keypair as the MLS BasicCredential
+     (32-byte x-only pubkey). Do not generate or store keys server-side.
+  2. KeyPackage: publish a kind:30443 addressable event with a random 32-byte hex
+     `d` slot; advertise KeyPackage relays with kind:10051. (kind:443 is legacy —
+     migration only.)
+  3. Group: have the library create the MLS group with the Marmot Group Data
+     Extension 0xF2EE, ciphersuite MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519
+     (0x0001), and self_remove (0x000a) in required_capabilities.
+  4. Welcome: fetch the invitee's kind:30443 KeyPackage, build the MLS Welcome, and
+     gift-wrap it per NIP-59 — inner kind:444 rumor → kind:13 seal → kind:1059 wrap.
+  5. Send: let the library derive exporter_secret = MLS-Exporter("marmot",
+     "group-event", 32) and ChaCha20-Poly1305-encrypt the MLSMessage; publish a
+     kind:445 Group Event with content = base64(nonce || ciphertext).
+  6. Receive: subscribe to kind:445, hand each event to the library to authenticate
+     and decrypt (drop on AEAD failure), and advance the MLS epoch.
+  Then run `npm run check && npm run enforce`; commit only on green. If you cannot
+  do a step without inventing cryptography, STOP and ask.
