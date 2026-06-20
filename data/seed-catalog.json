@@ -279,5 +279,16 @@
     "what_it_does": "An implementation of the OpenMLS storage traits backed by the sled embedded database — persists MLS group state for OpenMLS-based apps. Maintained under the Marmot project.",
     "aos_repos_using": 1,
     "aos_repos_list": ["marmot-protocol/nostr-openmls"]
+  },
+  {
+    "name": "openmls_traits",
+    "ecosystem": "rust",
+    "entry_type": "library",
+    "category": "Security & Privacy",
+    "protocols": ["nostr", "atproto"],
+    "pie_anchor": "§4 Cooking → Catalysts / Pressure",
+    "what_it_does": "The shared trait definitions used across OpenMLS — the provider interfaces (cryptography, randomness, and storage) that let MLS group operations run on pluggable backends.",
+    "aos_repos_using": 5,
+    "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/nostr-openmls", "marmot-protocol/openmls-lmdb-storage", "marmot-protocol/openmls-redb-storage", "marmot-protocol/openmls-sled-storage"]
   }
 ]
