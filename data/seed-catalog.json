@@ -245,5 +245,16 @@
     "what_it_does": "A Rust implementation of the IETF Messaging Layer Security (MLS) protocol (RFC 9420) — the standard for end-to-end-encrypted group messaging. The MLS foundation the Marmot Development Kit builds on; the same core can carry encrypted groups over Nostr or AT Protocol.",
     "aos_repos_using": 3,
     "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/nostr-openmls", "marmot-protocol/propose"]
+  },
+  {
+    "name": "openmls_basic_credential",
+    "ecosystem": "rust",
+    "entry_type": "library",
+    "category": "Security & Privacy",
+    "protocols": ["nostr", "atproto"],
+    "pie_anchor": "§4 Cooking → Catalysts / Pressure",
+    "what_it_does": "The Basic Credential implementation for OpenMLS — the simple identity-credential type used to establish membership in an MLS group.",
+    "aos_repos_using": 3,
+    "aos_repos_list": ["marmot-protocol/mdk", "marmot-protocol/nostr-openmls", "marmot-protocol/propose"]
   }
 ]
