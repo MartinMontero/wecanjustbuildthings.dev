@@ -211,5 +211,16 @@
     "what_it_does": "Internal macros for whitenoise-rs, the Rust core ('the Rust brain') of the White Noise encrypted group-messaging client for Nostr. Published only within the White Noise workspace.",
     "aos_repos_using": 1,
     "aos_repos_list": ["marmot-protocol/whitenoise-rs"]
+  },
+  {
+    "name": "@internet-privacy/marmot-ts",
+    "ecosystem": "js",
+    "entry_type": "library",
+    "category": "Misc & Everything Else",
+    "protocols": ["nostr"],
+    "pie_anchor": "§3 Kitchen Prep",
+    "what_it_does": "A TypeScript implementation of the Marmot protocol — MLS-based, end-to-end-encrypted group messaging over Nostr — published as @internet-privacy/marmot-ts.",
+    "aos_repos_using": 1,
+    "aos_repos_list": ["marmot-protocol/marmots-web-chat"]
   }
 ]
