@@ -343,5 +343,15 @@
     "pie_anchor": "§4 Cooking → The Oven",
     "source_url": "https://github.com/hzrd149/blossom",
     "what_it_does": "The Blossom protocol — a simple specification for storing and fetching binary blobs (media) on HTTP media servers, where each blob is addressed by its hash. Lets Nostr apps keep images, video, and files off-relay; Marmot uses Blossom for encrypted media (its MIP-04). ('Blobs Stored Simply on Media Servers.')"
+  },
+  {
+    "name": "blossom-server",
+    "ecosystem": "js",
+    "entry_type": "service",
+    "category": "Hosting Infra & Deploy",
+    "protocols": ["nostr"],
+    "pie_anchor": "§4 Cooking → The Oven",
+    "source_url": "https://github.com/hzrd149/blossom-server",
+    "what_it_does": "A Blossom media server implementation written in TypeScript/Deno (by the Blossom author, hzrd149). Run it to host binary blobs — images, video, files — for Nostr apps over the Blossom protocol; a deployable option for Marmot/Nostr encrypted media (MIP-04)."
   }
 ]
