@@ -6,7 +6,13 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // Route /api/* to the Worker FIRST. Without this, the asset layer matches
+    // every request before the Worker runs, so non-asset paths like
+    // /api/auth/* and /api/github/* fall through to the static 404 page and the
+    // Worker's router (worker/index.ts) never sees them. Everything else stays
+    // assets-first (including the 404 page for genuine static misses).
+    "run_worker_first": ["/api/*"]
   },
 
   // --- Auth storage (Sign in with Nostr / Bluesky) ---
