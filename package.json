@@ -24,6 +24,7 @@
     "deploy:dry": "wrangler deploy --dry-run",
     "migrate": "wrangler d1 migrations apply wcjbt-auth --remote",
     "migrate:local": "wrangler d1 migrations apply wcjbt-auth --local",
+    "provision:auth": "tsx scripts/provision-auth.ts",
     "translate:catalog": "tsx scripts/translate-catalog.ts",
     "enforce": "tsx enforcement/cli.ts all --catalog src/content/docs/catalog --recipes src/content/docs/recipes",
     "enforce:layer1": "tsx enforcement/cli.ts layer1 --catalog src/content/docs/catalog",
