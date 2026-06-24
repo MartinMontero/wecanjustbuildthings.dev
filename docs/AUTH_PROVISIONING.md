@@ -28,11 +28,30 @@ The steps below assume the recommended topology.
 - A Cloudflare account, and `wrangler` authenticated: `npx wrangler login`.
 - Node 22+ (`npm ci`).
 
-## 1 — Create the storage and paste the ids
+## 1 — Create the storage and set the ids
 
-Auth uses two KV namespaces and one D1 database. Create them, then paste the
-returned ids into `wrangler.jsonc` (they're committed as `PLACEHOLDER_*` on
-purpose, so a deploy fails fast until they're real).
+Auth uses two KV namespaces and one D1 database. **`wrangler.jsonc` commits real
+ids** — but KV/D1 ids are **account-scoped**: they only resolve on the Cloudflare
+account that created them. (They are non-secret identifiers, so committing them is
+fine — only signing keys and tokens are secrets; see step 3.)
+
+- **Deploying under the account that owns those ids?** They already resolve — skip
+  to step 2 (migrations).
+- **Deploying under a different account?** Those ids don't exist there, so
+  `wrangler deploy` fails with *"namespace/database not found."* Re-provision on the
+  new account and swap the ids below.
+
+The reproducible way to (re)provision on **any** account:
+
+```sh
+npx wrangler login            # or set CLOUDFLARE_API_TOKEN (+ CLOUDFLARE_ACCOUNT_ID)
+npm run provision:auth        # idempotent: creates only what's missing, applies the
+                              # migrations, and prints a wrangler.jsonc-ready block
+```
+
+`provision:auth` (`scripts/provision-auth.ts`) never deletes or recreates anything —
+re-running it just reuses what already exists. It's the easy path; the equivalent
+manual commands are:
 
 ```sh
 npx wrangler kv namespace create SESSIONS   # → id for kv_namespaces[binding=SESSIONS]
@@ -44,7 +63,9 @@ npx wrangler d1 create wcjbt-auth           # → database_id for d1_databases[b
 - `ATPROTO` — AT Protocol OAuth state/session stores and DID/handle caches.
 - `DB` (`wcjbt-auth`) — the identity model (`users`, `identities`).
 
-Edit `wrangler.jsonc` and replace each `PLACEHOLDER_*` with the real id.
+Paste the returned ids into the `kv_namespaces` and `d1_databases` blocks of
+`wrangler.jsonc`, keeping the binding names `SESSIONS`, `ATPROTO`, `DB` and
+`migrations_dir: migrations` unchanged.
 
 ## 2 — Apply the database migration
 
