@@ -46,3 +46,6 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Claude Code local settings (per-user; may carry approvals)
+.claude/settings.local.json
