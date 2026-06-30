@@ -45,22 +45,19 @@ project in a new session or conversation.
   `a0b51c43`, ~4 min after push).
 
 ## ⛔ Blocked / watch (none of these take the live site down)
-- **`CONTEXT7_API_KEY` / Context7 MCP** — two separate things:
-  - *Durability:* move the key from `~/.bashrc` to the durable **environment settings**.
-    It's injected into the **MCP subprocess**, not the interactive shell (verified
-    2026-06-30: `CONTEXT7_API_KEY` is unset in the web session's shell and absent from
-    `~/.bashrc`, yet the `context7` server still started — so it's coming from elsewhere;
-    confirm it's the durable env settings so it survives container resets).
-  - *Web-session gotcha — DON'T re-chase this:* Context7 doc lookups **cannot work in
-    Claude Code on the web** as currently configured, regardless of the key. This
-    environment's **network policy denies `context7.com` egress** — the agent proxy
-    returns `403` on CONNECT (`recentRelayFailures` lists `context7.com:443`), which the
-    MCP server surfaces as the misleading `fetch failed` / `TypeError: fetch failed`. It
-    is **not** a key/auth problem. To use Context7 in *web* sessions, allowlist
-    `context7.com` in the environment's network policy; it already works **locally**
-    (no egress wall). `.mcp.json` itself is correct — do **not** run `npx ctx7 setup`
-    (it would rewrite the config and risks inlining the key, breaking the
-    key-never-in-the-file rule).
+- _Nothing currently blocked or on watch._
+
+### ✅ Recently resolved
+- **`CONTEXT7_API_KEY` / Context7 MCP egress — RESOLVED 2026-06-30** (environment/operator
+  change, not a code merge). Both former concerns cleared:
+  - *Durability + key validity:* the key lives in the durable **environment settings**
+    (injected into the **MCP subprocess**, not the interactive shell) and is **valid** — a
+    web-session `resolve-library-id "Astro"` MCP call returned real `/withastro/docs` results.
+  - *Web-session egress:* `context7.com` is now **allowlisted** in this environment's network
+    policy. The same MCP call that previously surfaced `403` on CONNECT / `fetch failed` now
+    succeeds, so Context7 doc lookups work in Claude Code on the web. `.mcp.json` is unchanged
+    and correct — still do **not** run `npx ctx7 setup` (it risks inlining the key, breaking
+    the key-never-in-the-file rule).
 
 ## 🤔 Decisions needed (none block the live site)
 - **Alfred's PWA** — a **separate** project. If deployed from here, give it its own
