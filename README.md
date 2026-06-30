@@ -188,3 +188,5 @@ lighthouserc.json  Lighthouse CI budgets   ·   lychee.toml  dead-link config
 
 [AGPL-3.0-or-later](./LICENSE). The methodology, catalog, and engine are open so
 any collective can run their own.
+
+<!-- ci: trigger Workers Builds deploy to verify build credential (2026-06-30) -->
