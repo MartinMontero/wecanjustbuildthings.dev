@@ -4,7 +4,7 @@ A living snapshot of where **wecanjustbuildthings.dev** stands — what's done, 
 blocked, what needs a decision, what's deferred. **Read this first** when picking up the
 project in a new session or conversation.
 
-**Last updated:** 2026-06-29 · **Canonical branch:** `main` (sole branch; GitHub default)
+**Last updated:** 2026-06-30 · **Canonical branch:** `main` (sole branch; GitHub default)
 
 > Detailed external-operator tasks + the deferred-work ledger live in
 > `docs/OPERATOR-RUNBOOK.md`. Non-negotiable constraints live in `CLAUDE.md`.
@@ -35,17 +35,32 @@ project in a new session or conversation.
   (never in the file), local approval in gitignored `.claude/settings.local.json`.
 - **GitHub OAuth** app registered; Worker secrets set (`BLUESKY_PRIVATE_KEY_JWK`,
   `GITHUB_OAUTH_CLIENT_ID/SECRET`).
+- **Cloudflare CLI/agent token** (`CLOUDFLARE_API_TOKEN`) — verified working 2026-06-30:
+  resolves to `These3remain@gmail.com's Account` (`7c69…1ee5`); `whoami` / KV list / D1 list /
+  `deployments status` all succeed. Lacks Pages + User Details:Read by design (not needed).
+  To re-create on an account move: Workers Scripts·Edit, Workers KV·Edit, D1·Edit (+ account read).
+- **Workers Builds deploy credential** — the Build → API token is now a
+  wecanjustbuildthings-owned token; verified end-to-end 2026-06-30 (a push to `main` ran
+  `npm run build` + `npx wrangler deploy` and produced a fresh production deployment
+  `a0b51c43`, ~4 min after push).
 
 ## ⛔ Blocked / watch (none of these take the live site down)
-- **`CLOUDFLARE_API_TOKEN` (CLI/agent)** — rotate to a properly-scoped token: Workers
-  Scripts·Edit, Workers KV·Edit, D1·Edit, Pages·Edit, Account Settings·Read, Memberships·Read;
-  account `7c698d3b94888bc42ba17564cc9c1ee5`; no/long TTL. Set it in the environment settings,
-  then start a **fresh session** (a resumed session caches the old value). Blocks CLI
-  verification + manual deploys — **not** the running site or Git-push auto-deploys.
-- **Workers Builds API token** — must be a wecanjustbuildthings-owned token (it had been the
-  unrelated *"basecampyvr build token"*). Swap it in Workers Builds → Settings → Build → API
-  token, and confirm it isn't expiring.
-- **`CONTEXT7_API_KEY`** — move from `~/.bashrc` to the environment settings for durability.
+- **`CONTEXT7_API_KEY` / Context7 MCP** — two separate things:
+  - *Durability:* move the key from `~/.bashrc` to the durable **environment settings**.
+    It's injected into the **MCP subprocess**, not the interactive shell (verified
+    2026-06-30: `CONTEXT7_API_KEY` is unset in the web session's shell and absent from
+    `~/.bashrc`, yet the `context7` server still started — so it's coming from elsewhere;
+    confirm it's the durable env settings so it survives container resets).
+  - *Web-session gotcha — DON'T re-chase this:* Context7 doc lookups **cannot work in
+    Claude Code on the web** as currently configured, regardless of the key. This
+    environment's **network policy denies `context7.com` egress** — the agent proxy
+    returns `403` on CONNECT (`recentRelayFailures` lists `context7.com:443`), which the
+    MCP server surfaces as the misleading `fetch failed` / `TypeError: fetch failed`. It
+    is **not** a key/auth problem. To use Context7 in *web* sessions, allowlist
+    `context7.com` in the environment's network policy; it already works **locally**
+    (no egress wall). `.mcp.json` itself is correct — do **not** run `npx ctx7 setup`
+    (it would rewrite the config and risks inlining the key, breaking the
+    key-never-in-the-file rule).
 
 ## 🤔 Decisions needed (none block the live site)
 - **Alfred's PWA** — a **separate** project. If deployed from here, give it its own
