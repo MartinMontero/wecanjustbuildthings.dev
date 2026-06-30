@@ -4,7 +4,7 @@ A living snapshot of where **wecanjustbuildthings.dev** stands — what's done, 
 blocked, what needs a decision, what's deferred. **Read this first** when picking up the
 project in a new session or conversation.
 
-**Last updated:** 2026-06-29 · **Canonical branch:** `main` (sole branch; GitHub default)
+**Last updated:** 2026-06-30 · **Canonical branch:** `main` (sole branch; GitHub default)
 
 > Detailed external-operator tasks + the deferred-work ledger live in
 > `docs/OPERATOR-RUNBOOK.md`. Non-negotiable constraints live in `CLAUDE.md`.
@@ -45,7 +45,22 @@ project in a new session or conversation.
 - **Workers Builds API token** — must be a wecanjustbuildthings-owned token (it had been the
   unrelated *"basecampyvr build token"*). Swap it in Workers Builds → Settings → Build → API
   token, and confirm it isn't expiring.
-- **`CONTEXT7_API_KEY`** — move from `~/.bashrc` to the environment settings for durability.
+- **`CONTEXT7_API_KEY` / Context7 MCP** — two separate things:
+  - *Durability:* move the key from `~/.bashrc` to the durable **environment settings**.
+    It's injected into the **MCP subprocess**, not the interactive shell (verified
+    2026-06-30: `CONTEXT7_API_KEY` is unset in the web session's shell and absent from
+    `~/.bashrc`, yet the `context7` server still started — so it's coming from elsewhere;
+    confirm it's the durable env settings so it survives container resets).
+  - *Web-session gotcha — DON'T re-chase this:* Context7 doc lookups **cannot work in
+    Claude Code on the web** as currently configured, regardless of the key. This
+    environment's **network policy denies `context7.com` egress** — the agent proxy
+    returns `403` on CONNECT (`recentRelayFailures` lists `context7.com:443`), which the
+    MCP server surfaces as the misleading `fetch failed` / `TypeError: fetch failed`. It
+    is **not** a key/auth problem. To use Context7 in *web* sessions, allowlist
+    `context7.com` in the environment's network policy; it already works **locally**
+    (no egress wall). `.mcp.json` itself is correct — do **not** run `npx ctx7 setup`
+    (it would rewrite the config and risks inlining the key, breaking the
+    key-never-in-the-file rule).
 
 ## 🤔 Decisions needed (none block the live site)
 - **Alfred's PWA** — a **separate** project. If deployed from here, give it its own
