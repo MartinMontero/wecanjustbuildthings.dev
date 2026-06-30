@@ -35,16 +35,16 @@ project in a new session or conversation.
   (never in the file), local approval in gitignored `.claude/settings.local.json`.
 - **GitHub OAuth** app registered; Worker secrets set (`BLUESKY_PRIVATE_KEY_JWK`,
   `GITHUB_OAUTH_CLIENT_ID/SECRET`).
+- **Cloudflare CLI/agent token** (`CLOUDFLARE_API_TOKEN`) — verified working 2026-06-30:
+  resolves to `These3remain@gmail.com's Account` (`7c69…1ee5`); `whoami` / KV list / D1 list /
+  `deployments status` all succeed. Lacks Pages + User Details:Read by design (not needed).
+  To re-create on an account move: Workers Scripts·Edit, Workers KV·Edit, D1·Edit (+ account read).
+- **Workers Builds deploy credential** — the Build → API token is now a
+  wecanjustbuildthings-owned token; verified end-to-end 2026-06-30 (a push to `main` ran
+  `npm run build` + `npx wrangler deploy` and produced a fresh production deployment
+  `a0b51c43`, ~4 min after push).
 
 ## ⛔ Blocked / watch (none of these take the live site down)
-- **`CLOUDFLARE_API_TOKEN` (CLI/agent)** — rotate to a properly-scoped token: Workers
-  Scripts·Edit, Workers KV·Edit, D1·Edit, Pages·Edit, Account Settings·Read, Memberships·Read;
-  account `7c698d3b94888bc42ba17564cc9c1ee5`; no/long TTL. Set it in the environment settings,
-  then start a **fresh session** (a resumed session caches the old value). Blocks CLI
-  verification + manual deploys — **not** the running site or Git-push auto-deploys.
-- **Workers Builds API token** — must be a wecanjustbuildthings-owned token. If it's set to a
-  token borrowed from any other project, swap it in Workers Builds → Settings → Build → API
-  token, and confirm it isn't expiring.
 - **`CONTEXT7_API_KEY` / Context7 MCP** — two separate things:
   - *Durability:* move the key from `~/.bashrc` to the durable **environment settings**.
     It's injected into the **MCP subprocess**, not the interactive shell (verified
