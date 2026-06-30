@@ -42,8 +42,8 @@ project in a new session or conversation.
   account `7c698d3b94888bc42ba17564cc9c1ee5`; no/long TTL. Set it in the environment settings,
   then start a **fresh session** (a resumed session caches the old value). Blocks CLI
   verification + manual deploys — **not** the running site or Git-push auto-deploys.
-- **Workers Builds API token** — must be a wecanjustbuildthings-owned token (it had been the
-  unrelated *"basecampyvr build token"*). Swap it in Workers Builds → Settings → Build → API
+- **Workers Builds API token** — must be a wecanjustbuildthings-owned token. If it's set to a
+  token borrowed from any other project, swap it in Workers Builds → Settings → Build → API
   token, and confirm it isn't expiring.
 - **`CONTEXT7_API_KEY` / Context7 MCP** — two separate things:
   - *Durability:* move the key from `~/.bashrc` to the durable **environment settings**.

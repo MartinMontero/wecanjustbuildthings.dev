@@ -45,5 +45,5 @@ builder, augment their ability, and protect their privacy and security.
 - **Secrets never in the repo.** Worker secrets via `wrangler secret put`; env vars via the
   environment settings; `.mcp.json` references `${VARS}`, never literal keys.
 - **Cloudflare account:** these3remain@gmail.com (account id
-  `7c698d3b94888bc42ba17564cc9c1ee5`). **basecampyvr is a SEPARATE project** — keep its
-  tokens and resources out of this one.
+  `7c698d3b94888bc42ba17564cc9c1ee5`). Only wecanjustbuildthings.dev belongs to this project —
+  keep any other project's tokens and resources out of it.
