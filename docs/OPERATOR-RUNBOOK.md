@@ -21,13 +21,13 @@ drift over time; treat them as starting points, not exact addresses.
 
 | Task | Where | Status / notes |
 |---|---|---|
-| KV + D1 provisioning (`SESSIONS`, `ATPROTO`, `DB`) | `wrangler kv namespace create` / `d1 create` | `wrangler.jsonc:16-22` already holds **real IDs**, so this looks **done** on the current account. Re-run only when moving accounts (`docs/AUTH_PROVISIONING.md` §1). |
+| KV + D1 provisioning (`SESSIONS`, `ATPROTO`, `DB`) | `wrangler kv namespace create` / `d1 create` | The `kv_namespaces` + `d1_databases` blocks in `wrangler.jsonc` already hold **real IDs**, so this looks **done** on the current account. Re-run only when moving accounts (`docs/AUTH_PROVISIONING.md` §1). |
 | Apply the D1 migration | `npm run migrate` (`--remote`) | Creates `users` + `identities` (`migrations/0001_auth.sql`). Run once per environment. |
 | Set Worker secrets | `wrangler secret put …` | `BLUESKY_PRIVATE_KEY_JWK`, `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`. Not verifiable from the repo — confirm with the curl checks below. |
 | Confirm deploy topology | CF dashboard | Auth needs the **Worker**, not plain Pages. Either Worker-serves-everything (recommended) or Pages + an API-only Worker (`docs/AUTH_PROVISIONING.md` top). |
 | Attach the custom domain to the Worker | Workers & Pages → Domains & Routes | Ensure the same domain isn't *also* served by a Pages project. |
 | Workers Builds env vars (build-time) | CF Workers Builds → Settings → Variables | `SITE_URL`, optional `PLAUSIBLE_DOMAIN` (enables analytics), and `CSP_MODE=enforce` to flip the CSP out of report-only (Part B §6). |
-| Review CSP reports, then flip to enforce | Workers Logs (`observability` on, `wrangler.jsonc:33`) | CSP currently ships **Report-Only** (`astro.config.mjs:63`). After a clean soak, set `CSP_MODE=enforce`. |
+| Review CSP reports, then flip to enforce | Workers Logs (the `observability` block in `wrangler.jsonc`) | CSP currently ships **Report-Only** (`astro.config.mjs:63`). After a clean soak, set `CSP_MODE=enforce`. |
 
 ### 🐙 GitHub
 
@@ -37,7 +37,7 @@ drift over time; treat them as starting points, not exact addresses.
 | Sveltia CMS auth backend | A GitHub OAuth app / auth proxy for the CMS | `/admin` uses `backend: github` (`public/admin/config.yml:1-3`). Editors can't log into the CMS without a GitHub OAuth app + auth endpoint wired to Sveltia. **Verify this is set up** — it's distinct from the repo-creation app above. |
 | Add the `ANTHROPIC_API_KEY` Actions secret | repo → Settings → Secrets → Actions | Only for the optional `translate-catalog.yml` workflow (`:69`). Everything else uses the auto `GITHUB_TOKEN` or keyless OIDC. |
 | Mark the additive gates as required checks | repo → Settings → Branch protection | `path-a`, `e2e`, `skills` (and `verify`/`security-pr`/`quality`) run on PRs but only **block merges** if marked required. |
-| Decide the production-branch strategy | repo settings | Work currently lands on a feature branch; the workflows + Workers Builds key off `main` and PRs. Confirm whether/how the feature branch promotes to `main`. |
+| Production-branch strategy | repo settings | **Resolved:** `main` is the sole canonical branch — feature branches merge to `main` via PR, and Workers Builds deploys from `main` (see ROADMAP "Branch reconciliation"). No open decision. |
 
 ### 🦋 AT Protocol (Bluesky sign-in)
 
@@ -84,8 +84,8 @@ curl https://wecanjustbuildthings.dev/api/github/status           # configured:t
 | Runtime Worker secrets | `BLUESKY_PRIVATE_KEY_JWK`, `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET` | `wrangler secret put` |
 | Build-time env | `SITE_URL`, `PLAUSIBLE_DOMAIN` (opt), `CSP_MODE` (opt) | Workers Builds variables / CI |
 | CI secret | `ANTHROPIC_API_KEY` (opt) | GitHub Actions secrets |
-| Bindings | `SESSIONS` (KV), `ATPROTO` (KV), `DB` (D1) | `wrangler.jsonc` |
-| Runtime var | `SITE_URL` | `wrangler.jsonc:23-27` |
+| Bindings | `SESSIONS` (KV), `ATPROTO` (KV), `DB` (D1), `AUTH_RATE_LIMITER` (ratelimit) | `wrangler.jsonc` |
+| Runtime var | `SITE_URL` | the `vars` block in `wrangler.jsonc` |
 
 Deploys are handled by **Cloudflare Workers Builds** (dashboard-connected repo) — there is
 no `wrangler deploy` in CI, so no `CLOUDFLARE_API_TOKEN` is needed in GitHub Actions.

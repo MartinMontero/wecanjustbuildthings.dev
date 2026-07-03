@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "source": { "path": "package-lock.json", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "below", "version": "1.0.0", "ecosystem": "npm" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-test-below-89",
+              "affected": [
+                { "ranges": [ { "type": "SEMVER", "events": [ { "introduced": "0" }, { "fixed": "1.0.1" } ] } ] }
+              ],
+              "database_specific": { "severity": "HIGH" }
+            }
+          ],
+          "groups": [
+            { "ids": ["GHSA-test-below-89"], "max_severity": "8.9" }
+          ]
+        }
+      ]
+    }
+  ]
+}

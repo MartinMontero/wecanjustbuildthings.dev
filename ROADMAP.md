@@ -4,7 +4,7 @@ A living snapshot of where **wecanjustbuildthings.dev** stands — what's done, 
 blocked, what needs a decision, what's deferred. **Read this first** when picking up the
 project in a new session or conversation.
 
-**Last updated:** 2026-06-30 · **Canonical branch:** `main` (sole branch; GitHub default)
+**Last updated:** 2026-07-03 · **Canonical branch:** `main` (sole branch; GitHub default)
 
 > Detailed external-operator tasks + the deferred-work ledger live in
 > `docs/OPERATOR-RUNBOOK.md`. Non-negotiable constraints live in `CLAUDE.md`.

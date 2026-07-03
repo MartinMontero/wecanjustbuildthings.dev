@@ -23,14 +23,28 @@ function fakeD1(): D1Database {
   const users = new Map<string, UserRow>();
   const identities = new Map<string, { user_id: string }>(); // key: provider|subject
   const apply = (sql: string, a: unknown[]) => {
-    if (sql.includes('INSERT INTO users')) users.set(a[0] as string, { id: a[0] as string, created_at: a[1] as number, display_name: (a[2] ?? null) as string | null });
-    else if (sql.includes('INTO identities')) identities.set(`${a[0]}|${a[1]}`, { user_id: a[2] as string });
+    if (sql.includes('DELETE FROM users')) { users.delete(a[0] as string); return; }
+    if (sql.includes('INTO users')) {
+      const id = a[0] as string;
+      if (sql.includes('OR IGNORE') && users.has(id)) return; // OR IGNORE: keep existing
+      users.set(id, { id, created_at: a[1] as number, display_name: (a[2] ?? null) as string | null });
+      return;
+    }
+    if (sql.includes('INTO identities')) {
+      const key = `${a[0]}|${a[1]}`;
+      if (sql.includes('OR IGNORE') && identities.has(key)) return; // OR IGNORE: don't clobber a racer
+      identities.set(key, { user_id: a[2] as string }); // INSERT / OR REPLACE: (re)point
+    }
   };
   const make = (sql: string): D1PreparedStatement => {
     let args: unknown[] = [];
     const stmt: D1PreparedStatement = {
       bind(...a) { args = a; return stmt; },
       async first<T>() {
+        if (sql.includes('JOIN users')) { // joined returning-user read
+          const idn = identities.get(`${args[0]}|${args[1]}`);
+          return (((idn && users.get(idn.user_id)) ?? null) as T | null);
+        }
         if (sql.includes('FROM users WHERE id')) return ((users.get(args[0] as string) ?? null) as T | null);
         if (sql.includes('FROM identities WHERE provider')) { const r = identities.get(`${args[0]}|${args[1]}`); return ((r ?? null) as T | null); }
         return null;
@@ -82,7 +96,7 @@ test('readCookie extracts the named cookie value', () => {
 test('createSession → resolveSession round-trips to the live user', async () => {
   const env = envOf();
   const user = await getOrCreateUserByIdentity(env.DB, 'nostr', 'pubkeyA', 'Alice');
-  const id = await createSession(env, user.id);
+  const id = await createSession(env, user);
   const resolved = await resolveSession(withCookie(id), env);
   assert.ok(resolved);
   assert.equal(resolved!.user.id, user.id);
@@ -109,7 +123,7 @@ test('resolveSession rejects a tampered/corrupt session record (malformed JSON o
 test('destroySession invalidates the session', async () => {
   const env = envOf();
   const user = await getOrCreateUserByIdentity(env.DB, 'nostr', 'pubkeyB', null);
-  const id = await createSession(env, user.id);
+  const id = await createSession(env, user);
   assert.ok(await resolveSession(withCookie(id), env));
   await destroySession(env, id);
   assert.equal(await resolveSession(withCookie(id), env), null);
@@ -123,4 +137,28 @@ test('getOrCreateUserByIdentity is idempotent per (provider, subject) and isolat
   const other = await getOrCreateUserByIdentity(env.DB, 'bluesky', 'did:plc:xyz', null);
   assert.notEqual(other.id, first.id); // different identity → different user (v1: no auto-link)
   assert.equal((await getUserById(env.DB, first.id))!.id, first.id);
+});
+
+test('getOrCreateUserByIdentity repairs a dangling identity (user row vanished) without returning a phantom id', async () => {
+  const env = envOf();
+  const first = await getOrCreateUserByIdentity(env.DB, 'bluesky', 'did:plc:dangle', 'Orig');
+  // Simulate the user row disappearing out from under the identity.
+  await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(first.id).run();
+  assert.equal(await getUserById(env.DB, first.id), null);
+  const repaired = await getOrCreateUserByIdentity(env.DB, 'bluesky', 'did:plc:dangle', 'New');
+  assert.notEqual(repaired.id, first.id);           // repointed to a fresh user
+  assert.ok(await getUserById(env.DB, repaired.id)); // and that user actually exists (no phantom)
+});
+
+test('resolveSession serves the denormalized user snapshot without a live D1 read', async () => {
+  const env = envOf();
+  const user = await getOrCreateUserByIdentity(env.DB, 'nostr', 'denorm', 'Denorma');
+  const id = await createSession(env, user);
+  // Delete the user from D1: if resolveSession still returns it, it used the session
+  // snapshot (the perf fast path), not a per-page-load D1 lookup.
+  await env.DB.prepare('DELETE FROM users WHERE id = ?').bind(user.id).run();
+  const resolved = await resolveSession(withCookie(id), env);
+  assert.ok(resolved);
+  assert.equal(resolved!.user.id, user.id);
+  assert.equal(resolved!.user.displayName, 'Denorma');
 });

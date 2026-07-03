@@ -15,7 +15,6 @@ export interface EstimatorStrings {
   pathC: string;
   pathCDesc: string;
   derivedHeading: string;
-  derivedNote: string;
   missingHeading: string;
   missingNote: string;
   fMau: string;
@@ -33,9 +32,8 @@ export interface EstimatorStrings {
   recomputeBtn: string;
   computing: string;
   resultsHeading: string;
+  tiersCaveat: string;
   perMonth: string;
-  breakdown: string;
-  qty: string;
   provenanceSnapshot: string;
   provenanceLive: string;
   lastVerified: string;
@@ -61,7 +59,6 @@ export const STRINGS: Record<Lang, EstimatorStrings> = {
     pathC: 'In your browser (Path C)',
     pathCDesc: 'Your browser resolves pricing directly. No server involved; some provider endpoints may be unreachable (CORS).',
     derivedHeading: 'Inferred from your project',
-    derivedNote: 'Derived from what the Build Studio captured. Override anything below.',
     missingHeading: 'A few numbers it could not infer',
     missingNote: 'These are not in your build session yet. Enter them once and they are saved back, so the rest of the platform stays in sync.',
     fMau: 'Expected monthly active users',
@@ -79,9 +76,8 @@ export const STRINGS: Record<Lang, EstimatorStrings> = {
     recomputeBtn: 'Recompute',
     computing: 'Estimating…',
     resultsHeading: 'Estimated monthly cost',
+    tiersCaveat: 'Illustrative tiers: the usage bands and scale factors are placeholders, not finalized product figures — treat every number as a rough shape, not a quote.',
     perMonth: '/ month',
-    breakdown: 'Breakdown',
-    qty: 'qty',
     provenanceSnapshot: 'snapshot',
     provenanceLive: 'live',
     lastVerified: 'last verified',
@@ -105,7 +101,6 @@ export const STRINGS: Record<Lang, EstimatorStrings> = {
     pathC: 'En tu navegador (Ruta C)',
     pathCDesc: 'Tu navegador resuelve los precios directamente. Sin servidor; algunos endpoints de proveedores pueden ser inaccesibles (CORS).',
     derivedHeading: 'Inferido de tu proyecto',
-    derivedNote: 'Derivado de lo que captó el Estudio de construcción. Puedes anular cualquier valor.',
     missingHeading: 'Algunos números que no pudo inferir',
     missingNote: 'Aún no están en tu sesión de construcción. Introdúcelos una vez y se guardan, para que el resto de la plataforma siga sincronizada.',
     fMau: 'Usuarios activos mensuales previstos',
@@ -123,9 +118,8 @@ export const STRINGS: Record<Lang, EstimatorStrings> = {
     recomputeBtn: 'Recalcular',
     computing: 'Estimando…',
     resultsHeading: 'Coste mensual estimado',
+    tiersCaveat: 'Niveles ilustrativos: las bandas de uso y los factores de escala son provisionales, no cifras de producto definitivas — trata cada número como una forma aproximada, no una cotización.',
     perMonth: '/ mes',
-    breakdown: 'Desglose',
-    qty: 'cant.',
     provenanceSnapshot: 'instantánea',
     provenanceLive: 'en vivo',
     lastVerified: 'verificado por última vez',
@@ -149,7 +143,6 @@ export const STRINGS: Record<Lang, EstimatorStrings> = {
     pathC: 'في متصفحك (المسار C)',
     pathCDesc: 'يحلّ متصفحك الأسعار مباشرة. دون خادم؛ وقد تتعذّر بعض نقاط نهاية المزوّدين (CORS).',
     derivedHeading: 'مُستنتَج من مشروعك',
-    derivedNote: 'مُشتقّ ممّا التقطه استوديو البناء. يمكنك تجاوز أي قيمة أدناه.',
     missingHeading: 'بعض الأرقام التي تعذّر استنتاجها',
     missingNote: 'ليست بعد في جلسة البناء. أدخلها مرة وتُحفَظ، حتى تبقى بقية المنصّة متزامنة.',
     fMau: 'المستخدمون النشطون شهريًّا المتوقّعون',
@@ -167,9 +160,8 @@ export const STRINGS: Record<Lang, EstimatorStrings> = {
     recomputeBtn: 'إعادة الحساب',
     computing: 'جارٍ التقدير…',
     resultsHeading: 'التكلفة الشهرية المُقدّرة',
+    tiersCaveat: 'مستويات توضيحية: نطاقات الاستخدام وعوامل القياس قيم مؤقتة وليست أرقامًا نهائية للمنتج — عامِل كل رقم كشكل تقريبي لا كعرض سعر.',
     perMonth: '/ شهريًّا',
-    breakdown: 'التفصيل',
-    qty: 'الكمية',
     provenanceSnapshot: 'لقطة',
     provenanceLive: 'مباشر',
     lastVerified: 'آخر تحقّق',

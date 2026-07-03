@@ -11,7 +11,6 @@ export interface ModelCompassStrings {
   lead: string;
   sovereigntyNote: string;
   // column headers
-  colModel: string;
   colDeveloper: string;
   colJurisdiction: string;
   colTier: string;
@@ -20,7 +19,6 @@ export interface ModelCompassStrings {
   colCost: string;
   colBenchmark: string;
   colSelfHost: string;
-  colCaution: string;
   // tiers
   tierFrontier: string;
   tierExecution: string;
@@ -38,7 +36,6 @@ export interface ModelCompassStrings {
   filterAllTiers: string;
   // cell helpers
   todoConfirm: string;
-  source: string;
   selfHostedCompute: string;
   proprietary: string;
   vendorReported: string;
@@ -53,7 +50,6 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     title: 'Model Compass',
     lead: 'A sovereignty-first comparison of independent LLM tools and models — what runs where, who runs it, under whose law, and how self-hostable it is. Not a model picker: it calls nothing and proxies no keys.',
     sovereigntyNote: 'Listed most values-aligned first: self-hostable open weights and EU/Canada or confidential-computing options on top; US- and China-hosted APIs below, each with a caution label.',
-    colModel: 'Model / tool',
     colDeveloper: 'Developer',
     colJurisdiction: 'Jurisdiction',
     colTier: 'Tier',
@@ -62,7 +58,6 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     colCost: 'Cost /MTok',
     colBenchmark: 'Coding benchmark',
     colSelfHost: 'Self-host',
-    colCaution: 'Caution',
     tierFrontier: 'Frontier — research & architecture',
     tierExecution: 'Execution — code-building',
     tierBoth: 'Frontier & execution',
@@ -76,7 +71,6 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     filterNoUsJurisdiction: 'No US jurisdiction',
     filterAllTiers: 'All tiers',
     todoConfirm: 'TODO: confirm',
-    source: 'source',
     selfHostedCompute: 'self-hosted compute',
     proprietary: 'proprietary',
     vendorReported: 'vendor-reported',
@@ -89,7 +83,6 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     title: 'Brújula de modelos',
     lead: 'Una comparación con la soberanía primero de herramientas y modelos LLM independientes: qué se ejecuta dónde, quién lo ejecuta, bajo qué ley y cómo de autoalojable es. No es un selector de modelos: no llama a nada ni gestiona claves.',
     sovereigntyNote: 'Ordenado primero por afinidad de valores: pesos abiertos autoalojables y opciones de la UE/Canadá o de computación confidencial arriba; las API alojadas en EE. UU. y China abajo, cada una con una etiqueta de precaución.',
-    colModel: 'Modelo / herramienta',
     colDeveloper: 'Desarrollador',
     colJurisdiction: 'Jurisdicción',
     colTier: 'Nivel',
@@ -98,7 +91,6 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     colCost: 'Coste /MTok',
     colBenchmark: 'Prueba de código',
     colSelfHost: 'Autoalojable',
-    colCaution: 'Precaución',
     tierFrontier: 'Frontera — investigación y arquitectura',
     tierExecution: 'Ejecución — construcción de código',
     tierBoth: 'Frontera y ejecución',
@@ -112,7 +104,6 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     filterNoUsJurisdiction: 'Sin jurisdicción de EE. UU.',
     filterAllTiers: 'Todos los niveles',
     todoConfirm: 'PENDIENTE: confirmar',
-    source: 'fuente',
     selfHostedCompute: 'cómputo autoalojado',
     proprietary: 'propietario',
     vendorReported: 'informado por el proveedor',
@@ -125,7 +116,6 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     title: 'بوصلة النماذج',
     lead: 'مقارنة تضع السيادة أولًا لأدوات ونماذج اللغة المستقلة — ما الذي يعمل وأين، ومن يُشغّله، وتحت أي قانون، ومدى قابليته للاستضافة الذاتية. ليست أداة اختيار نماذج: لا تستدعي شيئًا ولا تُمرّر مفاتيح.',
     sovereigntyNote: 'مرتّبة بحسب التوافق مع القيم أولًا: الأوزان المفتوحة القابلة للاستضافة الذاتية وخيارات الاتحاد الأوروبي/كندا أو الحوسبة السرّية في الأعلى؛ وواجهات البرمجة المُستضافة في الولايات المتحدة والصين أدناه، ولكلٍّ منها وسم تنبيه.',
-    colModel: 'النموذج / الأداة',
     colDeveloper: 'المطوّر',
     colJurisdiction: 'الولاية القضائية',
     colTier: 'المستوى',
@@ -134,7 +124,6 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     colCost: 'التكلفة /مليون رمز',
     colBenchmark: 'اختبار البرمجة',
     colSelfHost: 'استضافة ذاتية',
-    colCaution: 'تنبيه',
     tierFrontier: 'الطليعة — البحث والتصميم',
     tierExecution: 'التنفيذ — كتابة الشيفرة',
     tierBoth: 'الطليعة والتنفيذ',
@@ -148,7 +137,6 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     filterNoUsJurisdiction: 'دون ولاية قضائية أمريكية',
     filterAllTiers: 'كل المستويات',
     todoConfirm: 'للتأكيد لاحقًا',
-    source: 'المصدر',
     selfHostedCompute: 'حوسبة ذاتية الاستضافة',
     proprietary: 'مملوك',
     vendorReported: 'مُبلَّغ من المزوّد',

@@ -27,3 +27,13 @@ export interface D1Database {
   prepare(query: string): D1PreparedStatement;
   batch(statements: D1PreparedStatement[]): Promise<D1Result[]>;
 }
+
+/**
+ * Cloudflare's native rate-limiting binding (declared in `wrangler.jsonc`
+ * `ratelimits`). The `simple` limiter counts in-memory per-colo — it never
+ * writes to KV — so it can guard the unauthenticated KV-writing sign-in
+ * endpoints without adding to the very write budget it protects.
+ */
+export interface RateLimit {
+  limit(options: { key: string }): Promise<{ success: boolean }>;
+}

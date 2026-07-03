@@ -107,3 +107,22 @@ test('a sanitized hostile profile yields a finite estimate, never NaN/Infinity',
     for (const quote of tier.quotes) assert.ok(Number.isFinite(quote.confirmedTotal), 'total must be finite');
   }
 });
+
+test('coerceUsageProfile rejects absurdly-large FINITE values that would overflow when scaled', () => {
+  // 1e308 is finite + positive, so a sign-only guard let it through and 1e308 * scale
+  // (up to 50) overflowed to Infinity. The magnitude ceiling now nulls it → baseline.
+  const u = coerceUsageProfile({ monthlyActiveUsers: 1e308, bandwidthGB: 1e13, storageGB: 5, source: {} });
+  assert.equal(u.monthlyActiveUsers, null); // above the ceiling → null → baseline
+  assert.equal(u.bandwidthGB, null);        // 1e13 > 1e12 ceiling → null
+  assert.equal(u.storageGB, 5);             // an ordinary value still passes
+});
+
+test('a huge-but-finite hostile profile still yields a FINITE estimate (overflow guard, priced adapter)', async () => {
+  const dirty = coerceUsageProfile({ monthlyActiveUsers: 1e308, bandwidthGB: 1e308, storageGB: 1e308, source: {} });
+  const est = await estimate({ usage: dirty, adapters: [fixtureAdapter], fetcher: noopFetch, dataSource: 'pathA-function' });
+  for (const tier of est.tiers) {
+    assert.ok(Number.isFinite(tier.resolvedUsage.monthlyActiveUsers));
+    assert.ok(Number.isFinite(tier.resolvedUsage.storageGB));
+    for (const q of tier.quotes) assert.ok(Number.isFinite(q.confirmedTotal), 'priced total must stay finite for huge finite input');
+  }
+});

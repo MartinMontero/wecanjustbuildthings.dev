@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "source": { "path": "package-lock.json", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "boundary", "version": "1.0.0", "ecosystem": "npm" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-test-boundary-90",
+              "affected": [
+                { "ranges": [ { "type": "SEMVER", "events": [ { "introduced": "0" }, { "fixed": "1.0.1" } ] } ] }
+              ],
+              "database_specific": { "severity": "HIGH" }
+            }
+          ],
+          "groups": [
+            { "ids": ["GHSA-test-boundary-90"], "max_severity": "9.0" }
+          ]
+        }
+      ]
+    }
+  ]
+}

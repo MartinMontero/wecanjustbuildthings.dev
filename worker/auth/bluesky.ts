@@ -128,10 +128,25 @@ export function isValidHandle(input: string): boolean {
   return /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/.test(h);
 }
 
-/** Begin sign-in: returns the authorization URL to redirect the browser to. */
-export async function blueskyAuthorizeUrl(env: BlueskyEnv, handle: string): Promise<URL> {
+/** A browser-bound CSRF token (256-bit CSPRNG) used as the OAuth app-level `state`.
+ *  Set as an HttpOnly cookie at sign-in start and re-checked on callback so a login
+ *  begun in one browser can't be completed in another (login-CSRF defense). */
+export function newOAuthState(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Begin sign-in: returns the authorization URL AND the app-level `state` to bind to
+ *  the initiating browser (the caller stores it in an HttpOnly cookie). Passing our
+ *  own `state` makes it round-trip back on the callback so we can verify the browser. */
+export async function blueskyAuthorizeUrl(
+  env: BlueskyEnv,
+  handle: string,
+): Promise<{ url: URL; state: string }> {
   const client = await makeClient(env);
-  return client.authorize(normalizeHandle(handle), { scope: SCOPE });
+  const state = newOAuthState();
+  const url = await client.authorize(normalizeHandle(handle), { scope: SCOPE, state });
+  return { url, state };
 }
 
 /** Best-effort public handle for a DID (public AppView, no auth, no token). Used only
@@ -157,9 +172,19 @@ async function bestEffortDisplayName(did: string): Promise<string | null> {
 export async function blueskyCallback(
   env: BlueskyEnv,
   params: URLSearchParams,
+  expectedState: string | undefined,
 ): Promise<{ did: string; displayName: string | null }> {
   const client = await makeClient(env);
-  const { session } = await client.callback(params);
+  const { session, state } = await client.callback(params);
+  // Login-CSRF defense (CWE-352): the app-level `state` set at authorize() must match
+  // the browser-bound cookie the start handler stored. A forged or cross-browser
+  // callback carries no matching cookie, so it's rejected before we mint a session —
+  // mirroring the GitHub flow's gh_state check. The library already validated the
+  // OAuth `state` against its own store; this binds it to *this* browser.
+  if (!expectedState || state !== expectedState) {
+    try { await session.signOut(); } catch { /* best effort — our rejection stands */ }
+    throw new Error('oauth state does not match the initiating browser');
+  }
   const did = String(session.did);
   const displayName = await bestEffortDisplayName(did);
   // Sign-in only: don't hoard access/refresh tokens. Best-effort revoke + cleanup.

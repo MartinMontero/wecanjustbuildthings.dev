@@ -15,6 +15,13 @@ export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days
 interface SessionRecord {
   userId: string;
   createdAt: number;
+  // Denormalized user fields so resolving a session on every authenticated page
+  // load doesn't require a D1 read. Optional: sessions minted before this field
+  // fall back to D1. Trade-off: displayName is a snapshot (v1 has no rename path),
+  // and the fast path trusts the session over a live user-exists check (v1 has no
+  // user-deletion path) — both revisit D1 the day those features land.
+  userCreatedAt?: number;
+  displayName?: string | null;
 }
 
 export interface AuthEnv {
@@ -52,10 +59,15 @@ export function readCookie(request: Request, name: string): string | undefined {
   return undefined;
 }
 
-/** Mint a session for an authenticated user and return its id (for the cookie). */
-export async function createSession(env: AuthEnv, userId: string): Promise<string> {
+/** Mint a session for an authenticated user and return its id (for the cookie).
+ *  Denormalizes the user's display name + created-at into the record so resolving
+ *  the session later needs no D1 read. */
+export async function createSession(env: AuthEnv, user: User): Promise<string> {
   const id = newSessionId();
-  const record: SessionRecord = { userId, createdAt: Date.now() };
+  const record: SessionRecord = {
+    userId: user.id, createdAt: Date.now(),
+    userCreatedAt: user.createdAt, displayName: user.displayName,
+  };
   await env.SESSIONS.put(`sess:${id}`, JSON.stringify(record), { expirationTtl: SESSION_TTL_SECONDS });
   return id;
 }
@@ -72,7 +84,12 @@ export async function resolveSession(
 ): Promise<{ sessionId: string; user: User } | null> {
   const id = readCookie(request, SESSION_COOKIE);
   if (!id) return null;
-  const raw = await env.SESSIONS.get(`sess:${id}`);
+  let raw: string | null;
+  try {
+    raw = await env.SESSIONS.get(`sess:${id}`);
+  } catch {
+    return null; // transient KV error → unauthenticated, never a bubbled-up 500
+  }
   if (!raw) return null;
   let record: SessionRecord;
   try {
@@ -81,7 +98,17 @@ export async function resolveSession(
     return null;
   }
   if (!record?.userId) return null;
-  const user = await getUserById(env.DB, record.userId);
+  // Fast path: the record carries the denormalized user → no D1 round-trip.
+  if (record.userCreatedAt !== undefined && record.displayName !== undefined) {
+    return { sessionId: id, user: { id: record.userId, createdAt: record.userCreatedAt, displayName: record.displayName } };
+  }
+  // Older session (pre-denormalization): resolve through D1, tolerating errors.
+  let user: User | null;
+  try {
+    user = await getUserById(env.DB, record.userId);
+  } catch {
+    return null;
+  }
   if (!user) return null;
   return { sessionId: id, user };
 }

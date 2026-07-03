@@ -26,6 +26,14 @@
   "d1_databases": [
     { "binding": "DB", "database_name": "wcjbt-auth", "database_id": "d3240389-b265-4229-bff0-b8ab94c4d78d", "migrations_dir": "migrations" }
   ],
+
+  // Native per-colo rate limiter for the unauthenticated sign-in endpoints
+  // (Nostr challenge/verify, Bluesky OAuth start). The `simple` limiter counts
+  // in memory — it never writes to KV — so it caps abuse without adding to the KV
+  // write budget it protects. Keyed per bucket + client IP in worker/index.ts.
+  "ratelimits": [
+    { "name": "AUTH_RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 20, "period": 60 } }
+  ],
   "vars": {
     // Canonical prod origin (used for OAuth client metadata + redirects). Local dev
     // overrides this via .dev.vars (http://localhost:8788).

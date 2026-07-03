@@ -14,11 +14,16 @@ const TIER_LABEL: Record<TierId, string> = { seed: 'Seed', growth: 'Growth', sca
 const COMPUTE_POSTURES: readonly ComputePosture[] = ['edge', 'serverless', 'always-on'];
 const USAGE_FIELDS: readonly UsageField[] = ['monthlyActiveUsers', 'bandwidthGB', 'storageGB', 'compute', 'database'];
 
-/** A finite, non-negative number, or null. NaN / Infinity / negative / non-number
+/** A finite, non-negative number within a sane magnitude ceiling, or null. NaN /
+ *  Infinity / negative / non-number — and absurdly-large finite values that would
+ *  overflow to Infinity once scaled by a tier factor (up to 50×) or a unit price —
  *  all become null, so the estimator falls back to the tier baseline instead of
- *  multiplying garbage into a total. */
+ *  multiplying garbage (or a non-finite total) into a quote. The ceiling is far
+ *  beyond any real deployment (a trillion users/GB), so it only ever rejects input
+ *  that could never be a genuine estimate. */
+const MAX_USAGE = 1e12;
 const finiteNonNeg = (v: unknown): number | null =>
-  typeof v === 'number' && Number.isFinite(v) && v >= 0 ? v : null;
+  typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= MAX_USAGE ? v : null;
 
 /**
  * Coerce an untrusted value into a valid UsageProfile before any arithmetic runs.

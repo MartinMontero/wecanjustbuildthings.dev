@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { JoseKey } from '@atproto/jwk-jose';
-import { isValidHandle, normalizeHandle, blueskyClientMetadata, type BlueskyEnv } from '../auth/bluesky.ts';
+import { isValidHandle, normalizeHandle, blueskyClientMetadata, newOAuthState, type BlueskyEnv } from '../auth/bluesky.ts';
 import type { KVNamespace } from '../auth/cf.ts';
 
 function fakeKV(): KVNamespace {
@@ -55,6 +55,20 @@ test('blueskyClientMetadata: correct ids, least-privilege scope, and DPoP bindin
   assert.ok(md.grant_types?.includes('authorization_code'));
   assert.ok(md.grant_types?.includes('refresh_token'));
 });
+
+test('newOAuthState is a unique 256-bit (64 hex) CSPRNG token for browser-bound state', () => {
+  // The login-CSRF defense: this token is set as the bsky_state cookie at sign-in
+  // start AND passed as the OAuth app-level `state`, so the callback can prove the
+  // completing browser is the one that started. It must be unguessable + unique.
+  const a = newOAuthState(), b = newOAuthState();
+  assert.match(a, /^[0-9a-f]{64}$/);
+  assert.notEqual(a, b);
+});
+
+// NOTE: the end-to-end callback state-match rejection (blueskyCallback throwing on a
+// missing/mismatched cookie) needs a live PDS OAuth response to reach the check, so it
+// is covered by integration testing, not this offline unit suite. The token generator
+// above and the handler wiring (worker/tests/routing.test.ts) are what's unit-tested.
 
 test('blueskyClientMetadata publishes ONLY the public key (never the private "d")', async () => {
   const md = await blueskyClientMetadata(await envWithKey());
