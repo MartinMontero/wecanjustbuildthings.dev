@@ -44,6 +44,7 @@ builder, augment their ability, and protect their privacy and security.
 - **Keep state in the repo, not the chat** — update `ROADMAP.md` when something lands.
 - **Secrets never in the repo.** Worker secrets via `wrangler secret put`; env vars via the
   environment settings; `.mcp.json` references `${VARS}`, never literal keys.
-- **Cloudflare account:** these3remain@gmail.com (account id
-  `7c698d3b94888bc42ba17564cc9c1ee5`). Only wecanjustbuildthings.dev belongs to this project —
-  keep any other project's tokens and resources out of it.
+- **Cloudflare account:** account id `7c698d3b94888bc42ba17564cc9c1ee5` (the owner email is
+  intentionally omitted — personal PII does not belong in the repo; the account id is the
+  non-secret identifier). Only wecanjustbuildthings.dev belongs to this project — keep any
+  other project's tokens and resources out of it.
