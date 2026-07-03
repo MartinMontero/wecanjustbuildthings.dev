@@ -1,0 +1,46 @@
+---
+/**
+ * /console/ — the admin console. A deliberately bare, standalone static page
+ * (not a Starlight docs page): it renders nothing but the login island and is
+ * excluded from search engines.
+ *
+ * CONSTRAINT — /console/ MUST remain a static asset. Its CSP (the site policy
+ * plus `wss:` in connect-src for NIP-46 bunker relays) is delivered by the
+ * generated dist/_headers `/console/*` rule, and `_headers` applies ONLY to
+ * asset-layer responses. Routing this path through the Worker would silently
+ * strip that rule and break bunker sign-in the day the CSP flips to enforce.
+ * See renderHeadersFile in src/lib/security-headers.ts.
+ */
+import AdminConsole from '../../components/AdminConsole.svelte';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Console — We Can Just Build Things</title>
+  </head>
+  <body>
+    <main>
+      <h1>Console</h1>
+      <p class="muted">
+        Admin sign-in. Access is limited to a server-side allowlist of identities;
+        nothing here is open for registration.
+      </p>
+      <AdminConsole client:load />
+    </main>
+    <style>
+      body {
+        margin: 0; padding: 2rem 1rem; font: 16px/1.5 system-ui, sans-serif;
+        background: #16161d; color: #e8e8ef; display: flex; justify-content: center;
+      }
+      main { width: 100%; max-width: 34rem; display: grid; gap: 0.75rem; }
+      h1 { margin: 0; font-size: 1.4rem; }
+      .muted { color: #888; margin: 0 0 0.5rem; }
+      @media (prefers-color-scheme: light) {
+        body { background: #fafafa; color: #1a1a24; }
+      }
+    </style>
+  </body>
+</html>
