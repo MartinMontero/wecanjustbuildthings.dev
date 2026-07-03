@@ -48,6 +48,12 @@ project in a new session or conversation.
 - _Nothing currently blocked or on watch._
 
 ### ✅ Recently resolved
+- **`wecanjustbuildthings.dev` egress from web sessions — ALLOWLISTED 2026-07-03**
+  (environment/operator change, not a code merge). The `curl https://wecanjustbuildthings.dev/api/*`
+  verification checks in `docs/OPERATOR-RUNBOOK.md` are now runnable from Claude Code on the web
+  (previously `403` on CONNECT). Confirmed live from a web session: `/api/health` → `{"ok":true}`,
+  and `/api/auth/nostr/status`, `/api/auth/bluesky/status`, `/api/github/status` all →
+  `{"configured":true}`.
 - **`CONTEXT7_API_KEY` / Context7 MCP egress — RESOLVED 2026-06-30** (environment/operator
   change, not a code merge). Both former concerns cleared:
   - *Durability + key validity:* the key lives in the durable **environment settings**

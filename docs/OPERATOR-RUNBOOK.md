@@ -72,6 +72,11 @@ curl https://wecanjustbuildthings.dev/api/auth/bluesky/status     # configured:t
 curl https://wecanjustbuildthings.dev/api/github/status           # configured:true once the OAuth app is set
 ```
 
+> `wecanjustbuildthings.dev` egress is **allowlisted** in the Claude Code on the web
+> environment (as of 2026-07-03), so these checks are runnable from web sessions too — not
+> just locally. Last confirmed 2026-07-03: `/api/health` → `{"ok":true}`; the three status
+> endpoints → `{"configured":true}`.
+
 ### Consolidated secret / env inventory
 
 | Kind | Names | Set where |
