@@ -74,18 +74,20 @@ export function sanitizeDisplayName(input?: string | null): string | null {
 }
 
 /**
- * The seven checks. Returns the proven pubkey, or null for ANY failure — the
- * caller maps null to one generic 401 that never reveals which check failed.
+ * Checks 1–6 of the NIP-98 policy, parameterized by HTTP method so the admin API
+ * can verify per-request GET signatures with the SAME verifier (never a parallel
+ * one). Returns the proven pubkey + event id (the id lets a caller add its own
+ * check 7 — challenge consumption for sign-in, single-use event-id for per-request
+ * API auth). Null for ANY failure; callers map null to one generic 401.
  * `nowSeconds` is injectable so tests can exercise the timestamp window.
  */
-export async function verifyNostrAuth(
-  store: ChallengeStore,
+export async function verifyNip98Event(
   authHeader: string | null,
   rawBody: string,
   expectedUrl: string,
-  challenge: string,
+  expectedMethod: string,
   nowSeconds: number = Math.floor(Date.now() / 1000),
-): Promise<{ pubkey: string } | null> {
+): Promise<{ pubkey: string; eventId: string } | null> {
   if (!authHeader) return null;
 
   let event: Event;
@@ -97,21 +99,43 @@ export async function verifyNostrAuth(
 
   // 1. kind is NIP-98 HTTP Auth
   if (event.kind !== NIP98_KIND) return null;
-  // 2. `u` tag is exactly our verify endpoint (binds the event to this server)
+  // 2. `u` tag is exactly the expected endpoint (binds the event to this server)
   if (tagValue(event, 'u') !== expectedUrl) return null;
-  // 3. `method` tag is POST
-  if ((tagValue(event, 'method') ?? '').toUpperCase() !== 'POST') return null;
+  // 3. `method` tag is the expected HTTP method
+  if ((tagValue(event, 'method') ?? '').toUpperCase() !== expectedMethod.toUpperCase()) return null;
   // 4. created_at within a symmetric ±60s window (rejects stale AND future-dated)
   if (typeof event.created_at !== 'number' || Math.abs(nowSeconds - event.created_at) > TIMESTAMP_SKEW_SECONDS) return null;
-  // 5. `payload` tag is sha256 of the exact body (binds the event to this body,
-  //    which carries the challenge)
-  if (tagValue(event, 'payload') !== (await sha256Hex(rawBody))) return null;
+  // 5. `payload` tag is sha256 of the exact body. A bodyless request (GET) may
+  //    omit the tag per NIP-98 ("SHOULD be included if the request has a body"),
+  //    but if present it must still hash the empty string — never something else.
+  const payloadTag = tagValue(event, 'payload');
+  if (rawBody === '' && payloadTag === undefined) {
+    // acceptable: no body, no payload tag
+  } else if (payloadTag !== (await sha256Hex(rawBody))) {
+    return null;
+  }
   // 6. schnorr signature is valid (audited crypto). JSON-parsed events carry no
   //    cached verification symbol, so this really verifies.
   if (!verifyEvent(event)) return null;
-  // 7. challenge is live + single-use — consumed LAST, only after the event is
-  //    proven, so a bad attempt can't burn a good challenge.
-  if (!(await consumeChallenge(store, challenge))) return null;
 
-  return { pubkey: event.pubkey };
+  return { pubkey: event.pubkey, eventId: event.id };
+}
+
+/**
+ * The seven checks for challenge-based sign-in: checks 1–6 above (method POST) plus
+ * 7. the challenge is live + single-use — consumed LAST, only after the event is
+ * proven, so a bad attempt can't burn a good challenge.
+ */
+export async function verifyNostrAuth(
+  store: ChallengeStore,
+  authHeader: string | null,
+  rawBody: string,
+  expectedUrl: string,
+  challenge: string,
+  nowSeconds: number = Math.floor(Date.now() / 1000),
+): Promise<{ pubkey: string } | null> {
+  const proven = await verifyNip98Event(authHeader, rawBody, expectedUrl, 'POST', nowSeconds);
+  if (!proven) return null;
+  if (!(await consumeChallenge(store, challenge))) return null;
+  return { pubkey: proven.pubkey };
 }

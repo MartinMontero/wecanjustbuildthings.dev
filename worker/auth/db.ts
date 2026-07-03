@@ -31,6 +31,22 @@ export async function getUserById(db: D1Database, id: string): Promise<User | nu
   return row ? toUser(row) : null;
 }
 
+/** The proven protocol subject (Nostr pubkey / AT-Proto DID) behind a user for one
+ *  provider, or null if the user never signed in with it. Used by the admin
+ *  elevation flow to check the ORIGINAL cryptographic identity — never a display
+ *  name — against the server-side allowlist. */
+export async function getIdentitySubject(
+  db: D1Database,
+  userId: string,
+  provider: Provider,
+): Promise<string | null> {
+  const row = await db
+    .prepare('SELECT subject FROM identities WHERE user_id = ? AND provider = ?')
+    .bind(userId, provider)
+    .first<{ subject: string }>();
+  return row?.subject ?? null;
+}
+
 /**
  * Resolve the user behind a proven identity, creating the user+identity pair on
  * first sign-in. The subject (pubkey/DID) is the thing the caller has
