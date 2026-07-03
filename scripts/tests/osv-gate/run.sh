@@ -6,6 +6,10 @@
 #   - a CRITICAL with NO CVSS score (database_specific only) -> BLOCK (exit 1)   [no-CVSS fallback]
 #   - a CRITICAL with NO fix available                       -> warn, pass (exit 0) [fix-available filter]
 #   - a HIGH (CVSS 7.5)                                      -> pass (exit 0)        [CRITICAL-only]
+#   - CVSS 9.1 with a NON-critical label + a fix             -> BLOCK (exit 1)        [CVSS-only arm]
+#   - CVSS exactly 9.0 + a fix                               -> BLOCK (exit 1)        [>= 9.0 boundary]
+#   - CVSS 8.9 with a non-critical label + a fix             -> pass (exit 0)         [just below threshold]
+#   - an empty report (no results)                           -> pass (exit 0)         [clean scan]
 # Run: bash scripts/tests/osv-gate/run.sh
 set -uo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -28,6 +32,10 @@ check critical-fixable-cvss.json   1
 check critical-fixable-nocvss.json 1
 check critical-unfixable.json      0
 check high-nonblocking.json        0
+check cvss-only-block.json         1
+check boundary-9.0.json            1
+check below-threshold-8.9.json     0
+check empty-report.json            0
 
 if [ "$fail" -eq 0 ]; then echo "osv-critical-gate self-test: all assertions passed. ✅"; fi
 exit $fail

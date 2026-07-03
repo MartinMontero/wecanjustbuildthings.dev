@@ -47,9 +47,12 @@ export function advisoryRank(it: StackCandidate): number {
 /**
  * #3 — pin a generated package.json's dependencies to the concrete, license-
  * verified version recorded for each catalog entry (frontmatter `version`),
- * instead of the unbounded `latest`, so a starter installs the same tree that was
- * screened. Entries with no recorded version fall back to `latest`. A leading `v`
- * (some ecosystems tag releases `v1.2.3`) is stripped so the npm range is valid.
+ * instead of the unbounded `latest`. We emit an EXACT version (not a `^` range),
+ * so a starter installs the same screened version rather than a compatible-but-
+ * unscreened newer minor/patch. Entries with no recorded version fall back to
+ * `latest`. A leading `v` (some ecosystems tag releases `v1.2.3`) is stripped so
+ * the version is a valid npm specifier. NOTE: this pins the DIRECT dependencies;
+ * a committed lockfile is still what freezes the full transitive tree.
  */
 export function pinnedDependencies(
   jsDeps: { name: string; version?: string | null }[],
@@ -57,7 +60,7 @@ export function pinnedDependencies(
   return Object.fromEntries(
     jsDeps.map((it) => {
       const v = it.version?.trim().replace(/^v/, '');
-      return [it.name, v ? `^${v}` : 'latest'];
+      return [it.name, v ? v : 'latest']; // exact pin, not a `^` range
     }),
   );
 }

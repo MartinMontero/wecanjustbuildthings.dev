@@ -13,9 +13,9 @@ test('pinnedDependencies pins to each entry\'s recorded version, not "latest" (#
     { name: 'no-version-pkg', version: null },
   ];
   const out = pinnedDependencies(deps);
-  assert.equal(out['nostr-tools'], '^2.23.5'); // pinned, not "latest"
-  assert.equal(out['@noble/hashes'], '^1.4.0');
-  assert.equal(out['v-prefixed'], '^1.0.1'); // not ^v1.0.1
+  assert.equal(out['nostr-tools'], '2.23.5'); // EXACT pin (not a ^range, not "latest")
+  assert.equal(out['@noble/hashes'], '1.4.0');
+  assert.equal(out['v-prefixed'], '1.0.1'); // leading v stripped, exact
   // only entries with no recorded version fall back
   assert.equal(out['no-version-pkg'], 'latest');
   // when every entry has a version, no "latest" is emitted at all
@@ -28,7 +28,7 @@ test('pinnedDependencies trims surrounding whitespace before stripping the v pre
     { name: 'spacey', version: '  v1.2.3  ' }, // trimmed first → v stripped → valid range
     { name: 'blank', version: '   ' }, // whitespace-only → no version → latest
   ]);
-  assert.equal(out['spacey'], '^1.2.3'); // not '^v1.2.3' or '^ 1.2.3 '
+  assert.equal(out['spacey'], '1.2.3'); // trimmed, v-stripped, exact (not 'v1.2.3' or ' 1.2.3 ')
   assert.equal(out['blank'], 'latest');
 });
 

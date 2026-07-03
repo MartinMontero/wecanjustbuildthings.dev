@@ -13,10 +13,14 @@ const data = entry.data as { title: string; entry_type?: string; dependency_name
 const TOOL_TYPES = new Set(['tool', 'framework', 'library', 'service', 'protocol']);
 const isTool = Boolean(data.entry_type && TOOL_TYPES.has(data.entry_type));
 const seedName = data.dependency_name ?? data.title;
-const buildHref = `/build/?seed=${encodeURIComponent(seedName)}`;
 
-// Localize the button label from the page locale (house i18n convention).
+// Localize the button label AND the target from the page locale (house i18n
+// convention). Keep the link on the same locale as the page — mirroring
+// CatalogExplorer's buildBase — so an es/ar reader lands on the es/ar Studio, not
+// the English one.
 const locale = (Astro.currentLocale ?? 'en').slice(0, 2);
+const buildBase = locale === 'es' || locale === 'ar' ? `/${locale}/build/` : '/build/';
+const buildHref = `${buildBase}?seed=${encodeURIComponent(seedName)}`;
 const buildLabel =
   locale === 'es' ? 'Construir con esto' : locale === 'ar' ? 'ابدأ البناء بهذه' : 'Build with this';
 ---

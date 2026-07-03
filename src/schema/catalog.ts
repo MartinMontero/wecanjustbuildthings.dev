@@ -79,6 +79,15 @@ const recipeVerificationStep = z.object({
  * The full set of fields layered onto Starlight docs frontmatter.
  * Pass this object to `docsSchema({ extend: catalogExtend })`.
  */
+/**
+ * An http(s) URL. Zod's `z.url()` accepts ANY valid URL — including `javascript:`
+ * and `data:` — and Svelte renders a bound `href` verbatim, so an unconstrained URL
+ * that reached the dataset would become a clickable script link on the build/catalog
+ * pages. The catalog is the trust boundary; constrain the scheme here so no consumer
+ * has to re-validate at render time.
+ */
+const httpUrl = () => z.url().refine((u) => /^https?:\/\//i.test(u), { message: 'must be an http(s) URL' });
+
 export const catalogFields = z.object({
   /** Discriminator. Absent ⇒ a plain docs page. */
   entry_type: z.enum(ENTRY_TYPES).optional(),
@@ -88,14 +97,14 @@ export const catalogFields = z.object({
   ecosystem: z.enum(ECOSYSTEMS).optional(),
   category: z.string().min(1).optional(),
   what_it_does: z.string().min(1).optional(),
-  homepage_url: z.url().optional(),
-  repo_url: z.url().optional(),
-  registry_url: z.url().optional(),
+  homepage_url: httpUrl().optional(),
+  repo_url: httpUrl().optional(),
+  registry_url: httpUrl().optional(),
   protocols: z.array(z.enum(PROTOCOLS)).default([]),
 
   // ---- License verification (the accountability core) ----
   license_spdx: z.string().min(1).optional(),
-  license_source_url: z.url().optional(),
+  license_source_url: httpUrl().optional(),
   license_source_commit_sha: z.string().min(7).optional(),
 
   // ---- Maintenance ----

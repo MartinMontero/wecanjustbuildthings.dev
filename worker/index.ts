@@ -21,7 +21,7 @@
  * Static assets are served by the asset layer first; this Worker only runs for
  * /api/* routes, with env.ASSETS as the fallback for anything else.
  */
-import type { KVNamespace, D1Database } from './auth/cf.ts';
+import type { KVNamespace, D1Database, RateLimit } from './auth/cf.ts';
 import { authJson, authError } from './auth/respond.ts';
 import {
   resolveSession, destroySession, createSession, sessionCookie, clearSessionCookie,
@@ -58,9 +58,32 @@ export interface Env {
   // client assertions for Sign in with Bluesky. Set with `wrangler secret put`.
   // The matching public JWK is derived at runtime and published in the client metadata.
   BLUESKY_PRIVATE_KEY_JWK?: string;
+  // Native per-colo rate limiter (wrangler.jsonc `ratelimits`). Optional: when the
+  // binding is absent (local dev, tests, older deploy) the guards no-op so the site
+  // still works — the limiter only ever tightens, never breaks, a request path.
+  AUTH_RATE_LIMITER?: RateLimit;
 }
 
 const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';
+
+/** Client IP for rate-limit keying. `cf-connecting-ip` is set by Cloudflare's edge
+ *  and can't be spoofed by the client; fall back to a shared bucket if it's absent. */
+function clientIp(request: Request): string {
+  return request.headers.get('cf-connecting-ip') || 'unknown';
+}
+
+/** True when this request should be rejected for exceeding the rate limit. No-ops
+ *  (never limits) when the binding is unprovisioned, so unauthenticated abuse is
+ *  bounded in production without breaking dev/test or an unconfigured deploy. */
+async function overRateLimit(env: Env, request: Request, bucket: string): Promise<boolean> {
+  if (!env.AUTH_RATE_LIMITER) return false;
+  try {
+    const { success } = await env.AUTH_RATE_LIMITER.limit({ key: `${bucket}:${clientIp(request)}` });
+    return !success;
+  } catch {
+    return false; // limiter failure must never take sign-in down
+  }
+}
 
 
 function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
@@ -110,7 +133,12 @@ async function licenseHandler(url: URL): Promise<Response> {
     const d = await getJson(`https://hex.pm/api/packages/${encodeURIComponent(name)}`);
     if (d) { version = d.releases?.[0]?.version; license = d.meta?.licenses?.[0]; }
   }
-  return json({ name, eco, license: license ?? null, version: version ?? null, repo: repo ?? null });
+  // License/version metadata changes slowly; cache it so repeat catalog lookups on
+  // this now-live (run_worker_first) endpoint don't re-hit the upstream registry
+  // every time — saves an outbound round-trip and eases third-party rate limits.
+  return json({ name, eco, license: license ?? null, version: version ?? null, repo: repo ?? null }, 200, {
+    'cache-control': 'public, max-age=3600',
+  });
 }
 
 /** Path A for the Hosting Cost Estimator: compute pricing server-side at request
@@ -178,12 +206,19 @@ async function githubCallback(request: Request, url: URL, env: Env): Promise<Res
   const code = url.searchParams.get('code');
   const state = url.searchParams.get('state');
   if (!code || !state || state !== cookie(request, 'gh_state')) return fail('state');
-  const tokRes = await fetch('https://github.com/login/oauth/access_token', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ client_id: env.GITHUB_OAUTH_CLIENT_ID, client_secret: env.GITHUB_OAUTH_CLIENT_SECRET, code }),
-  });
-  const tok = await tokRes.json().catch(() => null) as any;
+  // Guard the upstream token exchange: a GitHub outage or network error mid-OAuth
+  // must surface as the friendly gh=error redirect, not an uncaught Worker 500.
+  let tok: any;
+  try {
+    const tokRes = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ client_id: env.GITHUB_OAUTH_CLIENT_ID, client_secret: env.GITHUB_OAUTH_CLIENT_SECRET, code }),
+    });
+    tok = await tokRes.json().catch(() => null);
+  } catch {
+    return fail('token');
+  }
   if (!tok?.access_token) return fail('token');
   const sep = back.includes('?') ? '&' : '?';
   return new Response(null, {
@@ -195,28 +230,52 @@ async function githubCallback(request: Request, url: URL, env: Env): Promise<Res
   });
 }
 
+// Bounds for the scaffold push. The Studio ships ~a dozen small text files; these
+// caps stop a hostile or buggy caller from turning one authenticated request into
+// thousands of GitHub subrequests or a multi-megabyte push (CWE-770). One PUT is
+// issued per file, so the file count directly bounds the outbound fan-out.
+const GH_MAX_FILES = 100;
+const GH_MAX_FILE_BYTES = 512 * 1024;       // 512 KB per file
+const GH_MAX_TOTAL_BYTES = 5 * 1024 * 1024; // 5 MB total
+
 async function githubCreate(request: Request): Promise<Response> {
+  // Cookie-authenticated (gh_token): answer through authJson so the response carries
+  // no wildcard CORS and no-store (CWE-942), matching the auth-response invariant.
   const token = cookie(request, 'gh_token');
-  if (!token) return json({ error: 'not authenticated; connect GitHub first' }, 401);
-  let body: any; try { body = await request.json(); } catch { return json({ error: 'invalid JSON' }, 400); }
+  if (!token) return authJson({ error: 'not authenticated; connect GitHub first' }, 401);
+  // Reject an over-large body before buffering it into memory.
+  const declaredBytes = Number(request.headers.get('content-length') ?? '0');
+  if (Number.isFinite(declaredBytes) && declaredBytes > GH_MAX_TOTAL_BYTES) return authJson({ error: 'payload too large' }, 413);
+  let body: any; try { body = await request.json(); } catch { return authJson({ error: 'invalid JSON' }, 400); }
   const repo = String(body.repo || '').replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 90);
-  const files = body.files as Record<string, string>;
-  if (!repo || !files) return json({ error: 'missing repo or files' }, 400);
+  const files = body.files;
+  if (!repo || !files || typeof files !== 'object' || Array.isArray(files)) return authJson({ error: 'missing repo or files' }, 400);
+  const entries = Object.entries(files as Record<string, unknown>);
+  if (entries.length === 0) return authJson({ error: 'no files' }, 400);
+  if (entries.length > GH_MAX_FILES) return authJson({ error: `too many files (max ${GH_MAX_FILES})` }, 413);
+  let totalBytes = 0;
+  for (const [path, content] of entries) {
+    if (typeof content !== 'string') return authJson({ error: `file "${path}" is not text` }, 400);
+    const bytes = new TextEncoder().encode(content).length;
+    if (bytes > GH_MAX_FILE_BYTES) return authJson({ error: `file "${path}" exceeds ${GH_MAX_FILE_BYTES} bytes` }, 413);
+    totalBytes += bytes;
+    if (totalBytes > GH_MAX_TOTAL_BYTES) return authJson({ error: 'payload too large' }, 413);
+  }
   const gh = (path: string, init: RequestInit = {}) =>
     fetch(`https://api.github.com${path}`, { ...init, headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json', 'user-agent': UA, ...(init.headers || {}) } });
 
   const created = await gh('/user/repos', { method: 'POST', body: JSON.stringify({ name: repo, private: false, auto_init: true, description: 'Scaffolded by wecanjustbuildthings.dev' }) });
   const repoJson = await created.json().catch(() => null) as any;
-  if (!created.ok) return json({ error: 'repo creation failed', detail: repoJson?.message }, 502);
+  if (!created.ok) return authJson({ error: 'repo creation failed', detail: repoJson?.message }, 502);
   const fullName = repoJson.full_name as string;
   const b64 = (s: string) => btoa(unescape(encodeURIComponent(s)));
-  for (const [path, content] of Object.entries(files)) {
+  for (const [path, content] of entries) {
     await gh(`/repos/${fullName}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}`, {
       method: 'PUT',
-      body: JSON.stringify({ message: `add ${path}`, content: b64(content) }),
+      body: JSON.stringify({ message: `add ${path}`, content: b64(content as string) }),
     });
   }
-  return json({ url: repoJson.html_url });
+  return authJson({ url: repoJson.html_url });
 }
 
 /** Auth needs both its KV (sessions) and D1 (identities) bindings. When either is
@@ -234,7 +293,25 @@ async function authSessionHandler(request: Request, env: Env): Promise<Response>
   return authJson({ authenticated: true, user: { id: resolved.user.id, displayName: resolved.user.displayName } });
 }
 
+/** True when a browser marks this request as coming from a different site. Prefers
+ *  the unspoofable Fetch-Metadata `Sec-Fetch-Site` header; falls back to comparing
+ *  `Origin` against SITE_URL. Absent both signals (non-browser client), returns
+ *  false — CSRF is an ambient-cookie, browser-only threat. */
+export function crossSiteRequest(request: Request, env: Env): boolean {
+  const site = request.headers.get('sec-fetch-site');
+  if (site) return site === 'cross-site';
+  const origin = request.headers.get('origin');
+  if (origin) {
+    const expected = env.SITE_URL ?? new URL(request.url).origin;
+    try { return new URL(origin).origin !== new URL(expected).origin; } catch { return true; }
+  }
+  return false;
+}
+
 async function authLogoutHandler(request: Request, env: Env): Promise<Response> {
+  // Reject cross-site POSTs so a third-party page can't force a client-side logout
+  // (cookie-clearing CSRF, CWE-352). Same-origin/direct requests proceed.
+  if (crossSiteRequest(request, env)) return authError(403, 'cross-site request rejected');
   // Always clear the cookie, even if storage is unconfigured or the id is stale.
   if (authConfigured(env)) {
     const id = readCookie(request, SESSION_COOKIE);
@@ -250,13 +327,17 @@ function nostrVerifyUrl(request: Request, env: Env): string {
   return `${origin}/api/auth/nostr/verify`;
 }
 
-async function nostrChallengeHandler(env: Env): Promise<Response> {
+async function nostrChallengeHandler(request: Request, env: Env): Promise<Response> {
   if (!authConfigured(env)) return authError(503, 'auth not configured');
+  // Unauthenticated + writes a KV challenge per call — rate-limit so a script can't
+  // exhaust the KV write budget and take down all sign-in (CWE-770).
+  if (await overRateLimit(env, request, 'nostr-challenge')) return authError(429, 'too many requests');
   return authJson({ challenge: await issueChallenge(env) });
 }
 
 async function nostrVerifyHandler(request: Request, env: Env): Promise<Response> {
   if (!authConfigured(env)) return authError(503, 'auth not configured');
+  if (await overRateLimit(env, request, 'nostr-verify')) return authError(429, 'too many requests');
   const rawBody = await request.text();
   let parsed: { challenge?: string; displayName?: string };
   try {
@@ -269,7 +350,7 @@ async function nostrVerifyHandler(request: Request, env: Env): Promise<Response>
   );
   if (!result) return authError(); // one generic 401 for every failure mode
   const user = await getOrCreateUserByIdentity(env.DB, 'nostr', result.pubkey, sanitizeDisplayName(parsed.displayName));
-  const sid = await createSession(env, user.id);
+  const sid = await createSession(env, user);
   return authJson(
     { authenticated: true, user: { id: user.id, displayName: user.displayName } },
     200,
@@ -297,16 +378,22 @@ async function blueskyMetadataHandler(env: Env): Promise<Response> {
 
 /** Begin sign-in. Reached by a full-page navigation, so every outcome is a redirect
  *  back to the studio with a flag (never raw JSON). */
-async function blueskyStartHandler(url: URL, env: Env): Promise<Response> {
+async function blueskyStartHandler(request: Request, url: URL, env: Env): Promise<Response> {
   const back = safeLocalPath(url.searchParams.get('redirect'));
   if (!blueskyConfigured(env)) return backTo(url.origin, back, 'bsky=unconfigured');
+  // Unauthenticated + writes OAuth state to KV and resolves the handle upstream —
+  // rate-limit to bound KV-write and outbound-resolution abuse (CWE-770).
+  if (await overRateLimit(env, request, 'bluesky-start')) return backTo(url.origin, back, 'bsky=error&reason=rate');
   const handle = url.searchParams.get('handle') || '';
   if (!isValidHandle(handle)) return backTo(url.origin, back, 'bsky=error&reason=handle');
   try {
-    const authUrl = await blueskyAuthorizeUrl(env, handle);
-    // Remember where to return after the PDS bounces back (same pattern as GitHub).
+    const { url: authUrl, state } = await blueskyAuthorizeUrl(env, handle);
+    // Bind the OAuth `state` to THIS browser via an HttpOnly cookie so the callback
+    // can verify the completing browser is the one that started (login-CSRF defense,
+    // mirroring GitHub's gh_state). Remember the return path the same way.
+    const stateCookie = `bsky_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`;
     const backCookie = `bsky_back=${encodeURIComponent(back)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`;
-    return new Response(null, { status: 302, headers: [['location', authUrl.toString()], ['set-cookie', backCookie]] as any });
+    return new Response(null, { status: 302, headers: [['location', authUrl.toString()], ['set-cookie', stateCookie], ['set-cookie', backCookie]] as any });
   } catch {
     return backTo(url.origin, back, 'bsky=error&reason=authorize');
   }
@@ -317,15 +404,18 @@ async function blueskyStartHandler(url: URL, env: Env): Promise<Response> {
 async function blueskyCallbackHandler(request: Request, url: URL, env: Env): Promise<Response> {
   const back = safeLocalPath(cookie(request, 'bsky_back'));
   const clearBack = 'bsky_back=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0';
+  const clearState = 'bsky_state=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0';
   const fail = (reason: string) =>
-    backTo(url.origin, back, `bsky=error&reason=${reason}`, [['set-cookie', clearBack]]);
+    backTo(url.origin, back, `bsky=error&reason=${reason}`, [['set-cookie', clearBack], ['set-cookie', clearState]]);
   // Session creation needs SESSIONS + DB; the OAuth flow needs ATPROTO + key + origin.
   if (!blueskyConfigured(env) || !authConfigured(env)) return fail('unconfigured');
   if (url.searchParams.get('error')) return fail('denied'); // user declined authorization
   try {
-    const { did, displayName } = await blueskyCallback(env, url.searchParams);
+    // The browser-bound state cookie set at start must round-trip and match.
+    const expectedState = cookie(request, 'bsky_state');
+    const { did, displayName } = await blueskyCallback(env, url.searchParams, expectedState);
     const user = await getOrCreateUserByIdentity(env.DB, 'bluesky', did, displayName);
-    const sid = await createSession(env, user.id);
+    const sid = await createSession(env, user);
     const sep = back.includes('?') ? '&' : '?';
     return new Response(null, {
       status: 302,
@@ -333,6 +423,7 @@ async function blueskyCallbackHandler(request: Request, url: URL, env: Env): Pro
         ['location', `${url.origin}${back}${sep}bsky=connected`],
         ['set-cookie', sessionCookie(sid)],
         ['set-cookie', clearBack],
+        ['set-cookie', clearState],
       ] as any,
     });
   } catch {
@@ -376,24 +467,33 @@ async function routeRequest(request: Request, env: Env): Promise<Response> {
     if (path === CSP_REPORT_PATH && request.method === 'POST') return cspReportHandler(request);
     if (path === '/api/license') return licenseHandler(url);
     if (path === '/api/pricing' && request.method === 'POST') return pricingHandler(request);
-    if (path === '/api/github/status') return json({ configured: Boolean(env.GITHUB_OAUTH_CLIENT_ID) });
+    // Config-status booleans live in the auth namespace → answer through authJson
+    // (no wildcard CORS, no-store), consistent with the auth-response invariant.
+    if (path === '/api/github/status') return authJson({ configured: Boolean(env.GITHUB_OAUTH_CLIENT_ID) });
     if (path === '/api/github/start') return githubStart(url, env);
     if (path === '/api/github/callback') return githubCallback(request, url, env);
     if (path === '/api/github/create' && request.method === 'POST') return githubCreate(request);
     if (path === '/api/auth/session') return authSessionHandler(request, env);
     if (path === '/api/auth/logout' && request.method === 'POST') return authLogoutHandler(request, env);
-    if (path === '/api/auth/nostr/challenge' && request.method === 'POST') return nostrChallengeHandler(env);
+    if (path === '/api/auth/nostr/challenge' && request.method === 'POST') return nostrChallengeHandler(request, env);
     if (path === '/api/auth/nostr/verify' && request.method === 'POST') return nostrVerifyHandler(request, env);
-    if (path === '/api/auth/nostr/status') return json({ configured: authConfigured(env) });
-    if (path === '/api/auth/bluesky/status') return json({ configured: blueskyConfigured(env) });
+    if (path === '/api/auth/nostr/status') return authJson({ configured: authConfigured(env) });
+    if (path === '/api/auth/bluesky/status') return authJson({ configured: blueskyConfigured(env) });
     if (path === '/api/auth/bluesky/client-metadata.json') return blueskyMetadataHandler(env);
-    if (path === '/api/auth/bluesky/start') return blueskyStartHandler(url, env);
+    if (path === '/api/auth/bluesky/start') return blueskyStartHandler(request, url, env);
     if (path === '/api/auth/bluesky/callback') return blueskyCallbackHandler(request, url, env);
     return env.ASSETS.fetch(request);
 }
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    return withSecurityHeaders(await routeRequest(request, env));
+    // The Worker is authoritative for /api/* (run_worker_first), so there is no
+    // asset-layer fallback on an unexpected throw. Convert one to a controlled,
+    // security-headered 500 instead of Cloudflare's raw exception page.
+    try {
+      return withSecurityHeaders(await routeRequest(request, env));
+    } catch {
+      return withSecurityHeaders(json({ error: 'internal error' }, 500));
+    }
   },
 };

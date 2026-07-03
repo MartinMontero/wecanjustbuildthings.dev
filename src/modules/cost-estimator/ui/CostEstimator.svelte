@@ -187,6 +187,7 @@
 
     {#if result}
       <h3 class="rh">{t.resultsHeading}</h3>
+      <p class="tiers-caveat small muted">{t.tiersCaveat}</p>
       <div class="tiers">
         {#each result.tiers as tier (tier.tierId)}
           <section class="tier">

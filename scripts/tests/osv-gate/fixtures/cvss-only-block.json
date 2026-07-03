@@ -1,0 +1,24 @@
+{
+  "results": [
+    {
+      "source": { "path": "package-lock.json", "type": "lockfile" },
+      "packages": [
+        {
+          "package": { "name": "cvss-only", "version": "1.0.0", "ecosystem": "npm" },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-test-cvss-only",
+              "affected": [
+                { "ranges": [ { "type": "SEMVER", "events": [ { "introduced": "0" }, { "fixed": "1.0.1" } ] } ] }
+              ],
+              "database_specific": { "severity": "HIGH" }
+            }
+          ],
+          "groups": [
+            { "ids": ["GHSA-test-cvss-only"], "max_severity": "9.1" }
+          ]
+        }
+      ]
+    }
+  ]
+}

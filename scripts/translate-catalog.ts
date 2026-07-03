@@ -17,7 +17,11 @@
  *   - all MDX/JSX/HTML tags + attributes, component names, the Aside import line,
  *     fenced/inline code, URLs, and the data VALUES inside <dl class="wcb-meta">
  *     and the <span class="wcb-badge ..."> badges (ecosystem code, license id,
- *     version, status). Visible label/boilerplate text IS translated.
+ *     version, status). Visible label/boilerplate text in ELEMENT BODIES IS
+ *     translated. NOTE: text that lives inside an ATTRIBUTE — notably a few
+ *     `<Aside title="…">` values — is preserved verbatim (attributes are held
+ *     exactly), so those short labels intentionally stay in English; the
+ *     machine_translated flag + human review pass is where they'd be localized.
  *   - `title` (the tool name) and every other frontmatter field/value.
  * Internal site links (href / markdown links starting with `/`) get the locale
  * prefix; `https://` and `#anchors` are left alone.
@@ -758,9 +762,15 @@ async function main(): Promise<void> {
     let written = 0;
     let skipped = 0;
 
-    // Batch entries so we can persist the cache after each batch (resumability
-    // + bounded loss if interrupted). Batch size tracks the concurrency limit.
+    // Batch entries for resumability + bounded loss if interrupted. Batch size
+    // tracks the concurrency limit. `cache.flush()` re-sorts and rewrites the whole
+    // (growing) cache file, so persist every Nth batch rather than every batch —
+    // ~10× fewer full-file serializations over a 1,355-entry run, at the cost of a
+    // slightly wider (still small) bounded-loss window. Flush stays at the batch
+    // barrier, never inside the concurrent workers, so writes never interleave.
     const batchSize = Math.max(opts.concurrency, 1);
+    const FLUSH_EVERY_BATCHES = 10;
+    let batchNo = 0;
     for (let i = 0; i < entries.length; i += batchSize) {
       const batch = entries.slice(i, i + batchSize);
       await runWithConcurrency(batch, opts.concurrency, async (relPath) => {
@@ -773,9 +783,9 @@ async function main(): Promise<void> {
           fail(`failed on ${relPath} (${lang}): ${String(err)}`);
         }
       });
-      cache.flush(); // persist after each batch
+      if (++batchNo % FLUSH_EVERY_BATCHES === 0) cache.flush(); // periodic checkpoint
     }
-    cache.flush();
+    cache.flush(); // final persist (covers the trailing partial interval)
 
     console.log(
       `  ${lang}: wrote ${written}, skipped ${skipped} (existing) — ` +

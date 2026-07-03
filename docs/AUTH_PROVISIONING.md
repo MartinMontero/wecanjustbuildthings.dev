@@ -49,6 +49,12 @@ npm run provision:auth        # idempotent: creates only what's missing, applies
                               # migrations, and prints a wrangler.jsonc-ready block
 ```
 
+> **Least privilege (token path):** `wrangler login` mints a broadly-scoped OAuth
+> token. If you use `CLOUDFLARE_API_TOKEN` instead, scope it to only what
+> provisioning needs — **Account · Workers KV Storage: Edit**, **Account · D1: Edit**,
+> and **Account · Account Settings: Read** (for `wrangler whoami`). No CI workflow
+> holds this token; it stays on the operator's machine.
+
 `provision:auth` (`scripts/provision-auth.ts`) never deletes or recreates anything —
 re-running it just reuses what already exists. It's the easy path; the equivalent
 manual commands are:

@@ -31,7 +31,7 @@
     "enforce:layer2": "tsx enforcement/cli.ts layer2 --catalog src/content/docs/catalog",
     "enforce:layer3": "tsx enforcement/cli.ts layer3 --catalog src/content/docs/catalog --recipes src/content/docs/recipes",
     "enforce:skills": "tsx enforcement/cli.ts skill --skills src/content/docs/skills",
-    "test": "node --import tsx --test \"enforcement/tests/**/*.test.ts\" \"worker/tests/**/*.test.ts\" \"src/**/*.test.ts\"",
+    "test": "node --import tsx --test \"enforcement/tests/**/*.test.ts\" \"worker/tests/**/*.test.ts\" \"src/**/*.test.ts\" \"scripts/**/*.test.ts\"",
     "a11y": "node scripts/a11y-check.mjs",
     "test:e2e": "node scripts/e2e-check.mjs",
     "check:path-a": "node scripts/path-a-check.mjs",
@@ -68,5 +68,8 @@
     "typescript": "^6.0.3",
     "wrangler": "^4.104.0",
     "yaml": "^2.9.0"
+  },
+  "overrides": {
+    "js-yaml@<3.15.0": "3.15.0"
   }
 }
