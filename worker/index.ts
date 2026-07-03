@@ -30,6 +30,7 @@ import {
   readCookie, SESSION_COOKIE, type AuthEnv,
 } from './auth/session.ts';
 import { issueChallenge, verifyNostrAuth, sanitizeDisplayName } from './auth/nostr.ts';
+import { overRateLimit, crossSiteRequest } from './auth/guards.ts';
 import {
   blueskyClientMetadata, blueskyAuthorizeUrl, blueskyCallback, isValidHandle, type BlueskyEnv,
 } from './auth/bluesky.ts';
@@ -71,25 +72,6 @@ export interface Env {
 }
 
 const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';
-
-/** Client IP for rate-limit keying. `cf-connecting-ip` is set by Cloudflare's edge
- *  and can't be spoofed by the client; fall back to a shared bucket if it's absent. */
-function clientIp(request: Request): string {
-  return request.headers.get('cf-connecting-ip') || 'unknown';
-}
-
-/** True when this request should be rejected for exceeding the rate limit. No-ops
- *  (never limits) when the binding is unprovisioned, so unauthenticated abuse is
- *  bounded in production without breaking dev/test or an unconfigured deploy. */
-async function overRateLimit(env: Env, request: Request, bucket: string): Promise<boolean> {
-  if (!env.AUTH_RATE_LIMITER) return false;
-  try {
-    const { success } = await env.AUTH_RATE_LIMITER.limit({ key: `${bucket}:${clientIp(request)}` });
-    return !success;
-  } catch {
-    return false; // limiter failure must never take sign-in down
-  }
-}
 
 
 function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
@@ -299,25 +281,10 @@ async function authSessionHandler(request: Request, env: Env): Promise<Response>
   return authJson({ authenticated: true, user: { id: resolved.user.id, displayName: resolved.user.displayName } });
 }
 
-/** True when a browser marks this request as coming from a different site. Prefers
- *  the unspoofable Fetch-Metadata `Sec-Fetch-Site` header; falls back to comparing
- *  `Origin` against SITE_URL. Absent both signals (non-browser client), returns
- *  false — CSRF is an ambient-cookie, browser-only threat. */
-export function crossSiteRequest(request: Request, env: Env): boolean {
-  const site = request.headers.get('sec-fetch-site');
-  if (site) return site === 'cross-site';
-  const origin = request.headers.get('origin');
-  if (origin) {
-    const expected = env.SITE_URL ?? new URL(request.url).origin;
-    try { return new URL(origin).origin !== new URL(expected).origin; } catch { return true; }
-  }
-  return false;
-}
-
 async function authLogoutHandler(request: Request, env: Env): Promise<Response> {
   // Reject cross-site POSTs so a third-party page can't force a client-side logout
   // (cookie-clearing CSRF, CWE-352). Same-origin/direct requests proceed.
-  if (crossSiteRequest(request, env)) return authError(403, 'cross-site request rejected');
+  if (crossSiteRequest(request, env.SITE_URL)) return authError(403, 'cross-site request rejected');
   // Always clear the cookie, even if storage is unconfigured or the id is stale.
   if (authConfigured(env)) {
     const id = readCookie(request, SESSION_COOKIE);
@@ -337,13 +304,13 @@ async function nostrChallengeHandler(request: Request, env: Env): Promise<Respon
   if (!authConfigured(env)) return authError(503, 'auth not configured');
   // Unauthenticated + writes a KV challenge per call — rate-limit so a script can't
   // exhaust the KV write budget and take down all sign-in (CWE-770).
-  if (await overRateLimit(env, request, 'nostr-challenge')) return authError(429, 'too many requests');
+  if (await overRateLimit(env.AUTH_RATE_LIMITER, request, 'nostr-challenge')) return authError(429, 'too many requests');
   return authJson({ challenge: await issueChallenge(env) });
 }
 
 async function nostrVerifyHandler(request: Request, env: Env): Promise<Response> {
   if (!authConfigured(env)) return authError(503, 'auth not configured');
-  if (await overRateLimit(env, request, 'nostr-verify')) return authError(429, 'too many requests');
+  if (await overRateLimit(env.AUTH_RATE_LIMITER, request, 'nostr-verify')) return authError(429, 'too many requests');
   const rawBody = await request.text();
   let parsed: { challenge?: string; displayName?: string };
   try {
@@ -389,7 +356,7 @@ async function blueskyStartHandler(request: Request, url: URL, env: Env): Promis
   if (!blueskyConfigured(env)) return backTo(url.origin, back, 'bsky=unconfigured');
   // Unauthenticated + writes OAuth state to KV and resolves the handle upstream —
   // rate-limit to bound KV-write and outbound-resolution abuse (CWE-770).
-  if (await overRateLimit(env, request, 'bluesky-start')) return backTo(url.origin, back, 'bsky=error&reason=rate');
+  if (await overRateLimit(env.AUTH_RATE_LIMITER, request, 'bluesky-start')) return backTo(url.origin, back, 'bsky=error&reason=rate');
   const handle = url.searchParams.get('handle') || '';
   if (!isValidHandle(handle)) return backTo(url.origin, back, 'bsky=error&reason=handle');
   try {

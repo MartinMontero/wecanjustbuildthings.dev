@@ -7,7 +7,10 @@
 
 export interface KVNamespace {
   get(key: string): Promise<string | null>;
-  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
+  // `expiration` is an ABSOLUTE unix epoch (seconds). Admin sessions use it so a
+  // last-seen refresh rewrite can never slide the record's hard 8-hour bound the
+  // way a fresh relative `expirationTtl` would.
+  put(key: string, value: string, options?: { expirationTtl?: number; expiration?: number }): Promise<void>;
   delete(key: string): Promise<void>;
 }
 

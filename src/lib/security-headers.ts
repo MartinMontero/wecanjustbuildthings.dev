@@ -94,6 +94,12 @@ export interface CspOptions {
   hashes: string[];
   /** Plausible domain, if analytics is enabled — adds plausible.io to script/connect. */
   plausibleDomain?: string | null;
+  /**
+   * Extra connect-src sources appended to the base policy. Used ONLY by the
+   * /console/* rule (wss: for NIP-46 remote-bunker signing) so both rules are
+   * built by this one function and can never drift apart in any other directive.
+   */
+  extraConnectSrc?: string[];
 }
 
 /**
@@ -103,13 +109,13 @@ export interface CspOptions {
  * navigation, not a fetch. The privileged /admin/ CMS needs a broader connect-src
  * (GitHub) — handled separately when this flips to enforce (see SECURITY.md).
  */
-export function buildContentSecurityPolicy({ hashes, plausibleDomain }: CspOptions): string {
+export function buildContentSecurityPolicy({ hashes, plausibleDomain, extraConnectSrc = [] }: CspOptions): string {
   const plausible = plausibleDomain ? ['https://plausible.io'] : [];
   // 'wasm-unsafe-eval' + worker-src 'self': Starlight's Pagefind search compiles
   // WebAssembly inside a same-origin Web Worker; without these, site search breaks
   // under enforcement. 'wasm-unsafe-eval' permits WASM compilation only — not eval().
   const scriptSrc = ["'self'", "'wasm-unsafe-eval'", ...hashes, ...plausible];
-  const connectSrc = ["'self'", ...plausible];
+  const connectSrc = ["'self'", ...plausible, ...extraConnectSrc];
   return [
     "default-src 'none'",
     `script-src ${scriptSrc.join(' ')}`,
@@ -138,15 +144,38 @@ export interface HeadersFileOptions extends CspOptions {
   mode?: CspMode;
 }
 
+/** Path pattern for the admin console's CSP rule (see renderHeadersFile). */
+export const CONSOLE_HEADERS_PATH = '/console/*';
+
 /**
- * Render the full Cloudflare `_headers` file as a single `/*` rule. One rule only:
- * Cloudflare COMBINES (appends) overlapping rules rather than overriding, so a second
- * rule setting Content-Security-Policy would send a second header and the browser would
- * enforce the intersection — verified empirically with `wrangler dev`.
+ * Render the full Cloudflare `_headers` file. The site-wide policy is a single `/*`
+ * rule: Cloudflare COMBINES (appends) overlapping rules rather than overriding, so a
+ * second rule that merely set Content-Security-Policy again would send a second header
+ * and the browser would enforce the intersection — verified empirically with
+ * `wrangler dev`.
+ *
+ * The ONE sanctioned exception is `/console/*` (the admin console): NIP-46 remote-
+ * bunker signing opens a WebSocket to the admin's own user-chosen bunker relay, so
+ * connect-src there must additionally allow `wss:`. Because of the combining behavior
+ * above, the console rule must DETACH the inherited CSP first (`! <header>` removes a
+ * header set by a more pervasive rule — documented Workers static-assets `_headers`
+ * behavior) and then re-add the full policy, byte-identical except for wss: in
+ * connect-src (enforced by both rules calling buildContentSecurityPolicy, plus a unit
+ * test asserting the invariance). The non-CSP SECURITY_HEADERS are NOT detached — the
+ * /* rule keeps supplying them unchanged.
+ *
+ * CONSTRAINT: `_headers` applies ONLY to static-asset responses. /console/ must stay a
+ * plain static asset (src/pages/console/) — routing it through the Worker would strip
+ * this rule and silently break NIP-46 the day the CSP flips to enforce.
  */
 export function renderHeadersFile({ hashes, plausibleDomain, mode = 'report-only' }: HeadersFileOptions): string {
-  const lines = ['/*', `  ${CSP_HEADER_NAME[mode]}: ${buildContentSecurityPolicy({ hashes, plausibleDomain })}`];
+  const cspName = CSP_HEADER_NAME[mode];
+  const lines = ['/*', `  ${cspName}: ${buildContentSecurityPolicy({ hashes, plausibleDomain })}`];
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) lines.push(`  ${name}: ${value}`);
+  lines.push('');
+  lines.push(CONSOLE_HEADERS_PATH);
+  lines.push(`  ! ${cspName}`);
+  lines.push(`  ${cspName}: ${buildContentSecurityPolicy({ hashes, plausibleDomain, extraConnectSrc: ['wss:'] })}`);
   return lines.join('\n') + '\n';
 }
 

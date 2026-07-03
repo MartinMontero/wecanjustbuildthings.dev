@@ -78,21 +78,51 @@ test('Plausible is opt-in: hosts appear only when a domain is set', () => {
   assert.match(on, /connect-src[^;]*https:\/\/plausible\.io/);
 });
 
-test('renderHeadersFile emits one /* rule, Report-Only by default', () => {
+/** Split the rendered _headers file into its two rules by path line. */
+function splitRules(file: string): { global: string; console: string } {
+  const idx = file.indexOf('/console/*');
+  assert.ok(idx > 0, 'missing /console/* rule');
+  return { global: file.slice(0, idx), console: file.slice(idx) };
+}
+
+test('renderHeadersFile emits a single-CSP /* rule, Report-Only by default', () => {
   const file = renderHeadersFile({ hashes: ["'sha256-abc'"] });
   assert.match(file, /^\/\*$/m);
   assert.match(file, /'sha256-abc'/); // quoted hash survives into the _headers file
   assert.match(file, /Content-Security-Policy-Report-Only:/);
   assert.ok(!file.includes('\n  Content-Security-Policy:'), 'default must not enforce');
   assert.match(file, /X-Content-Type-Options: nosniff/);
-  // exactly one CSP line (avoid the double-CSP intersection trap)
-  assert.equal((file.match(/Content-Security-Policy/g) ?? []).length, 1);
+  const { global, console: consoleRule } = splitRules(file);
+  // exactly one CSP line per applied policy (avoid the double-CSP intersection trap):
+  // the /* rule SETS once; the /console/* rule DETACHES the inherited one, then SETS once.
+  assert.equal((global.match(/Content-Security-Policy/g) ?? []).length, 1);
+  assert.match(consoleRule, /^ {2}! Content-Security-Policy-Report-Only$/m);
+  assert.equal((consoleRule.match(/^ {2}Content-Security-Policy-Report-Only: /gm) ?? []).length, 1);
+  // the console rule must not re-set (and thus duplicate) any non-CSP header
+  assert.ok(!consoleRule.includes('X-Content-Type-Options'));
 });
 
-test('renderHeadersFile mode=enforce switches the header name', () => {
+test('renderHeadersFile mode=enforce switches the header name in BOTH rules (detach line included)', () => {
   const file = renderHeadersFile({ hashes: ['sha256-abc'], mode: 'enforce' });
   assert.match(file, /\n {2}Content-Security-Policy: /);
   assert.ok(!file.includes('Report-Only'));
+  assert.match(splitRules(file).console, /^ {2}! Content-Security-Policy$/m);
+});
+
+test('the /console/* rule differs from the global policy ONLY by wss: in connect-src', () => {
+  for (const mode of ['report-only', 'enforce'] as const) {
+    const name = mode === 'enforce' ? 'Content-Security-Policy' : 'Content-Security-Policy-Report-Only';
+    const file = renderHeadersFile({ hashes: ["'sha256-abc'", "'sha256-def'"], plausibleDomain: 'example.org', mode });
+    const { global, console: consoleRule } = splitRules(file);
+    const globalCsp = global.match(new RegExp(`^ {2}${name}: (.*)$`, 'm'))?.[1];
+    const consoleCsp = consoleRule.match(new RegExp(`^ {2}${name}: (.*)$`, 'm'))?.[1];
+    assert.ok(globalCsp && consoleCsp, `both rules carry a ${name} policy`);
+    // The site-wide policy never gains wss: — only the console page speaks to bunker relays.
+    assert.ok(!globalCsp.includes('wss:'), 'global policy must not allow wss:');
+    // Byte-identical except connect-src additionally allows wss:. This pins future
+    // global-CSP edits (new hashes, new hosts) to flow into the console rule unchanged.
+    assert.equal(consoleCsp, globalCsp.replace(/connect-src ([^;]*)/, 'connect-src $1 wss:'));
+  }
 });
 
 test('summariseCspReport whitelists + truncates a report-uri payload', () => {
