@@ -18,6 +18,7 @@ will not trip the guard. Tune the lists below for your repo.
 """
 import json
 import re
+import subprocess
 import sys
 
 # ---- Files the guard should never police (its own machinery + policy text) ----
@@ -64,6 +65,55 @@ PROTECTED_CI_PATHS = [
     ".github/workflows/quality.yml",      # Accessibility & performance — axe-core + Lighthouse gate
 ]
 
+# ---- RULE 3: no rewriting foreign or published git history ----
+# Added after two real stop-hook misfires (PR #44 tooling note): an agent was
+# nudged to `--amend --reset-author` a GitHub-authored merge commit that was
+# already on origin/main. This backstop makes that class of damage impossible to
+# EXECUTE regardless of what any advisory tooling suggests: a history rewrite is
+# blocked unless every commit it would rewrite is (a) authored by the agent
+# identity and (b) not already published on origin/main. The nudge-side fixes
+# (suppress during holds, never nudge push) live in the USER-LEVEL stop hook
+# (~/.claude/), which this repo cannot change — see the PR that added this rule.
+AGENT_AUTHOR_EMAIL = "noreply@anthropic.com"
+DEFAULT_PUBLISHED_REF = "origin/main"
+HISTORY_REWRITE_RE = re.compile(r"\bgit\b[^\n]*?(--amend|--reset-author|\bfilter-branch\b)", re.I)
+
+
+def _git(cwd, *args):
+    """Run a git query; returns (returncode, stdout) or (None, '') if git itself
+    is unavailable/times out — the backstop then stays out of the way."""
+    try:
+        proc = subprocess.run(
+            ["git", *args], cwd=cwd or None, capture_output=True, text=True, timeout=10,
+        )
+        return proc.returncode, proc.stdout.strip()
+    except Exception:
+        return None, ""
+
+
+def history_rewrite_violation(cwd=None, published_ref=DEFAULT_PUBLISHED_REF):
+    """Reason string when rewriting history here would touch a foreign-authored
+    or already-published commit; None when the rewrite is safe (or when the git
+    state can't be inspected — backstop, not a brick)."""
+    code, head_email = _git(cwd, "log", "-1", "--format=%ae")
+    if code is None or code != 0 or not head_email:
+        return None  # not a repo / no commits → nothing to protect
+    if head_email.lower() != AGENT_AUTHOR_EMAIL:
+        return ("rewrites HEAD, which is authored by <" + head_email + ">, not the "
+                "agent identity. Never rewrite someone else's commit.")
+    ref_code, _ = _git(cwd, "rev-parse", "--verify", "--quiet", published_ref)
+    if ref_code == 0:
+        anc_code, _ = _git(cwd, "merge-base", "--is-ancestor", "HEAD", published_ref)
+        if anc_code == 0:
+            return ("rewrites HEAD, which is already published on " + published_ref +
+                    ". Never rewrite published history.")
+        _, range_emails = _git(cwd, "log", published_ref + "..HEAD", "--format=%ae")
+        foreign = sorted({e for e in range_emails.split() if e and e.lower() != AGENT_AUTHOR_EMAIL})
+        if foreign:
+            return ("could rewrite commits authored by " + ", ".join(foreign) +
+                    " (in " + published_ref + "..HEAD). Never rewrite someone else's commits.")
+    return None
+
 
 def block(reason):
     sys.stderr.write("BLOCKED by project guard — " + reason + "\n")
@@ -106,6 +156,13 @@ def main():
     if tool == "Bash" and INSTALL_RE.search(text):
         block("installs an excluded-vendor package. Meta/OpenAI/xAI are forbidden; "
               "Google is permitted. Stop and ask the human.")
+
+    # ---- RULE 3: no rewriting foreign or published git history ----
+    if tool == "Bash" and HISTORY_REWRITE_RE.search(text):
+        reason = history_rewrite_violation(data.get("cwd"))
+        if reason:
+            block("this git history rewrite " + reason + " If the goal is commit "
+                  "hygiene, make a NEW commit instead, or stop and ask the human.")
 
     # ---- RULE 2: protect operational_advisory ----
     if tool == "Edit" and PROTECTED_TOKEN in (ti.get("old_string") or "").lower():
