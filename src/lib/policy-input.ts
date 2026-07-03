@@ -20,6 +20,23 @@ const PACKAGE_JSON_FIELDS = ['dependencies', 'devDependencies', 'optionalDepende
  * "name" or "name <ecosystem>". Lines starting with '#' are ignored, surrounding
  * quotes/commas are stripped (so pasted JSON lines work), and empty names are dropped.
  */
+/**
+ * Detect input the user clearly meant as a package.json but that isn't valid JSON,
+ * so the UI can show a parse error instead of silently line-parsing the blob into
+ * one bogus "dependency" and reporting it clean. Only flags `{`-leading text that
+ * fails `JSON.parse`; a plain name list (or valid JSON) returns null.
+ */
+export function dependencyInputError(raw: string): string | null {
+  const text = raw.trim();
+  if (!text.startsWith('{')) return null;
+  try {
+    JSON.parse(text);
+    return null;
+  } catch {
+    return "That looks like a package.json but couldn't be parsed as JSON. Paste a valid package.json, or list one dependency per line.";
+  }
+}
+
 export function parseDependencyInput(raw: string, defaultEcosystem: Ecosystem): ParsedDep[] {
   const text = raw.trim();
   if (!text) return [];

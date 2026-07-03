@@ -206,12 +206,28 @@
     atproto: ['@atproto/api', '@atcute/client'],
   };
   // Plain-language starting points for a builder who isn't sure how to phrase it.
-  const EXAMPLES = [
-    'A private way for tenants to report problems without exposing who they are.',
-    'A community bulletin board that no company can shut down or sell.',
-    'A tip jar so people can support our organizers directly.',
-    'A members-only space where our collective can talk and share files.',
-  ];
+  // Localized like the rest of the UI (es/ar are a careful first pass; flag for
+  // native review). No protocol/product terms here, so nothing stays English.
+  const EXAMPLES: Record<Lang, string[]> = {
+    en: [
+      'A private way for tenants to report problems without exposing who they are.',
+      'A community bulletin board that no company can shut down or sell.',
+      'A tip jar so people can support our organizers directly.',
+      'A members-only space where our collective can talk and share files.',
+    ],
+    es: [
+      'Una forma privada de que los inquilinos reporten problemas sin revelar quiénes son.',
+      'Un tablón comunitario que ninguna empresa pueda cerrar ni vender.',
+      'Un bote de propinas para que la gente apoye directamente a nuestros organizadores.',
+      'Un espacio solo para miembros donde nuestro colectivo pueda hablar y compartir archivos.',
+    ],
+    ar: [
+      'طريقة خاصة تتيح للمستأجرين الإبلاغ عن المشكلات دون الكشف عن هويّتهم.',
+      'لوحة إعلانات مجتمعية لا تستطيع أي شركة إغلاقها أو بيعها.',
+      'صندوق إكراميات ليدعم الناس منظّمينا مباشرةً.',
+      'مساحة للأعضاء فقط يمكن فيها لجماعتنا التحدّث ومشاركة الملفات.',
+    ],
+  };
 
   onMount(async () => {
     // Follow the page's locale so /es/build/ and /ar/build/ open in that language
@@ -1012,7 +1028,7 @@ manuals with the knowledge-to-skills-pipeline).
       <label class="field"><span>{t.problem}</span><textarea bind:value={problem} rows="3" placeholder="e.g. Tenants need to document evictions without exposing who they are."></textarea></label>
       <div class="examples">
         <span class="hint">{t.examples}</span>
-        <div class="chips">{#each EXAMPLES as ex}<button class="chip ex" onclick={() => (problem = ex)}>{ex}</button>{/each}</div>
+        <div class="chips">{#each EXAMPLES[lang] as ex}<button class="chip ex" onclick={() => (problem = ex)}>{ex}</button>{/each}</div>
       </div>
       <div class="field"><span>{t.protocols}</span>
         <div class="chips">{#each ALL_PROTOCOLS as p}<button class="chip" class:on={protocols.has(p)} onclick={() => toggleProto(p)} aria-pressed={protocols.has(p)}>{p}</button>{/each}</div>

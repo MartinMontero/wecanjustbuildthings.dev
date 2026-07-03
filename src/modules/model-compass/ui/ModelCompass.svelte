@@ -65,8 +65,8 @@
 
 <section class="mc" {dir} aria-label={t.title}>
   <header class="mc__head">
-    <h2 class="mc__title">{t.title}</h2>
-    <p class="mc__lead">{t.lead}</p>
+    <!-- Title + intro come from the page (frontmatter H1 + mdx intro); the island
+         keeps only the functional sorting note so the heading isn't duplicated. -->
     <p class="mc__note">{t.sovereigntyNote}</p>
   </header>
 
@@ -152,9 +152,11 @@
   .mc__badge--none { background: var(--sl-color-green-low, #cfc); color: var(--sl-color-green-high, #060); }
   .mc__meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.3rem 1rem; margin: 0.7rem 0 0; }
   .mc__meta div { display: flex; gap: 0.4rem; }
-  .mc__meta dt { font-weight: 600; opacity: 0.8; margin: 0; }
+  /* Labels differentiated by weight, NOT by dimming — `opacity` on text over the
+     card background dropped the contrast below WCAG AA (axe: 89 cells). */
+  .mc__meta dt { font-weight: 600; margin: 0; }
   .mc__meta dd { margin: 0; }
-  .mc__hint { opacity: 0.65; font-size: 0.85em; }
+  .mc__hint { color: var(--sl-color-gray-2); font-size: 0.85em; }
   .mc__caution { margin-top: 0.7rem; font-size: 0.9rem; }
   .mc__caution p { margin: 0.15rem 0; }
   /* Touch target on the one select control. */

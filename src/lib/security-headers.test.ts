@@ -13,8 +13,9 @@ import {
   hashInlineScript,
 } from './security-headers.ts';
 
-/** Independent oracle (node:crypto) for the module's Web Crypto hashing. */
-const oracle = (body: string) => 'sha256-' + createHash('sha256').update(body, 'utf8').digest('base64');
+/** Independent oracle (node:crypto) for the module's Web Crypto hashing. A CSP hash
+ *  source is single-quoted per the grammar — the oracle mirrors that. */
+const oracle = (body: string) => "'sha256-" + createHash('sha256').update(body, 'utf8').digest('base64') + "'";
 
 test('SECURITY_HEADERS carry the expected hardening set', () => {
   assert.equal(SECURITY_HEADERS['X-Content-Type-Options'], 'nosniff');
@@ -51,9 +52,16 @@ test('extractInlineScriptHashes dedupes and uses sha256', async () => {
 });
 
 test('buildContentSecurityPolicy is strict, hash-based, with the Pagefind allowances', () => {
-  const csp = buildContentSecurityPolicy({ hashes: ['sha256-abc', 'sha256-def'] });
+  const csp = buildContentSecurityPolicy({ hashes: ["'sha256-abc'", "'sha256-def'"] });
   assert.match(csp, /default-src 'none'/);
-  assert.match(csp, /script-src 'self' 'wasm-unsafe-eval' sha256-abc sha256-def/);
+  assert.match(csp, /script-src 'self' 'wasm-unsafe-eval' 'sha256-abc' 'sha256-def'/);
+  // Every hash source must be single-quoted — a bare `sha256-…` is an invalid CSP
+  // source the browser drops, which would block the inline scripts under enforce.
+  const scriptSrc = csp.split(';').find((d) => d.trim().startsWith('script-src'))!;
+  for (const tok of scriptSrc.trim().split(/\s+/).slice(1)) {
+    if (tok.includes('sha256-')) assert.ok(/^'sha256-[^']+'$/.test(tok), `hash not single-quoted: ${tok}`);
+  }
+  assert.ok(!/(?<!')sha256-/.test(csp), 'no bare (unquoted) sha256- in the policy');
   assert.match(csp, /worker-src 'self'/);
   assert.match(csp, /style-src 'self' 'unsafe-inline'/);
   assert.match(csp, /connect-src 'self'(;| )/); // no wildcards
@@ -71,8 +79,9 @@ test('Plausible is opt-in: hosts appear only when a domain is set', () => {
 });
 
 test('renderHeadersFile emits one /* rule, Report-Only by default', () => {
-  const file = renderHeadersFile({ hashes: ['sha256-abc'] });
+  const file = renderHeadersFile({ hashes: ["'sha256-abc'"] });
   assert.match(file, /^\/\*$/m);
+  assert.match(file, /'sha256-abc'/); // quoted hash survives into the _headers file
   assert.match(file, /Content-Security-Policy-Report-Only:/);
   assert.ok(!file.includes('\n  Content-Security-Policy:'), 'default must not enforce');
   assert.match(file, /X-Content-Type-Options: nosniff/);
