@@ -2,13 +2,14 @@
   import { onMount } from 'svelte';
   import { matchDependency } from '../../enforcement/matcher.ts';
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
-  import { parseDependencyInput } from '../lib/policy-input.ts';
+  import { parseDependencyInput, dependencyInputError } from '../lib/policy-input.ts';
 
   let orgs = $state<ExcludedOrg[]>([]);
   let policyReady = $state(false);
   let input = $state('');
   let ecosystem = $state<Ecosystem>('js');
   let checked = $state(false);
+  let parseError = $state('');
   let lookupLicenses = $state(true);
 
   interface Row {
@@ -46,6 +47,9 @@
 
   async function run() {
     if (!policyReady) return;
+    // Malformed package.json → show a parse error, never a false "all clean".
+    parseError = dependencyInputError(input) ?? '';
+    if (parseError) { rows = []; checked = true; return; }
     const deps = parseDependencyInput(input, ecosystem);
     rows = deps.map((d) => {
       const m = matchDependency({ name: d.name, ecosystem: d.ecosystem, source_file: 'input' }, orgs);
@@ -89,7 +93,11 @@
     <button class="primary" onclick={run} disabled={!policyReady}>{policyReady ? 'Check against the policy' : 'Loading policy…'}</button>
   </div>
 
-  {#if checked}
+  {#if checked && parseError}
+    <div class="summary bad" role="alert">⚠ {parseError}</div>
+  {:else if checked && rows.length === 0}
+    <div class="summary">Nothing to check — paste a <code>package.json</code>, or one dependency per line.</div>
+  {:else if checked}
     <div class="summary" class:bad={blockedCount > 0}>
       {#if blockedCount === 0}
         ✓ All {rows.length} dependencies are clean — none owned by Meta, OpenAI, or xAI.

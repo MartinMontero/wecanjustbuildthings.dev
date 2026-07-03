@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseDependencyInput } from './policy-input.ts';
+import { parseDependencyInput, dependencyInputError } from './policy-input.ts';
 
 test('empty / whitespace input yields no dependencies', () => {
   assert.deepEqual(parseDependencyInput('', 'js'), []);
@@ -54,4 +54,19 @@ test('strips surrounding quotes/commas so pasted package.json lines work, and dr
 
 test('malformed JSON starting with { degrades to line parsing without throwing', () => {
   assert.doesNotThrow(() => parseDependencyInput('{ not valid json', 'js'));
+});
+
+test('dependencyInputError flags {-leading text that is not valid JSON', () => {
+  // The bug F2 fixes: this used to line-parse into one bogus dep and report "clean".
+  const e1 = dependencyInputError('{ "dependencies": { bad');
+  const e2 = dependencyInputError('{ not valid json');
+  assert.ok(e1 && /couldn't be parsed/.test(e1));
+  assert.ok(e2 && /couldn't be parsed/.test(e2));
+});
+
+test('dependencyInputError returns null for valid JSON and for plain name lists', () => {
+  assert.equal(dependencyInputError('{"dependencies":{"react":"^18"}}'), null); // valid package.json
+  assert.equal(dependencyInputError('{}'), null);                                // valid, empty
+  assert.equal(dependencyInputError('react\nsvelte\n@atproto/api'), null);       // name list
+  assert.equal(dependencyInputError('   '), null);                               // empty
 });
