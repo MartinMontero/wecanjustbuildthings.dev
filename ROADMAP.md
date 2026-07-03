@@ -36,7 +36,7 @@ project in a new session or conversation.
 - **GitHub OAuth** app registered; Worker secrets set (`BLUESKY_PRIVATE_KEY_JWK`,
   `GITHUB_OAUTH_CLIENT_ID/SECRET`).
 - **Cloudflare CLI/agent token** (`CLOUDFLARE_API_TOKEN`) — verified working 2026-06-30:
-  resolves to `These3remain@gmail.com's Account` (`7c69…1ee5`); `whoami` / KV list / D1 list /
+  resolves to the project's Cloudflare account (`7c69…1ee5`); `whoami` / KV list / D1 list /
   `deployments status` all succeed. Lacks Pages + User Details:Read by design (not needed).
   To re-create on an account move: Workers Scripts·Edit, Workers KV·Edit, D1·Edit (+ account read).
 - **Workers Builds deploy credential** — the Build → API token is now a
