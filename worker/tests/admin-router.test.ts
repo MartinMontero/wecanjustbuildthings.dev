@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import worker from '../index.ts';
 import { routeAdmin } from '../admin/router.ts';
 
-// Phase 1 scaffold contract: /api/admin/* must be OWNED by the Worker's admin
-// sub-router — dispatched there (not falling through to the static asset layer) and
-// failing closed until Phase 2 wires authenticated endpoints. Uses the same
-// fake-binding pattern as the other worker tests (no miniflare, no new deps).
+// Dispatch contract: /api/admin/* must be OWNED by the Worker's admin sub-router —
+// dispatched there (not falling through to the static asset layer) and failing
+// closed. With no admin bindings provisioned (as here), known routes answer 503
+// and unknown paths 404 — never anything permissive. Uses the same fake-binding
+// pattern as the other worker tests (no miniflare, no new deps). The full Phase 2
+// auth matrix lives in admin-auth.test.ts.
 function fakeEnv() {
   let assetCalls = 0;
   const env: any = {
@@ -16,10 +18,10 @@ function fakeEnv() {
 }
 const req = (p: string, init?: RequestInit) => new Request(`https://wecanjustbuildthings.dev${p}`, init);
 
-test('/api/admin/* dispatches to the admin router (fail-closed 404), never to ASSETS', async () => {
+test('/api/admin/* dispatches to the admin router (fail-closed), never to ASSETS', async () => {
   const { env, assetCalls } = fakeEnv();
   const res = await worker.fetch(req('/api/admin/whoami'), env);
-  assert.equal(res.status, 404);                         // no admin routes exist yet → deny
+  assert.equal(res.status, 503);                         // known route, unprovisioned bindings → fail closed
   assert.equal(res.headers.get('cache-control'), 'no-store');
   assert.equal(res.headers.get('content-type'), 'application/json; charset=utf-8');
   assert.equal(assetCalls(), 0);                         // the Worker owned it, no static fallthrough
@@ -34,8 +36,9 @@ test('a non-admin /api path is unaffected by the admin dispatch', async () => {
   assert.equal(assetCalls(), 0);
 });
 
-test('routeAdmin denies every path by default (deny-by-default scaffold)', async () => {
-  for (const p of ['/api/admin/whoami', '/api/admin/', '/api/admin/anything/else']) {
+test('routeAdmin fails closed on an empty env: 503 for known routes, 404 for the rest', async () => {
+  assert.equal((await routeAdmin(req('/api/admin/whoami'), {} as never)).status, 503);
+  for (const p of ['/api/admin/', '/api/admin/anything/else']) {
     const res = await routeAdmin(req(p), {} as never);
     assert.equal(res.status, 404, `expected 404 for ${p}`);
   }
