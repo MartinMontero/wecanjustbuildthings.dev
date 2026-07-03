@@ -173,12 +173,14 @@ export function extractInlineScriptBodies(html: string): string[] {
   return bodies;
 }
 
-/** CSP source expression (`'sha256-…'`) for one inline script body. */
+/** CSP source expression (`'sha256-…'`) for one inline script body. The single
+ *  quotes are part of the grammar — a bare `sha256-…` is an "invalid source" the
+ *  browser drops, so the inline scripts would be blocked once the CSP is enforced. */
 export async function hashInlineScript(body: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(body));
   let binary = '';
   for (const byte of new Uint8Array(digest)) binary += String.fromCharCode(byte);
-  return `sha256-${btoa(binary)}`;
+  return `'sha256-${btoa(binary)}'`;
 }
 
 /** Convenience: the deduplicated set of inline-script hashes for one HTML string. */
