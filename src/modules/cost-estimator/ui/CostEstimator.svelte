@@ -125,9 +125,7 @@
     <p class="muted">{t.noSession}</p>
     <a class="cta" href={buildHref}>{t.noSessionCta}</a>
   {:else if usage}
-    <h2>{t.title}</h2>
-    <p class="lead">{t.lead}</p>
-
+    <!-- Title + intro come from the page (frontmatter H1 + mdx intro) — no duplicate here. -->
     <fieldset class="source">
       <legend>{t.sourceHeading}</legend>
       <label class:active={dataSource === 'pathC-client'}>
