@@ -37,3 +37,31 @@ export interface D1Database {
 export interface RateLimit {
   limit(options: { key: string }): Promise<{ success: boolean }>;
 }
+
+/**
+ * Minimal Durable Object surface used by the admin coordinator (`ADMIN_COORD`,
+ * a SQLite-backed DO declared in `wrangler.jsonc`). We use the KV-style storage
+ * API (get/put/delete) for the small, strongly-consistent coordinator state, so
+ * the test double stays a faithful in-memory map. Classic constructor shape
+ * (`(state, env)` + `fetch`) — no `cloudflare:workers` import — keeps this in the
+ * same hand-typed lane as the bindings above (no @cloudflare/workers-types).
+ */
+export interface DurableObjectId {
+  toString(): string;
+}
+export interface DurableObjectStub {
+  fetch(request: Request): Promise<Response>;
+}
+export interface DurableObjectNamespace {
+  idFromName(name: string): DurableObjectId;
+  get(id: DurableObjectId): DurableObjectStub;
+}
+export interface DurableObjectStorage {
+  get<T = unknown>(key: string): Promise<T | undefined>;
+  put<T = unknown>(key: string, value: T): Promise<void>;
+  delete(key: string): Promise<boolean>;
+}
+export interface DurableObjectState {
+  storage: DurableObjectStorage;
+  blockConcurrencyWhile<T>(fn: () => Promise<T>): Promise<T>;
+}

@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["index.ts", "auth/**/*.ts"]
+  "include": ["index.ts", "auth/**/*.ts", "admin/**/*.ts"]
 }
