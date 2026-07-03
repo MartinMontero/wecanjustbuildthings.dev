@@ -22,10 +22,9 @@
   "kv_namespaces": [
     { "binding": "SESSIONS", "id": "4646df2e5e3c4182b0d654a4a0664e40" },
     { "binding": "ATPROTO", "id": "a8da5109ae3046c88d726288d59aaa96" },
-    // Admin panel (Phase 1) — PLACEHOLDER id. Provision on approval with:
-    //   npx wrangler kv namespace create ADMIN_SESSIONS
-    // then paste the returned id here (account-state command; see docs/admin-panel-spec.md).
-    { "binding": "ADMIN_SESSIONS", "id": "PLACEHOLDER_ADMIN_SESSIONS_KV_ID" }
+    // Admin panel (Phase 1). Provisioned on the wecanjustbuildthings account; to
+    // recreate on a different account: `npx wrangler kv namespace create ADMIN_SESSIONS`.
+    { "binding": "ADMIN_SESSIONS", "id": "b250155143e348cba5a22b69024f677a" }
   ],
   "d1_databases": [
     { "binding": "DB", "database_name": "wcjbt-auth", "database_id": "d3240389-b265-4229-bff0-b8ab94c4d78d", "migrations_dir": "migrations" }
