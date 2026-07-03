@@ -21,7 +21,9 @@
  * Static assets are served by the asset layer first; this Worker only runs for
  * /api/* routes, with env.ASSETS as the fallback for anything else.
  */
-import type { KVNamespace, D1Database, RateLimit } from './auth/cf.ts';
+import type { KVNamespace, D1Database, RateLimit, DurableObjectNamespace } from './auth/cf.ts';
+import { routeAdmin } from './admin/router.ts';
+import { AdminCoordinator } from './admin/coordinator.ts';
 import { authJson, authError } from './auth/respond.ts';
 import {
   resolveSession, destroySession, createSession, sessionCookie, clearSessionCookie,
@@ -62,6 +64,10 @@ export interface Env {
   // binding is absent (local dev, tests, older deploy) the guards no-op so the site
   // still works — the limiter only ever tightens, never breaks, a request path.
   AUTH_RATE_LIMITER?: RateLimit;
+  // Admin panel bindings (Phase 1 scaffold). Optional so the admin surface fails
+  // closed when unprovisioned; see worker/admin/* and docs/admin-panel-spec.md.
+  ADMIN_COORD?: DurableObjectNamespace; // per-identity coordinator DO (CSRF + rate-limit)
+  ADMIN_SESSIONS?: KVNamespace;          // opaque admin sessions (separate from SESSIONS)
 }
 
 const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';
@@ -482,6 +488,9 @@ async function routeRequest(request: Request, env: Env): Promise<Response> {
     if (path === '/api/auth/bluesky/client-metadata.json') return blueskyMetadataHandler(env);
     if (path === '/api/auth/bluesky/start') return blueskyStartHandler(request, url, env);
     if (path === '/api/auth/bluesky/callback') return blueskyCallbackHandler(request, url, env);
+    // Admin panel sub-router (worker/admin/*). Fail-closed scaffold in Phase 1;
+    // authenticated endpoints (whoami, login, elevation) land in Phase 2.
+    if (path.startsWith('/api/admin/')) return routeAdmin(request, env);
     return env.ASSETS.fetch(request);
 }
 
@@ -497,3 +506,7 @@ export default {
     }
   },
 };
+
+// Durable Object classes must be exported from the Worker's entry module so the
+// runtime can bind them (wrangler.jsonc `durable_objects` → `ADMIN_COORD`).
+export { AdminCoordinator };

@@ -21,7 +21,11 @@
   // paste the returned ids below.
   "kv_namespaces": [
     { "binding": "SESSIONS", "id": "4646df2e5e3c4182b0d654a4a0664e40" },
-    { "binding": "ATPROTO", "id": "a8da5109ae3046c88d726288d59aaa96" }
+    { "binding": "ATPROTO", "id": "a8da5109ae3046c88d726288d59aaa96" },
+    // Admin panel (Phase 1) — PLACEHOLDER id. Provision on approval with:
+    //   npx wrangler kv namespace create ADMIN_SESSIONS
+    // then paste the returned id here (account-state command; see docs/admin-panel-spec.md).
+    { "binding": "ADMIN_SESSIONS", "id": "PLACEHOLDER_ADMIN_SESSIONS_KV_ID" }
   ],
   "d1_databases": [
     { "binding": "DB", "database_name": "wcjbt-auth", "database_id": "d3240389-b265-4229-bff0-b8ab94c4d78d", "migrations_dir": "migrations" }
@@ -34,6 +38,29 @@
   "ratelimits": [
     { "name": "AUTH_RATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 20, "period": 60 } }
   ],
+
+  // --- Admin panel (docs/admin-panel-spec.md) ---
+  // This slice binds only what Phase 1 (scaffold) + Phase 2 (auth) use: ADMIN_COORD
+  // (below) and ADMIN_SESSIONS (in kv_namespaces above). The spec's FULL ADMIN_* map,
+  // recorded for traceability — each lands with its own feature phase so a downstream
+  // deployer never has to provision idle resources:
+  //   ADMIN_DB        (D1)               — moderation cases/labels, audit log, catalog staging   [Phase 3]
+  //   ADMIN_SESSIONS  (KV)               — admin sessions                                        [this slice]
+  //   ADMIN_EVIDENCE  (R2)               — locked-down evidence                                  [Phase 6]
+  //   ADMIN_COORD     (SQLite DO)        — rate-limit / CSRF / queue-lock                        [this slice]
+  //   ADMIN_REPORTS   (Queues)           — NCMEC dispatch                                        [Phase 6]
+  //   ADMIN_ANALYTICS (Analytics Engine) — metrics                                              [Phase 7]
+  // ADMIN_COORD is a SQLite-backed Durable Object (class exported from worker/index.ts,
+  // created on deploy — no pre-provision command).
+  "durable_objects": {
+    "bindings": [
+      { "name": "ADMIN_COORD", "class_name": "AdminCoordinator" }
+    ]
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["AdminCoordinator"] }
+  ],
+
   "vars": {
     // Canonical prod origin (used for OAuth client metadata + redirects). Local dev
     // overrides this via .dev.vars (http://localhost:8788).
