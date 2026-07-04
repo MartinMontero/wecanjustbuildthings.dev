@@ -4,16 +4,20 @@
  * AdminCoordinator class behind a hand-fake DurableObjectNamespace — no miniflare,
  * no new dependencies.
  *
- * The allowlist used here is injected through routeAdmin's compile-time deps seam;
- * the COMMITTED allowlist stays empty and its fail-closed behavior is asserted
- * explicitly (a valid signature with the shipped config must be rejected).
+ * The allowlist used here is injected through routeAdmin's compile-time deps seam.
+ * Fails-closed is proven against an EMPTY FIXTURE (EMPTY_ALLOWLIST below) so the
+ * proof is invariant to whichever identities the operator has constituted in the
+ * committed list; the committed list itself is validated for well-formedness.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { generateSecretKey, getPublicKey, finalizeEvent } from 'nostr-tools/pure';
 import { routeAdmin } from '../admin/router.ts';
 import { AdminCoordinator } from '../admin/coordinator.ts';
-import { ADMIN_ALLOWLIST, isAllowedNostrPubkey, isAllowedBlueskyDid } from '../admin/allowlist.ts';
+import {
+  ADMIN_ALLOWLIST, isAllowedNostrPubkey, isAllowedBlueskyDid, adminRoleFor,
+  isWellFormedNostrEntry, isWellFormedBlueskyEntry, type AdminAllowlist,
+} from '../admin/allowlist.ts';
 import {
   ADMIN_SESSION_COOKIE, ADMIN_IDLE_SECONDS, ADMIN_ABSOLUTE_SECONDS,
   putAdminSession, resolveAdminSessionId, adminSessionCookie, newAdminSessionId,
@@ -163,38 +167,71 @@ const sessionIdOf = (res: Response) => /__Host-wcjbt_admin=([0-9a-f]{64})/.exec(
 const withAdminCookie = (path: string, id: string, init?: RequestInit) =>
   req(path, { ...init, headers: { ...(init?.headers as Record<string, string> ?? {}), cookie: `${ADMIN_SESSION_COOKIE}=${id}` } });
 
-// ---- the committed allowlist is EMPTY and fails closed ----
+// ---- fails-closed, proven against an EMPTY FIXTURE ----
+// The fixture — not the committed list — carries the fails-closed proof, so these
+// tests stay valid regardless of which identities the operator has constituted.
 
-test('the COMMITTED allowlist ships empty', () => {
-  assert.equal(ADMIN_ALLOWLIST.nostrPubkeys.length, 0);
-  assert.equal(ADMIN_ALLOWLIST.blueskyDids.length, 0);
-});
+const EMPTY_ALLOWLIST: AdminAllowlist = { nostr: [], bluesky: [] };
 
-test('EMPTY allowlist rejects a perfectly VALID signature (fail closed, generic 401)', async () => {
+test('an EMPTY allowlist rejects a perfectly VALID signature (fail closed, generic 401)', async () => {
   const env = fakeEnv();
-  const res = await nostrLogin(env, generateSecretKey()); // default deps = committed empty list
+  const res = await nostrLogin(env, generateSecretKey(), { allowlist: EMPTY_ALLOWLIST });
   assert.equal(res.status, 401);
   assert.deepEqual(await res.json(), { error: 'authentication failed' }); // no oracle
   assert.equal(cookieOf(res), ''); // and no cookie
+});
+
+test('routeAdmin DEFAULTS to the committed allowlist: an uncommitted key is rejected', async () => {
+  // No deps passed → the committed ADMIN_ALLOWLIST is in force. A fresh random key
+  // is (probabilistically) never a member, so this pins the default wiring without
+  // depending on whether the operator has constituted identities yet.
+  const env = fakeEnv();
+  const res = await nostrLogin(env, generateSecretKey());
+  assert.equal(res.status, 401);
+});
+
+test('every COMMITTED allowlist entry is well-formed with a valid role', () => {
+  for (const entry of ADMIN_ALLOWLIST.nostr) {
+    assert.ok(isWellFormedNostrEntry(entry), `malformed nostr entry: ${entry.pubkey}`);
+  }
+  for (const entry of ADMIN_ALLOWLIST.bluesky) {
+    assert.ok(isWellFormedBlueskyEntry(entry), `malformed bluesky entry: ${entry.did}`);
+  }
 });
 
 test('a NON-allowlisted pubkey is rejected exactly like a bad signature', async () => {
   const env = fakeEnv();
   const admin = generateSecretKey();
   const intruder = generateSecretKey();
-  const deps = { allowlist: { nostrPubkeys: [getPublicKey(admin)], blueskyDids: [] } };
+  const deps = { allowlist: { nostr: [{ pubkey: getPublicKey(admin), role: 'admin' }], bluesky: [] } };
   const res = await nostrLogin(env, intruder, deps);
   assert.equal(res.status, 401);
   assert.deepEqual(await res.json(), { error: 'authentication failed' });
 });
 
 test('allowlist matchers reject malformed subjects and malformed ENTRIES', () => {
-  const list = { nostrPubkeys: ['ABC', 'f'.repeat(64)], blueskyDids: ['not-a-did', 'did:plc:ok123'] };
+  const list: AdminAllowlist = {
+    nostr: [{ pubkey: 'ABC', role: 'admin' }, { pubkey: 'f'.repeat(64), role: 'admin' }],
+    bluesky: [{ did: 'not-a-did', role: 'admin' }, { did: 'did:plc:ok123', role: 'admin' }],
+  };
   assert.equal(isAllowedNostrPubkey(list, 'F'.repeat(64)), true); // hex case-insensitive
   assert.equal(isAllowedNostrPubkey(list, 'abc'), false);         // malformed subject
-  assert.equal(isAllowedNostrPubkey({ nostrPubkeys: ['ABC'], blueskyDids: [] }, 'abc'), false); // malformed entry never matches
+  assert.equal(isAllowedNostrPubkey({ nostr: [{ pubkey: 'ABC', role: 'admin' }], bluesky: [] }, 'abc'), false); // malformed entry never matches
   assert.equal(isAllowedBlueskyDid(list, 'did:plc:ok123'), true);
   assert.equal(isAllowedBlueskyDid(list, 'not-a-did'), false);
+});
+
+test('adminRoleFor returns the recorded role for members, null otherwise (role is genesis DATA)', () => {
+  const pk = 'a'.repeat(64);
+  const list: AdminAllowlist = {
+    nostr: [{ pubkey: pk, role: 'superadmin' }],
+    bluesky: [{ did: 'did:plc:member1', role: 'admin' }],
+  };
+  assert.equal(adminRoleFor(list, 'nostr', pk), 'superadmin');
+  assert.equal(adminRoleFor(list, 'nostr', pk.toUpperCase()), 'superadmin'); // hex case-insensitive
+  assert.equal(adminRoleFor(list, 'bluesky', 'did:plc:member1'), 'admin');
+  assert.equal(adminRoleFor(list, 'nostr', 'b'.repeat(64)), null);
+  assert.equal(adminRoleFor(list, 'bluesky', 'did:plc:stranger'), null);
 });
 
 // ---- Nostr login happy path + session cookie contract ----
@@ -203,7 +240,7 @@ test('allowlisted NIP-98 login mints a Strict __Host- admin session + csrf', asy
   const env = fakeEnv();
   const sk = generateSecretKey();
   const pk = getPublicKey(sk);
-  const deps = { allowlist: { nostrPubkeys: [pk], blueskyDids: [] } };
+  const deps = { allowlist: { nostr: [{ pubkey: pk, role: 'admin' }], bluesky: [] } };
   const res = await nostrLogin(env, sk, deps);
   assert.equal(res.status, 200);
   const body = (await res.json()) as { identity: string; method: string; csrf: string };
@@ -230,11 +267,11 @@ test('mid-session REVOCATION (Nostr): de-listing an identity kills its live cook
   const env = fakeEnv();
   const sk = generateSecretKey();
   const pk = getPublicKey(sk);
-  const allowed = { allowlist: { nostrPubkeys: [pk], blueskyDids: [] } };
+  const allowed = { allowlist: { nostr: [{ pubkey: pk, role: 'admin' }], bluesky: [] } };
   const id = sessionIdOf(await nostrLogin(env, sk, allowed));
   // While the session is still well within its idle+absolute bounds, the identity
   // is removed from the allowlist (simulating a revocation commit+deploy).
-  const revoked = { allowlist: { nostrPubkeys: [], blueskyDids: [] } };
+  const revoked = { allowlist: EMPTY_ALLOWLIST };
   assert.equal((await routeAdmin(withAdminCookie('/api/admin/whoami', id), env, revoked)).status, 401);
   // …and the session is destroyed, not merely rejected: even the ORIGINAL (still-
   // allowlisted) deps can't resurrect it.
@@ -244,14 +281,14 @@ test('mid-session REVOCATION (Nostr): de-listing an identity kills its live cook
 test('mid-session REVOCATION (Bluesky): de-listing a DID kills its elevated cookie session next request', async () => {
   const env = fakeEnv();
   const did = 'did:plc:revokeme';
-  const allowed = { allowlist: { nostrPubkeys: [], blueskyDids: [did] } };
+  const allowed = { allowlist: { nostr: [], bluesky: [{ did: did, role: 'admin' }] } };
   const sid = await blueskyUserSession(env, did);
   const elevated = await routeAdmin(req('/api/admin/elevate/bluesky', {
     method: 'POST', headers: { cookie: `${SESSION_COOKIE}=${sid}` },
   }), env, allowed);
   const id = sessionIdOf(elevated);
   assert.equal((await routeAdmin(withAdminCookie('/api/admin/whoami', id), env, allowed)).status, 200);
-  const revoked = { allowlist: { nostrPubkeys: [], blueskyDids: [] } };
+  const revoked = { allowlist: EMPTY_ALLOWLIST };
   assert.equal((await routeAdmin(withAdminCookie('/api/admin/whoami', id), env, revoked)).status, 401);
   assert.equal((await routeAdmin(withAdminCookie('/api/admin/whoami', id), env, allowed)).status, 401); // destroyed
 });
@@ -259,7 +296,7 @@ test('mid-session REVOCATION (Bluesky): de-listing a DID kills its elevated cook
 test('a replayed login (same challenge + token) fails: challenges are single-use', async () => {
   const env = fakeEnv();
   const sk = generateSecretKey();
-  const deps = { allowlist: { nostrPubkeys: [getPublicKey(sk)], blueskyDids: [] } };
+  const deps = { allowlist: { nostr: [{ pubkey: getPublicKey(sk), role: 'admin' }], bluesky: [] } };
   const cRes = await routeAdmin(req('/api/admin/login/nostr/challenge', { method: 'POST' }), env, deps);
   const { challenge } = (await cRes.json()) as { challenge: string };
   const body = JSON.stringify({ challenge });
@@ -349,7 +386,7 @@ test('the final <60 s before the absolute bound skips the rewrite (KV min window
 test('logout demands the coordinator-held CSRF token and a same-site request', async () => {
   const env = fakeEnv();
   const sk = generateSecretKey();
-  const deps = { allowlist: { nostrPubkeys: [getPublicKey(sk)], blueskyDids: [] } };
+  const deps = { allowlist: { nostr: [{ pubkey: getPublicKey(sk), role: 'admin' }], bluesky: [] } };
   const login = await nostrLogin(env, sk, deps);
   const id = sessionIdOf(login);
   const { csrf } = (await login.json()) as { csrf: string };
@@ -391,7 +428,7 @@ test('per-request NIP-98 whoami: allowlisted GET signature works once, replay di
   const env = fakeEnv();
   const sk = generateSecretKey();
   const pk = getPublicKey(sk);
-  const deps = { allowlist: { nostrPubkeys: [pk], blueskyDids: [] } };
+  const deps = { allowlist: { nostr: [{ pubkey: pk, role: 'admin' }], bluesky: [] } };
   const token = tokenFor(sk, { url: `${ORIGIN}/api/admin/whoami`, method: 'GET' }); // bodyless: no payload tag
   const call = () => routeAdmin(req('/api/admin/whoami', { headers: { authorization: token } }), env, deps);
   const first = await call();
@@ -404,7 +441,7 @@ test('per-request NIP-98 negatives: bad sig, wrong url, wrong method, stale, fut
   const env = fakeEnv();
   const sk = generateSecretKey();
   const pk = getPublicKey(sk);
-  const deps = { allowlist: { nostrPubkeys: [pk], blueskyDids: [] } };
+  const deps = { allowlist: { nostr: [{ pubkey: pk, role: 'admin' }], bluesky: [] } };
   const url = `${ORIGIN}/api/admin/whoami`;
   const call = (authorization: string, d = deps) =>
     routeAdmin(req('/api/admin/whoami', { headers: { authorization } }), env, d);
@@ -436,7 +473,7 @@ async function blueskyUserSession(env: ReturnType<typeof fakeEnv>, did: string) 
 test('an allowlisted DID elevates its user session into an admin session', async () => {
   const env = fakeEnv();
   const did = 'did:plc:adminxyz';
-  const deps = { allowlist: { nostrPubkeys: [], blueskyDids: [did] } };
+  const deps = { allowlist: { nostr: [], bluesky: [{ did: did, role: 'admin' }] } };
   const sid = await blueskyUserSession(env, did);
   const res = await routeAdmin(req('/api/admin/elevate/bluesky', {
     method: 'POST', headers: { cookie: `${SESSION_COOKIE}=${sid}` },
@@ -453,7 +490,7 @@ test('an allowlisted DID elevates its user session into an admin session', async
 
 test('elevation rejects: no user session, non-allowlisted DID, nostr-only user, cross-site', async () => {
   const env = fakeEnv();
-  const deps = { allowlist: { nostrPubkeys: [], blueskyDids: ['did:plc:someoneelse'] } };
+  const deps = { allowlist: { nostr: [], bluesky: [{ did: 'did:plc:someoneelse', role: 'admin' }] } };
   // no session cookie
   assert.equal((await routeAdmin(req('/api/admin/elevate/bluesky', { method: 'POST' }), env, deps)).status, 401);
   // session exists but the DID is not allowlisted → same generic 401
