@@ -162,17 +162,51 @@ async function openAdminSession(
   );
 }
 
+/** True when a proven subject is STILL a member of the allowlist for its method. */
+function isSubjectAllowed(allowlist: AdminAllowlist, method: AdminMethod, subject: string): boolean {
+  return method === 'nostr'
+    ? isAllowedNostrPubkey(allowlist, subject)
+    : isAllowedBlueskyDid(allowlist, subject);
+}
+
+/**
+ * The single per-request enforcement choke point for every COOKIE-authenticated
+ * admin route. Resolves the session (idle/absolute bounds) AND re-checks that its
+ * identity is STILL allowlisted — so removing an identity from the committed
+ * allowlist revokes every live session on its NEXT request, not merely at expiry
+ * (matching the governance model: revocation = commit + deploy, effective next
+ * request). A session whose identity has been de-listed is destroyed, not just
+ * rejected. The NIP-98 API path enforces membership inline (see whoami Path 2);
+ * this covers the browser path and any future privileged cookie route — route
+ * privileged reads/writes through this, never through resolveAdminSessionId alone.
+ * Returns null → caller responds 401.
+ */
+async function resolveAllowlistedAdmin(
+  request: Request,
+  env: AdminEnv & { ADMIN_SESSIONS: KVNamespace },
+  deps: AdminDeps,
+): Promise<{ id: string; record: { subject: string; method: AdminMethod } } | null> {
+  const session = await resolveAdminSessionId(env.ADMIN_SESSIONS, readCookie(request, ADMIN_SESSION_COOKIE));
+  if (!session) return null;
+  const { record } = session;
+  if (!isSubjectAllowed(deps.allowlist, record.method, record.subject)) {
+    await destroyAdminSession(env.ADMIN_SESSIONS, session.id); // de-listed → kill the session
+    return null;
+  }
+  return session;
+}
+
 async function whoami(request: Request, env: AdminEnv, deps: AdminDeps): Promise<Response> {
   if (!adminConfigured(env)) return authError(503, 'admin not configured');
 
-  // Path 1 — browser: the admin cookie session (idle/absolute checks + refresh
-  // live in resolveAdminSessionId). The CSRF token rides along so a reloaded tab
-  // can still make its next state-changing call; the response is same-origin-
-  // readable only (authJson sets no CORS) and the token is useless without the
-  // HttpOnly cookie beside it.
+  // Path 1 — browser: the admin cookie session, re-checked against the allowlist on
+  // EVERY request (resolveAllowlistedAdmin) so a revoked identity loses access on its
+  // next call, not at expiry. The CSRF token rides along so a reloaded tab can still
+  // make its next state-changing call; the response is same-origin-readable only
+  // (authJson sets no CORS) and the token is useless without the HttpOnly cookie.
   const cookieId = readCookie(request, ADMIN_SESSION_COOKIE);
   if (cookieId) {
-    const session = await resolveAdminSessionId(env.ADMIN_SESSIONS, cookieId);
+    const session = await resolveAllowlistedAdmin(request, env, deps);
     if (!session) return authError();
     const { record } = session;
     const csrfRes = await coord(env.ADMIN_COORD, record.method, record.subject, '/csrf', { sessionId: session.id });

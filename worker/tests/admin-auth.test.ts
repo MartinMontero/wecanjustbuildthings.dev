@@ -226,6 +226,36 @@ test('allowlisted NIP-98 login mints a Strict __Host- admin session + csrf', asy
   assert.equal(whoBody.csrf, body.csrf);
 });
 
+test('mid-session REVOCATION (Nostr): de-listing an identity kills its live cookie session on the next request', async () => {
+  const env = fakeEnv();
+  const sk = generateSecretKey();
+  const pk = getPublicKey(sk);
+  const allowed = { allowlist: { nostrPubkeys: [pk], blueskyDids: [] } };
+  const id = sessionIdOf(await nostrLogin(env, sk, allowed));
+  // While the session is still well within its idle+absolute bounds, the identity
+  // is removed from the allowlist (simulating a revocation commit+deploy).
+  const revoked = { allowlist: { nostrPubkeys: [], blueskyDids: [] } };
+  assert.equal((await routeAdmin(withAdminCookie('/api/admin/whoami', id), env, revoked)).status, 401);
+  // …and the session is destroyed, not merely rejected: even the ORIGINAL (still-
+  // allowlisted) deps can't resurrect it.
+  assert.equal((await routeAdmin(withAdminCookie('/api/admin/whoami', id), env, allowed)).status, 401);
+});
+
+test('mid-session REVOCATION (Bluesky): de-listing a DID kills its elevated cookie session next request', async () => {
+  const env = fakeEnv();
+  const did = 'did:plc:revokeme';
+  const allowed = { allowlist: { nostrPubkeys: [], blueskyDids: [did] } };
+  const sid = await blueskyUserSession(env, did);
+  const elevated = await routeAdmin(req('/api/admin/elevate/bluesky', {
+    method: 'POST', headers: { cookie: `${SESSION_COOKIE}=${sid}` },
+  }), env, allowed);
+  const id = sessionIdOf(elevated);
+  assert.equal((await routeAdmin(withAdminCookie('/api/admin/whoami', id), env, allowed)).status, 200);
+  const revoked = { allowlist: { nostrPubkeys: [], blueskyDids: [] } };
+  assert.equal((await routeAdmin(withAdminCookie('/api/admin/whoami', id), env, revoked)).status, 401);
+  assert.equal((await routeAdmin(withAdminCookie('/api/admin/whoami', id), env, allowed)).status, 401); // destroyed
+});
+
 test('a replayed login (same challenge + token) fails: challenges are single-use', async () => {
   const env = fakeEnv();
   const sk = generateSecretKey();
