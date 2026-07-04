@@ -47,14 +47,21 @@ export interface AdminAllowlist {
   readonly bluesky: readonly AdminBlueskyEntry[];
 }
 
-/** The committed allowlist. The operator adds identities in their own reviewed
- *  commit; the code never invents or defaults any. */
+/** The committed allowlist — the constituted admin set of THIS deployment
+ *  (wecanjustbuildthings.dev). Every entry is owner-declared and multi-source
+ *  verified before landing; changes enter only through reviewed commits. */
 export const ADMIN_ALLOWLIST: AdminAllowlist = {
   nostr: [
-    // { pubkey: '<64-hex admin pubkey>', role: 'admin' }, // who this is
+    // Martin Montero (site operator). npub1kdve3xh5l4xnuwx87zff9pyrq044kx9pd6lsxwdfgpy0xklhv5qs96rgqv
+    // Verified three ways: in-repo nip19 decode (round-tripped), independent decode,
+    // and the NIP-98-proven subject of his live sign-in in the production auth store.
+    { pubkey: 'b359989af4fd4d3e38c7f09292848303eb5b18a16ebf0339a94048f35bf76501', role: 'superadmin' },
   ],
   bluesky: [
-    // { did: 'did:plc:<id>', role: 'admin' }, // who this is
+    // Martin Montero (site operator). Handle monteroxr.bsky.social — the DID (not the
+    // mutable handle) is stored, taken from his completed AT-Proto OAuth session in
+    // the production auth store and confirmed via live resolveHandle.
+    { did: 'did:plc:nli4gouip2eswhsrzqbiatyz', role: 'superadmin' },
   ],
 };
 
