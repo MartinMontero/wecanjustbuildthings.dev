@@ -52,6 +52,30 @@ const runtime: RuntimeImplementation = {
 };
 
 /**
+ * Cloudflare's edge runtime (workerd) rejects `redirect: 'error'` on fetch with a
+ * TypeError ("won't be implemented … at the edge; use manual and check the response
+ * status code"). @atproto/oauth-client's identity/handle/DID resolvers all build
+ * their requests with `redirect: 'error'` (did:web, did:plc, the XRPC and
+ * well-known handle resolvers), so sign-in dies at identity resolution on Workers —
+ * before it ever reaches the PDS. Per workerd's own guidance we translate
+ * 'error' → 'manual'; every one of those resolvers already rejects a non-200
+ * response, and a manual-mode redirect surfaces as a non-200 opaqueredirect, so the
+ * "fail on an unexpected redirect" security intent is preserved. Injected as the
+ * client's Fetch, which OAuthClient threads to every resolver it builds.
+ * See github.com/bluesky-social/atproto issue #3292.
+ */
+export const edgeFetch = (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+  // The resolvers call fetch as `fetch(url, { redirect: 'error', … })`, and workerd
+  // rejects `redirect: 'error'` at Request construction — so the rewrite has to
+  // happen on the init BEFORE any Request is built (constructing one here would
+  // throw the very TypeError we're avoiding).
+  if (init?.redirect === 'error') {
+    return globalThis.fetch(input, { ...init, redirect: 'manual' });
+  }
+  return globalThis.fetch(input, init);
+};
+
+/**
  * KV store whose value embeds a live `dpopKey: Key`. We persist the key as its
  * private JWK and rebuild a JoseKey on read, so the rest of the value stays plain JSON.
  */
@@ -111,6 +135,7 @@ async function makeClient(env: BlueskyEnv): Promise<OAuthClient> {
     responseMode: 'query',
     handleResolver: HANDLE_RESOLVER,
     runtimeImplementation: runtime,
+    fetch: edgeFetch, // workerd rejects the resolvers' redirect:'error' — see edgeFetch
     stateStore: dpopKvStore<StateValue>(env.ATPROTO, 'bsky_state:', STATE_TTL_SECONDS),
     sessionStore: dpopKvStore<SessionValue>(env.ATPROTO, 'bsky_sess:', SESSION_TTL_SECONDS),
   });

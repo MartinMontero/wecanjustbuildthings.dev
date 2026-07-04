@@ -367,7 +367,17 @@ async function blueskyStartHandler(request: Request, url: URL, env: Env): Promis
     const stateCookie = `bsky_state=${state}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`;
     const backCookie = `bsky_back=${encodeURIComponent(back)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`;
     return new Response(null, { status: 302, headers: [['location', authUrl.toString()], ['set-cookie', stateCookie], ['set-cookie', backCookie]] as any });
-  } catch {
+  } catch (err) {
+    // Don't swallow the real failure: the previous bare `catch {}` hid a
+    // deterministic runtime error (the atproto resolvers' `redirect: 'error'`
+    // being rejected by workerd) behind a generic banner for anyone diagnosing
+    // it. Log the error's name/message/cause so it lands in Workers Logs
+    // (observability is on) — this pre-authorization path handles no token,
+    // cookie, or key material, so there is nothing secret to redact; the user
+    // still sees only the generic `bsky=error` banner. (See worker/auth/bluesky.ts
+    // edgeFetch for the workerd redirect fix.)
+    const e = err as { name?: string; message?: string; cause?: { message?: string } };
+    console.error('[bsky] authorize failed:', e?.name, '|', e?.message, '| cause:', e?.cause?.message);
     return backTo(url.origin, back, 'bsky=error&reason=authorize');
   }
 }

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { JoseKey } from '@atproto/jwk-jose';
-import { isValidHandle, normalizeHandle, blueskyClientMetadata, newOAuthState, type BlueskyEnv } from '../auth/bluesky.ts';
+import { isValidHandle, normalizeHandle, blueskyClientMetadata, newOAuthState, edgeFetch, type BlueskyEnv } from '../auth/bluesky.ts';
 import type { KVNamespace } from '../auth/cf.ts';
 
 function fakeKV(): KVNamespace {
@@ -69,6 +69,36 @@ test('newOAuthState is a unique 256-bit (64 hex) CSPRNG token for browser-bound 
 // missing/mismatched cookie) needs a live PDS OAuth response to reach the check, so it
 // is covered by integration testing, not this offline unit suite. The token generator
 // above and the handler wiring (worker/tests/routing.test.ts) are what's unit-tested.
+
+test('edgeFetch rewrites redirect:"error"→"manual" (workerd rejects "error"), passing everything else through', async () => {
+  // @atproto's identity/handle/DID resolvers call fetch(url, { redirect: 'error' });
+  // Cloudflare's edge runtime throws a TypeError on 'error' at Request construction,
+  // so authorize() dies at identity resolution. edgeFetch translates it up front.
+  const seen: Array<{ input: unknown; init?: RequestInit }> = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: unknown, init?: RequestInit) => {
+    seen.push({ input, init });
+    return new Response('ok');
+  }) as typeof fetch;
+  try {
+    await edgeFetch('https://plc.directory/did:plc:x', { redirect: 'error', headers: { accept: 'application/json' } });
+    assert.equal(seen[0]!.init!.redirect, 'manual', 'error must become manual');
+    assert.deepEqual(seen[0]!.init!.headers, { accept: 'application/json' }, 'other init fields preserved');
+
+    await edgeFetch('https://x/', { redirect: 'follow' });
+    assert.equal(seen[1]!.init!.redirect, 'follow', 'non-error redirect is untouched');
+
+    await edgeFetch('https://x/'); // no init at all → must not throw, passes through
+    assert.equal(seen[2]!.init, undefined);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});
+
+// NOTE: edgeFetch clearing the redirect barrier is unit-tested above; that the FULL
+// authorize() round-trip then reaches the PDS and returns an authorize URL needs a
+// live atproto resolver + PDS on the Workers runtime, so it is covered by the
+// operator's prod re-test (Sign in with Bluesky end-to-end), not this offline suite.
 
 test('blueskyClientMetadata publishes ONLY the public key (never the private "d")', async () => {
   const md = await blueskyClientMetadata(await envWithKey());
