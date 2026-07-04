@@ -52,28 +52,69 @@ const runtime: RuntimeImplementation = {
 };
 
 /**
- * Cloudflare's edge runtime (workerd) rejects `redirect: 'error'` on fetch with a
- * TypeError ("won't be implemented … at the edge; use manual and check the response
- * status code"). @atproto/oauth-client's identity/handle/DID resolvers all build
- * their requests with `redirect: 'error'` (did:web, did:plc, the XRPC and
- * well-known handle resolvers), so sign-in dies at identity resolution on Workers —
- * before it ever reaches the PDS. Per workerd's own guidance we translate
- * 'error' → 'manual'; every one of those resolvers already rejects a non-200
- * response, and a manual-mode redirect surfaces as a non-200 opaqueredirect, so the
- * "fail on an unexpected redirect" security intent is preserved. Injected as the
- * client's Fetch, which OAuthClient threads to every resolver it builds.
- * See github.com/bluesky-social/atproto issue #3292.
+ * Normalize a RequestInit for the Cloudflare edge runtime (workerd), which rejects
+ * some option values other runtimes accept — most importantly `redirect: 'error'`,
+ * which it refuses at Request CONSTRUCTION with a TypeError ("won't be implemented …
+ * at the edge; use manual and check the response status code").
+ *
+ * @atproto/oauth-client's identity/handle/DID resolvers (did:web, did:plc, the XRPC
+ * and well-known handle resolvers, and the AS/PDS metadata resolvers) all build
+ * their requests with `redirect: 'error'` via @atproto-labs/fetch's `asRequest()`
+ * (`new Request(url, { redirect: 'error' })`) — UPSTREAM of any fetch we can inject,
+ * so a fetch wrapper can't intercept the throw. The only interception point our code
+ * can reach is the Request constructor itself (see edgeRequestShim below).
+ *
+ * We translate `redirect: 'error'` → `'manual'`. This does NOT weaken the
+ * anti-redirect-hijack control those resolvers rely on: they reject any non-2xx
+ * response, and a manual-mode redirect surfaces as a non-2xx opaque response, so a
+ * DID document (or handle/metadata doc) served via a redirect still fails closed and
+ * is never followed to another origin. See github.com/bluesky-social/atproto#3292.
  */
-export const edgeFetch = (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
-  // The resolvers call fetch as `fetch(url, { redirect: 'error', … })`, and workerd
-  // rejects `redirect: 'error'` at Request construction — so the rewrite has to
-  // happen on the init BEFORE any Request is built (constructing one here would
-  // throw the very TypeError we're avoiding).
-  if (init?.redirect === 'error') {
-    return globalThis.fetch(input, { ...init, redirect: 'manual' });
+export function sanitizeEdgeRequestInit<T extends RequestInit | undefined>(init: T): T {
+  if (init && init.redirect === 'error') {
+    return { ...init, redirect: 'manual' } as T;
   }
-  return globalThis.fetch(input, init);
-};
+  return init;
+}
+
+/**
+ * Install (once, idempotently) a Request-constructor shim that runs every
+ * construction's init through sanitizeEdgeRequestInit. This is the single central
+ * sanitizer for the whole Bluesky OAuth flow — resolvers, DID-doc fetch, AS/PDS
+ * metadata, and PAR all build their Requests through `new Request`, so normalizing
+ * here covers every call site at once (no per-fetch injection, no missed layer).
+ *
+ * On runtimes that DON'T reject `redirect: 'error'` (Node, the unit-test harness)
+ * this is a harmless passthrough. The shim is a faithful subclass: it changes only
+ * `redirect: 'error'`, delegating everything else to the native constructor
+ * unchanged. Installed lazily from makeClient so Workers that never touch Bluesky
+ * keep the untouched global.
+ */
+let edgeRequestShimInstalled = false;
+export function installEdgeRequestShim(): void {
+  if (edgeRequestShimInstalled) return;
+  const NativeRequest = globalThis.Request;
+  class EdgeRequest extends NativeRequest {
+    constructor(input: RequestInfo | URL, init?: RequestInit) {
+      super(input as RequestInfo | URL, sanitizeEdgeRequestInit(init));
+    }
+  }
+  globalThis.Request = EdgeRequest as unknown as typeof Request;
+  edgeRequestShimInstalled = true;
+}
+
+/**
+ * The SECOND seam for the same sanitizer. The Request shim above covers call sites
+ * that build a Request explicitly before fetching (the DID + metadata resolvers, via
+ * @atproto-labs/fetch's asRequest → `new Request`). But XrpcHandleResolver calls
+ * `fetch(url, { redirect: 'error' })` DIRECTLY — no explicit Request — and the
+ * runtime's own fetch() builds that Request with its internal native constructor,
+ * which the global shim can't reach. Injecting this as the client's Fetch routes
+ * those direct calls through the same sanitizer. Two seams, one sanitizer, so every
+ * call site reachable from authorize()/callback() is covered.
+ */
+export const edgeFetch = (input: string | URL | Request, init?: RequestInit): Promise<Response> =>
+  globalThis.fetch(input as RequestInfo | URL, sanitizeEdgeRequestInit(init));
 
 /**
  * KV store whose value embeds a live `dpopKey: Key`. We persist the key as its
@@ -128,6 +169,7 @@ export async function blueskyClientMetadata(env: BlueskyEnv): Promise<OAuthClien
 }
 
 async function makeClient(env: BlueskyEnv): Promise<OAuthClient> {
+  installEdgeRequestShim(); // covers explicit `new Request` sites (DID + metadata resolvers)
   const key = await loadKey(env);
   return new OAuthClient({
     clientMetadata: await blueskyClientMetadata(env),
@@ -135,7 +177,7 @@ async function makeClient(env: BlueskyEnv): Promise<OAuthClient> {
     responseMode: 'query',
     handleResolver: HANDLE_RESOLVER,
     runtimeImplementation: runtime,
-    fetch: edgeFetch, // workerd rejects the resolvers' redirect:'error' — see edgeFetch
+    fetch: edgeFetch, // covers direct `fetch(url, init)` sites (XRPC handle resolver)
     stateStore: dpopKvStore<StateValue>(env.ATPROTO, 'bsky_state:', STATE_TTL_SECONDS),
     sessionStore: dpopKvStore<SessionValue>(env.ATPROTO, 'bsky_sess:', SESSION_TTL_SECONDS),
   });
