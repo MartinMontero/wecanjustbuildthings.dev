@@ -1,7 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { JoseKey } from '@atproto/jwk-jose';
-import { isValidHandle, normalizeHandle, blueskyClientMetadata, newOAuthState, edgeFetch, type BlueskyEnv } from '../auth/bluesky.ts';
+import {
+  isValidHandle, normalizeHandle, blueskyClientMetadata, newOAuthState,
+  sanitizeEdgeRequestInit, installEdgeRequestShim, edgeFetch, type BlueskyEnv,
+} from '../auth/bluesky.ts';
 import type { KVNamespace } from '../auth/cf.ts';
 
 function fakeKV(): KVNamespace {
@@ -70,35 +73,62 @@ test('newOAuthState is a unique 256-bit (64 hex) CSPRNG token for browser-bound 
 // is covered by integration testing, not this offline unit suite. The token generator
 // above and the handler wiring (worker/tests/routing.test.ts) are what's unit-tested.
 
-test('edgeFetch rewrites redirect:"error"→"manual" (workerd rejects "error"), passing everything else through', async () => {
-  // @atproto's identity/handle/DID resolvers call fetch(url, { redirect: 'error' });
-  // Cloudflare's edge runtime throws a TypeError on 'error' at Request construction,
-  // so authorize() dies at identity resolution. edgeFetch translates it up front.
-  const seen: Array<{ input: unknown; init?: RequestInit }> = [];
+// --- Workers edge-runtime redirect:'error' handling (bluesky-social/atproto#3292) ---
+// @atproto's resolvers issue fetch/Request with redirect:'error', which workerd
+// rejects at Request CONSTRUCTION. The fix is one sanitizer wired into two seams:
+// a Request-constructor shim (for `new Request` sites — DID/metadata resolvers) and
+// an injected fetch (for direct fetch(url,init) sites — the XRPC handle resolver).
+// The runtime's construction-time REJECTION isn't reproducible here (Node's fetch
+// accepts 'error'), so we unit-test the sanitizer/shim/fetch mapping logic; the
+// live authorize() round-trip on the Workers runtime is the operator's prod re-test.
+
+test('sanitizeEdgeRequestInit maps redirect:"error"→"manual", preserves everything else, no mutation', () => {
+  assert.deepEqual(
+    sanitizeEdgeRequestInit({ redirect: 'error', headers: { a: '1' }, cache: 'no-cache' }),
+    { redirect: 'manual', headers: { a: '1' }, cache: 'no-cache' },
+  );
+  assert.deepEqual(sanitizeEdgeRequestInit({ redirect: 'follow' }), { redirect: 'follow' });
+  assert.equal(sanitizeEdgeRequestInit(undefined), undefined);
+  const orig: RequestInit = { redirect: 'error' };
+  sanitizeEdgeRequestInit(orig);
+  assert.equal(orig.redirect, 'error', 'input is not mutated (returns a copy)');
+});
+
+test('installEdgeRequestShim routes new Request(...) construction through the sanitizer (idempotent)', () => {
+  const Native = globalThis.Request;
+  try {
+    installEdgeRequestShim();
+    const Wrapped = globalThis.Request;
+    assert.notEqual(Wrapped, Native, 'Request constructor is wrapped');
+    installEdgeRequestShim();
+    assert.equal(globalThis.Request, Wrapped, 'idempotent — never double-wrapped');
+    // The load-bearing behavior: a redirect:"error" construction yields manual mode
+    // (on workerd this is what averts the construction-time TypeError).
+    assert.equal(new Request('https://x/', { redirect: 'error' }).redirect, 'manual');
+    assert.equal(new Request('https://x/', { redirect: 'follow' }).redirect, 'follow');
+    assert.equal(new Request('https://x/').redirect, 'follow'); // default untouched
+  } finally {
+    globalThis.Request = Native; // restore native for the rest of the suite
+  }
+});
+
+test('edgeFetch routes direct fetch(url, init) calls through the sanitizer', async () => {
+  const seen: Array<{ init?: RequestInit }> = [];
   const realFetch = globalThis.fetch;
-  globalThis.fetch = (async (input: unknown, init?: RequestInit) => {
-    seen.push({ input, init });
+  globalThis.fetch = (async (_input: unknown, init?: RequestInit) => {
+    seen.push({ init });
     return new Response('ok');
   }) as typeof fetch;
   try {
-    await edgeFetch('https://plc.directory/did:plc:x', { redirect: 'error', headers: { accept: 'application/json' } });
-    assert.equal(seen[0]!.init!.redirect, 'manual', 'error must become manual');
-    assert.deepEqual(seen[0]!.init!.headers, { accept: 'application/json' }, 'other init fields preserved');
-
-    await edgeFetch('https://x/', { redirect: 'follow' });
-    assert.equal(seen[1]!.init!.redirect, 'follow', 'non-error redirect is untouched');
-
-    await edgeFetch('https://x/'); // no init at all → must not throw, passes through
-    assert.equal(seen[2]!.init, undefined);
+    await edgeFetch('https://x/', { redirect: 'error', headers: { accept: 'application/json' } });
+    assert.equal(seen[0]!.init!.redirect, 'manual');
+    assert.deepEqual(seen[0]!.init!.headers, { accept: 'application/json' });
+    await edgeFetch('https://x/'); // no init → passes through untouched
+    assert.equal(seen[1]!.init, undefined);
   } finally {
     globalThis.fetch = realFetch;
   }
 });
-
-// NOTE: edgeFetch clearing the redirect barrier is unit-tested above; that the FULL
-// authorize() round-trip then reaches the PDS and returns an authorize URL needs a
-// live atproto resolver + PDS on the Workers runtime, so it is covered by the
-// operator's prod re-test (Sign in with Bluesky end-to-end), not this offline suite.
 
 test('blueskyClientMetadata publishes ONLY the public key (never the private "d")', async () => {
   const md = await blueskyClientMetadata(await envWithKey());
