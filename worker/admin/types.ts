@@ -18,7 +18,10 @@ export interface AdminEnv {
   ADMIN_SESSIONS?: KVNamespace;
   /** USER sessions — read-only here, for the Bluesky reuse-then-elevate flow. */
   SESSIONS?: KVNamespace;
-  /** Identity model — resolves a user session to its proven DID for elevation. */
+  /** Identity model (elevation reads the proven DID) + the runtime admin roster
+   *  and its insert-only audit (migrations/0002_admin_roster.sql). Absent on the
+   *  AUTH path ⇒ roster treated as empty (file principals unaffected); absent on
+   *  the MANAGEMENT routes ⇒ explicit 503. */
   DB?: D1Database;
   /** Canonical origin: pins the NIP-98 `u` tag + origin checks to config, not Host. */
   SITE_URL?: string;
