@@ -15,6 +15,10 @@ function fakeKV(): KVNamespace {
     async get(k) { return store.has(k) ? store.get(k)! : null; },
     async put(k, v) { store.set(k, v); },
     async delete(k) { store.delete(k); },
+    async list(options) {
+      const prefix = options?.prefix ?? '';
+      return { keys: [...store.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })), list_complete: true };
+    },
   };
 }
 

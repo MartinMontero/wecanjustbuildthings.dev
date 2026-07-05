@@ -12,6 +12,14 @@ export interface KVNamespace {
   // way a fresh relative `expirationTtl` would.
   put(key: string, value: string, options?: { expirationTtl?: number; expiration?: number }): Promise<void>;
   delete(key: string): Promise<void>;
+  // Cursor-paged key listing — widened deliberately for the admin session purge
+  // (best-effort revocation hygiene, worker/admin/session.ts). Only the fields
+  // we consume are typed.
+  list(options?: { prefix?: string; cursor?: string }): Promise<{
+    keys: { name: string }[];
+    list_complete: boolean;
+    cursor?: string;
+  }>;
 }
 
 export interface D1Result<T = unknown> {

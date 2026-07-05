@@ -79,6 +79,36 @@ export async function destroyAdminSession(kv: KVNamespace, id: string): Promise<
 }
 
 /**
+ * Best-effort purge of every live admin session bound to a removed principal
+ * (called by the roster-remove route). The per-request role re-derivation in
+ * the router remains AUTHORITATIVE — a session this scan misses (KV list is
+ * eventually consistent) or fails to delete is still rejected AND destroyed on
+ * its very next request — so every error here is swallowed: a removal must
+ * never fail because eviction hygiene did.
+ */
+export async function purgeAdminSessions(
+  kv: KVNamespace,
+  method: AdminMethod,
+  subject: string,
+): Promise<void> {
+  try {
+    let cursor: string | undefined;
+    do {
+      const page = await kv.list({ prefix: 'adm:', cursor });
+      for (const { name } of page.keys) {
+        const raw = await kv.get(name);
+        if (!raw) continue;
+        try {
+          const record = JSON.parse(raw) as AdminSessionRecord;
+          if (record.method === method && record.subject === subject) await kv.delete(name);
+        } catch { /* malformed record — expiry/eviction owns it */ }
+      }
+      cursor = page.list_complete ? undefined : page.cursor;
+    } while (cursor);
+  } catch { /* best-effort by design; the per-request guard is authoritative */ }
+}
+
+/**
  * Resolve + validate a session id against both bounds, refreshing `lastSeen` per
  * the coalescing rules above. Returns null for any break (unknown id, malformed
  * record, idle-expired, absolute-expired); expired records are proactively deleted

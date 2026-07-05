@@ -44,6 +44,10 @@ function fakeKV(): KVNamespace & { puts: RecordedPut[] } {
     async get(k) { return store.has(k) ? store.get(k)! : null; },
     async put(k, v, options) { store.set(k, v); puts.push({ key: k, value: v, options }); },
     async delete(k) { store.delete(k); },
+    async list(options) {
+      const prefix = options?.prefix ?? '';
+      return { keys: [...store.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })), list_complete: true };
+    },
   };
 }
 
