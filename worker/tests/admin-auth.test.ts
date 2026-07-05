@@ -247,9 +247,10 @@ test('allowlisted NIP-98 login mints a Strict __Host- admin session + csrf', asy
   const deps = { allowlist: { nostr: [{ pubkey: pk, role: 'admin' }], bluesky: [] } };
   const res = await nostrLogin(env, sk, deps);
   assert.equal(res.status, 200);
-  const body = (await res.json()) as { identity: string; method: string; csrf: string };
+  const body = (await res.json()) as { identity: string; method: string; role: string; csrf: string };
   assert.equal(body.identity, pk);
   assert.equal(body.method, 'nostr');
+  assert.equal(body.role, 'admin'); // role rides the login response for panel routing
   assert.match(body.csrf, /^[0-9a-f]{64}$/);
   const cookie = cookieOf(res);
   assert.ok(cookie.startsWith(`${ADMIN_SESSION_COOKIE}=`));
@@ -261,9 +262,10 @@ test('allowlisted NIP-98 login mints a Strict __Host- admin session + csrf', asy
   // whoami rides the cookie and reports the SAME identity + csrf for the tab
   const who = await routeAdmin(withAdminCookie('/api/admin/whoami', sessionIdOf(res)), env, deps);
   assert.equal(who.status, 200);
-  const whoBody = (await who.json()) as { identity: string; method: string; csrf?: string };
+  const whoBody = (await who.json()) as { identity: string; method: string; role: string; csrf?: string };
   assert.equal(whoBody.identity, pk);
   assert.equal(whoBody.method, 'nostr');
+  assert.equal(whoBody.role, 'admin');
   assert.equal(whoBody.csrf, body.csrf);
 });
 
@@ -437,7 +439,7 @@ test('per-request NIP-98 whoami: allowlisted GET signature works once, replay di
   const call = () => routeAdmin(req('/api/admin/whoami', { headers: { authorization: token } }), env, deps);
   const first = await call();
   assert.equal(first.status, 200);
-  assert.deepEqual(await first.json(), { identity: pk, method: 'nostr' });
+  assert.deepEqual(await first.json(), { identity: pk, method: 'nostr', role: 'admin' });
   assert.equal((await call()).status, 401); // single-use event id → replay rejected
 });
 
@@ -483,9 +485,10 @@ test('an allowlisted DID elevates its user session into an admin session', async
     method: 'POST', headers: { cookie: `${SESSION_COOKIE}=${sid}` },
   }), env, deps);
   assert.equal(res.status, 200);
-  const body = (await res.json()) as { identity: string; method: string; csrf: string };
+  const body = (await res.json()) as { identity: string; method: string; role: string; csrf: string };
   assert.equal(body.identity, did);
   assert.equal(body.method, 'bluesky');
+  assert.equal(body.role, 'admin');
   assert.ok(cookieOf(res).includes('SameSite=Strict'));
   // whoami on the new admin session reports the DID
   const who = await routeAdmin(withAdminCookie('/api/admin/whoami', sessionIdOf(res)), env, deps);

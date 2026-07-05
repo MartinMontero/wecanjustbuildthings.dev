@@ -461,6 +461,28 @@ test('I3 LOGOUT destroy-on-null: a de-listed principal\'s logout destroys the re
   assert.equal(await env.ADMIN_SESSIONS.get(`adm:${rosterSession.id}`), null, 'destroyed, not merely rejected');
 });
 
+// ---- role rides the auth responses (drives console panel routing) ----
+
+test('login + whoami report role: file superadmin ⇒ superadmin, roster member ⇒ admin', async () => {
+  const env = fakeEnv();
+  const superSk = generateSecretKey();
+  const deps = fileFixture(getPublicKey(superSk), 'e'.repeat(64));
+
+  const login = await nostrLogin(env, superSk, deps);
+  assert.equal(((await login.clone().json()) as { role: string }).role, 'superadmin');
+  const superId = sessionIdOf(login);
+  const who = await routeAdmin(withAdminCookie('/api/admin/whoami', superId), env, deps);
+  assert.equal(((await who.json()) as { role: string }).role, 'superadmin');
+
+  // Seed a roster admin and confirm THEIR responses carry role admin, not superadmin.
+  const { csrf } = (await login.json()) as { csrf: string };
+  const rosterSk = generateSecretKey();
+  const rosterPk = getPublicKey(rosterSk);
+  await mutate('/api/admin/admins/add', { id: superId, csrf, sk: superSk, pk: getPublicKey(superSk) }, { provider: 'nostr', subject: rosterPk }, env, deps);
+  const rosterLogin = await nostrLogin(env, rosterSk, deps);
+  assert.equal(((await rosterLogin.json()) as { role: string }).role, 'admin');
+});
+
 // ---- management API surface ----
 
 test('list returns file principals marked immutable ∪ roster entries with provenance', async () => {
