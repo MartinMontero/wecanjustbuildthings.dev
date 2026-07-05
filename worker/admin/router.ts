@@ -143,9 +143,11 @@ async function nostrVerify(request: Request, env: AdminEnv, deps: AdminDeps): Pr
   );
   if (!proven) return authError();
   // Membership (file ∪ roster) AFTER proof, same generic 401 as a failed proof
-  // (no oracle).
-  if (!(await resolveAdminRole('nostr', proven.pubkey, env, deps))) return authError();
-  return openAdminSession(env, 'nostr', proven.pubkey);
+  // (no oracle). The resolved role rides the login response so the console can
+  // route straight to the right panel without a second round-trip.
+  const role = await resolveAdminRole('nostr', proven.pubkey, env, deps);
+  if (!role) return authError();
+  return openAdminSession(env, 'nostr', proven.pubkey, role);
 }
 
 async function elevateBluesky(request: Request, env: AdminEnv, deps: AdminDeps): Promise<Response> {
@@ -164,8 +166,10 @@ async function elevateBluesky(request: Request, env: AdminEnv, deps: AdminDeps):
   } catch {
     return authError();
   }
-  if (!did || !(await resolveAdminRole('bluesky', did, env, deps))) return authError();
-  return openAdminSession(env, 'bluesky', did);
+  if (!did) return authError();
+  const role = await resolveAdminRole('bluesky', did, env, deps);
+  if (!role) return authError();
+  return openAdminSession(env, 'bluesky', did, role);
 }
 
 /** Shared tail of both login paths: identity is PROVEN + ALLOWLISTED. Gate on the
@@ -175,15 +179,19 @@ async function openAdminSession(
   env: AdminEnv & { ADMIN_SESSIONS: KVNamespace; ADMIN_COORD: DurableObjectNamespace },
   method: AdminMethod,
   subject: string,
+  role: AdminRole,
 ): Promise<Response> {
   const id = newAdminSessionId();
   const opened = await coord(env.ADMIN_COORD, method, subject, '/open', { sessionId: id });
   if (!opened || opened.status !== 200 || opened.data.ok !== true) {
     return opened?.status === 429 ? authError(429, 'too many requests') : authError();
   }
+  // Role is NOT persisted in the session record — it is re-derived per request
+  // (resolveRoledAdmin) so a revocation takes effect next request. It rides the
+  // response purely so the console can render the right panel immediately.
   await putAdminSession(env.ADMIN_SESSIONS, id, subject, method);
   return authJson(
-    { identity: subject, method, csrf: opened.data.csrf },
+    { identity: subject, method, role, csrf: opened.data.csrf },
     200,
     { 'set-cookie': adminSessionCookie(id) },
   );
@@ -234,7 +242,7 @@ async function whoami(request: Request, env: AdminEnv, deps: AdminDeps): Promise
     const { record } = session;
     const csrfRes = await coord(env.ADMIN_COORD, record.method, record.subject, '/csrf', { sessionId: session.id });
     const csrf = csrfRes?.status === 200 ? (csrfRes.data.csrf as string) : undefined;
-    return authJson({ identity: record.subject, method: record.method, ...(csrf ? { csrf } : {}) });
+    return authJson({ identity: record.subject, method: record.method, role: session.role, ...(csrf ? { csrf } : {}) });
   }
 
   // Path 2 — API client: per-request NIP-98 over this exact URL + method, with a
@@ -244,9 +252,10 @@ async function whoami(request: Request, env: AdminEnv, deps: AdminDeps): Promise
   if (authHeader) {
     const proven = await verifyNip98Event(authHeader, '', adminUrl(request, env, '/api/admin/whoami'), 'GET');
     if (!proven) return authError();
-    if (!(await resolveAdminRole('nostr', proven.pubkey, env, deps))) return authError();
+    const role = await resolveAdminRole('nostr', proven.pubkey, env, deps);
+    if (!role) return authError();
     if (!(await burnNip98EventId(env.ADMIN_SESSIONS, proven.eventId))) return authError();
-    return authJson({ identity: proven.pubkey, method: 'nostr' });
+    return authJson({ identity: proven.pubkey, method: 'nostr', role });
   }
 
   return authError();
