@@ -1,22 +1,29 @@
 /**
- * The server-side admin allowlist — the single authority on WHO may hold an admin
- * session. Checked on every admin request, after (never instead of) cryptographic
- * verification of the identity.
+ * The committed FILE tier of the two-tier admin model — the single authority on
+ * WHO may govern the admin set itself. Checked on every admin request, after
+ * (never instead of) cryptographic verification of the identity.
+ *
+ * TWO TIERS (role resolution: worker/admin/roles.ts — file first, file wins):
+ *   - THIS FILE: file-rooted principals, PR-governed (add/remove = commit +
+ *     review + deploy) and IMMUTABLE AT RUNTIME — there is NO runtime write-path
+ *     to this set, and the management API refuses file-resident subjects (add →
+ *     409, remove → 403). An entry's `role` is honored as recorded: only
+ *     'superadmin' entries may mutate the runtime roster below; a file entry
+ *     recorded 'admin' is an admin with no roster-mutation rights. The file is a
+ *     COMPLETE governance surface on its own — a fork may run its entire admin
+ *     set through PRs with the roster empty forever.
+ *   - RUNTIME ROSTER (D1 `admin_roster`, migrations/0002_admin_roster.sql):
+ *     role 'admin' only — the roster can never yield superadmin. Mutable
+ *     exclusively by file superadmins via /api/admin/admins, every mutation
+ *     written to the insert-only `admin_audit`.
  *
  * FAILS CLOSED. There is no self-registration, no environment override, and no
- * dev/test bypass. An identity absent from this list is rejected — including a
- * request carrying a perfectly valid signature — and removal revokes any live
- * session on its next request (per-request enforcement in worker/admin/router.ts).
- *
- * GOVERNANCE (the role field is genesis DATA, not a runtime capability switch):
- *   - role: "superadmin" — governance authority over THIS list, exercised through
- *     repository merge rights (add/remove admin = PR; revocation = commit +
- *     deploy). Never an in-app power: there is NO runtime write-path to the admin
- *     set. Also the highest capability tier when Phases 5–6 (catalog management,
- *     moderation) differentiate capabilities.
- *   - role: "admin" — assigned by superadmins via PR.
- *   TODAY all allowlisted identities pass the same gate; differentiated
- *   enforcement lands with the features that need it — nothing speculative here.
+ * dev/test bypass. An identity absent from file ∪ roster is rejected — including
+ * a request carrying a perfectly valid signature — and removal (commit + deploy,
+ * or a roster remove) revokes any live session on its next request (per-request
+ * role re-derivation in worker/admin/router.ts). An absent or unreachable DB
+ * treats the ROSTER as empty: file principals keep working, roster admins are
+ * denied — never degraded-open.
  *
  * Downstream deployers (this is AGPL software — run your own instance):
  * constitute your own admin set by editing the two arrays below in your fork.
@@ -106,4 +113,21 @@ export function adminRoleFor(
   }
   if (!isAllowedBlueskyDid(list, subject)) return null;
   return list.bluesky.find((e) => e.did === subject)?.role ?? null;
+}
+
+/** Strip ALL Unicode format characters (category Cf — bidi overrides like U+202A,
+ *  zero-width joiners, word joiners… the invisibles a copy-paste smuggles around
+ *  an identifier), then Unicode-trim; hex pubkeys are lowercased, DIDs are exact
+ *  after the strip. THE single normalizer for admin-principal input — the roster
+ *  management API reuses it verbatim; never write a second implementation. */
+export function normalizeSubject(provider: 'nostr' | 'bluesky', subject: string): string {
+  const stripped = subject.replace(/\p{Cf}/gu, '').trim();
+  return provider === 'nostr' ? stripped.toLowerCase() : stripped;
+}
+
+/** True only for a NORMALIZED subject (see normalizeSubject) that satisfies the
+ *  same rules the file matchers above enforce — HEX_PUBKEY / DID, one validator
+ *  shared by the file tier and the roster management API, never two. */
+export function isValidSubject(provider: 'nostr' | 'bluesky', subject: string): boolean {
+  return provider === 'nostr' ? HEX_PUBKEY.test(subject) : DID.test(subject);
 }

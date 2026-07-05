@@ -12,10 +12,14 @@
  * Everything else FAILS CLOSED with 404; missing bindings fail closed with 503.
  *
  * Security model:
- *   - The committed EMPTY allowlist (worker/admin/allowlist.ts) is checked
- *     server-side after every cryptographic verification. Allowlist rejection and
- *     verification failure return the SAME generic 401 — an attacker learns
- *     nothing about which gate stopped them. There is no bypass, no env override.
+ *   - TWO-TIER membership, re-derived per request (worker/admin/roles.ts): the
+ *     committed file (worker/admin/allowlist.ts — superadmins + file admins,
+ *     immutable at runtime) first, then the D1 runtime roster (admins only).
+ *     Checked server-side after every cryptographic verification. Membership
+ *     rejection and verification failure return the SAME generic 401 — an
+ *     attacker learns nothing about which gate stopped them (and no role
+ *     oracle: a non-superadmin probing a management route sees the same 401).
+ *     There is no bypass, no env override.
  *   - Pre-auth throttling: native rate limiter, buckets admin-login/admin-elevate,
  *     keyed on client IP. Post-auth velocity + CSRF: the per-identity ADMIN_COORD
  *     Durable Object, reachable only after verification + allowlist (decision 4).
@@ -39,9 +43,8 @@ import { getIdentitySubject } from '../auth/db.ts';
 import { overRateLimit, crossSiteRequest } from '../auth/guards.ts';
 import type { KVNamespace, DurableObjectNamespace } from '../auth/cf.ts';
 import type { AdminEnv } from './types.ts';
-import {
-  ADMIN_ALLOWLIST, isAllowedNostrPubkey, isAllowedBlueskyDid, type AdminAllowlist,
-} from './allowlist.ts';
+import type { AdminRole } from './allowlist.ts';
+import { resolveAdminRole, DEFAULT_ADMIN_DEPS, type AdminDeps } from './roles.ts';
 import {
   ADMIN_SESSION_COOKIE, newAdminSessionId, putAdminSession, destroyAdminSession,
   resolveAdminSessionId, adminSessionCookie, clearAdminSessionCookie, type AdminMethod,
@@ -52,9 +55,7 @@ import {
  *  the guard expires but still inside the window. */
 const NIP98_REPLAY_TTL_SECONDS = 150;
 
-export interface AdminDeps {
-  allowlist: AdminAllowlist;
-}
+export type { AdminDeps } from './roles.ts';
 
 /** The two bindings every admin auth route needs. SESSIONS/DB are additionally
  *  required by the elevation route and checked there. */
@@ -116,8 +117,9 @@ async function nostrVerify(request: Request, env: AdminEnv, deps: AdminDeps): Pr
     parsed.challenge ?? '',
   );
   if (!proven) return authError();
-  // Allowlist AFTER proof, same generic 401 as a failed proof (no oracle).
-  if (!isAllowedNostrPubkey(deps.allowlist, proven.pubkey)) return authError();
+  // Membership (file ∪ roster) AFTER proof, same generic 401 as a failed proof
+  // (no oracle).
+  if (!(await resolveAdminRole('nostr', proven.pubkey, env, deps))) return authError();
   return openAdminSession(env, 'nostr', proven.pubkey);
 }
 
@@ -137,7 +139,7 @@ async function elevateBluesky(request: Request, env: AdminEnv, deps: AdminDeps):
   } catch {
     return authError();
   }
-  if (!did || !isAllowedBlueskyDid(deps.allowlist, did)) return authError();
+  if (!did || !(await resolveAdminRole('bluesky', did, env, deps))) return authError();
   return openAdminSession(env, 'bluesky', did);
 }
 
@@ -162,51 +164,47 @@ async function openAdminSession(
   );
 }
 
-/** True when a proven subject is STILL a member of the allowlist for its method. */
-function isSubjectAllowed(allowlist: AdminAllowlist, method: AdminMethod, subject: string): boolean {
-  return method === 'nostr'
-    ? isAllowedNostrPubkey(allowlist, subject)
-    : isAllowedBlueskyDid(allowlist, subject);
-}
-
 /**
  * The single per-request enforcement choke point for every COOKIE-authenticated
- * admin route. Resolves the session (idle/absolute bounds) AND re-checks that its
- * identity is STILL allowlisted — so removing an identity from the committed
- * allowlist revokes every live session on its NEXT request, not merely at expiry
- * (matching the governance model: revocation = commit + deploy, effective next
- * request). A session whose identity has been de-listed is destroyed, not just
- * rejected. The NIP-98 API path enforces membership inline (see whoami Path 2);
- * this covers the browser path and any future privileged cookie route — route
- * privileged reads/writes through this, never through resolveAdminSessionId alone.
- * Returns null → caller responds 401.
+ * admin route. Resolves the session (idle/absolute bounds) AND re-derives the
+ * identity's role from the CURRENT effective set (file ∪ roster) — so removing a
+ * principal (a file commit+deploy, or a roster remove) revokes every live
+ * session on its NEXT request, not merely at expiry. A session whose identity
+ * has been de-listed is destroyed, not just rejected. The role is derived here
+ * per request and never stored in the session record. The NIP-98 API path
+ * enforces membership inline (see whoami Path 2); this covers the browser path
+ * and every privileged cookie route — route privileged reads/writes through
+ * this, never through resolveAdminSessionId alone. Returns null → caller
+ * responds 401.
  */
-async function resolveAllowlistedAdmin(
+async function resolveRoledAdmin(
   request: Request,
   env: AdminEnv & { ADMIN_SESSIONS: KVNamespace },
   deps: AdminDeps,
-): Promise<{ id: string; record: { subject: string; method: AdminMethod } } | null> {
+): Promise<{ id: string; record: { subject: string; method: AdminMethod }; role: AdminRole } | null> {
   const session = await resolveAdminSessionId(env.ADMIN_SESSIONS, readCookie(request, ADMIN_SESSION_COOKIE));
   if (!session) return null;
   const { record } = session;
-  if (!isSubjectAllowed(deps.allowlist, record.method, record.subject)) {
+  const role = await resolveAdminRole(record.method, record.subject, env, deps);
+  if (!role) {
     await destroyAdminSession(env.ADMIN_SESSIONS, session.id); // de-listed → kill the session
     return null;
   }
-  return session;
+  return { ...session, role };
 }
 
 async function whoami(request: Request, env: AdminEnv, deps: AdminDeps): Promise<Response> {
   if (!adminConfigured(env)) return authError(503, 'admin not configured');
 
-  // Path 1 — browser: the admin cookie session, re-checked against the allowlist on
-  // EVERY request (resolveAllowlistedAdmin) so a revoked identity loses access on its
-  // next call, not at expiry. The CSRF token rides along so a reloaded tab can still
-  // make its next state-changing call; the response is same-origin-readable only
-  // (authJson sets no CORS) and the token is useless without the HttpOnly cookie.
+  // Path 1 — browser: the admin cookie session, its role re-derived from the
+  // effective set (file ∪ roster) on EVERY request (resolveRoledAdmin) so a
+  // revoked identity loses access on its next call, not at expiry. The CSRF token
+  // rides along so a reloaded tab can still make its next state-changing call;
+  // the response is same-origin-readable only (authJson sets no CORS) and the
+  // token is useless without the HttpOnly cookie.
   const cookieId = readCookie(request, ADMIN_SESSION_COOKIE);
   if (cookieId) {
-    const session = await resolveAllowlistedAdmin(request, env, deps);
+    const session = await resolveRoledAdmin(request, env, deps);
     if (!session) return authError();
     const { record } = session;
     const csrfRes = await coord(env.ADMIN_COORD, record.method, record.subject, '/csrf', { sessionId: session.id });
@@ -221,7 +219,7 @@ async function whoami(request: Request, env: AdminEnv, deps: AdminDeps): Promise
   if (authHeader) {
     const proven = await verifyNip98Event(authHeader, '', adminUrl(request, env, '/api/admin/whoami'), 'GET');
     if (!proven) return authError();
-    if (!isAllowedNostrPubkey(deps.allowlist, proven.pubkey)) return authError();
+    if (!(await resolveAdminRole('nostr', proven.pubkey, env, deps))) return authError();
     const replayKey = `nip98:${proven.eventId}`;
     if ((await env.ADMIN_SESSIONS.get(replayKey)) !== null) return authError();
     await env.ADMIN_SESSIONS.put(replayKey, '1', { expirationTtl: NIP98_REPLAY_TTL_SECONDS });
@@ -231,12 +229,22 @@ async function whoami(request: Request, env: AdminEnv, deps: AdminDeps): Promise
   return authError();
 }
 
-async function logout(request: Request, env: AdminEnv): Promise<Response> {
+async function logout(request: Request, env: AdminEnv, deps: AdminDeps): Promise<Response> {
   if (!adminConfigured(env)) return authError(503, 'admin not configured');
   if (crossSiteRequest(request, env.SITE_URL)) return authError(403, 'cross-site request rejected');
   const session = await resolveAdminSessionId(env.ADMIN_SESSIONS, readCookie(request, ADMIN_SESSION_COOKIE));
   if (!session) return authError();
   const { record } = session;
+  // Per-request role re-derivation, cookie path included — logout is not exempt.
+  // A valid session id that reaches logout ALWAYS ends destroyed: membership
+  // failure changes the status code, never leaves the record alive. The
+  // coordinator is NOT consulted for a de-listed principal (it is only ever
+  // reachable post-verification + membership); its orphaned CSRF entry is inert
+  // once the session record is gone.
+  if (!(await resolveAdminRole(record.method, record.subject, env, deps))) {
+    await destroyAdminSession(env.ADMIN_SESSIONS, session.id);
+    return authError();
+  }
   // CSRF: the token minted at login (x-admin-csrf header) must validate against
   // the per-identity coordinator before the state change.
   const token = request.headers.get('x-admin-csrf') ?? '';
@@ -250,7 +258,7 @@ async function logout(request: Request, env: AdminEnv): Promise<Response> {
 export async function routeAdmin(
   request: Request,
   env: AdminEnv,
-  deps: AdminDeps = { allowlist: ADMIN_ALLOWLIST },
+  deps: AdminDeps = DEFAULT_ADMIN_DEPS,
 ): Promise<Response> {
   const path = new URL(request.url).pathname;
   const method = request.method.toUpperCase();
@@ -258,7 +266,7 @@ export async function routeAdmin(
   if (path === '/api/admin/login/nostr/verify' && method === 'POST') return nostrVerify(request, env, deps);
   if (path === '/api/admin/elevate/bluesky' && method === 'POST') return elevateBluesky(request, env, deps);
   if (path === '/api/admin/whoami' && method === 'GET') return whoami(request, env, deps);
-  if (path === '/api/admin/logout' && method === 'POST') return logout(request, env);
+  if (path === '/api/admin/logout' && method === 'POST') return logout(request, env, deps);
   // Deny-by-default: unknown paths and wrong methods fail closed.
   return authJson({ error: 'not found' }, 404);
 }
