@@ -1,15 +1,14 @@
--- 0001_admin_storage.sql — DRAFT (admin-panel Phase 3): the ADMIN_DB schema.
+-- 0001_admin_storage.sql — admin-panel Phase 3: the ADMIN_DB schema.
 --
--- ⚠ NOT YET PROVISIONED OR BOUND. This file is the reviewable spec for the
--- separate ADMIN_DB database the admin-panel spec calls for. Nothing reads it
--- yet: there is no ADMIN_DB binding in wrangler.jsonc and no code path touches
--- these tables. It lands first so the schema is reviewed as code BEFORE any
--- resource exists. To bring it live (operator, after review):
+-- PROVISIONED AND BOUND for this deployment (operator-authorized 2026-07-11):
+-- database `wcjbt-admin`, bound as ADMIN_DB in wrangler.jsonc, this migration
+-- applied remotely and the resulting tables/indexes verified. The schema was
+-- reviewed as code (PR #53) BEFORE the resource was created. No code path
+-- reads these tables yet — the Phase-3+ server slices land against them next.
 --
+-- Downstream deployers (this is AGPL software — run your own instance):
 --   1. npx wrangler d1 create wcjbt-admin
---   2. add to wrangler.jsonc d1_databases:
---        { "binding": "ADMIN_DB", "database_name": "wcjbt-admin",
---          "database_id": "<from step 1>", "migrations_dir": "migrations-admin" }
+--   2. paste the returned database_id into the ADMIN_DB entry in wrangler.jsonc
 --   3. npx wrangler d1 migrations apply wcjbt-admin --remote
 --
 -- WHY A SEPARATE DATABASE (not more tables in wcjbt-auth): the runtime roster +
