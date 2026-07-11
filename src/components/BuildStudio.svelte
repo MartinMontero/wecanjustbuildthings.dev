@@ -490,7 +490,9 @@
     }
     return hits;
   });
-  const policyClean = $derived(policyOrgs.length > 0 && policyMatches.length === 0);
+  // "Clean" is only claimable over a NON-EMPTY stack — a failed catalog load or
+  // an emptied blueprint must not render a vacuous ✓.
+  const policyClean = $derived(policyOrgs.length > 0 && chosenItems.length > 0 && policyMatches.length === 0);
 
   // ---------- Movement 1: the live Mentor Engine (deterministic) ----------
   // Localized prompts/options/constraint phrases for the engine's IDs. The logic
@@ -1305,8 +1307,10 @@ manuals with the knowledge-to-skills-pipeline).
           <p class="hint">{t.gooseDesc} <a href="/guides/get-started-with-goose/">{t.runLocal}</a></p>
         </div>
       {/if}
-      {/if}
 
+      <!-- Still inside the policy gate: the copy-paste prompt and the starter-file
+           viewers are handoff channels too — a clipboard is as much an exfil path
+           as a zip. A policy match pauses ALL of them. -->
       <button class="link copyp" onclick={() => copy('prompt', agentPrompt)}>{copied === 'prompt' ? '✓ copied' : t.copyPrompt}</button>
 
       <p class="hint">Want to look inside first? These are the files in your starter — the plain-English rules and plan your agent will follow:</p>
@@ -1316,6 +1320,7 @@ manuals with the knowledge-to-skills-pipeline).
       {@render artifact('The project’s rules (constitution.md)', 'c', constitution)}
       {@render artifact('The plan (spec.md)', 's', spec)}
       {@render artifact('The tools list (package.json)', 'pkg', packageJson)}
+      {/if}
 
       <div class="nav"><button onclick={() => (step = 2)}>{t.backStack}</button></div>
     </section>
