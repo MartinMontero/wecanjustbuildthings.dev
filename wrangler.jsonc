@@ -27,7 +27,13 @@
     { "binding": "ADMIN_SESSIONS", "id": "b250155143e348cba5a22b69024f677a" }
   ],
   "d1_databases": [
-    { "binding": "DB", "database_name": "wcjbt-auth", "database_id": "d3240389-b265-4229-bff0-b8ab94c4d78d", "migrations_dir": "migrations" }
+    { "binding": "DB", "database_name": "wcjbt-auth", "database_id": "d3240389-b265-4229-bff0-b8ab94c4d78d", "migrations_dir": "migrations" },
+    // Admin panel (Phase 3): moderation cases/labels, action audit, catalog-edit
+    // staging — deliberately SEPARATE from the auth store (different domain,
+    // retention, and legal posture; see migrations-admin/0001_admin_storage.sql).
+    // To recreate on a different account: `npx wrangler d1 create wcjbt-admin`,
+    // paste the returned id here, then `npx wrangler d1 migrations apply wcjbt-admin --remote`.
+    { "binding": "ADMIN_DB", "database_name": "wcjbt-admin", "database_id": "08f3ad34-45d4-4d97-a614-d8f9a6684270", "migrations_dir": "migrations-admin" }
   ],
 
   // Native per-colo rate limiter for the unauthenticated sign-in endpoints
