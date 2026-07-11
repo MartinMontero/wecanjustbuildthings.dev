@@ -44,6 +44,7 @@
       handoff: 'How do you want to get started?', zip: 'Download a starter folder', github: 'Save it to GitHub',
       goose: 'Run it with Goose',
       dlzip: '⬇ Download your starter folder (.zip)', copyPrompt: 'Copy the instructions for your AI agent',
+      policyClean: 'Policy re-checked in your browser — every piece is clean of Meta, OpenAI, and xAI.', policyHit: 'Excluded-vendor match — handoff paused.', policyHitDetail: 'These tools match the exclusion policy. Remove them from your stack to continue:',
       runLocal: 'New to Goose? Start here →', ghGuide: 'How to connect GitHub →',
       ghError: 'Connecting to GitHub didn’t finish. Try again, or download the folder below.',
       handoffIntro: 'Your starter is ready — everything your AI agent needs to begin, with the rules and safe tools already baked in. Pick how you’d like to take it:',
@@ -93,6 +94,7 @@
       handoff: '¿Cómo quieres empezar?', zip: 'Descargar una carpeta inicial', github: 'Guardarlo en GitHub',
       goose: 'Ejecutarlo con Goose',
       dlzip: '⬇ Descargar tu carpeta inicial (.zip)', copyPrompt: 'Copiar las instrucciones para tu agente de IA',
+      policyClean: 'Política re-verificada en tu navegador — todas las piezas están libres de Meta, OpenAI y xAI.', policyHit: 'Coincidencia con un proveedor excluido — entrega en pausa.', policyHitDetail: 'Estas herramientas coinciden con la política de exclusión. Quítalas de tu stack para continuar:',
       runLocal: '¿Nuevo en Goose? Empieza aquí →', ghGuide: 'Cómo conectar GitHub →',
       ghError: 'La conexión con GitHub no terminó. Inténtalo de nuevo o descarga la carpeta abajo.',
       handoffIntro: 'Tu kit está listo — todo lo que tu agente de IA necesita para empezar, con las reglas y las herramientas seguras ya incluidas. Elige cómo quieres llevarlo:',
@@ -142,6 +144,7 @@
       handoff: 'كيف تريد أن تبدأ؟', zip: 'تنزيل مجلد بداية', github: 'احفظه في GitHub',
       goose: 'شغّله مع Goose',
       dlzip: '⬇ نزّل مجلد البداية (.zip)', copyPrompt: 'انسخ تعليمات وكيل الذكاء الاصطناعي',
+      policyClean: 'أُعيد فحص السياسة في متصفحك — كل القطع خالية من Meta وOpenAI وxAI.', policyHit: 'تطابق مع مزوّد مستبعد — التسليم متوقف.', policyHitDetail: 'هذه الأدوات تطابق سياسة الاستبعاد. أزلها من مجموعتك للمتابعة:',
       runLocal: 'جديد على Goose؟ ابدأ هنا ←', ghGuide: 'كيفية ربط GitHub ←',
       ghError: 'لم يكتمل الاتصال بـ GitHub. حاول مرة أخرى، أو نزّل المجلد أدناه.',
       handoffIntro: 'حزمتك جاهزة — كل ما يحتاجه وكيل الذكاء الاصطناعي للبدء، مع القواعد والأدوات الآمنة مُضمّنة سلفاً. اختر كيف تريد أخذها:',
@@ -472,8 +475,11 @@
   });
   // Re-run the shared exclusion policy on the assembled stack, in the browser —
   // the same matchDependency() the dependency checker and the CLI engine use.
-  // The catalog is already enforced at build, so this should always be clean; it
-  // is the live guarantee that the handoff the builder downloads is policy-clean.
+  // The catalog is already enforced at build, so this should always be clean.
+  // The result is SURFACED (a ✓ badge in the blueprint) and ENFORCED (a match
+  // pauses the handoff step) — the live guarantee that what the builder downloads
+  // is policy-clean. If /policy.json can't load, policyOrgs stays empty and no
+  // claim is made either way; the build-time CI engine remains the authority.
   const policyMatches = $derived.by(() => {
     if (!policyOrgs.length) return [] as Array<{ name: string; org: string }>;
     const hits: Array<{ name: string; org: string }> = [];
@@ -1145,6 +1151,16 @@ manuals with the knowledge-to-skills-pipeline).
           <ul>{#each chem.conflicts as c (c.a + c.b)}<li>{c.a} · {c.b}</li>{/each}</ul>
         </div>
       {/if}
+      <!-- Movement 2/4: the in-browser policy re-check, surfaced. Silence when
+           /policy.json didn't load (no claim either way — CI is the authority). -->
+      {#if policyClean}
+        <p class="receipt"><span class="receipt-check" aria-hidden="true">✓</span> {t.policyClean}</p>
+      {:else if policyMatches.length}
+        <div class="conflict" role="alert">
+          <strong><span aria-hidden="true">⚠</span> {t.policyHit}</strong>
+          <ul>{#each policyMatches as m (m.name + m.org)}<li>{m.name} → {m.org}</li>{/each}</ul>
+        </div>
+      {/if}
 
       <details class="refine">
         <summary>{t.refineTitle}</summary>
@@ -1222,6 +1238,17 @@ manuals with the knowledge-to-skills-pipeline).
       <h3>{t.handoff}</h3>
       <p class="hint">{t.handoffIntro}</p>
       <p class="hint"><a href="/guides/knowledge-to-skills/">{t.skillsHint}</a></p>
+      <!-- The Movement-2 gate: an excluded-vendor match PAUSES the handoff — no
+           zip, no GitHub push, no Goose launch — until the stack is clean again.
+           (Unreachable in practice: the catalog is enforced at build. This is the
+           belt-and-suspenders the receipt UI promises.) -->
+      {#if policyMatches.length}
+        <div class="conflict" role="alert">
+          <strong><span aria-hidden="true">⚠</span> {t.policyHit}</strong>
+          <p class="hint">{t.policyHitDetail}</p>
+          <ul>{#each policyMatches as m (m.name + m.org)}<li>{m.name} → {m.org}</li>{/each}</ul>
+        </div>
+      {:else}
       <div class="tabs">
         <button class:on={handoff === 'zip'} onclick={() => (handoff = 'zip')}>{t.zip}</button>
         <button class:on={handoff === 'github'} onclick={() => (handoff = 'github')}>{t.github}</button>
@@ -1277,6 +1304,7 @@ manuals with the knowledge-to-skills-pipeline).
           {/if}
           <p class="hint">{t.gooseDesc} <a href="/guides/get-started-with-goose/">{t.runLocal}</a></p>
         </div>
+      {/if}
       {/if}
 
       <button class="link copyp" onclick={() => copy('prompt', agentPrompt)}>{copied === 'prompt' ? '✓ copied' : t.copyPrompt}</button>
