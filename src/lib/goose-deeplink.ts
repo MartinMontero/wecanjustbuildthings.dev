@@ -5,7 +5,7 @@
  * explain-before-launch panel. No DOM, no network, deterministic.
  *
  * STABLE primitive only: recipe deeplinks. `goose serve` / ACP / the TS SDK are out of
- * scope (see PLAN.md §5).
+ * scope (see docs/archive/PLAN-goose-pivot.md §5).
  */
 import type { GooseRecipe } from './goose-recipe.ts';
 

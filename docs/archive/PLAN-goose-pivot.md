@@ -449,5 +449,8 @@ export interface GooseSubRecipe { name: string; instructions: string; activities
 
 ---
 
-*Plan only — no feature code written. Awaiting review of `PLAN.md` before executing
-Slice A.*
+*STATUS (2026-07-11, E3): this plan was EXECUTED in full — Slices A–E all
+merged (recipe serializer, deeplink, mentor persona + deterministic reflection,
+sub-recipes) and the `/api/agent/kickoff` broker retired, making Path A = 0
+platform inference calls, CI-gated by `path-a.yml`. Archived as a historical
+record of the Goose pivot; §5's deferred items are tracked in BACKLOG.md.*

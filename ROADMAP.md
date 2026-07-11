@@ -77,7 +77,7 @@ project in a new session or conversation.
 - **Required checks** — mark `path-a` / `e2e` / `skills` as required in branch protection.
 - **Dependabot remainder** — leave (dev-only) or schedule a framework-upgrade pass (Astro 6→7).
 
-## 🔭 Deferred — FUTURE (see `docs/OPERATOR-RUNBOOK.md` Part B and `PLAN.md` §5)
+## 🔭 Deferred — FUTURE (see `docs/OPERATOR-RUNBOOK.md` Part B and `docs/archive/PLAN-goose-pivot.md` §5)
 Goose live agent loop (`goose serve`/ACP) · server-side recipe signing + shareable links ·
 full es/ar recipe-content translation.
 
