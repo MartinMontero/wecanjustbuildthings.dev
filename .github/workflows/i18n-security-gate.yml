@@ -1,0 +1,42 @@
+name: i18n security gate
+
+# Additive gate (NOT part of the protected operational_advisory set — new file
+# per CLAUDE.md constraint 4; it modifies nothing in verify / security-pr /
+# quality). Any PR touching a page whose ENGLISH SOURCE frontmatter carries
+# `security_sensitive: true` — or a locale (es/ar) variant of one — must show
+# TWO distinct approving reviews before this check passes. Decision logic +
+# fail-closed semantics live in scripts/i18n-security-gate.mjs (unit-tested
+# by scripts/i18n-security-gate.test.ts).
+#
+# B4 dependency (PLAN.md M0): GitHub only BLOCKS merging on a red check once
+# this check is marked Required in branch protection (operator setting).
+# Until then it is a loud advisory.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  two-review-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: step-security/harden-runner@9af89fc71515a100421586dfdb3dc9c984fbf411 # v2.19.4
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
+        with:
+          persist-credentials: false
+      - name: Two distinct approvals required on security_sensitive pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/i18n-security-gate.mjs
