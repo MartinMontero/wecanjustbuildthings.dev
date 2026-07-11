@@ -32,6 +32,13 @@ jobs:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.1
         with:
           persist-credentials: false
+          # TRUSTED-CODE PIN (M0-R1): the gate runs the BASE branch's copy of
+          # the decision script — a PR must never supply the logic that judges
+          # it (otherwise the same PR could neuter the gate it triggers).
+          # Bootstrap consequence: on the PR that introduces the script, the
+          # file is absent at base and this job fails CLOSED; it self-heals
+          # once the script exists on main.
+          ref: ${{ github.event.pull_request.base.sha }}
       - name: Two distinct approvals required on security_sensitive pages
         env:
           GH_TOKEN: ${{ github.token }}
