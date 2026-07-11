@@ -116,7 +116,7 @@ no `wrangler deploy` in CI, so no `CLOUDFLARE_API_TOKEN` is needed in GitHub Act
 - **What:** Replace the current "bring back the JSON your Goose run produced" step with a
   live, streamed session.
 - **Why deferred:** Experimental (mid-2026), and it would mean the platform drives a live
-  loop — a meaningful architecture step (`PLAN.md` §5). `reflectFromResponse` was
+  loop — a meaningful architecture step (`docs/archive/PLAN-goose-pivot.md` §5). `reflectFromResponse` was
   deliberately designed to later accept a streamed response without changing its
   deterministic contract.
 - **What it needs:** A stable Goose serve/ACP endpoint to target, plus a decision on where
@@ -126,14 +126,14 @@ no `wrangler deploy` in CI, so no `CLOUDFLARE_API_TOKEN` is needed in GitHub Act
 - **What:** Sign recipes and produce shareable links (today there's only the client-side
   `goose://` deeplink + the zip).
 - **Why deferred:** Needs the Worker (server-side signing/storage); out of the pure-client
-  scope the pivot stayed within (`PLAN.md` §5).
+  scope the pivot stayed within (`docs/archive/PLAN-goose-pivot.md` §5).
 - **What it needs:** A Worker endpoint + a signing key + a storage decision (KV/R2), and a
   UX for link expiry/revocation.
 
 ### 5. Full catalog translation for es/ar recipes
 - **What:** Localized extension/recipe **content** in Spanish and Arabic (the UI is
   translated; recipe/extension copy is not fully localized).
-- **Why deferred:** Scope (`PLAN.md` §5).
+- **Why deferred:** Scope (`docs/archive/PLAN-goose-pivot.md` §5).
 - **What it needs:** Run/extend `npm run translate:catalog` (needs `ANTHROPIC_API_KEY`)
   over recipe/extension content, then human review of the machine output (the
   `machine_translated` schema flag already exists for surfacing an advisory).
