@@ -70,6 +70,17 @@ check. Nothing found was dropped. **Scope key** — the column the gate decides:
 | E9 | CLAUDE.md constraint 4: one line naming the protected workflow set {verify, security-pr, quality} (doc-only; mapping currently lives only in guard.py) | P2 |
 | E10 | `LOOP.md` + `audit/` working artifacts: propose committing `audit/` (screens are the before-record) and deleting `LOOP.md` after harvesting B7 (items already captured here) | P2 |
 
+## D2. External backlogs, named — NOT consolidated (no silent third backlog)
+
+Two owner-side backlogs are referenced in session context but have **zero
+matches anywhere in this repository** (grep verified 2026-07-11):
+**QA-REMEDIATE-v1** (remediation backlog) and **PANEL-RESPEC-v2** (admin-panel
+re-spec). They live outside the repo (owner's project workspace) and therefore
+are NOT consolidated into this document. Status: **explicitly out-of-scope
+until the owner supplies their contents**, at which point they merge here as
+their own section with the same columns. D10 (console) is already fenced to
+token-compliance-only so nothing in this effort preempts PANEL-RESPEC-v2.
+
 ## E. Gate questions (the decisions this document exists to get)
 
 - **G1** — Approve scope column as marked? (SHIP = D1–D13, B1-Option-2, B10, E1–E10.)

@@ -12,12 +12,14 @@ Companion docs: `BACKLOG.md` (consolidated ledger), `DESIGN.md` (direction),
   typechecks clean, **352/352 tests**, enforce + enforce:skills green,
   production build 6,653 pages.
 - `npx tsx enforcement/cli.ts all --tree .` — exits 1, but **every hit is
-  self-referential**: the engine's own signal-definition YAMLs
-  (`enforcement/excluded-*.yaml`) and its negative-test fixtures
-  (`enforcement/tests/*`). **Zero hits in `src/`, `worker/`, `scripts/`,
-  `public/`.** The ship prompt's DoD line "full-tree run passes" is
-  unsatisfiable as written; the honest formulation is "zero hits outside the
-  engine's own definitions/fixtures" (already true) — gate item G3.
+  self-referential**: the engine's own signal-definition YAMLs and its
+  negative-test fixtures. **Zero hits in `src/`, `worker/`, `scripts/`,
+  `public/`.** Refinement (SHIP-GATE-R1 2c): CI **already dogfoods Layers 1–2
+  full-tree** (`verify.yml:42-43`, green); only Layer 3 full-tree is
+  unsatisfiable by construction. Exact exempt paths, enumerated:
+  `enforcement/excluded-organizations.yaml`,
+  `enforcement/excluded-provider-signals.yaml`, `enforcement/tests/**`.
+  DoD-prose fix suffices — no engine change needed — gate item G3.
 - `npm audit --omit=dev` — 4 low (esbuild via astro; Windows-dev-server-only,
   prod unaffected). Full audit: 14 (7 low/6 moderate/1 high) — the high is
   `tmp` via `@lhci/cli`, CI-tooling only.
@@ -31,7 +33,11 @@ Companion docs: `BACKLOG.md` (consolidated ledger), `DESIGN.md` (direction),
 |---|---|---|
 | P0-1 | **CLAUDE.md documents an i18n freshness/security-gate layer that does not exist** — incl. a 2-review gate for `security_sensitive` pages. One page carries the flag today (`guides/encrypted-group-messaging-marmot.mdx:10`) and gets **no extra protection**; the schema doesn't even define the field. CLAUDE.md is binding session instructions, so this is the highest-risk doc/reality conflict. | No `scripts/i18n-freshness.mjs`, `scripts/i18n-security-gate.mjs`, `i18n:stamp` script, `TranslationStatus.astro`, `src/config/i18n.mjs`, `TRANSLATING.md`, `.github/CODEOWNERS`, or i18n workflows (verified absent) |
 | P0-2 | **PolicyChecker island ignores its `lang` prop** — the verdict surface (the product's thesis) renders English-only inside `/es/check/` and `/ar/check/`. | `src/components/PolicyChecker.svelte` (no `$props()`); pages pass `lang="es|ar"` (`es/check.mdx:18`, `ar/check.mdx:17`); hardcoded strings `:83-127` |
-| P0-3 | **CLI jargon inside the checker verdict** aimed at non-developers: "run `npx tsx enforcement/cli.ts all --tree .` on a real project." | `PolicyChecker.svelte:126-127` |
+
+(P0-3 in the first revision — CLI jargon in the checker verdict — is
+**reclassified to P1-15** per the prompt's severity ladder: P0 is
+security/broken/policy; copy register is UX. Reclassification requested and
+ruled at SHIP-GATE-R1 2b.)
 
 ## P1 — correctness / UX / design debt
 
@@ -53,6 +59,7 @@ Kill-list hits (each with file:line; full table in the design-audit record):
 | P1-12 | CSP still Report-Only (mechanism complete; operator flip pending) | `astro.config.mjs:63`; `security-headers.ts:112-180` |
 | P1-13 | Cost Estimator: 12× `unitPrice: null` + 3× `lastVerified: null`; tier bands/scale placeholders. Model Compass: 7 models `score: null` (runbook undercounts as 3) | `providers.ts:62-97`; `tiers.ts:26-30`; `models.ts:37-182` |
 | P1-14 | Admin panel phases 4–8 unbuilt (per spec + wrangler binding comments); staging follow-ups (publish→PR, enforcement wiring, expiry job) logged | `docs/admin-panel-spec.md:73-136`; `wrangler.jsonc:48-62` |
+| P1-15 | CLI jargon inside the checker verdict aimed at non-developers: "run `npx tsx enforcement/cli.ts all --tree .` on a real project." (reclassified from P0 at SHIP-GATE-R1 2b) | `PolicyChecker.svelte:126-127` |
 
 ## P2 — polish / docs / deferred
 

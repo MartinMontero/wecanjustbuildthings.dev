@@ -109,7 +109,7 @@ commit as en):
 | Cost estimator | All `--sl-*`, raw radii; `TODO: confirm` register | Tokenized; provenance chips; numbers stay honest |
 | Model Compass | Hardcoded hex ramp (`:144-152`); English data prose in localized UI; whole registry shipped as eager JS | Tokenized status ramp; caution prose via i18n keys; `client:visible` + consider static-render of the table (island only for filters) |
 | Docs + PIE reading | Already designed (ticks, asides, tables) ✓ | No change beyond copy-register pass on first-contact pages |
-| Console `/console/` | Raw hex, outside the system (`:470-523`; page `:33-44`) | Token-native, `.btn`/`.field` adoption; stays English (operator surface — documented exception), stays standalone-CSP |
+| Console `/console/` | Raw hex, outside the system (`:470-523`; page `:33-44`) | **Token-compliance of the EXISTING auth screens only** — no feature-room design here (that waits for the owner's PANEL-RESPEC-v2 spec). Stays English (operator surface — documented exception), stays standalone-CSP. `/admin/` (Sveltia CMS) is vendored third-party and explicitly out of design scope |
 | Footer (all pages) | Stock Starlight | New Footer override (see §3) |
 | Islands, sitewide | 16× `client:load` | `client:visible` where below-the-fold (catalog explorer is above-fold: stays load); measure before/after |
 
