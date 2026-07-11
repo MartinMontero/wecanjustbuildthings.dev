@@ -27,6 +27,10 @@
    * the authority.
    */
   import { onMount } from 'svelte';
+  import {
+    looksLikeKeyMaterial, withTimeout, bunkerReason,
+    BUNKER_CONNECT_TIMEOUT_MS, BUNKER_SIGN_TIMEOUT_MS,
+  } from './bunker-login.ts';
 
   type Role = 'superadmin' | 'admin';
   type Who = { identity: string; method: 'nostr' | 'bluesky'; role: Role; csrf?: string };
@@ -133,12 +137,8 @@
     }
   }
 
-  /** Anything that looks like key material is refused outright — this input is
-   *  ONLY for a bunker connection string (bunker://…) or a NIP-05 name. */
-  function looksLikeKeyMaterial(s: string): boolean {
-    const t = s.trim().toLowerCase();
-    return t.startsWith('nsec1') || t.startsWith('ncryptsec1') || /^[0-9a-f]{64}$/.test(t);
-  }
+  // The key-material refusal gate + all other pure NIP-46 logic live in
+  // ./bunker-login.ts, where they are unit-tested.
 
   async function loginNip46() {
     error = ''; notice = '';
@@ -163,14 +163,21 @@
       // never the admin's identity key).
       const s = BunkerSigner.fromBunker(generateSecretKey(), pointer);
       signer = s;
-      await s.connect();
-      await loginWithSigner((tpl) => s.signEvent(tpl));
+      // Both remote awaits are BOUNDED: an unanswered on-phone approval or a dead
+      // relay becomes a visible, explained error — never a spinner that lives forever.
+      await withTimeout(s.connect(), BUNKER_CONNECT_TIMEOUT_MS, 'bunker connect');
+      await loginWithSigner((tpl) => withTimeout(s.signEvent(tpl), BUNKER_SIGN_TIMEOUT_MS, 'bunker signing'));
       notice = '';
-    } catch {
-      error = 'Bunker sign-in didn’t complete. Check the connection string, approve the request in your signer, and make sure only allowlisted admin keys are used.';
+    } catch (e) {
+      // The real cause goes to the console for the operator — the error object
+      // only, never the pasted input and never key material. The UI gets a
+      // static explanation mapped from it (bunkerReason echoes nothing).
+      console.error('[admin] NIP-46 bunker login failed:', e);
+      error = bunkerReason(e);
       notice = '';
     } finally {
-      try { await signer?.close(); } catch { /* relay already closed */ }
+      // Fire-and-forget: close() itself must never be able to hang the UI.
+      signer?.close().catch(() => { /* relay already closed */ });
       busy = '';
     }
   }
