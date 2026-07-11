@@ -64,3 +64,31 @@ export function pinnedDependencies(
     }),
   );
 }
+
+/** The license-at-commit facts a catalog entry carries (subset of the Studio's
+ *  Item / the session receipt). */
+export interface ReceiptFacts {
+  license?: string | null;
+  commit?: string | null;
+  licenseUrl?: string | null;
+}
+
+/**
+ * Movement 2, "receipts travel" — the license-at-commit receipt rendered for the
+ * DOWNLOADED artifacts (README.md, AGENT_PROMPT.txt), so the evidence shown in
+ * the blueprint UI travels into the files the builder keeps, not just the screen.
+ * Pure + total: an entry with no pinned commit yields an honest "verification
+ * pending" note (or nothing), never a fabricated claim.
+ *   - 'markdown' (README): links the claim to the recorded license source.
+ *   - 'plain' (AGENT_PROMPT): the same facts without markup.
+ */
+export function receiptLine(r: ReceiptFacts, style: 'markdown' | 'plain'): string {
+  const license = r.license?.trim();
+  const sha = r.commit?.trim();
+  if (!sha) return license ? ` — license ${license} (verification pending)` : '';
+  const label = license
+    ? `license ${license} verified at ${sha.slice(0, 7)}`
+    : `license verified at ${sha.slice(0, 7)}`;
+  if (style === 'markdown' && r.licenseUrl) return ` — [${label}](${r.licenseUrl})`;
+  return ` — ${label}`;
+}

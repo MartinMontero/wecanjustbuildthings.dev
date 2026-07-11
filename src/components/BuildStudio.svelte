@@ -6,7 +6,7 @@
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
   import { detectSignals, pickQuestions, reflect, reflectFromResponse, type ConstraintId } from '../lib/mentor-engine.ts';
   import { chemistry, partnersOf } from '../lib/chemistry.ts';
-  import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies } from '../lib/studio-stack.ts';
+  import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies, receiptLine } from '../lib/studio-stack.ts';
   import { slugifySkill, skillToMd, type DraftSkill } from '../lib/skill-doc.ts';
   import { mentorPersonaSkill } from '../lib/mentor-persona.ts';
   import { buildGooseRecipe, recipeToYaml, skillToSubRecipe, skillSubRecipePath, type ExtensionAllowlist } from '../lib/goose-recipe.ts';
@@ -748,7 +748,7 @@ RULES (binding — see constitution.md):
 - Read .specify/memory/constitution.md FIRST and never violate it.
 - Read skills/*.SKILL.md and follow the builder's own methods exactly; if a skill conflicts with a task, surface it and ask.
 - Use ONLY these policy-clean dependencies (no Meta/OpenAI/xAI, screened by enforcement). ★ = human-verified; the rest passed automated policy screening and are pending verification — prefer ★ where a choice exists:
-${chosenItems.map((it) => `    - ${it.verification === 'verified' ? '★ ' : ''}${it.name} (${it.ecosystem})${it.advisory ? ` [${it.advisory}-origin advisory]` : ''}`).join('\n') || '    - <none selected>'}
+${chosenItems.map((it) => `    - ${it.verification === 'verified' ? '★ ' : ''}${it.name} (${it.ecosystem})${it.advisory ? ` [${it.advisory}-origin advisory]` : ''}${receiptLine(it, 'plain')}`).join('\n') || '    - <none selected>'}
 ${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the primary SDK for relays, subscriptions, and signers.\n' : ''}${protocols.has('atproto') ? '- For AT Protocol, use @atproto/api as the primary SDK; prefer OAuth (DPoP) over App Passwords.\n' : ''}- No dependency or provider owned by Meta, OpenAI, or xAI — directly or transitively.
 - Run \`npm run enforce\` before every commit. Add rate
   limiting, test auth paths, and never swallow trust-path errors.
@@ -781,7 +781,7 @@ Scaffolded by wecanjustbuildthings.dev — every dependency is screened against 
 Meta/OpenAI/xAI exclusion policy.
 
 ## Stack
-${chosenItems.map((it) => `- [${it.name}](${it.repo || it.url}) — ${it.desc}`).join('\n') || '- (none)'}
+${chosenItems.map((it) => `- [${it.name}](${it.repo || it.url}) — ${it.desc}${receiptLine(it, 'markdown')}`).join('\n') || '- (none)'}
 
 ## Build it with an agent
 1. Configure your agent (Goose or Claude Code) with a permitted, BYOK provider.
