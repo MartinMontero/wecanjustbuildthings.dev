@@ -23,8 +23,10 @@ surfaces are the product's thesis, so that is exactly backwards.
 (clean / blocked / chain-to-excluded), the Studio's policy gate, the
 enforcement page's verdict band, admin audit views. A receipt is: a stamped
 edge (2px structural rule), a status color that is never decorative
-(`--ok/--warn/--danger`), the evidence inline (commit SHA, org chain, license
-id), and a plain-verb sentence a non-developer can act on. Boldness is spent
+(`--ok/--warn/--danger`) **and never the only carrier — icon + word + color,
+correct in grayscale (WCAG 1.4.1; SHIP-GATE-R2 rider)** — the evidence inline
+(commit SHA, org chain, license id), and a plain-verb sentence a non-developer
+can act on. Boldness is spent
 here — the blocked-dependency moment should feel like a customs stamp coming
 down — and everywhere else stays quiet: paper, ink, structure.
 
