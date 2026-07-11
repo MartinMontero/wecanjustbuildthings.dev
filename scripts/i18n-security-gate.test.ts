@@ -1,6 +1,5 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-// @ts-expect-error — plain .mjs module, no types; the contract is pinned here.
 import { englishSourceOf, hasSecuritySensitiveFlag, distinctApprovals, flaggedSources } from './i18n-security-gate.mjs';
 
 // ---- path mapping: locale variants inherit the English source's flag ----
