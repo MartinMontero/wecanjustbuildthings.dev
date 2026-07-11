@@ -25,6 +25,8 @@ schema, 1,355 catalog entries).
 
 4. PRESERVE `operational_advisory`. This blocking CI check MUST NOT be weakened,
    disabled, or bypassed. New CI steps must be ADDITIVE only (new workflow files).
+   (The name refers to the protected blocking set: `verify.yml`,
+   `security-pr.yml`, `quality.yml` — mapping recorded in `.claude/hooks/guard.py`.)
 
 5. EDITORIAL/ENGINEERING STANDARDS. Primary sources only. ZERO fabrication. ZERO
    inference of facts (file paths, env var names, config values, behavior). When
@@ -37,8 +39,9 @@ schema, 1,355 catalog entries).
 - Any migration off Cloudflare is implied.
 - A change would weaken, disable, or bypass the i18n freshness or security-gate
   checks (treat them like `operational_advisory` — additive only).
-- A new locale would be added to the live `locales` config (governance-gated:
-  requires a steward + reviewer per TRANSLATING.md).
+- A new locale would be added to the live `locales` config (governance-gated;
+  the TRANSLATING.md charter that will define the steward/reviewer process is
+  not yet written — until it is, ALWAYS stop and ask).
 
 <!-- Build commands, scripts, and project layout: run `/init` to populate these
      from the actual repo, then keep them current here. -->
@@ -73,56 +76,40 @@ schema, 1,355 catalog entries).
 
 ## Internationalization (i18n) & translation governance
 
-Multi-language support is Starlight native i18n (human-first, authoritative
-translations) plus a Git-based freshness + governance layer. That layer is pure
-Node and static rendering: it adds NO runtime dependencies and NO inference, so it
-sits inside constraints 1 (Path A) and 2 (vendor exclusions) — do not add
-dependencies to it. The reader banner is server-rendered with no client JS, so it
-is compatible with the hash-based CSP (constraint 3). The two i18n CI workflows
-are ADDITIVE new files per constraint 4 and MUST NOT modify, weaken, or be merged
-into `operational_advisory`.
+**What EXISTS (verified in-tree — rely on these):**
+- Starlight-native i18n: root locale `en` (no `/en` prefix, English sources
+  directly under `src/content/docs/`), `es`, and `ar` (RTL). Translations live
+  at `src/content/docs/<locale>/<same-path>`; untranslated pages fall back to
+  English. The locale list lives in astro.config — never guess it, read it.
+- The catalog-prose translation pipeline (`scripts/translate-catalog.ts`,
+  `.github/workflows/translate-catalog.yml`, dispatch-only) and the house
+  island i18n pattern (inline `Record<Lang,…>` string tables + `lang` prop +
+  `document.documentElement.lang` fallback).
+- **Security-sensitive pages — ENFORCED:** set `security_sensitive: true` in
+  frontmatter on the ENGLISH SOURCE page only (schema-validated field,
+  `src/schema/catalog.ts`); locale variants inherit it by path. Any PR touching
+  a flagged page (or a translation of one) requires 2 distinct approving
+  reviews, enforced by `.github/workflows/i18n-security-gate.yml` →
+  `scripts/i18n-security-gate.mjs` (fails closed: flag honored on base OR head,
+  unreadable pages treated as flagged; unit-tested). NOTE: the gate BLOCKS
+  merging only once marked Required in branch protection (operator item B4);
+  until then a red gate is a loud advisory. Treat key handling, self-custody,
+  and threat guidance as security-sensitive.
+- The i18n CI is ADDITIVE per constraint 4 and MUST NOT modify, weaken, or be
+  merged into `operational_advisory`. It adds no runtime dependencies and no
+  inference (constraints 1–2).
 
-**Locale config**
-- Default/root locale is `en`, served with no `/en` prefix; English source pages
-  live directly under `src/content/docs/`. Translations live at
-  `src/content/docs/<locale>/<same-path>`. If this changes, flip
-  `rootLocaleHasNoPrefix` in the i18n scripts and the banner component.
-- The locale list appears in astro.config, the three i18n scripts, and
-  `TranslationStatus.astro` (`KNOWN_LOCALES`) — ideally consolidated in
-  `src/config/i18n.mjs`. Keep every copy in sync; drift silently breaks the banner
-  and the gates. Per constraint 5, never guess this list — read it.
+**What is PLANNED (not built — do not rely on it, do not fabricate it):**
+freshness provenance (`source_commit`/`last_verified` stamps, an `i18n:stamp`
+script, `scripts/i18n-freshness.mjs` hygiene CI), the reader banner
+(`TranslationStatus.astro`, `src/data/i18n-status.json`), and the governance
+layer (roles, the language-opening gate, per-locale CODEOWNERS, a
+`TRANSLATING.md` charter — the file does not exist yet; the shipped
+`TRANSLATIONS.md` is a status ledger, not the charter). Building the full
+layer is its own future effort (BACKLOG B1, gate ruling G2/Option 2). Adding a
+new live locale remains governance-gated: stop and ask.
 
-**Translation provenance (freshness)**
-- Every translation page carries `source_commit` (the English source's Git SHA it
-  was translated from) and `last_verified` in frontmatter. English source pages
-  are not stamped.
-- After creating or updating a translation, verify it against the CURRENT English
-  source, then stamp it (never hand-edit `source_commit`):
-  `npm run i18n:stamp -- src/content/docs/<locale>/<path>`
-- CI hygiene (`scripts/i18n-freshness.mjs --mode=hygiene`) blocks a PR whose
-  CHANGED translations are unstamped, orphaned, or malformed. Editing an English
-  page is never penalized — it only flags its translations stale for re-check.
-- `src/data/i18n-status.json` is generated by the freshness script at build time
-  (via the `build` script) and is gitignored. The banner imports it tolerantly; a
-  missing file must never break the build.
-
-**Reader banner** (`TranslationStatus.astro`, a PageTitle override)
-- Stale translation → caution notice ("N changes behind") linking to English.
-  Untranslated page shown as English fallback → a softer note. Fresh pages,
-  default-locale pages, and the `unstamped` state show readers nothing
-  (`unstamped` is internal hygiene — never surface it).
-
-**Security-sensitive pages**
-- Set `security_sensitive: true` in frontmatter on the ENGLISH SOURCE page only;
-  translations inherit it. Any PR touching such a page (or a translation of one)
-  requires 2 approving reviews, enforced by the security-gate workflow
-  (`scripts/i18n-security-gate.mjs`). Treat key handling, self-custody, and threat
-  guidance as security-sensitive.
-
-**Governance**
-- Roles (suggester → reviewer → steward), the language-opening gate (steward + N
-  reviewers before a locale goes live), and conflict resolution live in
-  `TRANSLATING.md`. `.github/CODEOWNERS` scopes review by locale; each locale team
-  owns its register and glossary — do not override a team's linguistic choices.
+**Register rules that hold today:**
 - Never translate protocol/product terms (Nostr, relay, Cashu, zap, command
   names); they stay in English across all locales.
+- Do not override a locale team's linguistic choices once teams exist.
