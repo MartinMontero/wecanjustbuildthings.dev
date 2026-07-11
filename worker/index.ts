@@ -69,6 +69,7 @@ export interface Env {
   // closed when unprovisioned; see worker/admin/* and docs/admin-panel-spec.md.
   ADMIN_COORD?: DurableObjectNamespace; // per-identity coordinator DO (CSRF + rate-limit)
   ADMIN_SESSIONS?: KVNamespace;          // opaque admin sessions (separate from SESSIONS)
+  ADMIN_DB?: D1Database;                 // Phase-3 admin storage (staging + action audit)
 }
 
 const UA = 'wecanjustbuildthings/1.0 (+https://wecanjustbuildthings.dev)';

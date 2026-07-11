@@ -64,6 +64,10 @@ import {
   resolveAdminSessionId, adminSessionCookie, clearAdminSessionCookie, purgeAdminSessions,
   type AdminMethod,
 } from './session.ts';
+import {
+  listStagedEdits, getStagedEdit, createStagedEdit, updateStagedEdit, abandonStagedEdit,
+  isValidStagedKind, isValidStagedSlug, contentWithinLimit,
+} from './staging.ts';
 
 /** How long a used per-request NIP-98 event id stays burned. Must exceed the
  *  verifier's ±60s acceptance window so an exact replay can never slip in after
@@ -299,46 +303,63 @@ function managementConfigured(env: AdminEnv): env is AdminEnv & {
   return adminConfigured(env) && Boolean(env.DB);
 }
 
-interface SuperadminActor { actor: string; method: AuditMethod }
+interface ActorGate { actor: string; method: AuditMethod; role: AdminRole }
+
+/** With exactly two tiers, 'superadmin' satisfies everything and 'admin'
+ *  satisfies only an 'admin' floor. */
+const roleSatisfies = (role: AdminRole, minRole: AdminRole) => role === 'superadmin' || role === minRole;
 
 /**
- * The single auth gate for the management routes: cookie session (role
+ * The single auth gate for every privileged admin route: cookie session (role
  * re-derived from file ∪ roster on THIS request; coordinator CSRF for
- * mutations) OR per-request NIP-98 (Nostr file superadmins; single-use event
- * id — Bluesky superadmins manage via cookie+CSRF only, NIP-98 has no AT-Proto
- * analogue). Only a CURRENT 'superadmin' passes; everything short of that gets
- * the same generic 401 as any failed authentication — no role oracle. Returns
- * a ready-to-send failure Response otherwise.
+ * mutations) OR per-request NIP-98 (Nostr principals; single-use event id —
+ * Bluesky principals manage via cookie+CSRF only, NIP-98 has no AT-Proto
+ * analogue). Only an identity whose CURRENT role meets `minRole` passes;
+ * everything short of that gets the same generic 401 as any failed
+ * authentication — no role oracle. Returns a ready-to-send failure Response
+ * otherwise.
  */
-async function requireSuperadmin(
+async function requireActor(
   request: Request,
   env: AdminEnv & { ADMIN_SESSIONS: KVNamespace; ADMIN_COORD: DurableObjectNamespace },
   deps: AdminDeps,
   opts: { path: string; httpMethod: 'GET' | 'POST'; rawBody: string; mutation: boolean },
-): Promise<SuperadminActor | Response> {
+  minRole: AdminRole,
+): Promise<ActorGate | Response> {
   const cookieId = readCookie(request, ADMIN_SESSION_COOKIE);
   if (cookieId) {
     const session = await resolveRoledAdmin(request, env, deps);
     if (!session) return authError();
-    if (session.role !== 'superadmin') return authError(); // same generic 401 — no role oracle
+    if (!roleSatisfies(session.role, minRole)) return authError(); // same generic 401 — no role oracle
     if (opts.mutation) {
       const token = request.headers.get('x-admin-csrf') ?? '';
       const check = await coord(env.ADMIN_COORD, session.record.method, session.record.subject, '/check', { sessionId: session.id, token });
       if (!check || check.status !== 200 || check.data.ok !== true) return authError(403, 'invalid csrf token');
     }
-    return { actor: `${session.record.method}:${session.record.subject}`, method: 'cookie' };
+    return { actor: `${session.record.method}:${session.record.subject}`, method: 'cookie', role: session.role };
   }
 
   const authHeader = request.headers.get('authorization');
   if (authHeader) {
     const proven = await verifyNip98Event(authHeader, opts.rawBody, adminUrl(request, env, opts.path), opts.httpMethod);
     if (!proven) return authError();
-    if ((await resolveAdminRole('nostr', proven.pubkey, env, deps)) !== 'superadmin') return authError();
+    const role = await resolveAdminRole('nostr', proven.pubkey, env, deps);
+    if (!role || !roleSatisfies(role, minRole)) return authError();
     if (!(await burnNip98EventId(env.ADMIN_SESSIONS, proven.eventId))) return authError();
-    return { actor: `nostr:${proven.pubkey}`, method: 'nip98' };
+    return { actor: `nostr:${proven.pubkey}`, method: 'nip98', role };
   }
 
   return authError();
+}
+
+/** The roster-management gate: superadmins only. */
+function requireSuperadmin(
+  request: Request,
+  env: AdminEnv & { ADMIN_SESSIONS: KVNamespace; ADMIN_COORD: DurableObjectNamespace },
+  deps: AdminDeps,
+  opts: { path: string; httpMethod: 'GET' | 'POST'; rawBody: string; mutation: boolean },
+): Promise<ActorGate | Response> {
+  return requireActor(request, env, deps, opts, 'superadmin');
 }
 
 /** Parse + normalize a mutation's target principal through the SHARED
@@ -457,6 +478,168 @@ async function adminsRemove(request: Request, env: AdminEnv, deps: AdminDeps): P
   return authJson({ ok: true, provider: target.provider, subject: target.subject });
 }
 
+// ---- Phase 3: staged catalog/content edits (ADMIN_DB) ----
+
+/** Env narrowing for the staging routes: core admin bindings PLUS the separate
+ *  Phase-3 ADMIN_DB. Missing ⇒ explicit 503 — a staging surface must never
+ *  pretend to be empty when its store is simply unbound. */
+function stagingConfigured(env: AdminEnv): env is AdminEnv & {
+  ADMIN_SESSIONS: KVNamespace; ADMIN_COORD: DurableObjectNamespace; ADMIN_DB: D1Database;
+} {
+  return adminConfigured(env) && Boolean(env.ADMIN_DB);
+}
+
+/** GET /api/admin/staging — non-expired drafts: an admin sees their OWN, a
+ *  superadmin sees all (governance view). List rows carry no content bodies. */
+async function stagingList(request: Request, env: AdminEnv, deps: AdminDeps): Promise<Response> {
+  if (!stagingConfigured(env)) return authError(503, 'admin not configured');
+  if (await overRateLimit(env.AUTH_RATE_LIMITER, request, 'admin-staging')) return authError(429, 'too many requests');
+  const gate = await requireActor(request, env, deps, {
+    path: '/api/admin/staging', httpMethod: 'GET', rawBody: '', mutation: false,
+  }, 'admin');
+  if (gate instanceof Response) return gate;
+  try {
+    const drafts = await listStagedEdits(env.ADMIN_DB, Date.now(), gate.role === 'superadmin' ? undefined : gate.actor);
+    return authJson({ drafts });
+  } catch {
+    return authError(503, 'staging unavailable');
+  }
+}
+
+/** GET /api/admin/staging/get?id=… — one full draft. Another author's draft
+ *  reads as 404 for an admin (no existence oracle); superadmins can read any. */
+async function stagingGet(request: Request, env: AdminEnv, deps: AdminDeps): Promise<Response> {
+  if (!stagingConfigured(env)) return authError(503, 'admin not configured');
+  if (await overRateLimit(env.AUTH_RATE_LIMITER, request, 'admin-staging')) return authError(429, 'too many requests');
+  const url = new URL(request.url);
+  // The NIP-98 `u` tag must cover the query string — the id is part of what was signed.
+  const gate = await requireActor(request, env, deps, {
+    path: `/api/admin/staging/get${url.search}`, httpMethod: 'GET', rawBody: '', mutation: false,
+  }, 'admin');
+  if (gate instanceof Response) return gate;
+  const id = url.searchParams.get('id') ?? '';
+  if (!id) return authJson({ error: 'invalid id' }, 400);
+  try {
+    const draft = await getStagedEdit(env.ADMIN_DB, Date.now(), id);
+    if (!draft || (gate.role !== 'superadmin' && draft.author !== gate.actor)) return authJson({ error: 'not found' }, 404);
+    return authJson({ draft });
+  } catch {
+    return authError(503, 'staging unavailable');
+  }
+}
+
+/** POST /api/admin/staging/create — new draft owned by the acting admin.
+ *  enforcement_status starts 'pending'; the engine runs in the publish slice. */
+async function stagingCreate(request: Request, env: AdminEnv, deps: AdminDeps): Promise<Response> {
+  if (!stagingConfigured(env)) return authError(503, 'admin not configured');
+  if (crossSiteRequest(request, env.SITE_URL)) return authError(403, 'cross-site request rejected');
+  if (await overRateLimit(env.AUTH_RATE_LIMITER, request, 'admin-staging')) return authError(429, 'too many requests');
+  const rawBody = await request.text();
+  const gate = await requireActor(request, env, deps, {
+    path: '/api/admin/staging/create', httpMethod: 'POST', rawBody, mutation: true,
+  }, 'admin');
+  if (gate instanceof Response) return gate;
+  let parsed: { kind?: unknown; slug?: unknown; content?: unknown };
+  try {
+    parsed = JSON.parse(rawBody) as typeof parsed;
+  } catch {
+    return authJson({ error: 'invalid body' }, 400);
+  }
+  if (!isValidStagedKind(parsed.kind)) return authJson({ error: 'invalid kind' }, 400);
+  if (!isValidStagedSlug(parsed.slug)) return authJson({ error: 'invalid slug' }, 400);
+  if (typeof parsed.content !== 'string' || parsed.content.trim() === '' || !contentWithinLimit(parsed.content)) {
+    return authJson({ error: 'invalid content' }, 400);
+  }
+  const id = crypto.randomUUID();
+  try {
+    await createStagedEdit(env.ADMIN_DB, {
+      id, author: gate.actor, kind: parsed.kind, slug: parsed.slug, content: parsed.content, now: Date.now(),
+    });
+  } catch {
+    return authError(503, 'staging unavailable');
+  }
+  return authJson({ ok: true, id });
+}
+
+/** POST /api/admin/staging/update — AUTHOR-only, whatever the role: a
+ *  superadmin janitors (list/read/abandon) but never writes someone else's
+ *  words. Closed drafts (abandoned / pr-opened) reject with 409. */
+async function stagingUpdate(request: Request, env: AdminEnv, deps: AdminDeps): Promise<Response> {
+  if (!stagingConfigured(env)) return authError(503, 'admin not configured');
+  if (crossSiteRequest(request, env.SITE_URL)) return authError(403, 'cross-site request rejected');
+  if (await overRateLimit(env.AUTH_RATE_LIMITER, request, 'admin-staging')) return authError(429, 'too many requests');
+  const rawBody = await request.text();
+  const gate = await requireActor(request, env, deps, {
+    path: '/api/admin/staging/update', httpMethod: 'POST', rawBody, mutation: true,
+  }, 'admin');
+  if (gate instanceof Response) return gate;
+  let parsed: { id?: unknown; slug?: unknown; content?: unknown; state?: unknown };
+  try {
+    parsed = JSON.parse(rawBody) as typeof parsed;
+  } catch {
+    return authJson({ error: 'invalid body' }, 400);
+  }
+  if (typeof parsed.id !== 'string' || parsed.id === '') return authJson({ error: 'invalid id' }, 400);
+  if (parsed.slug !== undefined && !isValidStagedSlug(parsed.slug)) return authJson({ error: 'invalid slug' }, 400);
+  if (parsed.content !== undefined
+    && (typeof parsed.content !== 'string' || parsed.content.trim() === '' || !contentWithinLimit(parsed.content))) {
+    return authJson({ error: 'invalid content' }, 400);
+  }
+  if (parsed.state !== undefined && parsed.state !== 'draft' && parsed.state !== 'ready') {
+    return authJson({ error: 'invalid state' }, 400); // abandon has its own route; pr-opened is the publish slice's
+  }
+  try {
+    const existing = await getStagedEdit(env.ADMIN_DB, Date.now(), parsed.id);
+    if (!existing) return authJson({ error: 'not found' }, 404);
+    if (existing.author !== gate.actor) {
+      // Admins get the same 404 as a nonexistent draft (no oracle); a superadmin
+      // can already see the row, so the honest refusal is explicit.
+      return gate.role === 'superadmin' ? authJson({ error: 'author-only' }, 403) : authJson({ error: 'not found' }, 404);
+    }
+    if (existing.state === 'abandoned' || existing.state === 'pr-opened') return authJson({ error: 'draft is closed' }, 409);
+    await updateStagedEdit(env.ADMIN_DB, {
+      id: existing.id,
+      slug: (parsed.slug as string | undefined) ?? existing.slug,
+      content: (parsed.content as string | undefined) ?? existing.content,
+      state: (parsed.state as 'draft' | 'ready' | undefined) ?? (existing.state === 'ready' ? 'ready' : 'draft'),
+      actor: gate.actor,
+      now: Date.now(),
+    });
+  } catch {
+    return authError(503, 'staging unavailable');
+  }
+  return authJson({ ok: true });
+}
+
+/** POST /api/admin/staging/abandon — soft-close by the author, or by a
+ *  superadmin (janitorial). The row ages out; nothing is hard-deleted. */
+async function stagingAbandon(request: Request, env: AdminEnv, deps: AdminDeps): Promise<Response> {
+  if (!stagingConfigured(env)) return authError(503, 'admin not configured');
+  if (crossSiteRequest(request, env.SITE_URL)) return authError(403, 'cross-site request rejected');
+  if (await overRateLimit(env.AUTH_RATE_LIMITER, request, 'admin-staging')) return authError(429, 'too many requests');
+  const rawBody = await request.text();
+  const gate = await requireActor(request, env, deps, {
+    path: '/api/admin/staging/abandon', httpMethod: 'POST', rawBody, mutation: true,
+  }, 'admin');
+  if (gate instanceof Response) return gate;
+  let parsed: { id?: unknown };
+  try {
+    parsed = JSON.parse(rawBody) as typeof parsed;
+  } catch {
+    return authJson({ error: 'invalid body' }, 400);
+  }
+  if (typeof parsed.id !== 'string' || parsed.id === '') return authJson({ error: 'invalid id' }, 400);
+  try {
+    const existing = await getStagedEdit(env.ADMIN_DB, Date.now(), parsed.id);
+    if (!existing || (gate.role !== 'superadmin' && existing.author !== gate.actor)) return authJson({ error: 'not found' }, 404);
+    if (existing.state === 'abandoned' || existing.state === 'pr-opened') return authJson({ error: 'draft is closed' }, 409);
+    await abandonStagedEdit(env.ADMIN_DB, { id: existing.id, actor: gate.actor, now: Date.now() });
+  } catch {
+    return authError(503, 'staging unavailable');
+  }
+  return authJson({ ok: true });
+}
+
 export async function routeAdmin(
   request: Request,
   env: AdminEnv,
@@ -472,6 +655,11 @@ export async function routeAdmin(
   if (path === '/api/admin/admins' && method === 'GET') return adminsList(request, env, deps);
   if (path === '/api/admin/admins/add' && method === 'POST') return adminsAdd(request, env, deps);
   if (path === '/api/admin/admins/remove' && method === 'POST') return adminsRemove(request, env, deps);
+  if (path === '/api/admin/staging' && method === 'GET') return stagingList(request, env, deps);
+  if (path === '/api/admin/staging/get' && method === 'GET') return stagingGet(request, env, deps);
+  if (path === '/api/admin/staging/create' && method === 'POST') return stagingCreate(request, env, deps);
+  if (path === '/api/admin/staging/update' && method === 'POST') return stagingUpdate(request, env, deps);
+  if (path === '/api/admin/staging/abandon' && method === 'POST') return stagingAbandon(request, env, deps);
   // Deny-by-default: unknown paths and wrong methods fail closed.
   return authJson({ error: 'not found' }, 404);
 }
