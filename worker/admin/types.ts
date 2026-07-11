@@ -23,6 +23,11 @@ export interface AdminEnv {
    *  AUTH path ⇒ roster treated as empty (file principals unaffected); absent on
    *  the MANAGEMENT routes ⇒ explicit 503. */
   DB?: D1Database;
+  /** Phase-3 admin storage (migrations-admin/0001_admin_storage.sql): staged
+   *  catalog/content edits + the insert-only admin_action_audit. A SEPARATE
+   *  database from the auth store by design. Absent ⇒ the staging routes fail
+   *  closed with an explicit 503. */
+  ADMIN_DB?: D1Database;
   /** Canonical origin: pins the NIP-98 `u` tag + origin checks to config, not Host. */
   SITE_URL?: string;
   /** Shared native rate limiter; admin uses its own buckets (admin-login / admin-elevate). */
