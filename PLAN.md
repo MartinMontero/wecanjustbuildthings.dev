@@ -37,6 +37,12 @@ together (except the documented console exception).
   protection (OWNER item B4). Until B4 flips, the gate is a loud advisory —
   the P0 is fully closed only by this milestone + B4 together. PLAN records
   this; the owner flips B4.
+  **RULED (M0-R1, 2026-07-11):** two-review-gate goes Required with
+  owner-bypass retained. Standing B4 reminders stop here.
+- **Trusted-code pin (M0-R1):** the gate's checkout is pinned to the PR's
+  BASE sha — a PR must never supply the logic that judges it. Bootstrap: the
+  introducing PR's own gate run goes red (script absent at base — failing
+  closed) and self-heals on merge.
 - Acceptance: schema validates the flagged page; a test PR touching it shows
   the gate red at 0–1 approvals, green at 2; CLAUDE.md contains no claim a
   fresh clone can falsify.
@@ -113,7 +119,17 @@ deploy section → Workers Builds topology (+ CLAUDE.md "Cloudflare Pages"
 phrasing); E6 one generated catalog count everywhere; E7 runbook §B2 = 7
 models + maple-ai; E8 mobile-doc headers.
 - Acceptance: README claims match built reality line by line (DoD); no doc
-  names a file or number a fresh clone can falsify.
+  names a file or number a fresh clone can falsify. E4's deploy section
+  additionally records the verified deploy semantics (item-0 finding,
+  2026-07-11): non-main branch pushes are PREVIEW version uploads serving no
+  traffic; production deploys happen only on merge to main; the Cloudflare
+  bot reports "Deployment successful" with a `/production/` URL path for
+  branch builds regardless — cosmetic, not a deploy.
+
+### Scope addendum — B13 (approved at M0-R1, 2026-07-11)
+`.claude/hooks/guard.py`'s stale-ref check learns to recognize GitHub's own
+merge commits (four false fires on 2026-07-11 alone), with a test. Lands as
+its own micro-PR after #58 merges, BEFORE M1.
 
 ### M8 — Verification loop + ship report
 Per the ship prompt Phase 5: two consecutive full passes — clean-state
