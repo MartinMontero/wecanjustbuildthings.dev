@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import yaml from 'js-yaml';
-import { eligibleForStack, autoPickable, advisoryRank, pinnedDependencies } from './studio-stack.ts';
+import { eligibleForStack, autoPickable, advisoryRank, pinnedDependencies, receiptLine } from './studio-stack.ts';
 
 test('pinnedDependencies pins to each entry\'s recorded version, not "latest" (#3)', () => {
   const deps = [
@@ -58,6 +58,34 @@ test('autoPickable forbids advisory tools as the default pick (react is never th
 test('advisoryRank orders advisory tools last', () => {
   assert.equal(advisoryRank({ advisory: null }), 0);
   assert.equal(advisoryRank({ advisory: 'meta' }), 1);
+});
+
+// ---- Movement 2: receipts travel into the DOWNLOADED artifacts ----
+
+test('receiptLine renders the license-at-commit claim, sha shortened to 7', () => {
+  const r = { license: 'MIT', commit: '58b5ca6f00e30a9d1c9e2b7d', licenseUrl: 'https://x.example/LICENSE' };
+  assert.equal(receiptLine(r, 'plain'), ' — license MIT verified at 58b5ca6');
+  assert.equal(receiptLine(r, 'markdown'), ' — [license MIT verified at 58b5ca6](https://x.example/LICENSE)');
+});
+
+test('receiptLine markdown without a source URL falls back to unlinked text', () => {
+  assert.equal(
+    receiptLine({ license: 'MIT', commit: 'abcdef1234' }, 'markdown'),
+    ' — license MIT verified at abcdef1',
+  );
+});
+
+test('receiptLine never fabricates: no commit → honest pending note (or nothing)', () => {
+  // license recorded but not pinned at a commit → pending, no "verified" claim
+  assert.equal(receiptLine({ license: 'MIT', commit: null }, 'plain'), ' — license MIT (verification pending)');
+  assert.equal(receiptLine({ license: 'MIT' }, 'markdown'), ' — license MIT (verification pending)');
+  // nothing recorded → nothing claimed
+  assert.equal(receiptLine({}, 'plain'), '');
+  assert.equal(receiptLine({ license: '  ', commit: '' }, 'markdown'), '');
+});
+
+test('receiptLine tolerates a missing license on a pinned commit', () => {
+  assert.equal(receiptLine({ commit: '1234567890' }, 'plain'), ' — license verified at 1234567');
 });
 
 // ---- Phase 5: the Marmot "secure messaging" stack assembles in Build Studio ----

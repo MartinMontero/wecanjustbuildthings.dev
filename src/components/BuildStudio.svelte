@@ -6,7 +6,7 @@
   import type { ExcludedOrg, Ecosystem } from '../../enforcement/types.ts';
   import { detectSignals, pickQuestions, reflect, reflectFromResponse, type ConstraintId } from '../lib/mentor-engine.ts';
   import { chemistry, partnersOf } from '../lib/chemistry.ts';
-  import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies } from '../lib/studio-stack.ts';
+  import { eligibleForStack, advisoryRank, autoPickable, pinnedDependencies, receiptLine } from '../lib/studio-stack.ts';
   import { slugifySkill, skillToMd, type DraftSkill } from '../lib/skill-doc.ts';
   import { mentorPersonaSkill } from '../lib/mentor-persona.ts';
   import { buildGooseRecipe, recipeToYaml, skillToSubRecipe, skillSubRecipePath, type ExtensionAllowlist } from '../lib/goose-recipe.ts';
@@ -44,6 +44,7 @@
       handoff: 'How do you want to get started?', zip: 'Download a starter folder', github: 'Save it to GitHub',
       goose: 'Run it with Goose',
       dlzip: '⬇ Download your starter folder (.zip)', copyPrompt: 'Copy the instructions for your AI agent',
+      policyClean: 'Policy re-checked in your browser — every piece is clean of Meta, OpenAI, and xAI.', policyHit: 'Excluded-vendor match — handoff paused.', policyHitDetail: 'These tools match the exclusion policy. Remove them from your stack to continue:',
       runLocal: 'New to Goose? Start here →', ghGuide: 'How to connect GitHub →',
       ghError: 'Connecting to GitHub didn’t finish. Try again, or download the folder below.',
       handoffIntro: 'Your starter is ready — everything your AI agent needs to begin, with the rules and safe tools already baked in. Pick how you’d like to take it:',
@@ -93,6 +94,7 @@
       handoff: '¿Cómo quieres empezar?', zip: 'Descargar una carpeta inicial', github: 'Guardarlo en GitHub',
       goose: 'Ejecutarlo con Goose',
       dlzip: '⬇ Descargar tu carpeta inicial (.zip)', copyPrompt: 'Copiar las instrucciones para tu agente de IA',
+      policyClean: 'Política re-verificada en tu navegador — todas las piezas están libres de Meta, OpenAI y xAI.', policyHit: 'Coincidencia con un proveedor excluido — entrega en pausa.', policyHitDetail: 'Estas herramientas coinciden con la política de exclusión. Quítalas de tu stack para continuar:',
       runLocal: '¿Nuevo en Goose? Empieza aquí →', ghGuide: 'Cómo conectar GitHub →',
       ghError: 'La conexión con GitHub no terminó. Inténtalo de nuevo o descarga la carpeta abajo.',
       handoffIntro: 'Tu kit está listo — todo lo que tu agente de IA necesita para empezar, con las reglas y las herramientas seguras ya incluidas. Elige cómo quieres llevarlo:',
@@ -142,6 +144,7 @@
       handoff: 'كيف تريد أن تبدأ؟', zip: 'تنزيل مجلد بداية', github: 'احفظه في GitHub',
       goose: 'شغّله مع Goose',
       dlzip: '⬇ نزّل مجلد البداية (.zip)', copyPrompt: 'انسخ تعليمات وكيل الذكاء الاصطناعي',
+      policyClean: 'أُعيد فحص السياسة في متصفحك — كل القطع خالية من Meta وOpenAI وxAI.', policyHit: 'تطابق مع مزوّد مستبعد — التسليم متوقف.', policyHitDetail: 'هذه الأدوات تطابق سياسة الاستبعاد. أزلها من مجموعتك للمتابعة:',
       runLocal: 'جديد على Goose؟ ابدأ هنا ←', ghGuide: 'كيفية ربط GitHub ←',
       ghError: 'لم يكتمل الاتصال بـ GitHub. حاول مرة أخرى، أو نزّل المجلد أدناه.',
       handoffIntro: 'حزمتك جاهزة — كل ما يحتاجه وكيل الذكاء الاصطناعي للبدء، مع القواعد والأدوات الآمنة مُضمّنة سلفاً. اختر كيف تريد أخذها:',
@@ -472,8 +475,11 @@
   });
   // Re-run the shared exclusion policy on the assembled stack, in the browser —
   // the same matchDependency() the dependency checker and the CLI engine use.
-  // The catalog is already enforced at build, so this should always be clean; it
-  // is the live guarantee that the handoff the builder downloads is policy-clean.
+  // The catalog is already enforced at build, so this should always be clean.
+  // The result is SURFACED (a ✓ badge in the blueprint) and ENFORCED (a match
+  // pauses the handoff step) — the live guarantee that what the builder downloads
+  // is policy-clean. If /policy.json can't load, policyOrgs stays empty and no
+  // claim is made either way; the build-time CI engine remains the authority.
   const policyMatches = $derived.by(() => {
     if (!policyOrgs.length) return [] as Array<{ name: string; org: string }>;
     const hits: Array<{ name: string; org: string }> = [];
@@ -484,7 +490,9 @@
     }
     return hits;
   });
-  const policyClean = $derived(policyOrgs.length > 0 && policyMatches.length === 0);
+  // "Clean" is only claimable over a NON-EMPTY stack — a failed catalog load or
+  // an emptied blueprint must not render a vacuous ✓.
+  const policyClean = $derived(policyOrgs.length > 0 && chosenItems.length > 0 && policyMatches.length === 0);
 
   // ---------- Movement 1: the live Mentor Engine (deterministic) ----------
   // Localized prompts/options/constraint phrases for the engine's IDs. The logic
@@ -748,7 +756,7 @@ RULES (binding — see constitution.md):
 - Read .specify/memory/constitution.md FIRST and never violate it.
 - Read skills/*.SKILL.md and follow the builder's own methods exactly; if a skill conflicts with a task, surface it and ask.
 - Use ONLY these policy-clean dependencies (no Meta/OpenAI/xAI, screened by enforcement). ★ = human-verified; the rest passed automated policy screening and are pending verification — prefer ★ where a choice exists:
-${chosenItems.map((it) => `    - ${it.verification === 'verified' ? '★ ' : ''}${it.name} (${it.ecosystem})${it.advisory ? ` [${it.advisory}-origin advisory]` : ''}`).join('\n') || '    - <none selected>'}
+${chosenItems.map((it) => `    - ${it.verification === 'verified' ? '★ ' : ''}${it.name} (${it.ecosystem})${it.advisory ? ` [${it.advisory}-origin advisory]` : ''}${receiptLine(it, 'plain')}`).join('\n') || '    - <none selected>'}
 ${protocols.has('nostr') ? '- For Nostr, use @nostr-dev-kit/ndk (NDK) as the primary SDK for relays, subscriptions, and signers.\n' : ''}${protocols.has('atproto') ? '- For AT Protocol, use @atproto/api as the primary SDK; prefer OAuth (DPoP) over App Passwords.\n' : ''}- No dependency or provider owned by Meta, OpenAI, or xAI — directly or transitively.
 - Run \`npm run enforce\` before every commit. Add rate
   limiting, test auth paths, and never swallow trust-path errors.
@@ -781,7 +789,7 @@ Scaffolded by wecanjustbuildthings.dev — every dependency is screened against 
 Meta/OpenAI/xAI exclusion policy.
 
 ## Stack
-${chosenItems.map((it) => `- [${it.name}](${it.repo || it.url}) — ${it.desc}`).join('\n') || '- (none)'}
+${chosenItems.map((it) => `- [${it.name}](${it.repo || it.url}) — ${it.desc}${receiptLine(it, 'markdown')}`).join('\n') || '- (none)'}
 
 ## Build it with an agent
 1. Configure your agent (Goose or Claude Code) with a permitted, BYOK provider.
@@ -1145,6 +1153,16 @@ manuals with the knowledge-to-skills-pipeline).
           <ul>{#each chem.conflicts as c (c.a + c.b)}<li>{c.a} · {c.b}</li>{/each}</ul>
         </div>
       {/if}
+      <!-- Movement 2/4: the in-browser policy re-check, surfaced. Silence when
+           /policy.json didn't load (no claim either way — CI is the authority). -->
+      {#if policyClean}
+        <p class="receipt"><span class="receipt-check" aria-hidden="true">✓</span> {t.policyClean}</p>
+      {:else if policyMatches.length}
+        <div class="conflict" role="alert">
+          <strong><span aria-hidden="true">⚠</span> {t.policyHit}</strong>
+          <ul>{#each policyMatches as m (m.name + m.org)}<li>{m.name} → {m.org}</li>{/each}</ul>
+        </div>
+      {/if}
 
       <details class="refine">
         <summary>{t.refineTitle}</summary>
@@ -1222,6 +1240,17 @@ manuals with the knowledge-to-skills-pipeline).
       <h3>{t.handoff}</h3>
       <p class="hint">{t.handoffIntro}</p>
       <p class="hint"><a href="/guides/knowledge-to-skills/">{t.skillsHint}</a></p>
+      <!-- The Movement-2 gate: an excluded-vendor match PAUSES the handoff — no
+           zip, no GitHub push, no Goose launch — until the stack is clean again.
+           (Unreachable in practice: the catalog is enforced at build. This is the
+           belt-and-suspenders the receipt UI promises.) -->
+      {#if policyMatches.length}
+        <div class="conflict" role="alert">
+          <strong><span aria-hidden="true">⚠</span> {t.policyHit}</strong>
+          <p class="hint">{t.policyHitDetail}</p>
+          <ul>{#each policyMatches as m (m.name + m.org)}<li>{m.name} → {m.org}</li>{/each}</ul>
+        </div>
+      {:else}
       <div class="tabs">
         <button class:on={handoff === 'zip'} onclick={() => (handoff = 'zip')}>{t.zip}</button>
         <button class:on={handoff === 'github'} onclick={() => (handoff = 'github')}>{t.github}</button>
@@ -1279,6 +1308,9 @@ manuals with the knowledge-to-skills-pipeline).
         </div>
       {/if}
 
+      <!-- Still inside the policy gate: the copy-paste prompt and the starter-file
+           viewers are handoff channels too — a clipboard is as much an exfil path
+           as a zip. A policy match pauses ALL of them. -->
       <button class="link copyp" onclick={() => copy('prompt', agentPrompt)}>{copied === 'prompt' ? '✓ copied' : t.copyPrompt}</button>
 
       <p class="hint">Want to look inside first? These are the files in your starter — the plain-English rules and plan your agent will follow:</p>
@@ -1288,6 +1320,7 @@ manuals with the knowledge-to-skills-pipeline).
       {@render artifact('The project’s rules (constitution.md)', 'c', constitution)}
       {@render artifact('The plan (spec.md)', 's', spec)}
       {@render artifact('The tools list (package.json)', 'pkg', packageJson)}
+      {/if}
 
       <div class="nav"><button onclick={() => (step = 2)}>{t.backStack}</button></div>
     </section>

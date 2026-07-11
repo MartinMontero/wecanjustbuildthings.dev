@@ -10,6 +10,9 @@
    *        src/lib/security-headers.ts). The bunker connection string is pasted
    *        here; an ephemeral client key is generated in-memory for transport.
    *        NEVER an nsec/ncryptsec input — key-looking pastes are rejected.
+   *        Web bunkers' auth_url approval step is supported (sanitized, http(s)
+   *        only); every remote await is timeout-bounded and failures surface
+   *        their real cause in the browser console (see ./bunker-login.ts).
    *      - Bluesky: reuse the ordinary site sign-in (header widget), then elevate;
    *        the server checks the session's proven DID against the allowlist.
    *
@@ -27,6 +30,10 @@
    * the authority.
    */
   import { onMount } from 'svelte';
+  import {
+    looksLikeKeyMaterial, withTimeout, bunkerReason, safeApprovalUrl,
+    BUNKER_CONNECT_TIMEOUT_MS, BUNKER_SIGN_TIMEOUT_MS,
+  } from './bunker-login.ts';
 
   type Role = 'superadmin' | 'admin';
   type Who = { identity: string; method: 'nostr' | 'bluesky'; role: Role; csrf?: string };
@@ -47,6 +54,10 @@
   let notice = $state('');
   let busy = $state<'' | 'nip07' | 'nip46' | 'bluesky' | 'logout'>('');
   let bunkerInput = $state('');
+  // Web bunkers (nsec.app-style) send a NIP-46 `auth_url` the user must open and
+  // approve; Amber and other push-approval signers never do. Sanitized before it
+  // may render — live only while the attempt is in flight.
+  let approvalUrl = $state('');
 
   // ---- management panel state (superadmin only) ----
   let admins = $state<AdminRow[] | null>(null);
@@ -133,15 +144,11 @@
     }
   }
 
-  /** Anything that looks like key material is refused outright — this input is
-   *  ONLY for a bunker connection string (bunker://…) or a NIP-05 name. */
-  function looksLikeKeyMaterial(s: string): boolean {
-    const t = s.trim().toLowerCase();
-    return t.startsWith('nsec1') || t.startsWith('ncryptsec1') || /^[0-9a-f]{64}$/.test(t);
-  }
+  // The key-material refusal gate + all other pure NIP-46 logic live in
+  // ./bunker-login.ts, where they are unit-tested.
 
   async function loginNip46() {
-    error = ''; notice = '';
+    error = ''; notice = ''; approvalUrl = '';
     const input = bunkerInput.trim();
     if (!input) { error = 'Paste your bunker:// connection string first.'; return; }
     if (looksLikeKeyMaterial(input)) {
@@ -161,16 +168,36 @@
       notice = 'Connecting to your bunker — approve the request in your signer app…';
       // Ephemeral TRANSPORT key for this conversation only (never persisted,
       // never the admin's identity key).
-      const s = BunkerSigner.fromBunker(generateSecretKey(), pointer);
+      const s = BunkerSigner.fromBunker(generateSecretKey(), pointer, {
+        // The auth_url handler web bunkers require: without it nostr-tools warns
+        // and the connect promise never settles. The URL is SIGNER-PROVIDED input:
+        // sanitize to http(s) before opening, open with no opener access, and keep
+        // a clickable fallback rendered for when the popup is blocked (this runs
+        // outside the click gesture, so blockers usually do block it).
+        onauth: (url: string) => {
+          const safe = safeApprovalUrl(url);
+          if (!safe) return;
+          approvalUrl = safe;
+          window.open(safe, '_blank', 'noopener,noreferrer');
+        },
+      });
       signer = s;
-      await s.connect();
-      await loginWithSigner((tpl) => s.signEvent(tpl));
+      // Both remote awaits are BOUNDED: an unanswered on-phone approval or a dead
+      // relay becomes a visible, explained error — never a spinner that lives forever.
+      await withTimeout(s.connect(), BUNKER_CONNECT_TIMEOUT_MS, 'bunker connect');
+      await loginWithSigner((tpl) => withTimeout(s.signEvent(tpl), BUNKER_SIGN_TIMEOUT_MS, 'bunker signing'));
       notice = '';
-    } catch {
-      error = 'Bunker sign-in didn’t complete. Check the connection string, approve the request in your signer, and make sure only allowlisted admin keys are used.';
+    } catch (e) {
+      // The real cause goes to the console for the operator — the error object
+      // only, never the pasted input and never key material. The UI gets a
+      // static explanation mapped from it (bunkerReason echoes nothing).
+      console.error('[admin] NIP-46 bunker login failed:', e);
+      error = bunkerReason(e);
       notice = '';
     } finally {
-      try { await signer?.close(); } catch { /* relay already closed */ }
+      // Fire-and-forget: close() itself must never be able to hang the UI.
+      signer?.close().catch(() => { /* relay already closed */ });
+      approvalUrl = ''; // dead once the signer is closed, whatever the outcome
       busy = '';
     }
   }
@@ -420,6 +447,13 @@
           {busy === 'nip46' ? 'Waiting for bunker…' : 'Connect'}
         </button>
       </div>
+      {#if approvalUrl}
+        <p class="notice" role="status">
+          Your bunker asks you to approve this connection:
+          <a href={approvalUrl} target="_blank" rel="noopener noreferrer">open the approval page</a>,
+          approve there, then return to this tab.
+        </p>
+      {/if}
     </div>
     <div class="card">
       <h2>Bluesky</h2>
