@@ -92,6 +92,13 @@ export const catalogFields = z.object({
   /** Discriminator. Absent ⇒ a plain docs page. */
   entry_type: z.enum(ENTRY_TYPES).optional(),
 
+  /** Marks a page whose guidance is security-load-bearing (key handling,
+   *  self-custody, threat models). Set on the ENGLISH SOURCE page only —
+   *  locale variants inherit by path. Any PR touching a flagged page (or a
+   *  translation of one) must carry 2 distinct approving reviews, enforced by
+   *  .github/workflows/i18n-security-gate.yml → scripts/i18n-security-gate.mjs. */
+  security_sensitive: z.boolean().optional(),
+
   // ---- Catalog dependency fields (required when entry_type ∈ CATALOG_ENTRY_TYPES) ----
   dependency_name: z.string().min(1).optional(),
   ecosystem: z.enum(ECOSYSTEMS).optional(),
