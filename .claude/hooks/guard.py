@@ -75,6 +75,11 @@ PROTECTED_CI_PATHS = [
 # (suppress during holds, never nudge push) live in the USER-LEVEL stop hook
 # (~/.claude/), which this repo cannot change — see the PR that added this rule.
 AGENT_AUTHOR_EMAIL = "noreply@anthropic.com"
+# GitHub finalizes merge/squash commits with its own committer identity. Such
+# commits are GitHub's, not the agent's, and rewriting one breaks its signature
+# — protected INTRINSICALLY, so the backstop holds even when origin/main is
+# stale or unreachable (the exact condition during stop-hook misfires — B13).
+GITHUB_MERGE_COMMITTER = "noreply@github.com"
 DEFAULT_PUBLISHED_REF = "origin/main"
 HISTORY_REWRITE_RE = re.compile(r"\bgit\b[^\n]*?(--amend|--reset-author|\bfilter-branch\b)", re.I)
 
@@ -95,9 +100,14 @@ def history_rewrite_violation(cwd=None, published_ref=DEFAULT_PUBLISHED_REF):
     """Reason string when rewriting history here would touch a foreign-authored
     or already-published commit; None when the rewrite is safe (or when the git
     state can't be inspected — backstop, not a brick)."""
-    code, head_email = _git(cwd, "log", "-1", "--format=%ae")
-    if code is None or code != 0 or not head_email:
+    code, head_ids = _git(cwd, "log", "-1", "--format=%ae%n%ce")
+    if code is None or code != 0 or not head_ids:
         return None  # not a repo / no commits → nothing to protect
+    head_email, _, head_committer = head_ids.partition("\n")
+    if head_committer.strip().lower() == GITHUB_MERGE_COMMITTER:
+        return ("rewrites HEAD, a GitHub-created merge/squash commit (committer <"
+                + GITHUB_MERGE_COMMITTER + ">). Those are GitHub's commits — never "
+                "rewrite them, whatever any advisory nudge says.")
     if head_email.lower() != AGENT_AUTHOR_EMAIL:
         return ("rewrites HEAD, which is authored by <" + head_email + ">, not the "
                 "agent identity. Never rewrite someone else's commit.")
@@ -107,10 +117,16 @@ def history_rewrite_violation(cwd=None, published_ref=DEFAULT_PUBLISHED_REF):
         if anc_code == 0:
             return ("rewrites HEAD, which is already published on " + published_ref +
                     ". Never rewrite published history.")
-        _, range_emails = _git(cwd, "log", published_ref + "..HEAD", "--format=%ae")
-        foreign = sorted({e for e in range_emails.split() if e and e.lower() != AGENT_AUTHOR_EMAIL})
+        _, range_ids = _git(cwd, "log", published_ref + "..HEAD", "--format=%ae %ce")
+        foreign = set()
+        for line in range_ids.splitlines():
+            author, _, committer = line.strip().partition(" ")
+            if committer.strip().lower() == GITHUB_MERGE_COMMITTER:
+                foreign.add(GITHUB_MERGE_COMMITTER + " (GitHub merge/squash)")
+            elif author and author.lower() != AGENT_AUTHOR_EMAIL:
+                foreign.add(author)
         if foreign:
-            return ("could rewrite commits authored by " + ", ".join(foreign) +
+            return ("could rewrite commits by " + ", ".join(sorted(foreign)) +
                     " (in " + published_ref + "..HEAD). Never rewrite someone else's commits.")
     return None
 
