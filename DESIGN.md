@@ -5,6 +5,12 @@ Everything here is a decision, not an aspiration: each section maps to backlog
 items with acceptance criteria. Sources: the Phase-1 audit (`audit/AUDIT.md`),
 39 archived screenshots (`audit/screens/`), and the token/component inventory.
 
+> Companion: `design-field-manual.md` — Apple HIG × Google Material, translated
+> for the web. That document is reference and is stable. This one is direction and
+> is still at gate G6 (`BACKLOG.md`). Once G6 clears, this file governs and wins any
+> disagreement. Until then, a conflict between the two is a stop-and-ask, not a
+> ruling.
+
 ## 1. Concept
 
 This project's product is **judgment you can inspect**: license receipts pinned
