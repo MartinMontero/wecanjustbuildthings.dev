@@ -8,7 +8,12 @@
  * only for tool-type entries. Every other page keeps the plain title.
  */
 const { entry } = Astro.locals.starlightRoute;
-const data = entry.data as { title: string; entry_type?: string; dependency_name?: string };
+const data = entry.data as {
+  title: string;
+  entry_type?: string;
+  dependency_name?: string;
+  workbench?: boolean;
+};
 
 const TOOL_TYPES = new Set(['tool', 'framework', 'library', 'service', 'protocol']);
 const isTool = Boolean(data.entry_type && TOOL_TYPES.has(data.entry_type));
@@ -25,6 +30,10 @@ const buildLabel =
   locale === 'es' ? 'Construir con esto' : locale === 'ar' ? 'ابدأ البناء بهذه' : 'Build with this';
 ---
 
+{/* Tool pages opt into the wider bench column via frontmatter `workbench: true`
+    (schema-validated). The marker is contentless; components.css does the rest
+    via `.main-pane:has(.workbench-marker)` — no shell fork. */}
+{data.workbench && <span class="workbench-marker" hidden aria-hidden="true" />}
 <h1 id="_top">{data.title}</h1>
 {
   isTool && (
