@@ -18,7 +18,8 @@ Companion docs: `BACKLOG.md` (consolidated ledger), `DESIGN.md` (direction),
   full-tree** (`verify.yml:42-43`, green); only Layer 3 full-tree is
   unsatisfiable by construction. Exact exempt paths, enumerated:
   `enforcement/excluded-organizations.yaml`,
-  `enforcement/excluded-provider-signals.yaml`, `enforcement/tests/**`.
+  `enforcement/excluded-provider-signals.yaml`,
+  `enforcement/tests/**`.
   DoD-prose fix suffices — no engine change needed — gate item G3.
 - `npm audit --omit=dev` — 4 low (esbuild via astro; Windows-dev-server-only,
   prod unaffected). Full audit: 14 (7 low/6 moderate/1 high) — the high is
@@ -91,3 +92,53 @@ Intentional identity system exists and is substantial (tokens/theme/components
 no glassmorphism, no lorem, no stock illustration, no font CDNs. Path A holds
 (broker retired; CI-gated). Mobile fixes 1–8 merged. `/api/health`,
 `/api/license`, auth, admin auth+staging all live and tested (352 tests).
+
+---
+
+## Resumption addendum (2026-08-12)
+
+Baseline at HEAD (95e5be9) — all gates green, re-run this pass (Node 22.12.0,
+`npm ci` from the lockfile):
+- `astro check` 0 errors/0 warnings (67 files) · `typecheck:tools` ✓ ·
+  `typecheck:worker` ✓ · **366/366 tests** (352 at the Phase-1 baseline +14:
+  M0 gate, B13, policy-input, bunker suites) · `enforce` ✓ · `enforce:skills` ✓ ·
+  build **6,653 pages** in ~75 s.
+- e2e (`scripts/e2e-check.mjs`, real hydrated islands, headless Chromium):
+  **all island behaviors pass**.
+- a11y (`scripts/a11y-check.mjs`, axe-core): **no serious/critical** across the
+  22 canonical pages.
+
+### Ledger vs HEAD
+- **P0-1 FIXED** (M0, PRs #58–60): `security_sensitive` is real validated data
+  (`src/schema/catalog.ts`), the 2-review gate exists
+  (`.github/workflows/i18n-security-gate.yml` + `scripts/i18n-security-gate.mjs`),
+  CLAUDE.md's i18n section is truthful; live-acceptance PR #60.
+- **P0-2 STANDING** (re-verified: `PolicyChecker.svelte` declared no
+  `$props`/`lang`; `es/check.mdx:18` + `ar/check.mdx:17` pass `lang`) — fix in
+  flight: PR #62.
+- **P1-1…P1-15 STANDING** (spot-verified: `index.mdx:22,37-99` stock
+  CardGrid/LinkCard; no Footer override registered; `CatalogExplorer.svelte`
+  single-column + raw `box-shadow` :536; `TODO: confirm` user-visible
+  (`cost-estimator/ui/i18n.ts:84`, model-compass); all island mounts
+  `client:load`; `/console/` raw hex; no Arabic display face; CSP emitted
+  report-only per the build log). Fixes ship in milestone order M1–M6.
+- P2 set unchanged.
+
+### New findings this pass
+- **N-1 (P1, security hygiene): 34 osv advisories at HEAD, 0 CRITICAL** — the
+  blocking gate (`scripts/osv-critical-gate.sh`) stays green. All transitive:
+  `astro@6.4.6` (3 advisories; fixes only in 7.x — **G5 blocks; owner
+  re-ruling question**), `nanoid@3.3.12` (8.2 HIGH → 3.3.16+), `js-yaml@4.2.0`
+  (7.5 → 4.3.x), `postcss@8.5.15` (6.3), `esbuild@0.27.7` (2.5); the rest
+  dev-only (brace-expansion, ip-address, fast-uri, undici, uuid, yaml,
+  body-parser, js-yaml@3.15.0). None reach the static runtime. Several fixable
+  inside Astro 6 via lockfile refresh/overrides — recommend a dedicated
+  dependency-hygiene slice (owner-aware).
+- **N-2 (P2): gitleaks false positives.** `gitleaks dir` 4 / `gitleaks git` 2
+  hits, all benign: the algorithm name `ChaCha20-Poly1305` in
+  `goose-recipes/marmot-encrypted-media.yaml:21` and
+  `skills/marmot-encrypted-media/SKILL.md:60` (present since 1e443d78), plus
+  minified bundles in uncommitted `dist/`. No `.gitleaks.toml` exists; CI's
+  gitleaks steps are advisory (documented-deliberate `continue-on-error`).
+  **No secrets anywhere.** Recommend a two-line allowlist for the algorithm
+  string (doc-only slice).
