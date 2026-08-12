@@ -1,0 +1,134 @@
+---
+/**
+ * Footer override — the last stock chrome, replaced (DESIGN §3). Keeps every
+ * stock affordance (edit link, last-updated, prev/next pagination) via
+ * Starlight's virtual components, then adds the workshop bench: the project
+ * promise, the trust links, and the license/fork line as identity. Locale-aware
+ * (en/es/ar) via the house inline string-table pattern; RTL-safe via logical
+ * properties. Tokens only — no --sl-*, no raw hex.
+ */
+import EditLink from 'virtual:starlight/components/EditLink';
+import LastUpdated from 'virtual:starlight/components/LastUpdated';
+import Pagination from 'virtual:starlight/components/Pagination';
+
+type Lang = 'en' | 'es' | 'ar';
+const cl = (Astro.currentLocale ?? 'en').slice(0, 2);
+const lang: Lang = cl === 'es' || cl === 'ar' ? cl : 'en';
+const prefix = lang === 'en' ? '' : `/${lang}`;
+
+const L: Record<
+  Lang,
+  {
+    promise: string;
+    policies: string;
+    security: string;
+    privacy: string;
+    contribute: string;
+    license: string;
+    fork: string;
+    navLabel: string;
+  }
+> = {
+  en: {
+    promise: 'Build the tools your community needs — with an AI agent, on a catalog you can verify.',
+    policies: 'Policies',
+    security: 'Security',
+    privacy: 'Privacy',
+    contribute: 'Contribute',
+    license: 'Code AGPL-3.0 · Content CC BY 4.0',
+    fork: 'Fork it on GitHub',
+    navLabel: 'Footer',
+  },
+  es: {
+    promise:
+      'Construye las herramientas que tu comunidad necesita — con un agente de IA, sobre un catálogo que puedes verificar.',
+    policies: 'Políticas',
+    security: 'Seguridad',
+    privacy: 'Privacidad',
+    contribute: 'Contribuir',
+    license: 'Código AGPL-3.0 · Contenido CC BY 4.0',
+    fork: 'Haz un fork en GitHub',
+    navLabel: 'Pie de página',
+  },
+  ar: {
+    promise: 'ابنِ الأدوات التي يحتاجها مجتمعك — مع وكيل ذكاء اصطناعي، على كتالوج يمكنك التحقّق منه.',
+    policies: 'السياسات',
+    security: 'الأمان',
+    privacy: 'الخصوصية',
+    contribute: 'ساهم',
+    license: 'الشيفرة AGPL-3.0 · المحتوى CC BY 4.0',
+    fork: 'اعمل Fork على GitHub',
+    navLabel: 'تذييل',
+  },
+};
+const t = L[lang];
+
+const links = [
+  { href: `${prefix}/policies/`, label: t.policies },
+  { href: `${prefix}/security/`, label: t.security },
+  { href: `${prefix}/privacy/`, label: t.privacy },
+  { href: `${prefix}/contribute/`, label: t.contribute },
+];
+---
+
+<footer class="wcb-footer">
+  <div class="meta">
+    <EditLink />
+    <LastUpdated />
+  </div>
+  <Pagination />
+  <div class="wcb-footer__bench">
+    <p class="wcb-footer__promise">{t.promise}</p>
+    <nav aria-label={t.navLabel}>
+      <ul>
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href}>{l.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <p class="wcb-footer__license">
+      {t.license} — <a href="https://github.com/martinmontero/wecanjustbuildthings.dev">{t.fork}</a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .wcb-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .meta {
+    display: flex;
+    gap: var(--space-xs) var(--space-lg);
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: var(--space-xl);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+  }
+  .wcb-footer__bench nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-md);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .wcb-footer__bench nav a {
+    color: var(--ink-soft);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+  }
+  .wcb-footer__bench nav a:hover {
+    color: var(--structure);
+  }
+  .wcb-footer__license a {
+    color: var(--structure);
+    font-weight: var(--weight-medium);
+  }
+</style>
