@@ -1,0 +1,57 @@
+---
+/**
+ * Receipt — the signature trust element (DESIGN §1). One visual language for
+ * every trust moment: checker verdicts, catalog badges, the Studio policy gate,
+ * the enforcement page's verdict band.
+ *
+ * Status is carried by icon + word + color — never color alone (WCAG 1.4.1,
+ * correct in grayscale). Evidence is inline and monospace; the action line is a
+ * plain-verb sentence a non-developer can act on. Styles live in the shared
+ * `.receipt` class contract (components.css); Receipt.svelte renders the same
+ * markup inside islands so static and hydrated surfaces are identical.
+ *
+ * The component is locale-agnostic: callers pass already-localized strings.
+ */
+interface Props {
+  status: 'ok' | 'warn' | 'danger' | 'pending';
+  /** The verdict word(s), e.g. "Clean" / "Blocked" / "Awaiting check". */
+  title: string;
+  /** Inline evidence — commit SHA, org chain, license id (monospace). */
+  evidence?: string;
+  /** The plain-verb sentence telling the reader what they can do. */
+  action?: string;
+}
+
+const { status, title, evidence, action } = Astro.props;
+
+// Hand-drawn inline SVG, house stroke style (like BottomNav's set). aria-hidden:
+// the status word next to the icon always carries the meaning in text.
+const ICONS: Record<Props['status'], string> = {
+  ok: '<circle cx="12" cy="12" r="8.5"/><path d="m8.4 12.2 2.5 2.5 4.8-5"/>',
+  warn: '<path d="M12 4.2 20.8 19H3.2Z"/><path d="M12 9.8v3.8"/><path d="M12 16.6h.01"/>',
+  danger:
+    '<path d="M8.2 3.8h7.6l4.4 4.4v7.6l-4.4 4.4H8.2l-4.4-4.4V8.2Z"/><path d="m9.4 9.4 5.2 5.2m0-5.2-5.2 5.2"/>',
+  pending:
+    '<circle cx="12" cy="12" r="8.5" stroke-dasharray="3.2 3.2"/><path d="M12 7.8V12l2.6 2.6"/>',
+};
+---
+
+<div class:list={['receipt', `receipt--${status}`]}>
+  <p class="receipt__status">
+    <svg
+      class="receipt__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.75"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      set:html={ICONS[status]}
+    />
+    {title}
+  </p>
+  {evidence && <p class="receipt__evidence">{evidence}</p>}
+  {action && <p class="receipt__action">{action}</p>}
+  <slot />
+</div>

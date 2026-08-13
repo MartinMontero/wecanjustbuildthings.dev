@@ -150,6 +150,9 @@ export default defineConfig({
         SocialIcons: './src/components/overrides/SocialIcons.astro',
         // Appends the persistent compact-viewport bottom nav on every page.
         Header: './src/components/overrides/Header.astro',
+        // The designed workshop footer (promise, trust links, license/fork
+        // identity) — the last stock chrome, replaced (DESIGN §3, D6).
+        Footer: './src/components/overrides/Footer.astro',
       },
       customCss: ['./src/styles/tokens.css', './src/styles/theme.css', './src/styles/components.css'],
       sidebar: [
