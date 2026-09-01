@@ -162,3 +162,25 @@ Everything in BACKLOG OWNER/DEFER columns; QA-REMEDIATE-v1 and
 PANEL-RESPEC-v2 (external, un-consolidated — BACKLOG §D2); Astro 7 (G5);
 full i18n governance layer (G2); IA changes; new features; any weakening of
 POLICIES.md, the enforcement engine, or CI gates.
+
+---
+
+## Resumption addendum (2026-08-12)
+
+- **Confirmed closed at HEAD:** M0 (PRs #56–60), B13 (PR #59). Baseline
+  re-verified green — evidence in AUDIT.md's same-date addendum.
+- **Milestone boundary tightened (split, don't stuff):** M2 → **M2a**
+  (PolicyChecker receipt + i18n — the P0) and **M2b** (catalog badges,
+  `/policies/enforcement/` verdict band, Studio policy gate — completes D1's
+  ≥4-surfaces). No content change.
+- **Progress ledger:** M1 shipped as PR #61 (`ship/m1-system-layer`); M2a
+  shipped as PR #62 (stacked on #61). PRs are stacked — merge in order; later
+  branches retarget as earlier ones land.
+- **Remaining scope unchanged:** M2b, M3–M8 per the milestones above;
+  non-goals stand. G5 stands (Astro 7 out) — noting osv finding N-1
+  (`astro@6.4.6` advisories, fixes only in 7.x) is an owner re-ruling
+  question, recorded in AUDIT.md, not a scope change.
+- **Environment of this run:** Linux sandbox; Node 22.12.0 local install;
+  pushes via the GitHub API (one branch per slice, owner merges). No
+  Cloudflare access — deploy stays owner-side per the reconciled DoD;
+  live-deploy verification is UNTESTED from here by construction.
