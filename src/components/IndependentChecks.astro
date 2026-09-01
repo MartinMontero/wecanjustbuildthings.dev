@@ -12,6 +12,8 @@
  * summary and never disturbs the page's document outline. `not-content` opts it
  * out of Starlight's markdown styling so the scoped styles below own the look.
  */
+import Receipt from './Receipt.astro';
+
 type IconName = 'label' | 'chain' | 'globe' | 'shield' | 'lock' | 'eye';
 
 interface Check {
@@ -48,7 +50,6 @@ const ICONS: Record<IconName, string> = {
 };
 
 const { checks, verdict } = Astro.props as Props;
-const vIcon = verdict.icon ?? 'shield';
 ---
 
 <div class="checks-wrap not-content">
@@ -79,25 +80,9 @@ const vIcon = verdict.icon ?? 'shield';
     }
   </ul>
 
-  <div class="verdict">
-    <div class="verdict-badge">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.8"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-        set:html={ICONS[vIcon]}
-      />
-    </div>
-    <div>
-      <p class="verdict-title">{verdict.title}</p>
-      <p class="verdict-body" set:html={verdict.body} />
-      <p class="verdict-trust" set:html={verdict.trust} />
-    </div>
-  </div>
+  {/* The verdict joins the receipt contract (D1): stamped edge, icon + word +
+      color, inline provenance. Danger: it states the blocking rule. */}
+  <Receipt status="danger" title={verdict.title} action={verdict.body} evidence={verdict.trust} />
 </div>
 
 <style>
@@ -190,53 +175,6 @@ const vIcon = verdict.icon ?? 'shield';
   }
   .ck-plain .lbl::after {
     content: ' \2014';
-  }
-
-  /* the one marigold spot — the decisive verdict */
-  .verdict {
-    display: flex;
-    gap: var(--space-md);
-    align-items: flex-start;
-    margin-top: var(--space-lg);
-    background: var(--surface);
-    border: 1px solid var(--edge);
-    border-inline-start: 4px solid var(--signal);
-    border-radius: var(--radius-lg);
-    padding: var(--space-md);
-    box-shadow: var(--gs-shadow);
-  }
-  .verdict-badge {
-    flex: none;
-    width: 46px;
-    height: 46px;
-    display: grid;
-    place-items: center;
-    border-radius: var(--radius-lg);
-    background: var(--signal);
-    color: var(--on-signal);
-  }
-  .verdict-badge svg {
-    width: 24px;
-    height: 24px;
-  }
-  .verdict-title {
-    margin: 0;
-    font-family: var(--font-display);
-    font-weight: var(--weight-bold);
-    font-size: var(--step-2);
-    line-height: 1.2;
-    color: var(--ink);
-  }
-  .verdict-body {
-    margin: var(--space-2xs) 0 0;
-    color: var(--ink);
-    font-size: var(--step-0);
-  }
-  .verdict-trust {
-    margin: var(--space-xs) 0 0;
-    color: var(--ink-soft);
-    font-size: var(--step--1);
-    line-height: 1.55;
   }
 
   @media (prefers-reduced-motion: reduce) {
