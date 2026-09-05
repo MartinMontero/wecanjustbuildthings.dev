@@ -1,6 +1,8 @@
 # Mobile responsiveness — fixes summary
 
-Branch `mobile-responsiveness-audit`. Full findings + baseline in
+Branch `mobile-responsiveness-audit` — **MERGED as PR #19**. The only open
+carry-over is the `/build/models/` color-contrast item below — it closes with
+M4 (BACKLOG D4, island tokenization). Full findings + baseline in
 [`docs/mobile-audit.md`](docs/mobile-audit.md); this is the before/after.
 
 The design system was already in good shape (token-based, mostly logical
