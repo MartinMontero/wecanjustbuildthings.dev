@@ -18,7 +18,7 @@ schema, 1,355 catalog entries).
    Fonts, Analytics, reCAPTCHA, Maps, OSV-Scanner, Lighthouse). ONLY Meta/OpenAI/
    xAI are excluded.
 
-3. CLOUDFLARE-NATIVE. Stay on Cloudflare Pages + existing D1/KV/R2/Workers
+3. CLOUDFLARE-NATIVE. Stay on Cloudflare Workers (static `dist/` assets + the `/api/*` Worker) + existing D1/KV/R2/Workers
    bindings. NEVER propose migrating off Cloudflare. (Astro is now a Cloudflare
    company — prefer native features: built-in hash-based CSP, Secrets Store,
    bindings.)

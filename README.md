@@ -126,33 +126,36 @@ to **outlast its first maintainer**.
 
 ## Deployment
 
-Static site on **Cloudflare Pages**, deployed via the dashboard **Git
-integration** (Workers & Pages → Create → Pages → Connect to Git):
+Deployed as a **Cloudflare Worker** (`worker/index.ts`) that serves the static
+`dist/` build via the assets binding and handles the dynamic `/api/*` routes —
+`wrangler.jsonc` is canonical (`run_worker_first: ["/api/*"]` so the auth API is
+never shadowed by static-asset handling).
 
-- Production branch `main`, build command `npm run build`, output directory
-  `dist`, environment variable `NODE_VERSION=22`.
-- Add the custom domain under the project's **Custom domains** tab (the apex zone
-  must be on the same Cloudflare account). Add a www → apex redirect rule.
+Deploys run through **Cloudflare Workers Builds** (the Git-connected dashboard
+integration) — there is no `wrangler deploy` in CI:
+
+- **Production deploys happen only on merge to `main`.** Pushes to any other
+  branch upload a *preview version* that serves no traffic — the Cloudflare bot
+  reports "Deployment successful" with a `/production/` URL path on branch builds
+  regardless; that is cosmetic, not a deploy (verified against the deployments
+  ledger, SHIP-GATE-R2 item 0, 2026-07-11).
+- Build command `npm run build`, output directory `dist`, `NODE_VERSION=22`.
 - The build needs no secrets — catalog data is committed. Optionally set
   `PLAUSIBLE_DOMAIN` for cookieless analytics (off by default — see
   [Privacy](https://wecanjustbuildthings.dev/privacy/)) and `SITE_URL` to override
   the origin for preview builds.
 
-Pushes to `main` auto-deploy; pull requests get preview URLs. CI (`verify.yml`,
-`quality.yml`, `license-watch.yml`) runs the checks and weekly maintenance — it
-does not deploy.
-
-> Prefer deploying from GitHub Actions instead of the dashboard? Use
-> `cloudflare/wrangler-action` with a `pages deploy dist --project-name=…` step
-> and the `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` secrets, and don't also
-> connect the dashboard Git integration (to avoid double deploys).
+CI (`verify.yml`, `quality.yml`, `license-watch.yml`) runs the checks and weekly
+maintenance — it does not deploy. To deploy by hand (e.g. first provisioning),
+`npm run deploy` runs `wrangler deploy`; bindings (KV, D1, rate limiter, the
+admin Durable Object) live in `wrangler.jsonc`.
 
 ### Auth (Sign in with Nostr / Bluesky)
 
-Sign-in is the one feature with a backend: it runs in the Cloudflare **Worker**
-(`worker/index.ts`), which serves `dist/` *and* the `/api/*` routes. It needs KV +
-D1 + a signing key provisioned and a `wrangler deploy` — a different model from the
-static Pages deploy above. The catalog runs fine without it (the endpoints report
+Sign-in is the one feature with a backend: it runs in the same Cloudflare
+**Worker** (`worker/index.ts`) that serves `dist/` and the `/api/*` routes. It
+needs KV + D1 + a signing key provisioned (see `wrangler.jsonc` for the bound
+resources). The catalog runs fine without it (the endpoints report
 "not configured" and the account widget hides). Full setup, deploy, and
 verification steps are in [`docs/AUTH_PROVISIONING.md`](./docs/AUTH_PROVISIONING.md).
 
