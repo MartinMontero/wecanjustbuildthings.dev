@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import { catalogMatches, compareItems, facetCounts, type CatalogQuery, type FacetDim } from '../lib/catalog-filter.ts';
   import { loadSession, updateSession, subscribeSession, toggleExtraTool, type BuildSession } from '../lib/build-session.ts';
+  import { catalogBuildBase, catalogBuildHref } from '../lib/catalog-cta.ts';
+  import Receipt from './Receipt.svelte';
 
   interface Item {
     name: string;
@@ -55,6 +57,10 @@
     sortName: string;
     loading: string;
     loadFailed: string;
+    retry: string;
+    errorTitle: string;
+    emptyTitle: string;
+    emptyHint: string;
     clearAll: string;
     facetType: string;
     facetNetwork: string;
@@ -62,7 +68,6 @@
     facetVerification: string;
     facetCategory: string;
     filters: string; // aria-label
-    empty: string;
     addToBuild: string;
     inBuild: string;
     addAria: string;
@@ -95,6 +100,10 @@
       sortName: 'A–Z',
       loading: 'Loading the catalog…',
       loadFailed: 'Couldn’t load the catalog. Try refreshing the page.',
+      retry: 'Try again',
+      errorTitle: 'The catalog didn’t load',
+      emptyTitle: 'Nothing matches these filters',
+      emptyHint: 'Try a broader word, or clear a filter or two.',
       clearAll: 'Clear all',
       facetType: 'Type',
       facetNetwork: 'Network',
@@ -102,7 +111,6 @@
       facetVerification: 'How thoroughly checked',
       facetCategory: 'Category',
       filters: 'Filters',
-      empty: 'No tools match these filters.',
       addToBuild: '+ Add to build',
       inBuild: '✓ In your build',
       addAria: 'Add to your build',
@@ -134,6 +142,10 @@
       sortName: 'A–Z',
       loading: 'Cargando el catálogo…',
       loadFailed: 'No se pudo cargar el catálogo. Prueba a recargar la página.',
+      retry: 'Reintentar',
+      errorTitle: 'No se pudo cargar el catálogo',
+      emptyTitle: 'Nada coincide con estos filtros',
+      emptyHint: 'Prueba una palabra más general o quita un filtro o dos.',
       clearAll: 'Limpiar todo',
       facetType: 'Tipo',
       facetNetwork: 'Red',
@@ -141,7 +153,6 @@
       facetVerification: 'Qué tan a fondo se revisó',
       facetCategory: 'Categoría',
       filters: 'Filtros',
-      empty: 'Ninguna herramienta coincide con estos filtros.',
       addToBuild: '+ Añadir al proyecto',
       inBuild: '✓ En tu proyecto',
       addAria: 'Añadir a tu proyecto',
@@ -177,10 +188,13 @@
       facetType: 'النوع',
       facetNetwork: 'الشبكة',
       facetEcosystem: 'اللغة / المنصّة',
+      retry: 'أعد المحاولة',
+      errorTitle: 'تعذّر تحميل الكتالوج',
+      emptyTitle: 'لا شيء يطابق هذه المرشّحات',
+      emptyHint: 'جرّب كلمة أعمّ، أو أزل مرشّحًا أو اثنين.',
       facetVerification: 'مدى دقّة الفحص',
       facetCategory: 'الفئة',
       filters: 'المرشّحات',
-      empty: 'لا توجد أدوات تطابق هذه المرشّحات.',
       addToBuild: '+ أضف إلى المشروع',
       inBuild: '✓ في مشروعك',
       addAria: 'أضف إلى مشروعك',
@@ -283,12 +297,10 @@
   onMount(() => { syncBuild(loadSession()); return subscribeSession(syncBuild); });
 
   // Open the Build Studio oriented at a real tool: ?seed= jumps it to the blueprint
-  // focused there (same path a tool page's "Build with this" uses).
-  const buildBase = lang === 'en' ? '/build/' : `/${lang}/build/`;
-  const buildHref = $derived.by(() => {
-    const seed = buildSeed ?? [...inBuild][0];
-    return seed ? `${buildBase}?seed=${encodeURIComponent(seed)}` : buildBase;
-  });
+  // focused there (same path a tool page's "Build with this" uses). Locale-aware
+  // via catalog-cta.ts (M3 — the CTA used to hardlink the English Studio).
+  const buildBase = catalogBuildBase(lang);
+  const buildHref = $derived(catalogBuildHref(lang, buildSeed, inBuild));
 
   function toggleBuild(name: string) {
     const wasIn = inBuild.has(name);
@@ -297,7 +309,11 @@
   }
   let limit = $state(60);
 
-  onMount(async () => {
+  // The catalog fetch, retryable: the error state's plain-verb button re-runs
+  // this without a page reload (M3 designed error state).
+  async function loadCatalog() {
+    loading = true;
+    failed = false;
     try {
       const res = await fetch('/catalog.json');
       if (!res.ok) throw new Error(String(res.status));
@@ -311,7 +327,8 @@
     } finally {
       loading = false;
     }
-  });
+  }
+  onMount(loadCatalog);
 
   function toggle(set: Set<string>, value: string): Set<string> {
     const next = new Set(set);
@@ -355,7 +372,7 @@
 </script>
 
 <div class="explorer">
-  <a class="cat-cta" href="/build/">
+  <a class="cat-cta" href={buildBase}>
     <span><strong>{t.ctaBold}</strong> {t.ctaRest}</span>
     <span class="cat-cta-go">{t.ctaGo}</span>
   </a>
@@ -364,10 +381,10 @@
       {t.intro1} <strong>{t.introBlocks}</strong> {t.intro2}
     </p>
     <ul class="cat-legend">
-      <li><span class="badge badge--verified">{t.legendVerified}</span> {t.legendVerifiedText}</li>
-      <li><span class="badge badge--under_review">{t.legendUnderReview}</span> {t.legendUnderReviewText}</li>
-      <li><span class="badge badge--active">{t.legendActive}</span> {t.legendActiveText}</li>
-      <li><span class="badge badge--advisory">{t.legendOrigin}</span> {t.legendOriginText}</li>
+      <li><span class="wcb-badge wcb-badge--verified">{t.legendVerified}</span> {t.legendVerifiedText}</li>
+      <li><span class="wcb-badge wcb-badge--under_review">{t.legendUnderReview}</span> {t.legendUnderReviewText}</li>
+      <li><span class="wcb-badge wcb-badge--active">{t.legendActive}</span> {t.legendActiveText}</li>
+      <li><span class="wcb-badge wcb-badge--advisory">{t.legendOrigin}</span> {t.legendOriginText}</li>
     </ul>
   </div>
   <div class="toolbar">
@@ -390,9 +407,26 @@
   </div>
 
   {#if loading}
-    <p class="status">{t.loading}</p>
+    <!-- Designed loading state: a skeleton of the receipt-card grid, so the
+         layout (and the LCP element) is stable before /catalog.json arrives. -->
+    <div class="skeleton-wrap" aria-hidden="true">
+      <div class="cards cards--skeleton">
+        {#each Array(6) as _}
+          <div class="card card--skeleton">
+            <div class="sk-line sk-line--title"></div>
+            <div class="sk-line"></div>
+            <div class="sk-line sk-line--short"></div>
+          </div>
+        {/each}
+      </div>
+    </div>
+    <p class="sr-only" role="status">{t.loading}</p>
   {:else if failed}
-    <p class="status">{t.loadFailed}</p>
+    <div class="state">
+      <Receipt status="danger" title={t.errorTitle} evidence={t.loadFailed}>
+        <button type="button" class="state-btn" onclick={loadCatalog}>{t.retry}</button>
+      </Receipt>
+    </div>
   {:else}
     <div class="layout">
       <aside class="facets" aria-label={t.filters}>
@@ -425,17 +459,21 @@
 
       <div class="results">
         {#if filtered.length === 0}
-          <p class="status">{t.empty} <button class="link" onclick={clearAll}>{t.clearAll}</button></p>
+          <div class="state">
+            <Receipt status="pending" title={t.emptyTitle} evidence={t.emptyHint}>
+              <button type="button" class="state-btn" onclick={clearAll}>{t.clearAll}</button>
+            </Receipt>
+          </div>
         {/if}
         <ul class="cards">
           {#each filtered.slice(0, limit) as it (it.url)}
-            <li class="card">
+            <li class="card card--{it.verification}">
               <div class="card-top">
                 <a class="card-name" href={it.url}>{it.name}</a>
                 <span class="badges">
-                  <span class="badge badge--{it.verification}">{verificationLabel(it.verification)}</span>
-                  <span class="badge badge--{it.maintenance}">{maintenanceLabel(it.maintenance)}</span>
-                  {#if it.advisory}<span class="badge badge--advisory">{originLabel(it.advisory)}</span>{/if}
+                  <span class="wcb-badge wcb-badge--{it.verification}">{verificationLabel(it.verification)}</span>
+                  <span class="wcb-badge wcb-badge--{it.maintenance}">{maintenanceLabel(it.maintenance)}</span>
+                  {#if it.advisory}<span class="wcb-badge wcb-badge--advisory">{originLabel(it.advisory)}</span>{/if}
                 </span>
               </div>
               <p class="card-desc">{it.desc}</p>
@@ -496,29 +534,63 @@
   }
   .sort { display: flex; gap: 0.4rem; align-items: center; color: var(--sl-color-text); font-size: 0.9rem; }
   .sort select { padding: 0.4rem; font-size: max(16px, 1rem); border-radius: 0.4rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-black); color: var(--sl-color-white); }
-  .layout { display: grid; grid-template-columns: 16rem minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+  .layout { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 1.5rem; align-items: start; }
   @media (max-width: 50rem) { .layout { grid-template-columns: 1fr; } }
   .facets { position: sticky; top: 1rem; }
   .facets-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--sl-color-text); }
-  fieldset { border: 0; border-top: 1px solid var(--sl-color-gray-6); margin: 0; padding: 0.6rem 0; }
-  legend { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--sl-color-gray-2); }
-  .opts { display: flex; flex-direction: column; gap: 0.15rem; margin-top: 0.4rem; max-height: 14rem; overflow-y: auto; }
-  .opt { display: flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; padding: 0.2rem 0.3rem; border-radius: 0.35rem; cursor: pointer; color: var(--sl-color-text); }
-  .opt:hover { background: var(--sl-color-gray-6); }
-  .opt.on { background: var(--sl-color-gray-6); }
+  /* Designed facet groups (D3): token-native rows with a count pill, a clear
+     selected state (edge + wash, never colour alone — the checkbox is the icon),
+     and the system accent on the control itself. */
+  fieldset { border: 0; border-top: 1px solid var(--edge); margin: 0; padding: var(--space-2xs) 0; }
+  legend { font-weight: var(--weight-bold); font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
+  .opts { display: flex; flex-direction: column; gap: var(--space-3xs); margin-top: var(--space-3xs); max-height: 14rem; overflow-y: auto; }
+  .opt {
+    display: flex; align-items: center; gap: 0.45rem; font-size: 0.85rem;
+    padding: 0.2rem 0.3rem; border-radius: var(--radius-sm); cursor: pointer;
+    color: var(--ink); border: 1px solid transparent;
+  }
+  .opt input { accent-color: var(--structure); }
+  .opt:hover { background: var(--surface-2); }
+  .opt.on { background: var(--surface-2); border-color: var(--structure); }
   .opt-label { flex: 1; }
-  .opt-count { color: var(--sl-color-gray-3); font-variant-numeric: tabular-nums; }
+  .opt-count {
+    color: var(--ink-soft); font-variant-numeric: tabular-nums;
+    background: var(--surface-2); border-radius: var(--radius-pill);
+    padding: 0.05em 0.5em; font-size: var(--step--1);
+  }
+  .opt.on .opt-count { background: var(--surface); }
   .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; font: inherit; padding: 0; text-decoration: underline; }
-  .status { color: var(--sl-color-gray-2); }
-  .cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.75rem; }
-  .card { border: 1px solid var(--sl-color-gray-6); border-radius: 0.6rem; padding: 0.85rem 1rem; }
+  .state { max-width: 34rem; margin: var(--space-md) auto; }
+  .state-btn {
+    margin-top: var(--space-2xs); font: inherit; font-weight: var(--weight-bold);
+    padding: var(--space-3xs) var(--space-sm); min-block-size: 2.75rem;
+    border-radius: var(--radius-sm); cursor: pointer;
+    border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink);
+  }
+  .state-btn:focus-visible { outline: var(--focus-width) solid var(--ring); outline-offset: var(--focus-offset); }
+  /* Receipt-card grid: 1 → 2 → 3 columns as space allows (D3). Each card is a
+     mini receipt: stamped status edge + verdict wash keyed by verification, so
+     trust is readable at grid density (icon+word+colour via .wcb-badge). */
+  .cards {
+    list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-xs);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  }
+  .card {
+    border: 1px solid var(--edge); border-inline-start-width: 4px;
+    border-radius: var(--radius); padding: var(--space-xs) var(--space-sm);
+    background: var(--surface);
+    display: flex; flex-direction: column;
+  }
+  .card--verified { border-inline-start-color: var(--ok-edge); background: var(--verdict-ok-bg); }
+  .card--under_review { border-inline-start-color: var(--warn-edge); background: var(--verdict-warn-bg); }
+  .card--blocked { border-inline-start-color: var(--danger-edge); background: var(--verdict-danger-bg); }
   .card-top { display: flex; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; align-items: baseline; }
   .card-name { font-weight: 700; font-size: 1.02rem; overflow-wrap: anywhere; }
-  .card-desc { margin: 0.35rem 0; color: var(--sl-color-text); font-size: 0.92rem; }
+  .card-desc { margin: 0.35rem 0; color: var(--sl-color-text); font-size: 0.92rem; flex: 1; }
   .card-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
   .card-build {
     margin-top: 0.6rem; font: inherit; font-size: 0.82rem; cursor: pointer;
-    padding: 0.25rem 0.6rem; border-radius: 0.4rem;
+    padding: 0.25rem 0.6rem; border-radius: 0.4rem; align-self: flex-start;
     border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text);
   }
   .card-build:hover { border-color: var(--sl-color-text-accent); }
@@ -546,11 +618,15 @@
   .build-tray__cta:hover { background: color-mix(in srgb, var(--sl-color-accent) 14%, transparent); }
   .build-tray__cta:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
   .badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
-  .badge { font-size: 0.72rem; font-weight: 600; padding: 0.18rem 0.45rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-inline-start-width: 4px; background: var(--sl-color-gray-6); color: var(--sl-color-text); }
-  .badge--verified, .badge--active { border-inline-start-color: var(--ok-edge); }
-  .badge--under_review, .badge--minimal { border-inline-start-color: var(--warn-edge); }
-  .badge--blocked, .badge--abandoned { border-inline-start-color: var(--danger-edge); }
-  .badge--dormant, .badge--advisory { border-inline-start-color: var(--signal); }
+  /* Skeleton loading grid — same geometry as the receipt-card grid so the LCP
+     element doesn't shift when /catalog.json lands. */
+  .cards--skeleton { display: grid; gap: var(--space-xs); grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
+  .card--skeleton { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-sm); background: var(--surface); }
+  .sk-line { block-size: 0.8em; border-radius: var(--radius-sm); background: var(--surface-2); margin-block: var(--space-3xs); animation: sk-pulse 1.4s var(--ease-in-out) infinite; }
+  .sk-line--title { block-size: 1.1em; inline-size: 55%; }
+  .sk-line--short { inline-size: 40%; }
+  @keyframes sk-pulse { 50% { opacity: 0.5; } }
+  @media (prefers-reduced-motion: reduce) { .sk-line { animation: none; } }
   .more { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
   /* Touch targets. */
   .search input, .sort select, .more { min-block-size: 2.75rem; }
