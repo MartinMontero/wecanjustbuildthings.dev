@@ -24,7 +24,7 @@ drift over time; treat them as starting points, not exact addresses.
 | KV + D1 provisioning (`SESSIONS`, `ATPROTO`, `DB`) | `wrangler kv namespace create` / `d1 create` | The `kv_namespaces` + `d1_databases` blocks in `wrangler.jsonc` already hold **real IDs**, so this looks **done** on the current account. Re-run only when moving accounts (`docs/AUTH_PROVISIONING.md` §1). |
 | Apply the D1 migration | `npm run migrate` (`--remote`) | Creates `users` + `identities` (`migrations/0001_auth.sql`). Run once per environment. |
 | Set Worker secrets | `wrangler secret put …` | `BLUESKY_PRIVATE_KEY_JWK`, `GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`. Not verifiable from the repo — confirm with the curl checks below. |
-| Confirm deploy topology | CF dashboard | Auth needs the **Worker**, not plain Pages. Either Worker-serves-everything (recommended) or Pages + an API-only Worker (`docs/AUTH_PROVISIONING.md` top). |
+| Confirm deploy topology | CF dashboard | **Decided: the Worker serves everything** (Workers Builds on merge to `main`; `run_worker_first: ["/api/*"]`). Just confirm the domain is attached to the Worker and not also served by a Pages project (`docs/AUTH_PROVISIONING.md` top). |
 | Attach the custom domain to the Worker | Workers & Pages → Domains & Routes | Ensure the same domain isn't *also* served by a Pages project. |
 | Workers Builds env vars (build-time) | CF Workers Builds → Settings → Variables | `SITE_URL`, optional `PLAUSIBLE_DOMAIN` (enables analytics), and `CSP_MODE=enforce` to flip the CSP out of report-only (Part B §6). |
 | Review CSP reports, then flip to enforce | Workers Logs (the `observability` block in `wrangler.jsonc`) | CSP currently ships **Report-Only** (`astro.config.mjs:63`). After a clean soak, set `CSP_MODE=enforce`. |
@@ -106,8 +106,13 @@ no `wrangler deploy` in CI, so no `CLOUDFLARE_API_TOKEN` is needed in GitHub Act
   module until then.
 
 ### 2. Model Compass — missing benchmark scores
-- **What:** Several models (Mistral, Cohere, Gemma) carry `codingBenchmark.score: null`
-  (`src/modules/model-compass/registry/models.ts:37,53,96`).
+- **What:** **7 models** carry `codingBenchmark.score: null` — Mistral Large 3,
+  Cohere Command A+, Gemma 4, DeepSeek V4 Pro, two Claude entries, and one Gemini
+  entry (`src/modules/model-compass/registry/models.ts:37,53,96,118,140,161,182`,
+  verified against the tree 2026-09-05). **Maple AI** (`models.ts:226`) is a
+  confidential-computing *service*, not a model — it carries `codingBenchmark: null`
+  by construction plus `null` subscription pricing (`costPerMTok`) and
+  `lastVerified: null`.
 - **Why:** Same zero-fabrication rule — scores must come from a cited source.
 - **What it needs:** Confirm SWE-bench Verified scores from the vendor source URLs already
   recorded in each entry, then fill the `score` fields.

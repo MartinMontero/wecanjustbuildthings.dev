@@ -17,6 +17,8 @@ tsx enforcement/cli.ts all --tree path/to/project
 tsx enforcement/cli.ts layer2 --tree path/to/project
 # Validate one recipe
 tsx enforcement/cli.ts recipe src/content/docs/recipes/shakespeare-byok-configuration.mdx
+# Provider-exclusion scan of contributed skills (what site CI runs as enforce:skills)
+tsx enforcement/cli.ts skill --skills src/content/docs/skills
 ```
 
 Exit code is non-zero if anything violates the policy. JSON reports are written to
@@ -35,6 +37,7 @@ excluded-provider-signals.yaml WHAT data-flow strings to scan for
 layer1-direct/                8 manifest parsers + registry
 layer2-transitive/            13 lockfile parsers + chain-tracing walk
 layer3-provider-strings/      portable scanner + recipe-contract validator
+                              + contributed-skill validator (skill-validator.ts)
 tests/                        node:test suite over every parser + the contract
 ```
 
@@ -48,8 +51,10 @@ tests/                        node:test suite over every parser + the contract
   pip-compile / Go (`go mod graph`) / Bundler / Hex / pub / Gradle lockfiles and
   emits the full chain to any excluded package. Closure-only formats are reported
   honestly as un-traceable.
-- **Layer 3** scans source for excluded imports, endpoints, and config keys, and
-  validates provider-agnostic recipes against their contract.
+- **Layer 3** scans source for excluded imports, endpoints, and config keys;
+  validates provider-agnostic recipes against their contract; and runs the same
+  provider-exclusion scan over contributed skills (`skill` subcommand,
+  `src/content/docs/skills`) — shipped as the additive `skills` CI gate.
 
 ## Extending it
 

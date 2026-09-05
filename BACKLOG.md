@@ -39,7 +39,7 @@ check. Nothing found was dropped. **Scope key** — the column the gate decides:
 | B5 | Enable GitHub Dependency Graph (dependency-review currently no-ops) | `security-pr.yml:38-42` | setting off | P2 | OWNER | Review job produces results on a test PR |
 | B6 | Admin phases 4–8 (portability, content-mgmt UI, moderation+NCMEC w/ legal review, analytics, CI extension) | admin-panel-spec | phases 0–3 done | P1 | DEFER (own track — active, sliced, separately gated) | Per-phase per spec |
 | B7 | Staging follow-ups: publish→PR path, enforcement wiring for drafts, expiry job, unabandon decision | LOOP.md findings | deferred | P2 | DEFER (with B6) | Publish slice opens a real PR from a `ready` draft, enforcement green |
-| B8 | Catalog prose translation run es+ar (pipeline built; 1 of 1,360 files translated per locale) | TRANSLATIONS.md; runbook §B5 | pipeline ready | P2 | OWNER (needs `ANTHROPIC_API_KEY` + wave sign-off) | Waves run; PRs native-reviewed; `machine_translated: true` |
+| B8 | Catalog prose translation run es+ar (pipeline built; 1 of 2,185 entries translated per locale (generated figure, `data/catalog-count.json`)) | TRANSLATIONS.md; runbook §B5 | pipeline ready | P2 | OWNER (needs `ANTHROPIC_API_KEY` + wave sign-off) | Waves run; PRs native-reviewed; `machine_translated: true` |
 | B9 | Native-speaker review of ~25 machine-translated narrative pages | TRANSLATIONS.md | open | P2 | OWNER | List emptied |
 | B10 | NIP-07 one-liner in public docs (name nos2x/Alby near sign-in) | runbook Part A | open | P2 | SHIP | Line present, localized |
 | B11 | Goose live agent loop (`goose serve`/ACP) | runbook §B3; PLAN §5 | deferred | P2 | DEFER | — |

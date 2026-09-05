@@ -1,9 +1,10 @@
 # Mobile-responsiveness audit — `wecanjustbuildthings.dev`
 
 Read-only inventory of mobile-responsiveness defects in the **existing** code,
-captured before any fix. Branch: `mobile-responsiveness-audit`. This file is the
-first commit; code changes land in later commits, traced back to the findings
-below.
+captured before any fix. Branch: `mobile-responsiveness-audit` — **merged as PR
+#19**; fixes 1–8 shipped (see `MOBILE_FIXES.md`). This file remains the
+before-record; the one open finding (`/build/models/` color-contrast) closes
+with M4 (BACKLOG D4).
 
 Method: static review of every stylesheet, Starlight override, and Svelte/Astro
 island, plus an empirical harness (`scripts/mobile-audit.mjs`) that drives

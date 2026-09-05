@@ -4,19 +4,13 @@ The catalog site is static and needs no backend. **Sign-in is the one feature
 that does** — it runs in the Cloudflare **Worker** at `worker/index.ts`, which
 serves the static `dist/` (via the `ASSETS` binding) *and* the `/api/*` routes.
 
-This is a different deployment model from the plain static site (see the README
-"Deployment" section): the static site can live on **Cloudflare Pages**, but
-**auth requires the Worker**. Pick one of these topologies:
-
-- **Worker serves everything (recommended).** `wrangler deploy` uploads the Worker
-  with `dist/` as its assets; point the production domain at the Worker. Retire
-  the Pages Git integration (or keep it only for preview URLs) so the domain
-  isn't served by both.
-- **Keep Pages, run an API-only Worker.** Put the Worker on a route like
-  `wecanjustbuildthings.dev/api/*` and drop the `assets` block from
-  `wrangler.jsonc`. Pages keeps serving the site; the Worker only answers `/api/*`.
-
-The steps below assume the recommended topology.
+**Topology (decided, live since 2026-06-30): the Worker serves everything.**
+Production deploys run through **Cloudflare Workers Builds** on merge to `main`
+(see the README "Deployment" section) — the Worker serves `dist/` via the `ASSETS`
+binding *and* the `/api/*` routes (`run_worker_first: ["/api/*"]` in
+`wrangler.jsonc`). There is no Pages project serving the domain; a split
+"Pages + API-only Worker" topology exists only as a fallback sketch and is not
+what is deployed. The steps below assume the live topology.
 
 > Nothing here is required to run or contribute to the catalog. Until the
 > resources exist, the auth endpoints degrade gracefully — `*/status` reports

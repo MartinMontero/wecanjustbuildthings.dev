@@ -1,9 +1,25 @@
 # Admin Panel — Build Spec (design snapshot — VERIFY against live repo)
 
-> **Status:** design complete, not yet built. **Snapshot captured 2026-06-28** against
-> `main@ce558d8`. The repo is the source of truth and moves fast — Phase 0 below re-verifies
-> everything before any code is written. Do not treat library versions here as authoritative;
+> **Status: phases 0-3 BUILT, phases 4-8 OPEN** (ledger below; BACKLOG B6 tracks the
+> remainder as its own track). **Snapshot captured 2026-06-28** against
+> `main@ce558d8`; ledger updated 2026-09-05 (M7) against `main` at PR #64. The repo
+> is the source of truth and moves fast — re-verify against the live tree before
+> writing code in any open phase. Do not treat library versions here as authoritative;
 > re-check them at build time.
+>
+> **Phase ledger (verified against the live tree 2026-09-05):**
+> - **Phase 0 — ground truth:** done (design note + reconciliation below).
+> - **Phase 1 — server runtime:** `worker/admin/*` scaffold, dispatched from
+>   `worker/index.ts`; ADMIN_COORD (SQLite DO) + ADMIN_SESSIONS (KV) bound (#44).
+> - **Phase 2 — hardened admin auth:** allowlist, admin sessions, role tiers
+>   (file-rooted superadmins + runtime roster), `/console/` role-aware routing,
+>   per-request revocation (#45, #49-#52); admin constitution (#50).
+> - **Phase 3 — storage:** ADMIN_DB (D1, `wcjbt-admin`, `migrations-admin/`)
+>   bound, migrated, staged-edits API + insert-only action-audit tripwire (#54-#55).
+>   Scope note: R2 `ADMIN_EVIDENCE` / Queues `ADMIN_REPORTS` land with Phase 6,
+>   Analytics with Phase 7 — by design each binding ships with its feature phase.
+> - **Phases 4-8 (portability, catalog/content mgmt, T&S moderation + NCMEC,
+>   analytics, CI/hardening):** open — see BACKLOG B6/B7.
 >
 > Place at `docs/admin-panel-spec.md`. License: AGPL-3.0-or-later.
 
