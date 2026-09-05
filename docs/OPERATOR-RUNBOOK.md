@@ -106,8 +106,13 @@ no `wrangler deploy` in CI, so no `CLOUDFLARE_API_TOKEN` is needed in GitHub Act
   module until then.
 
 ### 2. Model Compass — missing benchmark scores
-- **What:** Several models (Mistral, Cohere, Gemma) carry `codingBenchmark.score: null`
-  (`src/modules/model-compass/registry/models.ts:37,53,96`).
+- **What:** **7 models** carry `codingBenchmark.score: null` — Mistral Large 3,
+  Cohere Command A+, Gemma 4, DeepSeek V4 Pro, two Claude entries, and one Gemini
+  entry (`src/modules/model-compass/registry/models.ts:37,53,96,118,140,161,182`,
+  verified against the tree 2026-09-05). **Maple AI** (`models.ts:226`) is a
+  confidential-computing *service*, not a model — it carries `codingBenchmark: null`
+  by construction plus `null` subscription pricing (`costPerMTok`) and
+  `lastVerified: null`.
 - **Why:** Same zero-fabrication rule — scores must come from a cited source.
 - **What it needs:** Confirm SWE-bench Verified scores from the vendor source URLs already
   recorded in each entry, then fill the `score` fields.
