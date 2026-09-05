@@ -12,7 +12,7 @@ const data = entry.data as {
   title: string;
   entry_type?: string;
   dependency_name?: string;
-  workbench?: boolean;
+  workbench?: boolean | 'wide';
 };
 
 const TOOL_TYPES = new Set(['tool', 'framework', 'library', 'service', 'protocol']);
@@ -34,6 +34,9 @@ const buildLabel =
     (schema-validated). The marker is contentless; components.css does the rest
     via `.main-pane:has(.workbench-marker)` — no shell fork. */}
 {data.workbench && <span class="workbench-marker" hidden aria-hidden="true" />}
+{/* M3: the catalog explorer opts into the full-width bench so the receipt-card
+    grid reaches its 3-column breakpoint on desktop. */}
+{data.workbench === 'wide' && <span class="workbench-marker--wide" hidden aria-hidden="true" />}
 <h1 id="_top">{data.title}</h1>
 {
   isTool && (
