@@ -142,3 +142,52 @@ Baseline at HEAD (95e5be9) — all gates green, re-run this pass (Node 22.12.0,
   gitleaks steps are advisory (documented-deliberate `continue-on-error`).
   **No secrets anywhere.** Recommend a two-line allowlist for the algorithm
   string (doc-only slice).
+---
+
+## F-8 addendum — dependency hygiene inside Astro 6 (2026-09-05)
+
+Ruled APPROVED 2026-09-01 (Astro 6 only; G5 stands — no Astro 7). Branch
+`dep-hygiene-astro6`. Every claim below is VERIFIED-LIVE (re-run today) unless
+marked CANON.
+
+### Fixed inside 6.x (lockfile refresh + targeted overrides)
+
+| Package | Before | After | How |
+|---|---|---|---|
+| astro | 6.4.6 | **6.4.8** (still 6.x) | `npm audit fix` |
+| nanoid (the named 8.2 HIGH) | 3.3.12 | fixed — gone from the audit report | `npm audit fix` |
+| postcss / brace-expansion / fast-uri / ip-address / undici / svgo / yaml / first body-parser advisory | vulnerable | gone from the audit report | `npm audit fix` |
+| js-yaml (astro/starlight/internal-helpers) | 4.2.0 | **4.3.2** | override `js-yaml@>=4.0.0 <4.3.1` (all consumers declare `^4.1.1` — in range) |
+| js-yaml (@lhci/utils) | 3.15.0 | **3.15.2** | override; the old `js-yaml@<3.15.0 → 3.15.0` override was *pinning the vulnerable floor* — raised to `<3.15.2 → 3.15.2` (consumer declares `^3.13.1`) |
+| esbuild (astro/vite copy) | 0.27.7 | **0.28.2** | override `esbuild@>=0.27.3 <0.28.1`. Outside astro 6's declared `^0.27.3` — evidence it holds: full `verify:all` green incl. the 6,653-page production build |
+| sharp (astro's nested copy) | 0.34.5 | **0.35.4** (deduped to the root direct dep) | override `sharp: $sharp`; the libvips CVE set only affected `<0.35.0` |
+| wrangler (miniflare chain) | 4.104 | **4.129** | `npm audit fix`; miniflare now uses the fixed sharp 0.35.x |
+
+Result: **npm audit 34 → 18 findings** (high 19 → 7). OSV lockfile scan after
+the fix: **11 vulns, 0 CRITICAL, 0 critical+fixable** — the blocking gate
+(`scripts/osv-critical-gate.sh`) stays green. `verify:all` green: 366/366
+tests, astro check 0/0, enforce + enforce:skills, build 6,653 pages.
+
+### Accepted-with-evidence remainder (no fix inside Astro 6)
+
+1. **astro@6.4.8 — 3 XSS advisories, fixes only in 7.x** (G5 forbids):
+   GHSA-f48w-9m4c-m7f5 (unescaped spread attribute names in renderHTMLElement),
+   GHSA-7pw4-f3q4-r2p2 (unescaped `transition:*` directive values on hydrated
+   islands), GHSA-4g3v-8h47-v7g6 (unescaped View Transition animation
+   properties). **Evidence of reduced surface:** a full-tree grep finds **zero
+   `transition:*` directive usage** in `src/` (2026-09-05), so the second and
+   third sinks have no in-repo source; the first sink is in MDX/element
+   rendering of committed, policy-screened content (the catalog is the trust
+   boundary — Layer-3-scanned), not user-supplied runtime input. Re-evaluate
+   the Astro 7 coupled upgrade (BACKLOG C5) on its own track.
+2. **@lhci/cli chain — CI tooling only, no in-range fix:** `extract-zip` (no
+   fixed release at all — `*`), `tmp` 0.0.33 + 0.1.0, `uuid` 8.3.2,
+   `qs` 6.15.3 / `body-parser` 1.20.6 / `express` 4.22.2 (express 4 pins
+   `qs ~6.15.1` and `body-parser ~1.20.5`; qs 6.15.x ends at 6.15.3 and
+   body-parser 1.x at 1.20.6 — both lines closed). npm's only offered fix is
+   `@lhci/cli@0.1.0`, a major downgrade of the Lighthouse CI tool. Exposure:
+   `@lhci/cli` runs only inside the `quality.yml` CI job against the static
+   `dist/`; nothing reaches the shipped site or the Worker. Same posture as
+   the #34 triage (dev-only). Accepted-with-evidence; re-check when lhci
+   ships a line with fixed transitive deps.
+
