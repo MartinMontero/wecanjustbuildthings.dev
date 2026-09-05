@@ -49,7 +49,7 @@ speaker's pass for tone and idiom before being considered final:
 - **Chrome — done (es + ar).** The catalog UI/frame is fully localized: the
   explorer (`CatalogExplorer.svelte`) via a `Record<Lang, …>` string table, the
   list view, the "Build with this" button, and the catalog landing pages.
-- **Entry prose (~2,182 entries) — pipeline built, run pending.** A standalone
+- **Entry prose (2,185 entries — generated figure, `data/catalog-count.json`) — pipeline built, run pending.** A standalone
   generator translates each entry's free text (`description`, `what_it_does`) and
   body prose into es + ar, preserving all markup, code, identifiers, URLs, and
   metadata values, localizing internal links, and stamping

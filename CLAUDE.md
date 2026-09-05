@@ -4,7 +4,7 @@ Astro Starlight site on Cloudflare that guides non-developers through
 agentic software development. Four components share ONE client-side build-session
 object: Build Studio, Mentor Engine, Skills Creator, Catalog. Plus a Hosting Cost
 Estimator module and a dataset-backed catalog pipeline (Astro 6 Content Layer Zod
-schema, 1,355 catalog entries).
+schema, 2,185 catalog entries — the generated figure: `node scripts/catalog-count.mjs` → `data/catalog-count.json`; 1,358 tools/libraries/etc + 827 datasets).
 
 ## Non-negotiable constraints — YOU MUST follow these every session
 

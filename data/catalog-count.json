@@ -1,0 +1,15 @@
+{
+  "generated": "2026-09-05",
+  "source": "node scripts/catalog-count.mjs (entry_type frontmatter over src/content/docs/catalog/)",
+  "total": 2185,
+  "tools": 1358,
+  "datasets": 827,
+  "byType": {
+    "library": 1172,
+    "tool": 158,
+    "framework": 3,
+    "service": 23,
+    "protocol": 2,
+    "dataset": 827
+  }
+}
