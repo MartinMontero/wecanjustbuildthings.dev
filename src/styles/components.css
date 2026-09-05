@@ -420,6 +420,8 @@
      these rules widen the bench and quiet the lede. `:has()` degrades gracefully
      (older engines keep the stock 45rem measure — the pages stay fully usable). */
   .main-pane:has(.workbench-marker) { --sl-content-width: 60rem; }
+  /* M3: catalog explorer bench — wide enough for the 1→2→3 receipt-card grid. */
+  .main-pane:has(.workbench-marker--wide) { --sl-content-width: 92rem; }
   .main-pane:has(.workbench-marker) .sl-markdown-content > p:first-of-type {
     font-size: var(--step-0);
     line-height: 1.65;

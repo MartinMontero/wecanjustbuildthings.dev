@@ -95,7 +95,7 @@ export const catalogFields = z.object({
   /** Page-level layout flag (not catalog data): the five tool pages
    *  (build / check / catalog / cost / models) render on the wider `.workbench`
    *  bench column (DESIGN §3). Set on each locale variant of the page. */
-  workbench: z.boolean().optional(),
+  workbench: z.union([z.boolean(), z.literal('wide')]).optional(),
 
   /** Marks a page whose guidance is security-load-bearing (key handling,
    *  self-custody, threat models). Set on the ENGLISH SOURCE page only —
