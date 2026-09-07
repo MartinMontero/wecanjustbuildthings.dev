@@ -11,9 +11,8 @@ sidebar:
 import PolicyChecker from '../../../components/PolicyChecker.svelte';
 
 ¿Ya tienes un stack — o le tienes el ojo echado a una nueva dependencia? Pégala
-aquí. La política de exclusión se ejecuta **en tu navegador** (la misma lista que
-usa el motor de CI), y las licencias se buscan en vivo. Nada de lo que pegues sale
-de tu dispositivo salvo los nombres de los paquetes enviados a los registros
-públicos para la búsqueda de licencias.
+aquí. Cotejamos tu lista con la lista de bloqueo aquí mismo, en tu dispositivo —
+no se sube nada. Los datos de licencia se consultan en vivo; solo viajan los
+nombres de los paquetes a los registros públicos.
 
 <PolicyChecker client:load lang="es" />
