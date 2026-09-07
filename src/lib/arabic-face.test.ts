@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { readdirSync } from 'node:fs';
 
 // M6 checkpoint invariants: the Arabic display face exists within budget, its
 // license ships, the :lang(ar) wiring is present, and the console surface

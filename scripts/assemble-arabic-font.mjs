@@ -11,14 +11,15 @@
  * corrupted or edited source fails the build loudly instead of shipping a
  * mangled font. Idempotent: skips the write when the output already matches.
  */
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
+import { readdirSync } from 'node:fs';
 const SRC_DIR = 'data/fonts/parts';
+const parts = readdirSync(SRC_DIR).filter((f) => f.startsWith('arabic-headings.b64.part-')).sort();
 const OUT = 'public/fonts/readex-pro-arabic-headings.woff2';
 const SHA256 = 'd80553453c7d817c1c47c659ae58c02831934ccb5b54a0092526ed96277cf316';
 
-const parts = readdirSync(SRC_DIR).filter((f) => f.startsWith('arabic-headings.b64.part-')).sort();
 if (!parts.length) { console.error('no font parts found in ' + SRC_DIR); process.exit(1); }
 const b64 = parts.map((f) => readFileSync(`${SRC_DIR}/${f}`, 'utf8')).join('').replace(/\s+/g, '');
 const buf = Buffer.from(b64, 'base64');
