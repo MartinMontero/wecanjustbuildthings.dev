@@ -24,7 +24,27 @@
 
   // ---------- i18n ----------
   type Lang = 'en' | 'es' | 'ar';
-  const STR: Record<Lang, Record<string, string>> = {
+  // Typed table — the house CatalogStrings pattern (CatalogExplorer.svelte):
+  // Record<Lang, StudioStrings> makes en/es/ar key parity a compile error.
+  interface StudioStrings {
+    s1: string; s2: string; s3: string; startOver: string; name: string; problem: string; why: string; success: string;
+    protocols: string; tenq: string; protoHelp: string; choose: string; back: string; gen: string; backStack: string;
+    bpHead: string; bpPieces: string; bpWhyFor: string; bpConnects: string; bpReceipt: string; bpAdded: string; bpSeeded: string; bpAddedByYou: string;
+    bpSwap: string; bpUse: string; bpRemove: string; bpKeep: string; bpFits: string; bpAdvanced: string; bpEmpty: string; bpLead: string;
+    examples: string; add: string; selected: string; loading: string; handoff: string; zip: string; github: string; goose: string;
+    dlzip: string; copyPrompt: string; policyClean: string; policyHit: string; policyHitDetail: string; runLocal: string; ghGuide: string; ghError: string;
+    handoffIntro: string; zipDesc: string; gooseDl: string; gooseCopy: string; gooseDesc: string; gooseExplainIntro: string; gooseExplainPrompt: string; gooseExplainSkills: string;
+    gooseExplainConsent: string; gooseOpen: string; gooseCopyLink: string; gooseTooBig: string; gooseFallback: string; ghNotReady: string; ghConnectBtn: string; ghSuccess: string;
+    refineTitle: string; refineIntro: string; refinePasteLabel: string; refinePastePh: string; refineApplyResponse: string; refinePasteErr: string; refineWhy: string;
+    refineApply: string; refineApplied: string; refineNone: string; skillsHint: string; skillsReady: string; skillAdd: string; skillAdded: string;
+    skCaptureHead: string; skCaptureSub: string; skName: string; skDesc: string; skDescPh: string; skSteps: string; skStepsPh: string; skSource: string;
+    skSourcePh: string; skCaptureBtn: string; skillRemove: string; skillsIncluded: string;
+    // M4/D9 — the previously hardcoded template strings, now keyed + localized:
+    progress: string; problemPh: string; deeperSummary: string; namePh: string; yourProject: string; searchCatalogPh: string;
+    ghChecking: string; copied: string; copyKey: string; artifactsIntro: string; artConstitution: string; artSpec: string; artPkg: string;
+    vVerified: string; vUnderReview: string; vBlocked: string;
+  }
+  const STR: Record<Lang, StudioStrings> = {
     en: {
       s1: '1 · Describe', s2: '2 · Your blueprint', s3: '3 · Build it', startOver: 'Start over',
       name: 'Project name (a short nickname is fine)',
@@ -74,6 +94,15 @@
       skillAdd: 'Add to my project', skillAdded: 'Added ✓',
       skCaptureHead: 'You know something the agent doesn’t', skCaptureSub: 'A method only you know — how you take a report, vet a member, keep people safe. Capture it once and every build follows it.', skName: 'Skill name', skDesc: 'One line: what it does', skDescPh: 'Take an eviction report without exposing the tenant', skSteps: 'The steps, one per line', skStepsPh: 'Use a chosen handle, not a legal name\nRecord the building, not the unit\nEncrypt everything; two organizers hold keys', skSource: 'Where it came from (optional)', skSourcePh: 'Tenants Union field manual', skCaptureBtn: 'Capture as a skill', skillRemove: 'Remove',
       skillsIncluded: 'skill(s) will be included in your starter',
+      progress: 'Progress',
+      problemPh: 'e.g. Tenants need to document evictions without exposing who they are.',
+      deeperSummary: 'Want a sharper blueprint? Add the why & what success looks like (optional)',
+      namePh: 'e.g. neighborhood-shield', yourProject: 'your project',
+      searchCatalogPh: 'search the full catalog…', ghChecking: 'Checking…',
+      copied: '✓ copied', copyKey: 'copy',
+      artifactsIntro: 'Want to look inside first? These are the files in your starter — the plain-language rules and plan your agent will follow:',
+      artConstitution: 'The project’s rules (constitution.md)', artSpec: 'The plan (spec.md)', artPkg: 'The tools list (package.json)',
+      vVerified: 'verified', vUnderReview: 'under review', vBlocked: 'blocked',
     },
     es: {
       s1: '1 · Describe', s2: '2 · Tu plano', s3: '3 · Constrúyelo', startOver: 'Empezar de nuevo',
@@ -124,6 +153,15 @@
       skillAdd: 'Añadir a mi proyecto', skillAdded: 'Añadida ✓',
       skCaptureHead: 'Sabes algo que el agente no sabe', skCaptureSub: 'Un método que solo tú conoces — cómo tomas un reporte, verificas a un miembro, proteges a la gente. Captúralo una vez y cada construcción lo seguirá.', skName: 'Nombre de la habilidad', skDesc: 'Una línea: qué hace', skDescPh: 'Tomar un reporte de desalojo sin exponer al inquilino', skSteps: 'Los pasos, uno por línea', skStepsPh: 'Usa un alias elegido, no un nombre legal\nRegistra el edificio, no la unidad\nCifra todo; dos organizadores tienen las claves', skSource: 'De dónde viene (opcional)', skSourcePh: 'Manual de campo del sindicato de inquilinos', skCaptureBtn: 'Capturar como habilidad', skillRemove: 'Quitar',
       skillsIncluded: 'habilidad(es) se incluirán en tu kit inicial',
+      progress: 'Progreso',
+      problemPh: 'p. ej. Los inquilinos necesitan documentar desalojos sin revelar quiénes son.',
+      deeperSummary: '¿Quieres un plano más preciso? Añade el porqué y cómo luce el éxito (opcional)',
+      namePh: 'p. ej. escudo-vecinal', yourProject: 'tu proyecto',
+      searchCatalogPh: 'busca en todo el catálogo…', ghChecking: 'Comprobando…',
+      copied: '✓ copiado', copyKey: 'copiar',
+      artifactsIntro: '¿Quieres ver dentro primero? Estos son los archivos de tu kit inicial — las reglas en lenguaje claro y el plan que seguirá tu agente:',
+      artConstitution: 'Las reglas del proyecto (constitution.md)', artSpec: 'El plan (spec.md)', artPkg: 'La lista de herramientas (package.json)',
+      vVerified: 'verificado', vUnderReview: 'en revisión', vBlocked: 'bloqueado',
     },
     ar: {
       s1: '١ · صِف', s2: '٢ · مخططك', s3: '٣ · ابنِه', startOver: 'ابدأ من جديد',
@@ -174,11 +212,33 @@
       skillAdd: 'أضِف إلى مشروعي', skillAdded: 'أُضيفت ✓',
       skCaptureHead: 'أنت تعرف شيئاً لا يعرفه الوكيل', skCaptureSub: 'طريقة تعرفها أنت وحدك — كيف تأخذ بلاغاً، تتحقّق من عضو، تحمي الناس. التقطها مرّة وسيتّبعها كل بناء.', skName: 'اسم المهارة', skDesc: 'سطر واحد: ماذا تفعل', skDescPh: 'أخذ بلاغ إخلاء دون كشف هوية المستأجر', skSteps: 'الخطوات، واحدة في كل سطر', skStepsPh: 'استخدم اسماً مستعاراً، لا اسماً قانونياً\nسجّل المبنى، لا الوحدة\nشفّر كل شيء؛ منظّمان يحملان المفاتيح', skSource: 'من أين أتت (اختياري)', skSourcePh: 'دليل ميداني لنقابة المستأجرين', skCaptureBtn: 'التقطها كمهارة', skillRemove: 'إزالة',
       skillsIncluded: 'مهارة ستُضمَّن في حزمتك المبدئية',
+      progress: 'التقدّم',
+      problemPh: 'مثال: يحتاج المستأجرون إلى توثيق حالات الإخلاء دون كشف هويّتهم.',
+      deeperSummary: 'تريد مخططًا أدقّ؟ أضِف الـ«لماذا» وكيف يبدو النجاح (اختياري)',
+      namePh: 'مثال: neighborhood-shield', yourProject: 'مشروعك',
+      searchCatalogPh: 'ابحث في الكتالوج كاملاً…', ghChecking: 'جارٍ التحقّق…',
+      copied: '✓ نُسخ', copyKey: 'نسخ',
+      artifactsIntro: 'تريد إلقاء نظرة أولًا؟ هذه ملفات حزمتك المبدئية — القواعد بلغة واضحة والخطة التي سيتبعها وكيلك:',
+      artConstitution: 'قواعد المشروع (constitution.md)', artSpec: 'الخطة (spec.md)', artPkg: 'قائمة الأدوات (package.json)',
+      vVerified: 'مُتحقَّق', vUnderReview: 'قيد المراجعة', vBlocked: 'محظور',
     },
   };
   let lang = $state<Lang>((['en', 'es', 'ar'].includes(initialLang) ? initialLang : 'en') as Lang);
   const t = $derived(STR[lang]);
   const rtl = $derived(lang === 'ar');
+
+  // Interpolated/derived labels (house pattern — cf. CatalogExplorer's usedIn):
+  // word order differs per locale, so these are functions, not flat keys.
+  function ghSaveLabel(s: string): string {
+    if (lang === 'es') return `Guardar “${s}” en GitHub`;
+    if (lang === 'ar') return `احفظ «${s}» على GitHub`;
+    return `Save “${s}” to GitHub`;
+  }
+  // Verification values are DATA ('verified'/'under_review'/'blocked'); the badge
+  // text is localized while the vbadge--{value} class stays keyed on the data.
+  function verificationLabel(v: string): string {
+    return v === 'verified' ? t.vVerified : v === 'under_review' ? t.vUnderReview : v === 'blocked' ? t.vBlocked : v.replace('_', ' ');
+  }
 
   // ---------- state ----------
   let items = $state<Item[]>([]);
@@ -1024,7 +1084,7 @@ manuals with the knowledge-to-skills-pipeline).
     {/each}
   </div>
 
-  <ol class="steps" aria-label="Progress">
+  <ol class="steps" aria-label={t.progress}>
     <li class:on={step === 1}><button onclick={() => (step = 1)}>{t.s1}</button></li>
     <li class:on={step === 2}><button onclick={() => (step = 2)} disabled={loading}>{t.s2}</button></li>
     <li class:on={step === 3}><button onclick={() => (step = 3)} disabled={loading}>{t.s3}</button></li>
@@ -1033,7 +1093,7 @@ manuals with the knowledge-to-skills-pipeline).
   {#if step === 1}
     <section class="panel">
       <p class="hint">{t.tenq} <a href="/method/ten-questions/">↗</a></p>
-      <label class="field"><span>{t.problem}</span><textarea bind:value={problem} rows="3" placeholder="e.g. Tenants need to document evictions without exposing who they are."></textarea></label>
+      <label class="field"><span>{t.problem}</span><textarea bind:value={problem} rows="3" placeholder={t.problemPh}></textarea></label>
       <div class="examples">
         <span class="hint">{t.examples}</span>
         <div class="chips">{#each EXAMPLES[lang] as ex}<button class="chip ex" onclick={() => (problem = ex)}>{ex}</button>{/each}</div>
@@ -1071,8 +1131,8 @@ manuals with the knowledge-to-skills-pipeline).
       {/if}
 
       <details class="deeper">
-        <summary>Want a sharper blueprint? Add the why &amp; what success looks like (optional)</summary>
-        <label class="field"><span>{t.name}</span><input bind:value={projectName} placeholder="e.g. neighborhood-shield" /></label>
+        <summary>{t.deeperSummary}</summary>
+        <label class="field"><span>{t.name}</span><input bind:value={projectName} placeholder={t.namePh} /></label>
         <label class="field"><span>{t.why}</span><textarea bind:value={goal} rows="2"></textarea></label>
         <label class="field"><span>{t.success}</span><textarea bind:value={success} rows="2"></textarea></label>
       </details>
@@ -1081,7 +1141,7 @@ manuals with the knowledge-to-skills-pipeline).
   {:else if step === 2}
     <section class="panel">
       <div class="bp-head">
-        <h3>{t.bpHead} {projectName || 'your project'}</h3>
+        <h3>{t.bpHead} {projectName || t.yourProject}</h3>
         <p class="hint">{t.bpLead}</p>
       </div>
       {#if !problem.trim()}
@@ -1097,7 +1157,7 @@ manuals with the knowledge-to-skills-pipeline).
             </div>
             <div class="piece-tool">
               <a class="tool-name" href={p.item.url}>{p.item.name}</a>
-              <span class="vbadge vbadge--{p.item.verification}">{p.item.verification.replace('_', ' ')}</span>
+              <span class="vbadge vbadge--{p.item.verification}">{verificationLabel(p.item.verification)}</span>
               <span class="tool-meta">{p.item.ecosystem} · {p.item.license}</span>
             </div>
             {#if p.item.commit}
@@ -1132,7 +1192,7 @@ manuals with the knowledge-to-skills-pipeline).
               <div class="piece-head"><span class="add-label">{seededTool === it.name ? t.bpSeeded : t.bpAddedByYou}</span><button class="toggle" onclick={() => toggleTool(it.name)}>{t.bpRemove}</button></div>
               <div class="piece-tool">
                 <a class="tool-name" href={it.url}>{it.name}</a>
-                <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span>
+                <span class="vbadge vbadge--{it.verification}">{verificationLabel(it.verification)}</span>
                 <span class="tool-meta">{it.ecosystem} · {it.license}</span>
               </div>
               {#if it.commit}<p class="receipt"><span class="receipt-check" aria-hidden="true">✓</span> {#if it.licenseUrl}<a href={it.licenseUrl} target="_blank" rel="noopener noreferrer">{t.bpReceipt} <code>{it.commit.slice(0, 7)}</code></a>{:else}{t.bpReceipt} <code>{it.commit.slice(0, 7)}</code>{/if}</p>{/if}
@@ -1180,7 +1240,7 @@ manuals with the knowledge-to-skills-pipeline).
                 {@const it = items.find((x) => x.name === p.name)}
                 <li class="proposal">
                   <div class="prop-head">
-                    <span class="prop-name">{p.action === 'add' ? '+ ' : '– '}{p.name}{#if it} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span> <span class="tool-meta">{it.license}</span>{/if}</span>
+                    <span class="prop-name">{p.action === 'add' ? '+ ' : '– '}{p.name}{#if it} <span class="vbadge vbadge--{it.verification}">{verificationLabel(it.verification)}</span> <span class="tool-meta">{it.license}</span>{/if}</span>
                     {#if aiApplied.has(i)}<span class="applied">{t.refineApplied}</span>{:else}<button class="apply" onclick={() => applyProposal(p, i)}>{t.refineApply}</button>{/if}
                   </div>
                   <p class="prop-why"><strong>{t.refineWhy}</strong> {p.why}</p>
@@ -1229,8 +1289,8 @@ manuals with the knowledge-to-skills-pipeline).
 
       <details class="advanced">
         <summary>{t.bpAdvanced}</summary>
-        <label class="field"><span>{t.add}</span><input bind:value={addQuery} placeholder="search the full catalog…" /></label>
-        {#if addResults.length}<ul class="picklist">{#each addResults as it (it.name)}<li class="pick" class:on={chosen.has(it.name)}><label><input type="checkbox" checked={chosen.has(it.name)} onchange={() => toggleTool(it.name)} /><span class="pick-name">{it.name}{primaryNames.has(it.name) ? ' ★' : ''}</span><span class="pick-meta">{it.ecosystem} · {it.license} <span class="vbadge vbadge--{it.verification}">{it.verification.replace('_', ' ')}</span></span></label></li>{/each}</ul>{/if}
+        <label class="field"><span>{t.add}</span><input bind:value={addQuery} placeholder={t.searchCatalogPh} /></label>
+        {#if addResults.length}<ul class="picklist">{#each addResults as it (it.name)}<li class="pick" class:on={chosen.has(it.name)}><label><input type="checkbox" checked={chosen.has(it.name)} onchange={() => toggleTool(it.name)} /><span class="pick-name">{it.name}{primaryNames.has(it.name) ? ' ★' : ''}</span><span class="pick-meta">{it.ecosystem} · {it.license} <span class="vbadge vbadge--{it.verification}">{verificationLabel(it.verification)}</span></span></label></li>{/each}</ul>{/if}
         <p class="hint"><strong>{chosen.size}</strong> {t.selected}.</p>
       </details>
       <div class="nav"><button onclick={() => (step = 1)}>{t.back}</button><button class="primary big" onclick={() => (step = 3)} disabled={chosen.size === 0}>{t.gen}</button></div>
@@ -1262,14 +1322,14 @@ manuals with the knowledge-to-skills-pipeline).
           <p class="hint">{t.zipDesc}</p></div>
       {:else if handoff === 'github'}
         <div class="hpanel">
-          {#if ghConfigured === null}<p class="hint">Checking…</p>
+          {#if ghConfigured === null}<p class="hint">{t.ghChecking}</p>
           {:else if !ghConfigured}
             <p class="hint">{t.ghNotReady} <a href="/guides/connect-github/">{t.ghGuide}</a></p>
             <button onclick={downloadZip}>{t.dlzip}</button>
           {:else if ghResult.startsWith('created:')}
             <p>{t.ghSuccess} <a href={ghResult.slice(8)}>{ghResult.slice(8)}</a></p>
           {:else if ghConnected}
-            <button class="primary big" onclick={ghCreate} disabled={ghBusy}>{ghBusy ? '…' : `Save “${slug}” to GitHub`}</button>
+            <button class="primary big" onclick={ghCreate} disabled={ghBusy}>{ghBusy ? '…' : ghSaveLabel(slug)}</button>
             {#if ghResult.startsWith('error:')}<p class="err">{ghResult.slice(6)}</p>{/if}
           {:else}
             <button class="primary big" onclick={ghConnect}>{t.ghConnectBtn}</button>
@@ -1311,15 +1371,15 @@ manuals with the knowledge-to-skills-pipeline).
       <!-- Still inside the policy gate: the copy-paste prompt and the starter-file
            viewers are handoff channels too — a clipboard is as much an exfil path
            as a zip. A policy match pauses ALL of them. -->
-      <button class="link copyp" onclick={() => copy('prompt', agentPrompt)}>{copied === 'prompt' ? '✓ copied' : t.copyPrompt}</button>
+      <button class="link copyp" onclick={() => copy('prompt', agentPrompt)}>{copied === 'prompt' ? t.copied : t.copyPrompt}</button>
 
-      <p class="hint">Want to look inside first? These are the files in your starter — the plain-English rules and plan your agent will follow:</p>
+      <p class="hint">{t.artifactsIntro}</p>
       {#snippet artifact(title: string, key: string, text: string)}
-        <details><summary>{title} <button class="link" onclick={(e) => { e.preventDefault(); copy(key, text); }}>{copied === key ? '✓' : 'copy'}</button></summary><pre><code>{text}</code></pre></details>
+        <details><summary>{title} <button class="link" onclick={(e) => { e.preventDefault(); copy(key, text); }}>{copied === key ? '✓' : t.copyKey}</button></summary><pre><code>{text}</code></pre></details>
       {/snippet}
-      {@render artifact('The project’s rules (constitution.md)', 'c', constitution)}
-      {@render artifact('The plan (spec.md)', 's', spec)}
-      {@render artifact('The tools list (package.json)', 'pkg', packageJson)}
+      {@render artifact(t.artConstitution, 'c', constitution)}
+      {@render artifact(t.artSpec, 's', spec)}
+      {@render artifact(t.artPkg, 'pkg', packageJson)}
       {/if}
 
       <div class="nav"><button onclick={() => (step = 2)}>{t.backStack}</button></div>
@@ -1357,17 +1417,17 @@ manuals with the knowledge-to-skills-pipeline).
   .chips, .tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .chip { padding: 0.35rem 0.8rem; border-radius: var(--radius-pill); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink); cursor: pointer; }
   .chip.on { background: var(--structure); color: var(--on-structure); border-color: var(--structure); }
-  .tabs button { padding: 0.45rem 0.8rem; border-radius: 0.5rem 0.5rem 0 0; border: 1px solid var(--sl-color-gray-6); background: transparent; color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
-  .tabs button.on { background: var(--sl-color-gray-6); border-color: var(--sl-color-gray-5); }
-  .hpanel { border: 1px solid var(--sl-color-gray-5); border-radius: 0 0.5rem 0.5rem 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.7rem; }
-  .picklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
-  .pick { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.7rem; }
-  .pick.on { border-color: var(--sl-color-accent); }
+  .tabs button { padding: 0.45rem 0.8rem; border-radius: var(--radius) var(--radius) 0 0; border: 1px solid var(--edge); background: transparent; color: var(--ink); cursor: pointer; font-weight: var(--weight-bold); }
+  .tabs button.on { background: var(--surface-2); border-color: var(--edge-strong); }
+  .hpanel { border: 1px solid var(--edge); border-radius: 0 var(--radius) var(--radius) var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-xs); }
+  .picklist { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3xs); }
+  .pick { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-2xs) var(--space-xs); }
+  .pick.on { border-color: var(--structure); }
   .pick label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0.2rem 0.6rem; align-items: baseline; cursor: pointer; }
-  .pick-name { font-weight: 700; overflow-wrap: anywhere; }
-  .pick-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
-  .pick-desc { grid-column: 2 / -1; color: var(--sl-color-text); font-size: 0.85rem; }
-  .vbadge { font-size: 0.68rem; font-weight: 700; padding: 0.05rem 0.4rem; border-radius: 999px; border: 1px solid var(--sl-color-gray-5); border-inline-start-width: 3px; }
+  .pick-name { font-weight: var(--weight-bold); overflow-wrap: anywhere; }
+  .pick-meta { color: var(--ink-soft); font-size: var(--step--1); }
+  .pick-desc { grid-column: 2 / -1; color: var(--ink); font-size: var(--step--1); }
+  .vbadge { font-family: var(--font-mono); font-size: 0.68rem; font-weight: var(--weight-bold); padding: 0.05rem 0.4rem; border-radius: var(--radius-pill); border: 1px solid var(--edge); border-inline-start-width: 3px; }
   .vbadge--verified { border-inline-start-color: var(--ok-edge); }
   .vbadge--under_review { border-inline-start-color: var(--warn-edge); }
   .vbadge--blocked { border-inline-start-color: var(--danger-edge); }
@@ -1377,44 +1437,46 @@ manuals with the knowledge-to-skills-pipeline).
   .mentor-head { margin: 0; }
   .mentor-q { border: 0; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
   .mentor-q legend { font-weight: var(--weight-bold); font-size: 0.92rem; padding: 0; color: var(--ink); }
-  .mentor-skip { opacity: 0.7; }
+  /* Skip is a quieter action — differentiated by soft ink, never by opacity on
+     text (opacity over the panel wash fails WCAG AA). */
+  .mentor-skip { color: var(--ink-soft); }
   .reflect { border-inline-start: 3px solid var(--signal); background: var(--surface-2); border-radius: var(--radius); padding: var(--space-sm) var(--space-md); }
   .reflect-head { margin: 0 0 0.25rem; color: var(--ink); }
   .reflect-list { margin: 0.4rem 0 0; padding-inline-start: 1.1rem; display: grid; gap: 0.25rem; }
-  .deeper, .advanced { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
-  .refine { border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.6rem 0.85rem; display: flex; flex-direction: column; gap: 0.6rem; background: color-mix(in srgb, var(--sl-color-accent) 5%, transparent); }
-  .refine > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 700; }
-  .proposals { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
-  .proposal { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.6rem 0.8rem; }
-  .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
-  .prop-name { font-weight: 700; }
-  .apply { background: var(--sl-color-accent); color: var(--on-structure); border: 0; border-radius: 999px; padding: 0.15rem 0.7rem; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-  .applied { font-size: 0.78rem; font-weight: 700; color: var(--ok-text); }
-  .prop-why { margin: 0.3rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
+  .deeper, .advanced { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-2xs) var(--space-xs); display: flex; flex-direction: column; gap: var(--space-2xs); }
+  .refine { border: 1px solid var(--structure); border-radius: var(--radius); padding: var(--space-2xs) var(--space-xs); display: flex; flex-direction: column; gap: var(--space-2xs); background: color-mix(in srgb, var(--structure) 5%, transparent); }
+  .refine > summary { cursor: pointer; color: var(--structure); font-weight: var(--weight-bold); }
+  .proposals { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2xs); }
+  .proposal { border: 1px solid var(--edge); border-inline-start: 4px solid var(--structure); border-radius: var(--radius); padding: var(--space-2xs) var(--space-xs); }
+  .prop-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-xs); flex-wrap: wrap; }
+  .prop-name { font-weight: var(--weight-bold); }
+  .apply { background: var(--structure); color: var(--on-structure); border: 0; border-radius: var(--radius-pill); padding: 0.15rem 0.7rem; font-size: var(--step--1); font-weight: var(--weight-bold); cursor: pointer; }
+  .applied { font-size: var(--step--1); font-weight: var(--weight-bold); color: var(--ok-text); }
+  .prop-why { margin: var(--space-3xs) 0 0; font-size: var(--step--1); color: var(--ink); }
   .skill-capture { border: 1px solid var(--edge); border-inline-start: 3px solid var(--signal); border-radius: var(--radius); padding: var(--space-sm); display: flex; flex-direction: column; gap: var(--space-2xs); background: color-mix(in srgb, var(--signal) 5%, transparent); }
   .skill-capture-head { margin: 0; font-size: 1.02rem; font-family: var(--font-display); }
-  .skillsbox { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
-  .skillsbox > summary { cursor: pointer; color: var(--sl-color-text-accent); font-weight: 600; }
-  .skilllist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
-  .skillcard { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.5rem; padding: 0.55rem 0.8rem; }
-  .skill-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
-  .skill-name { font-weight: 700; font-family: var(--sl-font-mono); font-size: 0.92rem; }
-  .skill-desc { margin: 0.25rem 0 0; font-size: 0.88rem; color: var(--sl-color-text); }
-  .skill-steps { margin: 0.4rem 0 0; padding-inline-start: 1.2rem; font-size: 0.85rem; color: var(--sl-color-gray-2); display: grid; gap: 0.15rem; }
-  .deeper summary, .advanced summary, .swap summary { cursor: pointer; color: var(--sl-color-text-accent); font-size: 0.9rem; font-weight: 600; }
+  .skillsbox { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-2xs) var(--space-xs); display: flex; flex-direction: column; gap: var(--space-2xs); }
+  .skillsbox > summary { cursor: pointer; color: var(--structure); font-weight: var(--weight-bold); }
+  .skilllist { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-2xs); }
+  .skillcard { border: 1px solid var(--edge); border-inline-start: 4px solid var(--structure); border-radius: var(--radius); padding: var(--space-2xs) var(--space-xs); }
+  .skill-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-xs); flex-wrap: wrap; }
+  .skill-name { font-weight: var(--weight-bold); font-family: var(--font-mono); font-size: var(--step--1); }
+  .skill-desc { margin: var(--space-3xs) 0 0; font-size: var(--step--1); color: var(--ink); }
+  .skill-steps { margin: var(--space-3xs) 0 0; padding-inline-start: var(--space-sm); font-size: var(--step--1); color: var(--ink-soft); display: grid; gap: 0.15rem; }
+  .deeper summary, .advanced summary, .swap summary { cursor: pointer; color: var(--structure); font-size: var(--step--1); font-weight: var(--weight-bold); }
   .bp-head h3 { margin: 0 0 0.3rem; }
-  .bp-sub { margin: 0.4rem 0 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--sl-color-gray-2); }
-  .pieces { list-style: none; counter-reset: piece; padding: 0; margin: 0; display: grid; gap: 0.7rem; }
-  .piece { border: 1px solid var(--sl-color-gray-5); border-inline-start: 4px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.7rem 0.9rem; }
-  .piece.off { opacity: 0.55; border-inline-start-color: var(--sl-color-gray-5); }
-  .piece-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; }
-  .role { counter-increment: piece; font-weight: 700; }
-  .role::before { content: counter(piece) '. '; color: var(--sl-color-text-accent); }
-  .toggle { background: none; border: 1px solid var(--sl-color-gray-5); border-radius: 999px; padding: 0.1rem 0.65rem; font-size: 0.74rem; color: var(--sl-color-text); cursor: pointer; }
-  .piece-tool { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; margin: 0.35rem 0; }
-  .tool-name { font-weight: 700; font-size: 1.02rem; }
-  .tool-meta { color: var(--sl-color-gray-2); font-size: 0.8rem; }
-  .piece-why, .piece-connects { margin: 0.25rem 0; font-size: 0.9rem; color: var(--sl-color-text); }
+  .bp-sub { margin: 0.4rem 0 0; font-size: var(--step--1); text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-soft); }
+  .pieces { list-style: none; counter-reset: piece; padding: 0; margin: 0; display: grid; gap: var(--space-xs); }
+  .piece { border: 1px solid var(--edge); border-inline-start: 4px solid var(--structure); border-radius: var(--radius); padding: var(--space-xs) var(--space-sm); }
+  .piece.off { opacity: 0.55; border-inline-start-color: var(--edge); }
+  .piece-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-xs); }
+  .role { counter-increment: piece; font-weight: var(--weight-bold); }
+  .role::before { content: counter(piece) '. '; color: var(--structure); }
+  .toggle { background: none; border: 1px solid var(--edge); border-radius: var(--radius-pill); padding: 0.1rem 0.65rem; font-size: var(--step--1); color: var(--ink); cursor: pointer; }
+  .piece-tool { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs); margin: 0.35rem 0; }
+  .tool-name { font-weight: var(--weight-bold); font-size: 1.02rem; }
+  .tool-meta { color: var(--ink-soft); font-size: var(--step--1); }
+  .piece-why, .piece-connects { margin: var(--space-3xs) 0; font-size: var(--step--1); color: var(--ink); }
   .works-with { margin: 0.25rem 0; font-size: 0.85rem; color: var(--ink-soft); }
   .advisory { margin: 0.3rem 0 0; font-size: 0.82rem; color: var(--ink); background: color-mix(in srgb, var(--signal) 14%, transparent); border-inline-start: 3px solid var(--signal); border-radius: var(--radius-sm); padding: 0.3rem 0.55rem; }
   .conflict { margin-top: 0.75rem; border: 1px solid var(--signal); border-inline-start-width: 4px; border-radius: var(--radius); padding: 0.55rem 0.8rem; background: color-mix(in srgb, var(--signal) 8%, transparent); font-size: 0.88rem; }
@@ -1426,27 +1488,27 @@ manuals with the knowledge-to-skills-pipeline).
   .receipt-check { color: var(--ok-edge); font-weight: 800; }
   .swap { margin-top: 0.45rem; }
   .swap ul { list-style: none; padding: 0.4rem 0 0; margin: 0; display: grid; gap: 0.3rem; }
-  .fits { border-inline-start: 3px solid var(--sl-color-accent); background: var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.6rem 0.85rem; }
-  .fits p { margin: 0.3rem 0 0; font-size: 0.92rem; }
-  .nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 0.5rem; }
-  .nav button { padding: 0.55rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; font-weight: 600; }
-  .primary { background: var(--sl-color-accent); color: var(--on-structure); border: 1px solid var(--sl-color-accent); padding: 0.55rem 1.1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 700; }
+  .fits { border-inline-start: 3px solid var(--structure); background: var(--surface-2); border-radius: var(--radius); padding: var(--space-2xs) var(--space-xs); }
+  .fits p { margin: var(--space-3xs) 0 0; font-size: var(--step-0); }
+  .nav { display: flex; justify-content: space-between; gap: var(--space-2xs); margin-top: var(--space-2xs); }
+  .nav button { padding: 0.55rem 1rem; border-radius: var(--radius); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink); cursor: pointer; font-weight: var(--weight-bold); }
+  .primary { background: var(--structure); color: var(--on-structure); border: 1px solid var(--structure); padding: 0.55rem 1.1rem; border-radius: var(--radius); cursor: pointer; font-weight: var(--weight-bold); }
   .big { font-size: 1.05rem; padding: 0.7rem 1.3rem; }
-  .hint { color: var(--sl-color-gray-2); font-size: 0.9rem; }
+  .hint { color: var(--ink-soft); font-size: var(--step--1); }
   /* "Open in Goose" is an <a> styled as the primary button. */
   a.primary { display: inline-block; text-decoration: none; text-align: center; }
-  .goose-explain { margin: 0.2rem 0 0.4rem; padding-inline-start: 1.1rem; color: var(--sl-color-gray-2); font-size: 0.9rem; }
-  .goose-explain li { margin: 0.25rem 0; }
-  .goose-explain strong { color: var(--sl-color-text-accent); }
-  .goose-fallback { font-size: 0.9rem; }
-  .goose-fallback summary { cursor: pointer; color: var(--sl-color-gray-2); }
-  .goose-fallback > :not(summary) { margin-top: 0.5rem; }
-  .err { color: var(--danger-text); font-size: 0.9rem; }
-  .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; text-decoration: underline; font: inherit; }
+  .goose-explain { margin: 0.2rem 0 0.4rem; padding-inline-start: 1.1rem; color: var(--ink-soft); font-size: var(--step--1); }
+  .goose-explain li { margin: var(--space-3xs) 0; }
+  .goose-explain strong { color: var(--structure); }
+  .goose-fallback { font-size: var(--step--1); }
+  .goose-fallback summary { cursor: pointer; color: var(--ink-soft); }
+  .goose-fallback > :not(summary) { margin-top: var(--space-2xs); }
+  .err { color: var(--danger-text); font-size: var(--step--1); }
+  .link { background: none; border: 0; color: var(--structure); cursor: pointer; text-decoration: underline; font: inherit; }
   .copyp { align-self: flex-start; }
-  details { border: 1px solid var(--sl-color-gray-6); border-radius: 0.5rem; padding: 0.5rem 0.75rem; }
-  summary { font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; }
-  pre { max-height: 22rem; overflow: auto; background: var(--sl-color-black); padding: 0.75rem; border-radius: 0.4rem; }
+  details { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-2xs) var(--space-xs); }
+  summary { font-weight: var(--weight-bold); cursor: pointer; display: flex; justify-content: space-between; gap: var(--space-sm); }
+  pre { max-height: 22rem; overflow: auto; background: var(--bg); padding: var(--space-xs); border-radius: var(--radius); }
   /* Touch targets (merged from the mobile-responsiveness work): primary actions reach
      ~44px; dense in-flow controls stay above the 24px floor (axe target-size already
      passes; this honours the 48/24 working-target guidance). */

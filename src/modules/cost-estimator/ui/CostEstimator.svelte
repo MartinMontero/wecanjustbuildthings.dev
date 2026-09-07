@@ -6,6 +6,7 @@
     writeUsageToSession, writeEstimateToSession,
   } from '../core/usage-profile.ts';
   import { estimate } from '../core/estimator.ts';
+  import { allUnconfirmed } from '../../../lib/provenance.ts';
   import { ALL_ADAPTERS } from '../adapters/index.ts';
   import type { CostEstimate, ComputePosture, EstimateDataSource, TierId, UsageProfile } from '../core/types.ts';
   import { STRINGS, normalizeLang, type Lang } from './i18n.ts';
@@ -40,8 +41,9 @@
   });
 
   // ---- locale-aware formatting (currency symbol, grouping, digit shaping) ----
-  function money(amount: number | null, currency: string): string {
-    if (amount == null) return t.todoConfirm;
+  // Null amounts never reach here: the template renders the D8 provenance chip
+  // for unconfirmed figures instead of any placeholder text.
+  function money(amount: number, currency: string): string {
     return new Intl.NumberFormat(lang, { style: 'currency', currency }).format(amount);
   }
   function num(n: number): string {
@@ -79,10 +81,6 @@
   function tierLabel(id: TierId): string {
     return id === 'seed' ? t.tierSeed : id === 'growth' ? t.tierGrowth : t.tierScale;
   }
-  function allUnconfirmed(amounts: (number | null)[]): boolean {
-    return amounts.every((a) => a === null);
-  }
-
   async function run() {
     if (!usage) return;
     computing = true;
@@ -117,6 +115,13 @@
     }
   }
 </script>
+
+<!-- D8 provenance chip: an unconfirmed registry figure is surfaced as an
+     honesty statement (icon + word + pending-style dashed edge — readable in
+     grayscale, never colour alone), never as a work note. -->
+{#snippet provChip()}
+  <span class="prov-chip"><svg class="prov-chip__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.8V12l2.6 2.6" /></svg>{t.unverifiedChip}</span>
+{/snippet}
 
 <div class="ce" {dir}>
   {#if !ready}
@@ -199,7 +204,7 @@
                   <strong>{q.providerName}</strong>
                   <span class="total">
                     {#if allUnconfirmed(q.lineItems.map((li) => li.amount))}
-                      {t.todoConfirm}
+                      {@render provChip()}
                     {:else}
                       {money(q.confirmedTotal, q.currency)} <small>{t.perMonth}</small>
                       {#if q.hasUnconfirmed}<em class="partial">· {t.partialTotal}</em>{/if}
@@ -208,7 +213,7 @@
                 </div>
                 <p class="pmeta small">
                   <span class="badge">{q.source === 'live' ? t.provenanceLive : t.provenanceSnapshot}</span>
-                  · {q.lastVerified ? `${t.lastVerified} ${q.lastVerified}` : t.todoConfirm}
+                  · {#if q.lastVerified}{t.lastVerified} {q.lastVerified}{:else}{@render provChip()}{/if}
                   · <a href={q.sourceUrl} target="_blank" rel="noopener noreferrer">{t.source}</a>
                 </p>
                 <table class="lines">
@@ -217,7 +222,7 @@
                       <tr>
                         <td>{li.label}</td>
                         <td class="q">{num(li.quantity)} {li.unit}</td>
-                        <td class="a">{li.amount == null ? t.todoConfirm : money(li.amount, q.currency)}</td>
+                        <td class="a">{#if li.amount == null}{@render provChip()}{:else}{money(li.amount, q.currency)}{/if}</td>
                       </tr>
                     {/each}
                   </tbody>
@@ -232,46 +237,57 @@
 </div>
 
 <style>
-  /* RTL-aware: layout uses logical properties so it mirrors, not just flips text. */
-  .ce { display: flex; flex-direction: column; gap: 1rem; }
-  .muted { color: var(--sl-color-gray-3); }
-  .small { font-size: 0.85rem; }
+  /* RTL-aware: layout uses logical properties so it mirrors, not just flips text.
+     Tokenized (M4/D4): every colour/space/radius comes from the wcb tokens —
+     no Starlight vars, no raw hex, no off-scale values beyond the 4px sub-grid. */
+  .ce { display: flex; flex-direction: column; gap: var(--space-sm); }
+  .muted { color: var(--ink-soft); }
+  .small { font-size: var(--step--1); }
   .lead { margin: 0; }
-  fieldset { border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; padding-inline: 1rem; padding-block: 0.5rem 1rem; }
-  legend { font-weight: 600; padding-inline: 0.4rem; }
-  .source label { display: flex; gap: 0.6rem; align-items: start; padding-block: 0.4rem; cursor: pointer; }
+  fieldset { border: 1px solid var(--edge); border-radius: var(--radius); padding-inline: var(--space-sm); padding-block: var(--space-2xs) var(--space-sm); }
+  legend { font-weight: var(--weight-bold); padding-inline: var(--space-2xs); }
+  .source label { display: flex; gap: var(--space-2xs); align-items: start; padding-block: var(--space-3xs); cursor: pointer; }
   .source label span { display: flex; flex-direction: column; }
-  .source label small { color: var(--sl-color-gray-3); }
-  .source label.active strong { color: var(--sl-color-text-accent); }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.75rem; }
-  .grid label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; }
-  .grid label.need span::after { content: ' *'; color: var(--sl-color-text-accent); }
-  .grid em.derived { color: var(--sl-color-gray-3); font-style: normal; font-size: 0.8rem; }
-  input, select { padding: 0.4rem 0.5rem; border: 1px solid var(--sl-color-gray-5); border-radius: 0.35rem; background: var(--sl-color-black); color: inherit; font-size: max(16px, 1rem); }
+  .source label small { color: var(--ink-soft); }
+  .source label.active strong { color: var(--structure); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: var(--space-xs); }
+  .grid label { display: flex; flex-direction: column; gap: var(--space-3xs); font-size: var(--step--1); }
+  .grid label.need span::after { content: ' *'; color: var(--structure); }
+  .grid em.derived { color: var(--ink-soft); font-style: normal; font-size: var(--step--1); }
+  input, select { padding: var(--space-2xs) var(--space-xs); border: 1px solid var(--control-edge); border-radius: var(--radius); background: var(--surface); color: inherit; font-size: max(16px, 1rem); }
   .seg { display: inline-flex; gap: 0; }
-  .seg button { padding: 0.4rem 0.8rem; border: 1px solid var(--sl-color-gray-5); background: transparent; color: inherit; cursor: pointer; }
-  .seg button:first-child { border-start-start-radius: 0.35rem; border-end-start-radius: 0.35rem; }
-  .seg button:last-child { border-start-end-radius: 0.35rem; border-end-end-radius: 0.35rem; }
-  .seg button.on { background: var(--sl-color-accent-low); border-color: var(--sl-color-text-accent); }
-  .go { align-self: start; padding: 0.6rem 1.2rem; border: 0; border-radius: 0.4rem; background: var(--sl-color-text-accent); color: var(--sl-color-black); font-weight: 600; cursor: pointer; }
+  .seg button { padding: var(--space-2xs) var(--space-xs); border: 1px solid var(--control-edge); background: transparent; color: inherit; cursor: pointer; }
+  .seg button:first-child { border-start-start-radius: var(--radius); border-end-start-radius: var(--radius); }
+  .seg button:last-child { border-start-end-radius: var(--radius); border-end-end-radius: var(--radius); }
+  .seg button.on { background: color-mix(in srgb, var(--structure) 18%, transparent); border-color: var(--structure); }
+  .go { align-self: start; padding: var(--space-2xs) var(--space-md); border: 0; border-radius: var(--radius); background: var(--structure); color: var(--on-structure); font-weight: var(--weight-bold); cursor: pointer; }
   .go:disabled { opacity: 0.6; cursor: default; }
-  .cta { font-weight: 600; }
-  .ok { color: var(--sl-color-text-accent); font-size: 0.9rem; }
+  .cta { font-weight: var(--weight-bold); }
+  .ok { color: var(--ok-text); font-size: var(--step--1); }
   .rh { margin-block-end: 0; }
-  .tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 1rem; }
-  .tier { border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem; padding: 0.75rem 1rem; }
+  .tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: var(--space-sm); }
+  .tier { border: 1px solid var(--edge); border-radius: var(--radius); padding: var(--space-xs) var(--space-sm); }
   .tier h4 { margin: 0; }
-  .ru { margin-block: 0.25rem 0.75rem; }
-  .prov { border-block-start: 1px solid var(--sl-color-gray-6); padding-block: 0.6rem; }
-  .phead { display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline; }
+  .ru { margin-block: var(--space-3xs) var(--space-xs); }
+  .prov { border-block-start: 1px solid var(--edge); padding-block: var(--space-2xs); }
+  .phead { display: flex; justify-content: space-between; gap: var(--space-2xs); align-items: baseline; flex-wrap: wrap; }
   .total { text-align: end; }
-  .partial { color: var(--sl-color-gray-3); font-style: normal; font-size: 0.8rem; }
-  .badge { border: 1px solid var(--sl-color-gray-5); border-radius: 0.25rem; padding: 0 0.35rem; }
-  .pmeta { color: var(--sl-color-gray-3); margin-block: 0.3rem; }
-  .lines { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .partial { color: var(--ink-soft); font-style: normal; font-size: var(--step--1); }
+  .badge { border: 1px solid var(--edge); border-radius: var(--radius-sm); padding: 0 var(--space-3xs); }
+  /* D8 provenance chip — pending language: dashed control edge + soft ink +
+     mono, with the clock icon carrying the state alongside the word. */
+  .prov-chip {
+    display: inline-flex; align-items: center; gap: var(--space-3xs);
+    font-family: var(--font-mono); font-size: var(--step--1); line-height: 1.4;
+    padding: 0 var(--space-2xs); border: 1px dashed var(--control-edge);
+    border-radius: var(--radius-pill); color: var(--ink-soft); white-space: normal;
+  }
+  .prov-chip__icon { inline-size: 0.9em; block-size: 0.9em; flex: 0 0 auto; }
+  .pmeta { color: var(--ink-soft); margin-block: var(--space-3xs); }
+  .lines { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
   .lines td { padding: 0.15rem 0; text-align: start; }
-  .lines td.q { color: var(--sl-color-gray-3); text-align: end; white-space: nowrap; padding-inline-start: 0.5rem; }
-  .lines td.a { text-align: end; white-space: nowrap; padding-inline-start: 0.5rem; }
+  .lines td.q { color: var(--ink-soft); text-align: end; white-space: nowrap; padding-inline-start: var(--space-2xs); }
+  .lines td.a { text-align: end; padding-inline-start: var(--space-2xs); }
   /* Touch targets. */
   .go, .seg button, input, select { min-block-size: 2.75rem; }
 </style>

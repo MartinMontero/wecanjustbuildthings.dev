@@ -35,7 +35,9 @@ export interface ModelCompassStrings {
   filterNoUsJurisdiction: string;
   filterAllTiers: string;
   // cell helpers
-  todoConfirm: string;
+  /** D8 provenance chip — shown wherever a registry figure is still null
+   *  (never a work note; the reader gets an honesty statement). */
+  unverifiedChip: string;
   selfHostedCompute: string;
   proprietary: string;
   vendorReported: string;
@@ -70,7 +72,7 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     filterSelfHostOnly: 'Self-hostable only',
     filterNoUsJurisdiction: 'No US jurisdiction',
     filterAllTiers: 'All tiers',
-    todoConfirm: 'TODO: confirm',
+    unverifiedChip: 'unverified — awaiting human check',
     selfHostedCompute: 'self-hosted compute',
     proprietary: 'proprietary',
     vendorReported: 'vendor-reported',
@@ -103,7 +105,7 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     filterSelfHostOnly: 'Solo autoalojables',
     filterNoUsJurisdiction: 'Sin jurisdicción de EE. UU.',
     filterAllTiers: 'Todos los niveles',
-    todoConfirm: 'PENDIENTE: confirmar',
+    unverifiedChip: 'sin verificar — pendiente de revisión humana',
     selfHostedCompute: 'cómputo autoalojado',
     proprietary: 'propietario',
     vendorReported: 'informado por el proveedor',
@@ -136,7 +138,7 @@ export const STRINGS: Record<Lang, ModelCompassStrings> = {
     filterSelfHostOnly: 'القابلة للاستضافة الذاتية فقط',
     filterNoUsJurisdiction: 'دون ولاية قضائية أمريكية',
     filterAllTiers: 'كل المستويات',
-    todoConfirm: 'للتأكيد لاحقًا',
+    unverifiedChip: 'غير مُتحقَّق — بانتظار مراجعة بشرية',
     selfHostedCompute: 'حوسبة ذاتية الاستضافة',
     proprietary: 'مملوك',
     vendorReported: 'مُبلَّغ من المزوّد',
