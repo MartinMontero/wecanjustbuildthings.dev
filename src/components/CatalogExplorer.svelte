@@ -518,26 +518,26 @@
 <style>
   .explorer { margin: 1rem 0 2rem; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-  .cat-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; text-decoration: none; color: var(--sl-color-text); background: color-mix(in srgb, var(--sl-color-accent) 9%, transparent); border: 1px solid var(--sl-color-accent); border-radius: 0.6rem; padding: 0.8rem 1rem; margin-bottom: 1.1rem; }
+  .cat-cta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2xs) var(--space-sm); text-decoration: none; color: var(--ink); background: color-mix(in srgb, var(--structure) 9%, transparent); border: 1px solid var(--structure); border-radius: var(--radius); padding: var(--space-xs) var(--space-sm); margin-bottom: var(--space-sm); }
   .cat-cta span:first-child { flex: 1 1 18rem; font-size: 0.92rem; }
-  .cat-cta-go { font-weight: 700; color: var(--sl-color-text-accent); white-space: nowrap; }
-  .cat-intro { border-inline-start: 3px solid var(--sl-color-accent); padding: 0.1rem 0 0.1rem 0.9rem; margin-bottom: 1.1rem; }
-  .cat-intro p { margin: 0 0 0.6rem; color: var(--sl-color-text); font-size: 0.95rem; max-width: 60ch; }
-  .cat-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; font-size: 0.82rem; color: var(--sl-color-gray-2); }
+  .cat-cta-go { font-weight: var(--weight-bold); color: var(--structure); white-space: nowrap; }
+  .cat-intro { border-inline-start: 3px solid var(--structure); padding: 0.1rem 0 0.1rem var(--space-sm); margin-bottom: var(--space-sm); }
+  .cat-intro p { margin: 0 0 var(--space-2xs); color: var(--ink); font-size: var(--step-0); max-width: 60ch; }
+  .cat-legend { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-3xs) var(--space-sm); font-size: var(--step--1); color: var(--ink-soft); }
   .cat-legend li { display: flex; align-items: center; gap: 0.4rem; }
   .toolbar { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: end; margin-bottom: 1rem; }
   .search { flex: 1 1 18rem; }
   .search input {
     width: 100%; padding: 0.55rem 0.75rem; font-size: max(16px, 1rem);
-    border: 1px solid var(--sl-color-gray-5); border-radius: 0.5rem;
-    background: var(--sl-color-black); color: var(--sl-color-white);
+    border: 1px solid var(--control-edge); border-radius: var(--radius);
+    background: var(--surface); color: var(--ink);
   }
-  .sort { display: flex; gap: 0.4rem; align-items: center; color: var(--sl-color-text); font-size: 0.9rem; }
-  .sort select { padding: 0.4rem; font-size: max(16px, 1rem); border-radius: 0.4rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-black); color: var(--sl-color-white); }
+  .sort { display: flex; gap: var(--space-3xs); align-items: center; color: var(--ink); font-size: var(--step--1); }
+  .sort select { padding: var(--space-3xs); font-size: max(16px, 1rem); border-radius: var(--radius); border: 1px solid var(--control-edge); background: var(--surface); color: var(--ink); }
   .layout { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 1.5rem; align-items: start; }
   @media (max-width: 50rem) { .layout { grid-template-columns: 1fr; } }
   .facets { position: sticky; top: 1rem; }
-  .facets-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem; font-size: 0.9rem; color: var(--sl-color-text); }
+  .facets-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-xs); font-size: var(--step--1); color: var(--ink); }
   /* Designed facet groups (D3): token-native rows with a count pill, a clear
      selected state (edge + wash, never colour alone — the checkbox is the icon),
      and the system accent on the control itself. */
@@ -559,7 +559,7 @@
     padding: 0.05em 0.5em; font-size: var(--step--1);
   }
   .opt.on .opt-count { background: var(--surface); }
-  .link { background: none; border: 0; color: var(--sl-color-text-accent); cursor: pointer; font: inherit; padding: 0; text-decoration: underline; }
+  .link { background: none; border: 0; color: var(--structure); cursor: pointer; font: inherit; padding: 0; text-decoration: underline; }
   .state { max-width: 34rem; margin: var(--space-md) auto; }
   .state-btn {
     margin-top: var(--space-2xs); font: inherit; font-weight: var(--weight-bold);
@@ -586,16 +586,16 @@
   .card--blocked { border-inline-start-color: var(--danger-edge); background: var(--verdict-danger-bg); }
   .card-top { display: flex; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap; align-items: baseline; }
   .card-name { font-weight: 700; font-size: 1.02rem; overflow-wrap: anywhere; }
-  .card-desc { margin: 0.35rem 0; color: var(--sl-color-text); font-size: 0.92rem; flex: 1; }
-  .card-meta { color: var(--sl-color-gray-2); font-size: 0.82rem; }
+  .card-desc { margin: var(--space-3xs) 0; color: var(--ink); font-size: var(--step-0); flex: 1; }
+  .card-meta { color: var(--ink-soft); font-size: var(--step--1); }
   .card-build {
     margin-top: 0.6rem; font: inherit; font-size: 0.82rem; cursor: pointer;
     padding: 0.25rem 0.6rem; border-radius: 0.4rem; align-self: flex-start;
-    border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text);
+    border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink);
   }
-  .card-build:hover { border-color: var(--sl-color-text-accent); }
-  .card-build.on { border-color: var(--sl-color-text-accent); color: var(--sl-color-text-accent); font-weight: 600; }
-  .card-build:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
+  .card-build:hover { border-color: var(--structure); }
+  .card-build.on { border-color: var(--structure); color: var(--structure); font-weight: var(--weight-bold); }
+  .card-build:focus-visible { outline: var(--focus-width) solid var(--ring); outline-offset: var(--focus-offset); }
 
   /* Sticky "build tray" — stays in view as the builder scrolls, so they always know
      what's staged and have a one-click, oriented way into the Build Studio. */
@@ -603,20 +603,20 @@
     position: sticky; bottom: 0.6rem; z-index: 5;
     display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 0.9rem;
     margin-top: 1rem; padding: 0.7rem 1rem;
-    background: var(--sl-color-bg-nav, var(--sl-color-bg)); color: var(--sl-color-text);
-    border: 1px solid var(--sl-color-accent); border-radius: 0.6rem;
-    box-shadow: 0 6px 24px rgb(0 0 0 / 0.18);
+    background: var(--bg); color: var(--ink);
+    border: 1px solid var(--structure); border-radius: var(--radius);
+    box-shadow: var(--shadow-1); /* the one sanctioned shadow (tokens.css) */
   }
   .build-tray__count { font-size: 0.92rem; }
-  .build-tray__count strong { color: var(--sl-color-text-accent); }
-  .build-tray__hint { flex: 1 1 16rem; font-size: 0.82rem; color: var(--sl-color-gray-2); }
+  .build-tray__count strong { color: var(--structure); }
+  .build-tray__hint { flex: 1 1 16rem; font-size: var(--step--1); color: var(--ink-soft); }
   .build-tray__cta {
     font-weight: 700; white-space: nowrap; text-decoration: none;
-    color: var(--sl-color-text-accent);
-    padding: 0.3rem 0.7rem; border-radius: 0.4rem; border: 1px solid var(--sl-color-accent);
+    color: var(--structure);
+    padding: var(--space-3xs) var(--space-xs); border-radius: var(--radius); border: 1px solid var(--structure);
   }
-  .build-tray__cta:hover { background: color-mix(in srgb, var(--sl-color-accent) 14%, transparent); }
-  .build-tray__cta:focus-visible { outline: 2px solid var(--sl-color-text-accent); outline-offset: 2px; }
+  .build-tray__cta:hover { background: color-mix(in srgb, var(--structure) 14%, transparent); }
+  .build-tray__cta:focus-visible { outline: var(--focus-width) solid var(--ring); outline-offset: var(--focus-offset); }
   .badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
   /* Skeleton loading grid — same geometry as the receipt-card grid so the LCP
      element doesn't shift when /catalog.json lands. */
@@ -627,7 +627,7 @@
   .sk-line--short { inline-size: 40%; }
   @keyframes sk-pulse { 50% { opacity: 0.5; } }
   @media (prefers-reduced-motion: reduce) { .sk-line { animation: none; } }
-  .more { margin-top: 1rem; padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid var(--sl-color-gray-5); background: var(--sl-color-gray-6); color: var(--sl-color-text); cursor: pointer; }
+  .more { margin-top: var(--space-sm); padding: var(--space-2xs) var(--space-sm); border-radius: var(--radius); border: 1px solid var(--control-edge); background: var(--surface-2); color: var(--ink); cursor: pointer; }
   /* Touch targets. */
   .search input, .sort select, .more { min-block-size: 2.75rem; }
   .opt { min-block-size: 1.75rem; }
