@@ -19,7 +19,7 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import WorkOrderGrid from '../../components/WorkOrderGrid.astro';
 
 ## For the people who build to protect their communities
 
@@ -34,31 +34,29 @@ judgment:** a verified catalog of freedom-tech tools, a guided flow from idea to
 shipped, reusable agent skills, and safeguards that have your back — so when the
 agent runs, it builds on decisions already made, verified, and documented.
 
-<CardGrid stagger>
-  <Card title="Build what your community needs" icon="rocket">
-    You don't need a CS degree — only to know the problem. The
-    [guided flow](/pie/about/) and an agent take you from "my community needs
-    this" to a shipped, production-grade tool for Nostr, AT Protocol, or whatever
-    you're creating.
-  </Card>
-  <Card title="Trust you can verify yourself" icon="approve-check">
-    Every tool is license-checked **at a specific commit**, its provenance on
-    display. You never have to take a vendor's — or a README's — word for what
-    you're depending on. The receipts are right there.
-  </Card>
-  <Card title="Your values, kept by default" icon="heart">
-    The tools you build to protect your people can't be quietly wired into the
-    surveillance-ad stacks they're trying to route around. Anything owned by
-    Meta, OpenAI, or xAI is kept out — [automatically](/policies/enforcement/),
-    so solidarity is the default, not a chore.
-  </Card>
-  <Card title="Built to outlast its makers" icon="seti:clock">
-    Designed for month six, not demo day. Weekly automation keeps the catalog
-    honest, and anyone can fork it and keep going — so the infrastructure belongs
-    to the movement, not to one maintainer. Bring any agent: Goose, Claude Code,
-    Aider.
-  </Card>
-</CardGrid>
+<WorkOrderGrid
+  stagger
+  items={[
+    {
+      title: 'Build what your community needs',
+      body: 'You don’t need a CS degree — only to know the problem. Say it in plain words, and the guided flow plus an AI agent take you from “my community needs this” to a shipped, production-grade tool.',
+      href: '/pie/about/',
+    },
+    {
+      title: 'Check every claim yourself',
+      body: 'Every tool’s license is verified at a specific commit, with the receipt right on the page. You never take a vendor’s — or a README’s — word for what you depend on.',
+    },
+    {
+      title: 'Your values, kept by default',
+      body: 'The tools you build to protect your people can’t be quietly wired into surveillance-ad stacks. Anything owned by Meta, OpenAI, or xAI is kept out — automatically — so solidarity is the default, not a chore.',
+      href: '/policies/enforcement/',
+    },
+    {
+      title: 'Built to outlast its makers',
+      body: 'Made for month six, not demo day. Weekly checks keep the catalog honest, and anyone can fork the whole project and keep going — the infrastructure belongs to the movement, not one maintainer.',
+    },
+  ]}
+/>
 
 ## Built for you, not for the platform
 
@@ -68,33 +66,62 @@ people who have to *trust* a system without being able to see inside it, and who
 deserve to make the calls about what they depend on with their eyes open. The
 safeguards exist to serve them, never to fence them in.
 
-<CardGrid>
-  <LinkCard
-    title="The first-time builder"
-    href="/start/"
-    description="You have an idea and a community problem, not a CS degree. Follow the guided flow from intent to a shortlist of vetted tools — and on to something shipped."
-  />
-  <LinkCard
-    title="The builder-operator"
-    href="/catalog/"
-    description="You already ship. Use the catalog like a curated bookshelf — check a license, find adjacent libraries, grab a configuration recipe, and save an afternoon of due diligence."
-  />
-</CardGrid>
+<WorkOrderGrid
+  items={[
+    {
+      title: 'The first-time builder',
+      body: 'You have an idea and a community problem, not a CS degree. Follow the guided flow from intent to a shortlist of vetted tools — and on to something shipped.',
+      href: '/start/',
+    },
+    {
+      title: 'The builder-operator',
+      body: 'You already ship. Check a license, find adjacent libraries, grab a configuration recipe — and save an afternoon of due diligence.',
+      href: '/catalog/',
+    },
+  ]}
+/>
 
 ## Use the tools
 
-<CardGrid>
-  <LinkCard title="Build Studio →" href="/build/" description="Describe your project; get a policy-clean stack, a constitution, an agent prompt, and a downloadable starter repo." />
-  <LinkCard title="Catalog explorer →" href="/catalog/" description="Search and filter a thousand-plus verified tools and 800+ datasets live — by protocol, ecosystem, license, and more." />
-  <LinkCard title="Check a dependency →" href="/check/" description="Paste a package.json or a list of dependencies; run the exclusion policy in your browser with live license lookups." />
-  <LinkCard title="The build flow →" href="/pie/about/" description="From “my community has a problem” to a shippable plan." />
-</CardGrid>
+<WorkOrderGrid
+  items={[
+    {
+      title: 'Build Studio →',
+      body: 'Describe your project; get a policy-clean stack, a constitution, an agent prompt, and a starter repo you can download.',
+      href: '/build/',
+    },
+    {
+      title: 'Catalog explorer →',
+      body: 'Search a thousand-plus verified tools and 800+ datasets — by what they do, the network they run on, and their license.',
+      href: '/catalog/',
+    },
+    {
+      title: 'Check a dependency →',
+      body: 'Paste your dependency list; we check it against the blocklist right here on your device — nothing is uploaded. License details are looked up live; only the package names travel.',
+      href: '/check/',
+    },
+    {
+      title: 'The build flow →',
+      body: 'From “my community has a problem” to a plan you can actually ship.',
+      href: '/pie/about/',
+    },
+  ]}
+/>
 
 ## Start where you are
 
-<CardGrid>
-  <LinkCard title="What this is →" href="/start/" description="The 3-minute orientation." />
-  <LinkCard title="Why not just use Goose? →" href="/start/vs-harness/" description="The harness vs. the layer that gives it judgment." />
-  <LinkCard title="How we keep our promise →" href="/policies/enforcement/" description="The safeguards that protect what you build, in plain language." />
-</CardGrid>
-
+<WorkOrderGrid
+  items={[
+    { title: 'What this is →', body: 'The 3-minute orientation.', href: '/start/' },
+    {
+      title: 'Why not just use Goose? →',
+      body: 'The harness vs. the layer that gives it judgment.',
+      href: '/start/vs-harness/',
+    },
+    {
+      title: 'How we keep our promise →',
+      body: 'The safeguards that protect what you build, in plain language.',
+      href: '/policies/enforcement/',
+    },
+  ]}
+/>
