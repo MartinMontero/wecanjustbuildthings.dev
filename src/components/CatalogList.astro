@@ -78,6 +78,12 @@ if (limit) entries = entries.slice(0, limit);
   .wcb-catalog-list li {
     padding: 0.6rem 0;
     border-bottom: 1px solid var(--edge);
+    /* Long protocol clusters render several hundred items; let the browser skip
+       layout/paint for off-screen items (M8 perf fix — /pie/cooking/ was below
+       the 0.90 Lighthouse budget at 0.88, driven by the cluster DOM). Items stay
+       in the accessibility tree; intrinsic size keeps scroll geometry stable. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 5.5rem;
   }
   .wcb-catalog-desc {
     color: var(--ink-soft);
