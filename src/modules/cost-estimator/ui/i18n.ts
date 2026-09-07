@@ -37,7 +37,9 @@ export interface EstimatorStrings {
   provenanceSnapshot: string;
   provenanceLive: string;
   lastVerified: string;
-  todoConfirm: string;
+  /** D8 provenance chip — shown wherever a registry figure is still null
+   *  (never a work note; the builder reads an honesty statement). */
+  unverifiedChip: string;
   partialTotal: string;
   source: string;
   savedNote: string;
@@ -81,7 +83,7 @@ export const STRINGS: Record<Lang, EstimatorStrings> = {
     provenanceSnapshot: 'snapshot',
     provenanceLive: 'live',
     lastVerified: 'last verified',
-    todoConfirm: 'TODO: confirm',
+    unverifiedChip: 'unverified — awaiting human check',
     partialTotal: 'partial — some prices unconfirmed',
     source: 'source',
     savedNote: 'Saved to your build session.',
@@ -123,7 +125,7 @@ export const STRINGS: Record<Lang, EstimatorStrings> = {
     provenanceSnapshot: 'instantánea',
     provenanceLive: 'en vivo',
     lastVerified: 'verificado por última vez',
-    todoConfirm: 'PENDIENTE: confirmar',
+    unverifiedChip: 'sin verificar — pendiente de revisión humana',
     partialTotal: 'parcial — algunos precios sin confirmar',
     source: 'fuente',
     savedNote: 'Guardado en tu sesión de construcción.',
@@ -165,7 +167,7 @@ export const STRINGS: Record<Lang, EstimatorStrings> = {
     provenanceSnapshot: 'لقطة',
     provenanceLive: 'مباشر',
     lastVerified: 'آخر تحقّق',
-    todoConfirm: 'للتأكيد لاحقًا',
+    unverifiedChip: 'غير مُتحقَّق — بانتظار مراجعة بشرية',
     partialTotal: 'جزئي — بعض الأسعار غير مؤكّدة',
     source: 'المصدر',
     savedNote: 'حُفِظ في جلسة البناء.',
