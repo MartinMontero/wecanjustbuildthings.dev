@@ -21,7 +21,7 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import WorkOrderGrid from '../../../components/WorkOrderGrid.astro';
 
 ## Para quienes construyen para proteger a sus comunidades
 
@@ -38,32 +38,29 @@ a lo lanzado, habilidades reutilizables del agente y salvaguardas que te respald
 — para que cuando el agente actúe, construya sobre decisiones ya tomadas,
 verificadas y documentadas.
 
-<CardGrid stagger>
-  <Card title="Construye lo que tu comunidad necesita" icon="rocket">
-    No necesitas un título en informática — solo conocer el problema. El
-    [flujo guiado](/es/pie/about/) y un agente te llevan de "mi comunidad
-    necesita esto" a una herramienta lanzada y de nivel profesional para Nostr,
-    AT Protocol o lo que sea que estés creando.
-  </Card>
-  <Card title="Confianza que puedes verificar tú mismo" icon="approve-check">
-    Cada herramienta tiene su licencia verificada **en un commit específico**, con
-    su procedencia a la vista. Nunca tienes que creerle a un proveedor — ni a un
-    README — sobre aquello de lo que dependes. Las pruebas están ahí mismo.
-  </Card>
-  <Card title="Tus valores, respetados por defecto" icon="heart">
-    Las herramientas que construyes para proteger a tu gente no pueden quedar
-    discretamente conectadas a las pilas de vigilancia publicitaria que intentan
-    esquivar. Todo lo que sea propiedad de Meta, OpenAI o xAI queda fuera —
-    [automáticamente](/es/policies/enforcement/), para que la solidaridad sea lo
-    predeterminado, no una carga.
-  </Card>
-  <Card title="Hecho para durar más que sus creadores" icon="seti:clock">
-    Diseñado para el mes seis, no para el día del demo. La automatización semanal
-    mantiene el catálogo honesto, y cualquiera puede bifurcarlo y seguir adelante
-    — para que la infraestructura pertenezca al movimiento, no a una sola persona.
-    Trae cualquier agente: Goose, Claude Code, Aider.
-  </Card>
-</CardGrid>
+<WorkOrderGrid
+  stagger
+  items={[
+    {
+      title: 'Construye lo que tu comunidad necesita',
+      body: 'No necesitas un título en informática — solo conocer el problema. Dilo en palabras sencillas, y el flujo guiado más un agente de IA te llevan de «mi comunidad necesita esto» a una herramienta lanzada y de nivel profesional.',
+      href: '/es/pie/about/',
+    },
+    {
+      title: 'Verifica cada afirmación tú mismo',
+      body: 'Cada herramienta tiene su licencia verificada en un commit específico, con el comprobante a la vista en la página. Nunca tienes que creerle a un proveedor — ni a un README — sobre aquello de lo que dependes.',
+    },
+    {
+      title: 'Tus valores, respetados por defecto',
+      body: 'Las herramientas que construyes para proteger a tu gente no pueden quedar discretamente conectadas a pilas de vigilancia publicitaria. Todo lo que sea propiedad de Meta, OpenAI o xAI queda fuera — automáticamente — para que la solidaridad sea lo predeterminado, no una carga.',
+      href: '/es/policies/enforcement/',
+    },
+    {
+      title: 'Hecho para durar más que sus creadores',
+      body: 'Pensado para el mes seis, no para el día del demo. Las comprobaciones semanales mantienen el catálogo honesto, y cualquiera puede bifurcar el proyecto entero y seguir adelante — la infraestructura pertenece al movimiento, no a una sola persona.',
+    },
+  ]}
+/>
 
 ## Hecho para ti, no para la plataforma
 
@@ -73,32 +70,62 @@ colectivo — las personas que tienen que *confiar* en un sistema sin poder ver 
 interior, y que merecen decidir de qué dependen con los ojos abiertos. Las
 salvaguardas existen para servirles, nunca para encerrarles.
 
-<CardGrid>
-  <LinkCard
-    title="Quien construye por primera vez"
-    href="/es/start/"
-    description="Tienes una idea y un problema comunitario, no un título en informática. Sigue el flujo guiado de la intención a una lista corta de herramientas verificadas — y de ahí a algo lanzado."
-  />
-  <LinkCard
-    title="Quien ya construye y opera"
-    href="/es/catalog/"
-    description="Ya lanzas. Usa el catálogo como una estantería curada — verifica una licencia, encuentra bibliotecas afines, toma una receta de configuración y ahórrate una tarde de diligencia debida."
-  />
-</CardGrid>
+<WorkOrderGrid
+  items={[
+    {
+      title: 'Quien construye por primera vez',
+      body: 'Tienes una idea y un problema comunitario, no un título en informática. Sigue el flujo guiado de la intención a una lista corta de herramientas verificadas — y de ahí a algo lanzado.',
+      href: '/es/start/',
+    },
+    {
+      title: 'Quien ya construye y opera',
+      body: 'Ya lanzas. Verifica una licencia, encuentra bibliotecas afines, toma una receta de configuración — y ahórrate una tarde de diligencia debida.',
+      href: '/es/catalog/',
+    },
+  ]}
+/>
 
 ## Usa las herramientas
 
-<CardGrid>
-  <LinkCard title="Estudio de construcción →" href="/es/build/" description="Describe tu proyecto; obtén un stack que cumple la política, una constitución, un prompt para el agente y un repositorio inicial descargable." />
-  <LinkCard title="Explorador del catálogo →" href="/es/catalog/" description="Busca y filtra más de 1.300 herramientas verificadas en vivo — por protocolo, ecosistema, licencia y más." />
-  <LinkCard title="Verifica una dependencia →" href="/es/check/" description="Pega un package.json; ejecuta la política de exclusión en tu navegador con búsquedas de licencia en vivo." />
-  <LinkCard title="El flujo de construcción →" href="/es/pie/about/" description="De «mi comunidad tiene un problema» a un plan que se puede lanzar." />
-</CardGrid>
+<WorkOrderGrid
+  items={[
+    {
+      title: 'Estudio de construcción →',
+      body: 'Describe tu proyecto; obtén un stack que cumple la política, una constitución, un prompt para el agente y un repositorio inicial que puedes descargar.',
+      href: '/es/build/',
+    },
+    {
+      title: 'Explorador del catálogo →',
+      body: 'Busca entre más de mil herramientas verificadas y más de 800 conjuntos de datos — por lo que hacen, la red en que corren y su licencia.',
+      href: '/es/catalog/',
+    },
+    {
+      title: 'Verifica una dependencia →',
+      body: 'Pega tu lista de dependencias; la cotejamos con la lista de bloqueo aquí mismo, en tu dispositivo — no se sube nada. Los datos de licencia se consultan en vivo; solo viajan los nombres de los paquetes.',
+      href: '/es/check/',
+    },
+    {
+      title: 'El flujo de construcción →',
+      body: 'De «mi comunidad tiene un problema» a un plan que de verdad se puede lanzar.',
+      href: '/es/pie/about/',
+    },
+  ]}
+/>
 
 ## Empieza donde estás
 
-<CardGrid>
-  <LinkCard title="Qué es esto →" href="/es/start/" description="La orientación de 3 minutos." />
-  <LinkCard title="¿Por qué no usar solo Goose? →" href="/es/start/vs-harness/" description="El arnés frente a la capa que le da criterio." />
-  <LinkCard title="Cómo cumplimos nuestra promesa →" href="/es/policies/enforcement/" description="Las salvaguardas que protegen lo que construyes, en lenguaje claro." />
-</CardGrid>
+<WorkOrderGrid
+  items={[
+    { title: 'Qué es esto →', body: 'La orientación de 3 minutos.', href: '/es/start/' },
+    {
+      title: '¿Por qué no usar solo Goose? →',
+      body: 'El arnés frente a la capa que le da criterio.',
+      href: '/es/start/vs-harness/',
+    },
+    {
+      title: 'Cómo cumplimos nuestra promesa →',
+      body: 'Las salvaguardas que protegen lo que construyes, en lenguaje claro.',
+      href: '/es/policies/enforcement/',
+    },
+  ]}
+/>

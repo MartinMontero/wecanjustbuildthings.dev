@@ -1,0 +1,121 @@
+---
+/**
+ * WorkOrderGrid — the landing's bespoke card grid (M5/D5), replacing the stock
+ * Starlight CardGrid/LinkCard on the landing only (interior docs keep the
+ * Starlight components, per DESIGN §3).
+ *
+ * Speaks the Build Plate's spec-sheet language: each card is a workshop work
+ * order — a mono index rail (WO-01…), a stamped inline-start edge, a plain-verb
+ * title, and a one-sentence body. Status-free by design (no verdict semantics
+ * here); the rail + edge + text carry the structure, so it reads correctly in
+ * grayscale and never by colour alone.
+ *
+ * Token-native: no raw hex, no Starlight vars, no off-scale rems. Interactive
+ * contract: linked titles get the global :focus-visible ring; the hover lift is
+ * motion-gated by the site-wide prefers-reduced-motion rule.
+ */
+interface WorkOrder {
+  title: string;
+  body: string;
+  href?: string;
+}
+
+interface Props {
+  items: WorkOrder[];
+  /** Offset every second card on wide viewports (the landing's lead group). */
+  stagger?: boolean;
+}
+
+const { items, stagger = false } = Astro.props;
+const pad = (n: number) => String(n).padStart(2, '0');
+---
+
+<ol class:list={['wog', { 'wog--stagger': stagger }]}>
+  {
+    items.map((it, i) => (
+      <li class="wog__order">
+        <span class="wog__no" aria-hidden="true">
+          WO-{pad(i + 1)}
+        </span>
+        <h3 class="wog__title">{it.href ? <a href={it.href}>{it.title}</a> : it.title}</h3>
+        <p class="wog__body">{it.body}</p>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .wog {
+    list-style: none;
+    margin: 0 0 var(--space-md);
+    padding: 0;
+    display: grid;
+    gap: var(--space-sm);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  }
+  .wog__order {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    padding: var(--space-sm);
+    background: var(--surface);
+    border: 1px solid var(--edge);
+    border-inline-start: 4px solid var(--structure);
+    border-radius: var(--radius);
+    transition:
+      transform var(--dur-1) var(--ease-out),
+      border-color var(--dur-1) var(--ease-out);
+  }
+  .wog__order:hover {
+    border-color: var(--structure);
+    transform: translateY(-2px);
+  }
+  .wog__no {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+  }
+  .wog__title {
+    margin: 0;
+    font-size: var(--step-0);
+    font-weight: var(--weight-bold);
+    line-height: 1.3;
+  }
+  .wog__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .wog__title a:hover {
+    color: var(--structure);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .wog__body {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink);
+  }
+  @media (min-width: 50rem) {
+    .wog--stagger .wog__order:nth-child(even) {
+      transform: translateY(var(--space-md));
+    }
+    .wog--stagger .wog__order:nth-child(even):hover {
+      transform: translateY(calc(var(--space-md) - 2px));
+    }
+    /* The stagger borrows the space below, so the grid doesn't crowd the next
+       heading. */
+    .wog--stagger {
+      margin-bottom: calc(var(--space-md) + var(--space-md));
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wog__order,
+    .wog__order:hover,
+    .wog--stagger .wog__order:nth-child(even),
+    .wog--stagger .wog__order:nth-child(even):hover {
+      transform: none;
+      transition: none;
+    }
+  }
+</style>
