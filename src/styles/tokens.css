@@ -41,6 +41,20 @@
       U+2113, U+2C60-2C7F, U+A720-A7FF;
   }
 
+  /* ---- Arabic display face: Readex Pro (M6 checkpoint). Single heading weight
+          (700, instanced), subset to the measured /ar/ heading alphabet +
+          digits/punct — 32.6 KB woff2 against the 45 KB budget. Arabic-script
+          codepoints only: Latin inside Arabic headings keeps rendering in
+          Bricolage (unicode-range gates the download). OFL in /fonts. ---- */
+  @font-face {
+    font-family: 'Readex Pro Arabic';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 700;
+    src: url('/fonts/readex-pro-arabic-headings.woff2') format('woff2');
+    unicode-range: U+0600-06FF, U+0750-077F, U+FB50-FDFF, U+FE70-FEFF;
+  }
+
   :root {
     /* ---- Type ---- */
     --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter,
@@ -120,6 +134,36 @@
 
     /* Elevation — the one sanctioned shadow (replaces the last raw box-shadow). */
     --shadow-1: 0 6px 24px rgb(0 0 0 / 0.18);
+  }
+
+  /* Light palette for script-less standalone pages (the standalone /console/
+     joins the token layer in M6/D10 but runs no theme script). On the Starlight
+     site the theme script always sets data-theme, so this block never applies
+     there — it can only make first paint match the user's preference earlier.
+     KEEP IN SYNC with :root[data-theme='light'] above. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme='dark']) {
+      --bg: #E8ECE6;
+      --surface: #F3F5F0;
+      --surface-2: #FFFFFF;
+      --ink: #14211B;
+      --ink-soft: #44514A;
+      --structure: #1C5D43;
+      --on-structure: #FFFFFF;
+      --signal: #E59500;
+      --on-signal: #1E1405;
+      --edge: #CBD3CB;
+      --edge-strong: #AEB8AF;
+      --control-edge: #6E7A72;
+      --ring: var(--structure);
+      --ok-edge: #2E844E;   --ok-text: #1C7A3E;
+      --warn-edge: #B7811C; --warn-text: #8A6200;
+      --danger-edge: #C5371F; --danger-text: #B5301A;
+      --verdict-ok-bg: color-mix(in srgb, var(--ok-edge) 9%, var(--surface));
+      --verdict-warn-bg: color-mix(in srgb, var(--warn-edge) 11%, var(--surface));
+      --verdict-danger-bg: color-mix(in srgb, var(--danger-edge) 9%, var(--surface));
+      --shadow-1: 0 6px 24px rgb(20 33 27 / 0.14);
+    }
   }
 
   :root[data-theme='light'] {

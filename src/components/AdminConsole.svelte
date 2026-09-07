@@ -469,55 +469,52 @@
 
 <style>
   .console { display: grid; gap: 1rem; max-width: 34rem; }
-  .card { border: 1px solid #8884; border-radius: 0.5rem; padding: 1rem; display: grid; gap: 0.6rem; }
+  .card { border: 1px solid var(--edge); border-radius: var(--radius); padding: 1rem; display: grid; gap: 0.6rem; background: var(--surface); }
   .card h2 { margin: 0; font-size: 1.05rem; }
   .card h3 { margin: 0.2rem 0 0; font-size: 0.95rem; }
   .btn {
     font: inherit; cursor: pointer; padding: 0.5rem 0.9rem; border-radius: 0.4rem;
-    border: 1px solid #8886; background: transparent; color: inherit; min-height: 2.75rem;
+    border: 1px solid var(--control-edge); background: transparent; color: inherit; min-height: 2.75rem;
   }
   .btn:disabled { opacity: 0.6; cursor: default; }
   .small-btn { min-height: 2.25rem; padding: 0.35rem 0.7rem; font-size: 0.9rem; justify-self: start; }
   .row { display: flex; gap: 0.5rem; }
   .row input {
     flex: 1; min-width: 0; font: inherit; font-size: max(16px, 1rem);
-    padding: 0.5rem 0.6rem; border-radius: 0.4rem; border: 1px solid #8886;
+    padding: 0.5rem 0.6rem; border-radius: 0.4rem; border: 1px solid var(--control-edge);
     background: transparent; color: inherit;
   }
   .row select {
     font: inherit; padding: 0.5rem 0.6rem; border-radius: 0.4rem;
-    border: 1px solid #8886; background: transparent; color: inherit;
+    border: 1px solid var(--control-edge); background: transparent; color: inherit;
   }
-  .add { display: grid; gap: 0.5rem; border-top: 1px solid #8884; padding-top: 0.75rem; margin-top: 0.25rem; }
+  .add { display: grid; gap: 0.5rem; border-top: 1px solid var(--edge); padding-top: 0.75rem; margin-top: 0.25rem; }
   .add input {
     font: inherit; font-size: max(16px, 1rem); padding: 0.5rem 0.6rem;
-    border-radius: 0.4rem; border: 1px solid #8886; background: transparent; color: inherit;
+    border-radius: 0.4rem; border: 1px solid var(--control-edge); background: transparent; color: inherit;
   }
   .admins { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.6rem; }
   .admins li {
     display: grid; gap: 0.3rem; padding: 0.5rem 0.6rem;
-    border: 1px solid #8883; border-radius: 0.4rem;
+    border: 1px solid var(--edge); border-radius: 0.4rem;
   }
   .who-line { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
   .tag {
     font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.02em;
-    padding: 0.1rem 0.4rem; border-radius: 0.3rem; border: 1px solid #8886; color: #aaa;
+    padding: 0.1rem 0.4rem; border-radius: 0.3rem; border: 1px solid var(--edge-strong); color: var(--ink-soft);
   }
-  .tag-super { color: #e8e8ef; border-color: #aaa; }
+  .tag-super { color: var(--ink); border-color: var(--control-edge); }
   .note { margin: 0; }
-  .or { display: flex; align-items: center; gap: 0.5rem; color: #888; font-size: 0.85rem; }
-  .or::before, .or::after { content: ""; flex: 1; height: 1px; background: #8884; }
-  .muted { color: #888; }
+  .or { display: flex; align-items: center; gap: 0.5rem; color: var(--ink-soft); font-size: 0.85rem; }
+  .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--edge); }
+  .muted { color: var(--ink-soft); }
   .small { font-size: 0.85rem; }
-  .error { color: #c0392b; margin: 0; }
-  .notice { color: #888; margin: 0; }
+  .error { color: var(--danger-text); margin: 0; }
+  .notice { color: var(--ink-soft); margin: 0; }
   code { word-break: break-all; }
   .sr-only {
     position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
   }
-  @media (prefers-color-scheme: light) {
-    .tag { color: #666; }
-    .tag-super { color: #1a1a24; border-color: #666; }
-  }
+  /* Light/dark handled by the token layer (M6/D10) — no per-component media queries. */
 </style>

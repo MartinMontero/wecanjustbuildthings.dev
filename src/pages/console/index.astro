@@ -10,7 +10,13 @@
  * asset-layer responses. Routing this path through the Worker would silently
  * strip that rule and break bunker sign-in the day the CSP flips to enforce.
  * See renderHeadersFile in src/lib/security-headers.ts.
+ *
+ * M6/D10: the console joins the token layer — tokens.css is bundled in and the
+ * palette comes from it (dark by default; light via the tokens' own
+ * prefers-color-scheme block, no theme script on this page). Stays English
+ * (documented operator exception).
  */
+import '../../styles/tokens.css';
 import AdminConsole from '../../components/AdminConsole.svelte';
 ---
 
@@ -33,14 +39,11 @@ import AdminConsole from '../../components/AdminConsole.svelte';
     <style>
       body {
         margin: 0; padding: 2rem 1rem; font: 16px/1.5 system-ui, sans-serif;
-        background: #16161d; color: #e8e8ef; display: flex; justify-content: center;
+        background: var(--bg); color: var(--ink); display: flex; justify-content: center;
       }
       main { width: 100%; max-width: 34rem; display: grid; gap: 0.75rem; }
       h1 { margin: 0; font-size: 1.4rem; }
-      .muted { color: #888; margin: 0 0 0.5rem; }
-      @media (prefers-color-scheme: light) {
-        body { background: #fafafa; color: #1a1a24; }
-      }
+      .muted { color: var(--ink-soft); margin: 0 0 0.5rem; }
     </style>
   </body>
 </html>

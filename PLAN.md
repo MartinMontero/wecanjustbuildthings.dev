@@ -102,9 +102,11 @@ together (except the documented console exception).
 
 ### M6 — Console tokens, Arabic face, hydration, ceilings (D10–D13)
 - **CHECKPOINT (G6 rider b, recorded here before implementation):** Arabic
-  display face — final pick: _____ ; measured subset woff2 size: _____ KB
-  (budget ≤ 45 KB); OFL text committed. Filled in by the M6 PR itself; the
-  face does not land until this line is filled.
+  display face — final pick: **Readex Pro** (wght 700 instanced from the
+  variable source); measured subset woff2 size: **32.6 KB** (budget ≤ 45 KB);
+  OFL text committed (`public/fonts/Readex-Pro-OFL.txt`). Subset = the measured
+  /ar/ heading alphabet + digits/punct, Arabic-script codepoints only (Latin
+  stays in Bricolage). Filled by the M6 PR, 2026-09-06.
 - D10: console token-compliance only (raw hex → tokens; `.btn`/`.field`);
   CSP wss: invariance test stays green; PANEL-RESPEC-v2 room untouched.
 - D12: `client:visible` for below-fold islands; ModelCompass static-render

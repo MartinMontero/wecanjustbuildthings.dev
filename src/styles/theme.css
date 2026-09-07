@@ -56,6 +56,17 @@
     letter-spacing: -0.015em;
   }
 
+  /* Arabic headings get the M6 Arabic display face (Readex Pro subset); Latin
+     runs inside Arabic headings stay in Bricolage via the unicode-range gate. */
+  .sl-markdown-content :is(h1, h2, h3, h4):lang(ar),
+  .content-panel h1:lang(ar),
+  .hero h1:lang(ar),
+  site-title:lang(ar),
+  .site-title:lang(ar) {
+    font-family: 'Readex Pro Arabic', var(--font-display);
+    letter-spacing: 0; /* the Latin display tracking does not suit Arabic */
+  }
+
   /* Native form controls join the system: checkboxes, radios, range, progress
      take the structural green everywhere (DESIGN §2). */
   :root { accent-color: var(--structure); }
