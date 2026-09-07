@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "prebuild": "node scripts/assemble-arabic-font.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",

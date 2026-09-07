@@ -1,17 +1,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
 // M6 checkpoint invariants: the Arabic display face exists within budget, its
 // license ships, the :lang(ar) wiring is present, and the console surface
 // carries zero raw hex. These guard the G6 rider mechanically, not by memory.
 
-const srcPath = 'data/fonts/readex-pro-arabic-headings.woff2.b64';
+const partsDir = 'data/fonts/parts';
 const oflPath = 'public/fonts/Readex-Pro-OFL.txt';
 
 test('Arabic subset source exists, decodes to woff2, and is within the 45 KB budget', () => {
-  const b64 = readFileSync(srcPath, 'utf8').replace(/\s+/g, '');
+  const parts = readdirSync(partsDir).filter((f) => f.startsWith('arabic-headings.b64.part-')).sort();
+  assert.ok(parts.length >= 4, 'font parts missing');
+  const b64 = parts.map((f) => readFileSync(`${partsDir}/${f}`, 'utf8')).join('').replace(/\s+/g, '');
   const buf = Buffer.from(b64, 'base64');
   assert.ok(buf.length / 1024 <= 45, `subset ${(buf.length / 1024).toFixed(1)} KB exceeds the 45 KB budget`);
   assert.equal(buf.subarray(0, 4).toString('ascii'), 'wOF2', 'decoded source is not woff2');
