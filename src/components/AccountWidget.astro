@@ -55,33 +55,10 @@
 </div>
 
 <script>
-  type Strings = Record<string, string>;
-  const STR: Record<'en' | 'es' | 'ar', Strings> = {
-    en: {
-      signIn: 'Sign in', signOut: 'Sign out', heading: 'Sign in', or: 'or',
-      nostr: 'Continue with Nostr', bsky: 'Continue with Bluesky', go: 'Continue',
-      placeholder: 'you.bsky.social', hint: 'You’ll authorize on your own server, then come back here.',
-      signedIn: 'Signed in', connected: 'Signed in with Bluesky.', error: 'Sign-in didn’t finish — please try again.',
-      noExt: 'Install a Nostr extension (NIP-07), e.g. nos2x or Alby, then try again.',
-      nostrFailed: 'Nostr sign-in didn’t finish — please try again.',
-    },
-    es: {
-      signIn: 'Entrar', signOut: 'Salir', heading: 'Entrar', or: 'o',
-      nostr: 'Continuar con Nostr', bsky: 'Continuar con Bluesky', go: 'Continuar',
-      placeholder: 'tu.bsky.social', hint: 'Autorizarás en tu propio servidor y volverás aquí.',
-      signedIn: 'Sesión iniciada', connected: 'Sesión iniciada con Bluesky.', error: 'No se completó el inicio de sesión — inténtalo de nuevo.',
-      noExt: 'Instala una extensión de Nostr (NIP-07), p. ej. nos2x o Alby, e inténtalo de nuevo.',
-      nostrFailed: 'No se completó el inicio con Nostr — inténtalo de nuevo.',
-    },
-    ar: {
-      signIn: 'تسجيل الدخول', signOut: 'تسجيل الخروج', heading: 'تسجيل الدخول', or: 'أو',
-      nostr: 'المتابعة عبر Nostr', bsky: 'المتابعة عبر بلوسكاي', go: 'متابعة',
-      placeholder: 'you.bsky.social', hint: 'ستوافق على الدخول عبر خادمك ثم تعود إلى هنا.',
-      signedIn: 'تم تسجيل الدخول', connected: 'تم تسجيل الدخول عبر بلوسكاي.', error: 'لم يكتمل تسجيل الدخول — حاول مرة أخرى.',
-      noExt: 'ثبّت إضافة Nostr ‏(NIP-07)‏ مثل nos2x أو Alby ثم حاول مجددًا.',
-      nostrFailed: 'لم يكتمل تسجيل الدخول عبر Nostr — حاول مرة أخرى.',
-    },
-  };
+  // The string table lives in ./account-widget-strings.ts (extracted in M4/D9 so
+  // en/es/ar key parity is unit-tested); Astro bundles this import into the
+  // client script.
+  import { ACCOUNT_STRINGS as STR, type AccountStrings as Strings } from './account-widget-strings.ts';
 
   const enc = new TextEncoder();
   async function sha256Hex(s: string): Promise<string> {
@@ -248,7 +225,7 @@
     position: absolute; inset-block-start: calc(100% + var(--space-2xs)); inset-inline-end: 0;
     z-index: 50; inline-size: min(20rem, calc(100vw - 2rem));
     background: var(--surface); border: 1px solid var(--edge); border-radius: var(--radius-lg);
-    box-shadow: 0 8px 30px rgb(0 0 0 / 0.18); padding: var(--space-sm);
+    box-shadow: var(--shadow-1); padding: var(--space-sm); /* the one sanctioned shadow (tokens.css) */
     display: grid; gap: var(--space-sm);
   }
   .wcb-acct__head { margin: 0; font-weight: var(--weight-bold); font-size: var(--step--1); color: var(--ink); }
