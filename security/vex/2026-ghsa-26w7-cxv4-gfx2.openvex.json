@@ -1,0 +1,23 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://wecanjustbuildthings.dev/vex/2026-ghsa-26w7-cxv4-gfx2",
+  "author": "We Can Just Build Things maintainers",
+  "role": "Project maintainers",
+  "timestamp": "2026-09-10T00:00:00Z",
+  "version": 1,
+  "statements": [
+    {
+      "vulnerability": {
+        "name": "GHSA-26w7-cxv4-gfx2",
+        "description": "Astro: Remote code execution through AVIF image optimization (libheif, via the default Sharp image service). CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H (9.8). Fixed in Astro 7.2.8, which requires Sharp 0.35.4."
+      },
+      "products": [
+        { "@id": "pkg:npm/astro@6.4.8" }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "Not exploitable here, on two independent grounds. (1) The advisory's precondition is that an attacker can cause Astro to process an untrusted AVIF image. This project ships a fully static build: the Astro/Sharp image service runs at build time only, over images committed to this repository (policy-screened content); at runtime the Cloudflare Worker serves prebuilt assets and no /api/* route touches image processing. The untrusted-AVIF path is therefore unreachable in production. (2) The lockfile forces sharp to 0.35.4 (package.json override), which vendors libheif 1.23.2 — the fixed Sharp line the advisory names — so the advisory's version-range flag on astro < 7.2.8 does not reflect the actual vendored image stack in this tree. The Astro 6 line itself carries no fix; the upgrade to Astro 7 remains a separate, owner-gated decision (G5).",
+      "action_statement": "Re-evaluate by 2026-12-09 (90 days from acceptance) or at the Astro 7 upgrade, whichever comes first. Accepted per SECURITY.md 'Accepted risk'; tracked in issue #73. Scanner-level ignores carry the same reason + review date in osv-scanner.toml and .grype.yaml."
+    }
+  ]
+}

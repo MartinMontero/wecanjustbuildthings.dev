@@ -17,3 +17,7 @@
 # id = "GHSA-xxxx-xxxx-xxxx"
 # ignoreUntil = 2026-09-01
 # reason = "Dev-only transitive dependency, not shipped to dist/; vulnerable path unreachable in a static build. Tracked in security/vex/2026-xxxx.openvex.json. Re-evaluate by the date above."
+[[IgnoredVulns]]
+id = "GHSA-26w7-cxv4-gfx2"
+ignoreUntil = 2026-12-09
+reason = "Accepted risk (ruled 2026-09-10, tracks issue #73): AVIF/libheif RCE path is unreachable — fully static build; the Astro/Sharp image service runs at build time on committed, policy-screened images only, so no untrusted AVIF is ever processed in production. Additionally the lockfile forces sharp 0.35.4 (vendoring libheif 1.23.2), the fixed line the advisory names; the astro < 7.2.8 range flag cannot see the forced transitive. Recorded in security/vex/2026-ghsa-26w7-cxv4-gfx2.openvex.json. Re-evaluate by 2026-12-09 or at the Astro 7 upgrade (G5), whichever comes first."

@@ -16,3 +16,5 @@ ignore:
   # sync with security/vex/ and osv-scanner.toml. Example (commented):
   # - vulnerability: GHSA-xxxx-xxxx-xxxx
   #   reason: "accepted — see security/vex/2026-xxxx.openvex.json"
+  - vulnerability: GHSA-26w7-cxv4-gfx2
+    reason: "accepted (ruled 2026-09-10, tracks issue #73) — see security/vex/2026-ghsa-26w7-cxv4-gfx2.openvex.json: static build, image service runs at build time on committed images only (runtime untrusted-AVIF path unreachable); lockfile forces sharp 0.35.4 with libheif 1.23.2. Review by 2026-12-09 or at the Astro 7 upgrade."
