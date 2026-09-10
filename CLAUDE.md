@@ -6,6 +6,18 @@ object: Build Studio, Mentor Engine, Skills Creator, Catalog. Plus a Hosting Cos
 Estimator module and a dataset-backed catalog pipeline (Astro 6 Content Layer Zod
 schema, 2,185 catalog entries — the generated figure: `node scripts/catalog-count.mjs` → `data/catalog-count.json`; 1,358 tools/libraries/etc + 827 datasets).
 
+## Project graph
+
+- **Read `RECIPE.md` before any work.** It is the persistent dependency graph:
+  every subsystem, what must work before it, and the checkable proof that it does.
+- **The session's PLAN.md is a subset of RECIPE.md** — the subsystems being
+  touched, in dependency order, with the proof lines carried forward. If PLAN.md
+  and RECIPE.md ever disagree, that is drift: flag it, don't edit silently.
+- **Run `gate.ps1` before claiming done** — it executes every RECIPE.md proof and
+  exits 0 only when all pass. This is separate from the build gate
+  (`npm run verify:all`), which gate.ps1 itself calls as one of its proofs.
+  `gate.ps1 -SelfTest` proves the gate can fail.
+
 ## Non-negotiable constraints — YOU MUST follow these every session
 
 1. MODEL-FREE "PATH A". The deployed platform makes ZERO inference/LLM API calls,
