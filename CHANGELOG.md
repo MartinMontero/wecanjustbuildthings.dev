@@ -3,6 +3,18 @@
 All notable changes to wecanjustbuildthings.dev, MVP → v1 (2026-09-07).
 Milestones follow PLAN.md (M0–M8); PR numbers are the merge records on `main`.
 
+## [Unreleased]
+
+### Security
+- **proxy-addr 2.0.7→2.0.8** (transitive via `@lhci/cli`→`express@4.22.2`,
+  dev-only): fixes GHSA-jqcg-44mw-7w3h (CVSS 9.1 CRITICAL, IPv4-mapped IPv6
+  trust-subnet spoofing), the actionable CRITICAL tracked in issue #77 that
+  blocked the nightly security re-scan. `express@4.22.2` already ranges
+  `proxy-addr ~2.0.7`, so the fix is a lockfile-only re-resolution — no
+  parent bump, no override. Guarded by a new lockfile-assertion test
+  (`scripts/security-lockfile.test.ts`) that fails if the vulnerable version
+  is ever re-locked.
+
 ## [v1] — 2026-09-07
 
 ### Added
