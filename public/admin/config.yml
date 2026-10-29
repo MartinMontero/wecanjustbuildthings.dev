@@ -2,6 +2,7 @@ backend:
   name: github
   repo: martinmontero/wecanjustbuildthings.dev
   branch: main
+  base_url: https://wcjbt-cms-auth.these3remain.workers.dev
 
 # Edits land as pull requests so the enforcement engine gates them in CI.
 publish_mode: editorial_workflow
