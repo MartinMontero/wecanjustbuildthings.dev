@@ -1,0 +1,24 @@
+---
+title: rsky-pds — Personal Data Server (Blacksky)
+description: Blacksky's Personal Data Server in Rust — the self-hosted home of AT Protocol accounts, built for cloud migration (Postgres, S3-compatible blobs, Mailgun).
+entry_type: service
+dependency_name: rsky-pds
+ecosystem: rust
+category: atproto
+what_it_does: A Personal Data Server for AT Protocol. Hosts accounts, repos, and records for Bluesky-compatible networks, so builders can run their own sovereign data home instead of relying on a hosted PDS.
+protocols: [atproto]
+homepage_url: https://github.com/blacksky-algorithms/rsky
+repo_url: https://github.com/blacksky-algorithms/rsky
+license_spdx: Apache-2.0
+license_source_url: https://github.com/blacksky-algorithms/rsky/blob/main/LICENSE
+license_source_commit_sha: e7158f227f22cb770a1f8f8a3574776fb1ea17c7
+maintenance_status: active
+verification_status: under_review
+provider_agnostic: true
+---
+
+The Personal Data Server in the rsky family. A PDS is the piece of AT Protocol that actually holds an account's data — the posts, the records, the identity. rsky-pds is Blacksky's Rust implementation of it, designed for cloud migration: Postgres for records, S3-compatible blob storage for media, Mailgun for outbound mail.
+
+For BuilderOS this is the sovereignty play: a path to hosting builder accounts on our own infrastructure instead of a third-party PDS. Hosting is an owner-court decision (spend + operational ownership), not a default.
+
+**Maturity caveat, verbatim from the rsky README:** "This library is a work in progress. Things will change. Things are incomplete. Things will break. Until the project reaches version 1.0.0, stability will not be guaranteed."
