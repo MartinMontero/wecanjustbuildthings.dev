@@ -1,46 +1,26 @@
 ---
-title: "rsky"
-description: "rsky: BlackSky's Rust implementation of AT Protocol services (PDS, feed generators, and more) — open infrastructure built by and for the Black community on Bluesky."
-entry_type: "service"
-dependency_name: "rsky"
-ecosystem: "rust"
-category: "AT Protocol Apps & Services"
-what_it_does: "rsky: BlackSky's Rust implementation of AT Protocol services (PDS, feed generators, and more) — open infrastructure built by and for the Black community on Bluesky."
-protocols: ["atproto"]
-repo_url: "https://github.com/blacksky-algorithms/rsky"
-license_spdx: "NOASSERTION"
-license_source_url: "https://github.com/blacksky-algorithms/rsky"
-maintenance_status: "unknown"
-aos_repos_using: 0
-provider_agnostic: false
-verification_status: "under_review"
-verified_at: "2026-06-14"
+title: rsky — AT Protocol in Rust (Blacksky)
+description: An AT Protocol implementation in Rust by the Blacksky team, prioritizing community safety and self-governance.
+entry_type: library
+dependency_name: rsky
+ecosystem: rust
+category: atproto
+what_it_does: Provides the core crates for building AT Protocol (Bluesky) applications in Rust — identity, lexicon, repo, syntax, crypto, plus services like relay, PDS, feedgen, jetstream, labeler.
+protocols: [atproto]
+homepage_url: https://github.com/blacksky-algorithms/rsky
+repo_url: https://github.com/blacksky-algorithms/rsky
+license_spdx: Apache-2.0
+license_source_url: https://github.com/blacksky-algorithms/rsky/blob/main/LICENSE
+license_source_commit_sha: e7158f227f22cb770a1f8f8a3574776fb1ea17c7
+maintenance_status: active
+verification_status: under_review
+provider_agnostic: true
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+An AT Protocol implementation in Rust by the Blacksky team, prioritizing community safety and self-governance. Apache-2.0 licensed — compatible with BuilderOS (AGPL family) and NOT on the vendor denylist (Meta/OpenAI/xAI are excluded; Blacksky is none of those).
 
-rsky: BlackSky's Rust implementation of AT Protocol services (PDS, feed generators, and more) — open infrastructure built by and for the Black community on Bluesky.
+**Maturity caveat, verbatim from their README:** "This library is a work in progress. Things will change. Things are incomplete. Things will break. Until the project reaches version 1.0.0, stability will not be guaranteed."
 
-<div class="wcb-badges">
-<span class="wcb-badge wcb-badge--unknown">license: unknown</span>
-<span class="wcb-badge wcb-badge--unknown">status: unknown</span>
-<span class="wcb-badge wcb-badge--under_review">verification: under_review</span>
+Component map (library crates on crates.io): `rsky-crypto`, `rsky-identity`, `rsky-lexicon`, `rsky-syntax`, `rsky-common`, `rsky-repo`. Services: `rsky-relay`, `rsky-pds` (Personal Data Server), `rsky-feedgen`, `rsky-firehose`, `rsky-jetstream-subscriber`, `rsky-labeler`, `rsky-satnav`, `rsky-wintermute`.
 
-</div>
-
-<dl class="wcb-meta">
-  <dt>Ecosystem</dt><dd>rust</dd>
-  <dt>Category</dt><dd>AT Protocol Apps & Services</dd>
-  <dt>License</dt><dd>unknown (unverified SPDX)</dd>
-  <dt>Latest version</dt><dd>unknown</dd>
-  <dt>Source</dt><dd><a href="https://github.com/blacksky-algorithms/rsky">github.com/blacksky-algorithms/rsky</a></dd>
-  
-</dl>
-
-<Aside type="caution" title="Pending full verification">A pinned license commit could not be retrieved automatically; this entry is <code>under_review</code> until a maintainer confirms the source.</Aside>
-
-
-## Why it's in the catalog
-
-This entry was screened against the [exclusion policy](/policies/): it declares no dependency owned by Meta, OpenAI, or xAI at the direct level. See
-[how enforcement works](/policies/enforcement/) for the full three-layer check.
+rsky ≠ rkyv (a serialization library). They are different projects; do not conflate them.
