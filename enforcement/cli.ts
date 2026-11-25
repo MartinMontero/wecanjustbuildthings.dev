@@ -7,9 +7,9 @@ import { validateRecipe } from './layer3-provider-strings/recipe-validator.ts';
 import { validateSkillFile } from './layer3-provider-strings/skill-validator.ts';
 import { readFileSync, existsSync } from 'node:fs';
 import { basename } from 'node:path';
-import { parseFrontmatter, readDocEntries, type DocEntry } from './frontmatter.ts';
+import { collectDocEntries, parseFrontmatter, type DocEntry } from './frontmatter.ts';
 import { block, dim, heading, pass, warn, writeJsonReport } from './report.ts';
-import { formatInputError, type InputError } from './input-errors.ts';
+import { InputFailure, firstLine, formatInputError, type InputError } from './input-errors.ts';
 import type { ExcludedOrg, ProviderSignals } from './types.ts';
 
 interface ParsedArgs {
@@ -74,11 +74,15 @@ const reportDir = typeof flags['report-dir'] === 'string' ? flags['report-dir'] 
 
 let hadBlock = false;
 let didWork = false;
-/** Inputs a tree scan could not check. Any entry fails the run (fail closed). */
+/** Inputs a scan could not check. Any entry fails the run (fail closed). */
 const inputErrors: InputError[] = [];
+const reportedInputErrors = new Set<string>();
 
 function reportInputErrors(errors: InputError[] | undefined): void {
   for (const e of errors ?? []) {
+    const key = `${e.reason}|${e.file}`;
+    if (reportedInputErrors.has(key)) continue; // e.g. the catalog read for Layer 1 and again for recipes
+    reportedInputErrors.add(key);
     block(formatInputError(e));
     inputErrors.push(e);
   }
@@ -93,9 +97,10 @@ function doLayer1(): void {
     for (const f of report.findings) {
       block(`${f.manifest_file}: "${f.dependency}" → ${f.org_key} (${f.signal}: ${f.matched_value})`);
     }
+    reportInputErrors(report.errors);
     for (const w of report.warnings) warn(w);
+    if (report.findings.length > 0) hadBlock = true;
     if (report.status === 'pass') pass(`${report.scanned} catalog entries clean`);
-    else hadBlock = true;
   }
   if (treeDir) {
     didWork = true;
@@ -133,8 +138,15 @@ function doLayer2(): void {
   if (report.status === 'pass') pass(`${report.scanned} lockfiles clean`);
 }
 
+let catalogCache: DocEntry[] | undefined;
 function loadCatalogEntries(): DocEntry[] {
-  return catalogDir ? readDocEntries(catalogDir) : [];
+  if (!catalogDir) return [];
+  if (!catalogCache) {
+    const { entries, errors } = collectDocEntries(catalogDir);
+    reportInputErrors(errors); // deduplicated against Layer 1's own report
+    catalogCache = entries;
+  }
+  return catalogCache;
 }
 
 function doRecipes(): void {
@@ -142,7 +154,9 @@ function doRecipes(): void {
   didWork = true;
   heading(`Recipes — provider-lockdown contract (${recipesDir})`);
   const catalog = loadCatalogEntries();
-  const recipes = readDocEntries(recipesDir).filter((e) => e.frontmatter.entry_type === 'recipe');
+  const { entries, errors } = collectDocEntries(recipesDir);
+  reportInputErrors(errors);
+  const recipes = entries.filter((e) => e.frontmatter.entry_type === 'recipe');
   for (const recipe of recipes) {
     const finding = validateRecipe(recipe, { catalog, orgs, signals });
     writeJsonReport(`${reportDir}/recipe-${recipe.slug}.json`, finding);
@@ -167,7 +181,9 @@ function doSkills(): void {
     dim('  (no skills directory yet)');
     return;
   }
-  const skills = readDocEntries(skillsDir).filter((e) => e.frontmatter.entry_type === 'skill');
+  const { entries, errors } = collectDocEntries(skillsDir);
+  reportInputErrors(errors);
+  const skills = entries.filter((e) => e.frontmatter.entry_type === 'skill');
   for (const skill of skills) {
     const finding = validateSkillFile(skill, { signals });
     writeJsonReport(`${reportDir}/skill-${skill.slug}.json`, finding);
@@ -191,9 +207,10 @@ function doLayer3(): void {
     for (const f of report.findings) {
       block(`${f.file}:${f.line}:${f.column} ${f.org_key} (${f.signal_kind}): ${f.matched_text}`);
     }
+    reportInputErrors(report.errors);
     for (const w of report.warnings) warn(w);
+    if (report.findings.length > 0) hadBlock = true;
     if (report.status === 'pass') pass(`${report.scanned} files clean`);
-    else hadBlock = true;
   }
   doRecipes();
   if (!treeDir && !recipesDir) warn('layer3: nothing to do (pass --tree and/or --recipes)');
@@ -207,13 +224,22 @@ function doRecipeFile(path: string | undefined): void {
   }
   heading(`Recipe — ${path}`);
   didWork = true;
+  let content: string;
+  try {
+    content = readFileSync(path, 'utf8');
+  } catch (err) {
+    reportInputErrors([{ file: path, reason: 'unreadable_file', detail: `could not read recipe: ${firstLine(err)}` }]);
+    return;
+  }
   let entry: DocEntry;
   try {
-    const content = readFileSync(path, 'utf8');
-    entry = { slug: basename(path).replace(/\.mdx?$/, ''), file: path, frontmatter: parseFrontmatter(content) };
-  } catch {
-    block(`${path}: could not read recipe`);
-    hadBlock = true;
+    entry = { slug: basename(path).replace(/\.mdx?$/, ''), file: path, frontmatter: parseFrontmatter(content, path) };
+  } catch (err) {
+    reportInputErrors([
+      err instanceof InputFailure
+        ? err.toInputError()
+        : { file: path, reason: 'unparseable_frontmatter', detail: `frontmatter error: ${firstLine(err)}` },
+    ]);
     return;
   }
   const finding = validateRecipe(entry, { catalog: loadCatalogEntries(), orgs, signals });

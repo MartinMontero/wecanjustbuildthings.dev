@@ -8,6 +8,9 @@ dist/
 .astro/
 .output/
 .wrangler/
+# Reassembled at prebuild from data/fonts/parts/*.b64 (scripts/assemble-arabic-font.mjs);
+# the font is committed as base64 text, never as this binary.
+public/fonts/readex-pro-arabic-headings.woff2
 
 # Generated catalog data (regenerated from data/aos-dependency-audit.csv)
 # NOTE: the source spreadsheet/CSV is committed; generated reports are not.

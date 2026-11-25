@@ -14,6 +14,20 @@ Milestones follow PLAN.md (M0–M8); PR numbers are the merge records on `main`.
   (`bun.lockb`, `deno.lock`, `Pipfile.lock`, `pdm.lock`), unreadable file, or
   missing/unlistable `--tree` directory fails the run (exit 1) with a named
   reason. Covered by `enforcement/tests/fail-closed.test.ts`.
+- **Catalog, recipe, skill and Layer 3 checks fail closed too.** A page whose
+  YAML frontmatter did not parse was silently dropped (so a catalog entry's
+  declared dependency was never checked); a `--catalog` / `--recipes` path or a
+  Layer 3 `--tree` that did not exist passed with nothing scanned. These now
+  fail with `unparseable_frontmatter`, `unreadable_directory` or
+  `unreadable_file`. An absent `--skills` directory still passes (documented
+  as a legitimate state). Covered by `enforcement/tests/fail-closed-docs.test.ts`.
+- **Layer 1 reads `mix.exs` deps in every standard spelling** (`defp deps, do:
+  [...]` and `defp deps() do ... end` used to yield zero deps) **and reads
+  Maven `pom.xml`** (previously no Maven support although the policy lists
+  `maven_groups`): dependencies, managed dependencies, plugin dependencies,
+  build/reporting plugins, extensions and parent, per the Apache Maven POM
+  Reference; exclusions and relocations are not counted. Malformed XML fails
+  closed. Covered by `enforcement/tests/layer1.test.ts` and `maven.test.ts`.
 - **Layer 2 reads `bun.lock`** (Bun's text lockfile): every package row is
   checked against the policy, with chains resolved by a port of Bun's own
   lookup rule (`find_resolution`, oven-sh/bun `src/install/lockfile/bun.lock.rs`).

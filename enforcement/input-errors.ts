@@ -19,8 +19,10 @@ export type InputErrorReason =
   | 'unparseable_manifest'
   /** A lockfile's syntax could not be parsed, or it parsed to the wrong shape. */
   | 'unparseable_lockfile'
-  /** A lockfile format the engine recognises but has no reader for (e.g. bun.lock). */
-  | 'unsupported_lockfile';
+  /** A lockfile format the engine recognises but has no reader for (e.g. bun.lockb). */
+  | 'unsupported_lockfile'
+  /** A catalog / recipe / skill page whose YAML frontmatter could not be parsed. */
+  | 'unparseable_frontmatter';
 
 export interface InputError {
   file: string;
