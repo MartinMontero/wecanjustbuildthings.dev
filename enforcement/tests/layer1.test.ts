@@ -123,3 +123,38 @@ test('runLayer1OnTree flags an excluded dependency across a directory', () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+// ---- mix.exs: every standard way to write the deps function ----
+// Elixir allows `defp deps, do: [...]` (keyword one-liner, possibly wrapped)
+// and `defp deps() do ... end`. Both used to yield zero deps plus only a warning.
+
+test('mix.exs parser reads the keyword one-liner `defp deps, do: [...]`', () => {
+  const { deps, warnings } = parseMixExs(
+    `defmodule App.MixProject do\n  def project, do: [app: :app, deps: deps()]\n  defp deps, do: [{:phoenix, "~> 1.7"}, {:jason, "~> 1.4"}]\nend\n`,
+    'mix.exs',
+  );
+  assert.deepEqual(deps.map((d) => d.name), ['phoenix', 'jason']);
+  assert.ok(!warnings.some((w) => w.includes('no standard')), warnings.join('\n'));
+});
+
+test('mix.exs parser reads a wrapped keyword form and nested lists inside entries', () => {
+  const { deps } = parseMixExs(
+    `defmodule App.MixProject do\n  defp deps,\n    do: [\n      {:phoenix, "~> 1.7"},\n      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}\n    ]\nend\n`,
+    'mix.exs',
+  );
+  assert.deepEqual(deps.map((d) => d.name), ['phoenix', 'credo']);
+});
+
+test('mix.exs parser reads `defp deps() do ... end` with parentheses', () => {
+  const { deps } = parseMixExs(
+    `defmodule App.MixProject do\n  defp deps() do\n    [\n      {:plug, "~> 1.15"}\n    ]\n  end\nend\n`,
+    'mix.exs',
+  );
+  assert.deepEqual(deps.map((d) => d.name), ['plug']);
+});
+
+test('mix.exs parser still warns when there is no deps function at all', () => {
+  const { deps, warnings } = parseMixExs(`defmodule App.MixProject do\n  def project, do: [app: :app]\nend\n`, 'mix.exs');
+  assert.equal(deps.length, 0);
+  assert.ok(warnings.some((w) => w.includes('unparseable_dependency_block')));
+});
