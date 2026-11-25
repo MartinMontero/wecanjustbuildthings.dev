@@ -28,6 +28,13 @@ Milestones follow PLAN.md (M0–M8); PR numbers are the merge records on `main`.
   parent bump, no override. Guarded by a new lockfile-assertion test
   (`scripts/security-lockfile.test.ts`) that fails if the vulnerable version
   is ever re-locked.
+- **GHSA-26w7-cxv4-gfx2 acceptance renewed to 2027-02-23** (owner decision,
+  2026-11-25). The Astro AVIF/libheif RCE is fixed only in astro >= 7.2.8;
+  every ground of the `not_affected` VEX statement was re-verified first
+  (static output, no runtime image processing, 0 `.avif` files, sharp 0.35.4
+  with libheif 1.23.2). `osv-scanner.toml`, `.grype.yaml` and the VEX document
+  are updated together. The Astro 7 upgrade that retires the acceptance is
+  planned in `docs/astro-7-upgrade-plan.md` (BACKLOG C5).
 
 ## [v1] — 2026-09-07
 
