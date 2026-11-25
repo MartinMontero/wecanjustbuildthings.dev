@@ -53,7 +53,7 @@ check. Nothing found was dropped. **Scope key** — the column the gate decides:
 | C2 | Cost Estimator tier bands / scale multipliers / `requestsPerMauPerMonth` product decisions | `tiers.ts:26-30`; `_interface.ts:10-30` | P1 | OWNER | Sign-off recorded, values updated |
 | C3 | Model Compass: 7 models `score: null` + maple-ai pricing (runbook says 3 — undercount) | `models.ts:37-235` | P1 | OWNER | Filled from cited sources or annotated "vendor does not publish" |
 | C4 | Alfred's PWA scope/repo decision | ROADMAP:69-70 | P2 | OWNER | Decision recorded |
-| C5 | Dependabot remainder (5 dev-only) + the **Astro 7 coupled upgrade** (astro 7.0.7 + starlight 0.41.3 + @astrojs/svelte 9; breaking list verified, none of the removed APIs used here; fixes the low esbuild dev advisory) | stack report | P2 | **GATE DECISION** — recommend: not in this effort (identity work shouldn't ride a major framework jump); schedule as its own slice after | If taken later: coupled upgrade in one slice, verify:all + screens diff green |
+| C5 | Dependabot remainder (5 dev-only) + the **Astro 7 coupled upgrade** (astro 7.0.7 + starlight 0.41.3 + @astrojs/svelte 9; breaking list verified, none of the removed APIs used here; fixes the low esbuild dev advisory) | stack report | P2 | **GATE DECISION** — recommend: not in this effort (identity work shouldn't ride a major framework jump); schedule as its own slice after | If taken later: coupled upgrade in one slice, verify:all + screens diff green. **Planned 2026-11-25:** `docs/astro-7-upgrade-plan.md` (targets re-read from npm: astro 7.4.13, starlight 0.43.1, @astrojs/svelte 9.1.6; it also retires the GHSA-26w7-cxv4-gfx2 acceptance, renewed to 2027-02-23) |
 
 ## D. Doc-drift cleanups (all SHIP, one commit each)
 
