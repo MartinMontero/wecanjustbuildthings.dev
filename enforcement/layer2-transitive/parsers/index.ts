@@ -38,3 +38,23 @@ const RULES: Rule[] = [
 export function lookupLockParser(filename: string): LockParser | undefined {
   return RULES.find((r) => r.test(filename))?.parser;
 }
+
+/**
+ * Lockfiles for ecosystems the matcher covers (js, py) that the engine has NO
+ * reader for. Finding one fails the run (unsupported_lockfile) instead of being
+ * skipped: before this list existed, a tree whose only lockfile was bun.lock
+ * reported "0 lockfiles clean" and passed. Remove an entry only in the same
+ * change that adds its reader to RULES above, with a fixture-backed test.
+ */
+const UNSUPPORTED_LOCKFILES = new Map<string, string>([
+  ['bun.lock', 'Bun text lockfile (bun.lock)'],
+  ['bun.lockb', 'Bun binary lockfile (bun.lockb)'],
+  ['deno.lock', 'Deno lockfile (deno.lock)'],
+  ['Pipfile.lock', 'Pipenv lockfile (Pipfile.lock)'],
+  ['pdm.lock', 'PDM lockfile (pdm.lock)'],
+]);
+
+/** A short description when `filename` is a recognised lockfile with no reader; otherwise undefined. */
+export function unsupportedLockfileKind(filename: string): string | undefined {
+  return UNSUPPORTED_LOCKFILES.get(filename);
+}

@@ -1,4 +1,5 @@
 import TOML from '@iarna/toml';
+import { InputFailure, firstLine } from '../../input-errors.ts';
 import type { DependencyRef } from '../../types.ts';
 import type { ManifestParseResult } from './js.ts';
 
@@ -20,7 +21,8 @@ export function parsePyprojectToml(content: string, file: string): ManifestParse
   try {
     t = TOML.parse(content) as Record<string, unknown>;
   } catch (err) {
-    return { deps, warnings: [`${file}: invalid TOML (${(err as Error).message})`] };
+    // Fail closed: an unreadable manifest is never "no dependencies".
+    throw new InputFailure('unparseable_manifest', file, `could not parse as TOML: ${firstLine(err)}`);
   }
 
   const push = (name: string | null, depType: string) => {

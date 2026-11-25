@@ -6,6 +6,14 @@ Milestones follow PLAN.md (M0–M8); PR numbers are the merge records on `main`.
 ## [Unreleased]
 
 ### Security
+- **Exclusion engine fails closed on unreadable input** (W0, BuilderOS audit):
+  the Layer 1/Layer 2 tree scans used to log a warning for a manifest or
+  lockfile they could not parse and then count it as clean, so a broken
+  `pyproject.toml` declaring an excluded package passed. Now any unparseable
+  manifest or lockfile, unresolved yarn merge conflict, lockfile with no reader
+  (`bun.lock`, `bun.lockb`, `deno.lock`, `Pipfile.lock`, `pdm.lock`),
+  unreadable file, or missing/unlistable `--tree` directory fails the run
+  (exit 1) with a named reason. Covered by `enforcement/tests/fail-closed.test.ts`.
 - **proxy-addr 2.0.7→2.0.8** (transitive via `@lhci/cli`→`express@4.22.2`,
   dev-only): fixes GHSA-jqcg-44mw-7w3h (CVSS 9.1 CRITICAL, IPv4-mapped IPv6
   trust-subnet spoofing), the actionable CRITICAL tracked in issue #77 that

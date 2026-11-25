@@ -1,6 +1,7 @@
 import { parse as parseYaml } from 'yaml';
 import yarnLockfile from '@yarnpkg/lockfile';
 import { parseSyml } from '@yarnpkg/parsers';
+import { InputFailure, firstLine, requireMapping } from '../../input-errors.ts';
 import type { ChainNode, LockGraph } from '../../types.ts';
 import { emptyGraph, nodeKey } from '../util.ts';
 
@@ -13,13 +14,13 @@ function pkgNameFromPath(path: string): string {
 /** npm package-lock.json (lockfileVersion 2/3, `packages` map; v1 `dependencies` fallback). */
 export function parseNpmLock(content: string, file: string): LockGraph {
   const graph = emptyGraph('js', file);
-  let json: Record<string, unknown>;
+  let parsed: unknown;
   try {
-    json = JSON.parse(content) as Record<string, unknown>;
+    parsed = JSON.parse(content);
   } catch (err) {
-    graph.warnings.push(`${file}: invalid JSON (${(err as Error).message})`);
-    return graph;
+    throw new InputFailure('unparseable_lockfile', file, `could not parse as JSON: ${firstLine(err)}`);
   }
+  const json = requireMapping(parsed, 'unparseable_lockfile', file, 'JSON');
 
   const packages = json.packages as Record<string, Record<string, unknown>> | undefined;
   if (packages) {
@@ -98,13 +99,13 @@ function splitNameVersion(spec: string): KeyParts {
 /** pnpm-lock.yaml (v9 `snapshots` + `importers`; v6 `packages` fallback). */
 export function parsePnpmLock(content: string, file: string): LockGraph {
   const graph = emptyGraph('js', file);
-  let doc: Record<string, unknown>;
+  let parsed: unknown;
   try {
-    doc = (parseYaml(content) ?? {}) as Record<string, unknown>;
+    parsed = parseYaml(content) ?? {}; // an empty document lists no packages
   } catch (err) {
-    graph.warnings.push(`${file}: invalid YAML (${(err as Error).message})`);
-    return graph;
+    throw new InputFailure('unparseable_lockfile', file, `could not parse as YAML: ${firstLine(err)}`);
   }
+  const doc = requireMapping(parsed, 'unparseable_lockfile', file, 'YAML');
 
   const snapshots = (doc.snapshots ?? doc.packages ?? {}) as Record<string, Record<string, unknown>>;
   for (const k of Object.keys(snapshots)) {
@@ -149,9 +150,14 @@ export function parseYarn1(content: string, file: string): LockGraph {
   try {
     parsed = yarnLockfile.parse(content.replace(/\r\n/g, '\n')) as typeof parsed;
   } catch (err) {
-    graph.warnings.push(`${file}: parse error (${(err as Error).message})`);
-    return graph;
+    throw new InputFailure('unparseable_lockfile', file, `could not parse as a yarn v1 lockfile: ${firstLine(err)}`);
   }
+  // 'conflict' = merge-conflict markers whose sides could not be parsed; the
+  // library then returns an EMPTY object, which must not read as "no packages".
+  if (parsed.type === 'conflict') {
+    throw new InputFailure('unparseable_lockfile', file, 'unresolved merge conflict: neither side of the conflict could be parsed');
+  }
+  // 'merge' = both conflict sides parsed and were combined; every package is still listed.
   if (parsed.type !== 'success') graph.warnings.push(`${file}: yarn lockfile parse status ${parsed.type}`);
 
   const rangeToVersion = new Map<string, string>();
@@ -194,8 +200,7 @@ export function parseYarnBerry(content: string, file: string): LockGraph {
   try {
     obj = parseSyml(content) as typeof obj;
   } catch (err) {
-    graph.warnings.push(`${file}: parse error (${(err as Error).message})`);
-    return graph;
+    throw new InputFailure('unparseable_lockfile', file, `could not parse as a yarn Berry lockfile: ${firstLine(err)}`);
   }
 
   const descriptorToVersion = new Map<string, string>();

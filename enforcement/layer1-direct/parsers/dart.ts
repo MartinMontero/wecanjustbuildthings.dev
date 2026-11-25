@@ -1,16 +1,18 @@
 import { parse as parseYaml } from 'yaml';
+import { InputFailure, firstLine, requireMapping } from '../../input-errors.ts';
 import type { DependencyRef } from '../../types.ts';
 import type { ManifestParseResult } from './js.ts';
 
 export function parsePubspecYaml(content: string, file: string): ManifestParseResult {
   const deps: DependencyRef[] = [];
   const warnings: string[] = [];
-  let doc: Record<string, unknown>;
+  let parsed: unknown;
   try {
-    doc = (parseYaml(content) ?? {}) as Record<string, unknown>;
+    parsed = parseYaml(content) ?? {}; // an empty document declares nothing
   } catch (err) {
-    return { deps, warnings: [`${file}: invalid YAML (${(err as Error).message})`] };
+    throw new InputFailure('unparseable_manifest', file, `could not parse as YAML: ${firstLine(err)}`);
   }
+  const doc = requireMapping(parsed, 'unparseable_manifest', file, 'YAML');
 
   const collect = (obj: unknown, depType: string) => {
     if (!obj || typeof obj !== 'object') return;

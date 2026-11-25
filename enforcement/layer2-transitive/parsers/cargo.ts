@@ -1,4 +1,5 @@
 import TOML from '@iarna/toml';
+import { InputFailure, firstLine } from '../../input-errors.ts';
 import type { LockGraph } from '../../types.ts';
 import { emptyGraph, nodeKey } from '../util.ts';
 
@@ -16,8 +17,7 @@ export function parseCargoLock(content: string, file: string): LockGraph {
   try {
     t = TOML.parse(content) as { package?: CargoPkg[] };
   } catch (err) {
-    graph.warnings.push(`${file}: invalid TOML (${(err as Error).message})`);
-    return graph;
+    throw new InputFailure('unparseable_lockfile', file, `could not parse as TOML: ${firstLine(err)}`);
   }
   const pkgs = t.package ?? [];
   const nameVersions = new Map<string, string[]>();
