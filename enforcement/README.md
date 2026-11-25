@@ -55,7 +55,7 @@ catalog-check.ts              Layer 1 over catalog frontmatter
 fs-walk.ts / frontmatter.ts   shared filesystem + frontmatter helpers
 excluded-organizations.yaml   WHO is excluded (ownership signals)
 excluded-provider-signals.yaml WHAT data-flow strings to scan for
-layer1-direct/                8 manifest parsers + registry
+layer1-direct/                9 manifest parsers + registry
 layer2-transitive/            lockfile parsers (one per format in parsers/index.ts) + chain-tracing walk
 layer3-provider-strings/      portable scanner + recipe-contract validator
                               + contributed-skill validator (skill-validator.ts)
@@ -65,8 +65,10 @@ tests/                        node:test suite over every parser + the contract
 ## The three layers
 
 - **Layer 1** parses `package.json`, `Cargo.toml`, `pyproject.toml` /
-  `requirements.txt`, `go.mod`, `mix.exs`, `pubspec.yaml`, `Gemfile`, and Gradle
-  files, and flags directly-declared excluded packages. In catalog mode it reads
+  `requirements.txt`, `go.mod`, `mix.exs`, `pubspec.yaml`, `Gemfile`, Gradle
+  files, and Maven `pom.xml` (dependencies, managed dependencies, plugins,
+  extensions, parent; exclusions are not counted), and flags directly-declared
+  excluded packages. In catalog mode it reads
   each entry's frontmatter instead.
 - **Layer 2** walks npm / pnpm / yarn (classic + Berry) / Bun (`bun.lock`) / Cargo / uv / Poetry /
   pip-compile / Go (`go mod graph`) / Bundler / Hex / pub / Gradle lockfiles and

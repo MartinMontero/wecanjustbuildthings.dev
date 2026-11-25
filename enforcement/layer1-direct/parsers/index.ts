@@ -6,6 +6,7 @@ import { parseMixExs } from './elixir.ts';
 import { parsePubspecYaml } from './dart.ts';
 import { parseGemfile } from './ruby.ts';
 import { parseGradle } from './kotlin.ts';
+import { parsePomXml } from './maven.ts';
 
 export type ManifestParser = (content: string, file: string) => ManifestParseResult;
 
@@ -24,6 +25,7 @@ const RULES: Rule[] = [
   { test: (f) => f === 'pubspec.yaml', parser: parsePubspecYaml },
   { test: (f) => f === 'Gemfile' || f === 'gems.rb', parser: parseGemfile },
   { test: (f) => /^(build|settings)\.gradle(\.kts)?$/.test(f), parser: parseGradle },
+  { test: (f) => f === 'pom.xml', parser: parsePomXml },
 ];
 
 export function lookupManifestParser(filename: string): ManifestParser | undefined {
