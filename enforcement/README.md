@@ -21,25 +21,29 @@ tsx enforcement/cli.ts recipe src/content/docs/recipes/shakespeare-byok-configur
 tsx enforcement/cli.ts skill --skills src/content/docs/skills
 ```
 
-Exit code is non-zero if anything violates the policy, or if a tree scan meets
-input it cannot check. JSON reports are written to `reports/enforcement/`.
+Exit code is non-zero if anything violates the policy, or if a scan meets input
+it cannot check. JSON reports are written to `reports/enforcement/`.
 
 ## It fails closed
 
-The engine only vouches for what it actually read. In the Layer 1 and Layer 2
-tree scans, input it cannot check is a failure (exit 1) with a named reason,
-never a pass:
+The engine only vouches for what it actually read. In every scan (Layers 1-3 on
+a `--tree`, the catalog check, recipes, and skills), input it cannot check is a
+failure (exit 1) with a named reason, never a pass:
 
 | Reason | Meaning |
 |---|---|
 | `unparseable_manifest` | a manifest's syntax could not be parsed (or it is not a mapping) |
 | `unparseable_lockfile` | a lockfile's syntax could not be parsed, incl. an unresolved yarn merge conflict |
 | `unsupported_lockfile` | a lockfile with no reader yet: `bun.lockb` (binary), `deno.lock`, `Pipfile.lock`, `pdm.lock` |
+| `unparseable_frontmatter` | a catalog / recipe / skill page whose YAML frontmatter does not parse as a mapping |
 | `unreadable_file` | the file could not be read from disk |
-| `unreadable_directory` | a directory under `--tree`, or `--tree` itself, could not be listed (e.g. it does not exist) |
+| `unreadable_directory` | a directory under `--tree` / `--catalog` / `--recipes` / `--skills`, or the path itself, could not be listed (e.g. it does not exist) |
 
-Files that parse but contain entries a parser cannot resolve statically (Gradle
-version catalogs, dynamic `mix.exs` deps blocks) still produce warnings, as before.
+Deliberate exceptions, each visible rather than silent:
+- an **absent** `--skills` directory passes (no skills contributed yet is a legitimate state);
+- Layer 3 skips files over 2 MB with a named warning (very large generated bundles);
+- files that parse but contain entries a parser cannot resolve statically (Gradle
+  version catalogs, dynamic `mix.exs` deps blocks) produce warnings.
 
 ## Layout
 

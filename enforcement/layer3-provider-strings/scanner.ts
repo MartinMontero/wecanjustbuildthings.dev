@@ -1,6 +1,7 @@
 import { readFileSync, statSync } from 'node:fs';
 import { extname } from 'node:path';
-import { walkFiles } from '../fs-walk.ts';
+import { IGNORE_DIRS, walkFiles } from '../fs-walk.ts';
+import { firstLine, type InputError } from '../input-errors.ts';
 import type { Layer3Finding, LayerReport, ProviderSignals } from '../types.ts';
 
 /**
@@ -80,23 +81,38 @@ export function runLayer3OnTree(root: string, signals: ProviderSignals[]): Layer
   const compiled = compileSignals(signals);
   const findings: Layer3Finding[] = [];
   const warnings: string[] = [];
+  // Fail closed: a directory or file that cannot be read is a named error, not
+  // a silent skip (a --tree that does not exist used to report "0 files clean").
+  const errors: InputError[] = [];
   let scanned = 0;
 
-  for (const file of walkFiles(root)) {
+  const onUnreadableDir = (dir: string, err: unknown) =>
+    errors.push({ file: dir, reason: 'unreadable_directory', detail: `could not list directory: ${firstLine(err)}` });
+
+  for (const file of walkFiles(root, IGNORE_DIRS, onUnreadableDir)) {
     const ext = extname(file);
     if (!CODE_EXT.has(ext) && !CONFIG_EXT.has(ext)) continue;
     let size = 0;
     try {
       size = statSync(file).size;
-    } catch {
+    } catch (err) {
+      errors.push({ file, reason: 'unreadable_file', detail: `could not stat file: ${firstLine(err)}` });
       continue;
     }
     if (size > MAX_BYTES) {
+      // A visible, named skip (not silent): scanning very large generated bundles is a policy choice.
       warnings.push(`${file}: skipped (exceeds ${MAX_BYTES} bytes)`);
       continue;
     }
+    let text: string;
+    try {
+      text = readFileSync(file, 'utf8');
+    } catch (err) {
+      errors.push({ file, reason: 'unreadable_file', detail: `could not read file: ${firstLine(err)}` });
+      continue;
+    }
     scanned += 1;
-    findings.push(...scanText(readFileSync(file, 'utf8'), file, compiled));
+    findings.push(...scanText(text, file, compiled));
   }
 
   // Imports are the strongest signal; endpoints/config keys can appear in
@@ -109,9 +125,10 @@ export function runLayer3OnTree(root: string, signals: ProviderSignals[]): Layer
 
   return {
     layer: 3,
-    status: findings.length > 0 ? 'block' : 'pass',
+    status: findings.length > 0 || errors.length > 0 ? 'block' : 'pass',
     findings,
     warnings,
+    errors,
     scanned,
     generated_at: new Date().toISOString(),
   };
