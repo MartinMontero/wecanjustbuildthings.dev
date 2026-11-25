@@ -128,12 +128,22 @@ test('yarn.lock v1 with unresolvable merge conflicts throws unparseable_lockfile
   assert.throws(() => parseYarn1(conflicted, 'yarn.lock'), failsWith('unparseable_lockfile'));
 });
 
-test('Layer 2 tree scan: a tree whose only lockfile is bun.lock blocks with unsupported_lockfile', () => {
-  withTree({ 'package.json': '{"name":"x"}', 'bun.lock': 'not read: no bun.lock reader exists\n' }, (dir) => {
+test('Layer 2 tree scan: a tree whose only lockfile is bun.lockb (binary, no reader) blocks with unsupported_lockfile', () => {
+  withTree({ 'package.json': '{"name":"x"}', 'bun.lockb': 'not read: binary format, no reader\n' }, (dir) => {
     const report = runLayer2OnTree(dir, orgs);
     assert.equal(report.status, 'block');
     assert.equal(report.errors?.length, 1);
     assert.equal(report.errors![0]!.reason, 'unsupported_lockfile');
+    assert.match(report.errors![0]!.file, /bun\.lockb$/);
+  });
+});
+
+test('Layer 2 tree scan: a tree whose only lockfile is an unreadable bun.lock blocks with unparseable_lockfile', () => {
+  withTree({ 'package.json': '{"name":"x"}', 'bun.lock': 'this is not a bun lockfile\n' }, (dir) => {
+    const report = runLayer2OnTree(dir, orgs);
+    assert.equal(report.status, 'block');
+    assert.equal(report.errors?.length, 1);
+    assert.equal(report.errors![0]!.reason, 'unparseable_lockfile');
     assert.match(report.errors![0]!.file, /bun\.lock$/);
   });
 });
@@ -194,12 +204,28 @@ test('CANARY: `all --tree` on a valid pyproject.toml exits 0', () => {
   });
 });
 
-test('CANARY: `all --tree` on a tree whose only lockfile is bun.lock exits 1 and names unsupported_lockfile', () => {
-  withTree({ 'package.json': '{"name":"x"}', 'bun.lock': 'not read\n' }, (dir) => {
+test('CANARY: `all --tree` on a tree whose only lockfile is bun.lockb exits 1 and names unsupported_lockfile', () => {
+  withTree({ 'package.json': '{"name":"x"}', 'bun.lockb': 'not read\n' }, (dir) => {
     const r = runCli(['all', '--tree', dir], join(dir, 'reports'));
     assert.equal(r.status, 1, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
     assert.match(r.stdout, /unsupported_lockfile/);
     assert.doesNotMatch(r.stdout, /Enforcement passed/);
+  });
+});
+
+test('CANARY: `all --tree` on a broken bun.lock exits 1 (unparseable_lockfile); a valid clean one exits 0', () => {
+  withTree({ 'package.json': '{"name":"x"}', 'bun.lock': '{ "lockfileVersion": 1, "workspaces": { \n' }, (dir) => {
+    const r = runCli(['all', '--tree', dir], join(dir, 'reports'));
+    assert.equal(r.status, 1, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+    assert.match(r.stdout, /unparseable_lockfile/);
+  });
+  const clean =
+    '{\n  "lockfileVersion": 1,\n  "workspaces": { "": { "name": "x", "dependencies": { "left-pad": "^1.3.0", }, }, },\n' +
+    '  "packages": { "left-pad": ["left-pad@1.3.0", "", {}, "sha512-EEEE"], },\n}\n';
+  withTree({ 'package.json': '{"name":"x"}', 'bun.lock': clean }, (dir) => {
+    const r = runCli(['all', '--tree', dir], join(dir, 'reports'));
+    assert.equal(r.status, 0, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+    assert.match(r.stdout, /1 lockfiles clean/);
   });
 });
 

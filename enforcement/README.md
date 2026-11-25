@@ -34,7 +34,7 @@ never a pass:
 |---|---|
 | `unparseable_manifest` | a manifest's syntax could not be parsed (or it is not a mapping) |
 | `unparseable_lockfile` | a lockfile's syntax could not be parsed, incl. an unresolved yarn merge conflict |
-| `unsupported_lockfile` | a lockfile with no reader yet: `bun.lock`, `bun.lockb`, `deno.lock`, `Pipfile.lock`, `pdm.lock` |
+| `unsupported_lockfile` | a lockfile with no reader yet: `bun.lockb` (binary), `deno.lock`, `Pipfile.lock`, `pdm.lock` |
 | `unreadable_file` | the file could not be read from disk |
 | `unreadable_directory` | a directory under `--tree`, or `--tree` itself, could not be listed (e.g. it does not exist) |
 
@@ -52,7 +52,7 @@ fs-walk.ts / frontmatter.ts   shared filesystem + frontmatter helpers
 excluded-organizations.yaml   WHO is excluded (ownership signals)
 excluded-provider-signals.yaml WHAT data-flow strings to scan for
 layer1-direct/                8 manifest parsers + registry
-layer2-transitive/            13 lockfile parsers + chain-tracing walk
+layer2-transitive/            lockfile parsers (one per format in parsers/index.ts) + chain-tracing walk
 layer3-provider-strings/      portable scanner + recipe-contract validator
                               + contributed-skill validator (skill-validator.ts)
 tests/                        node:test suite over every parser + the contract
@@ -64,7 +64,7 @@ tests/                        node:test suite over every parser + the contract
   `requirements.txt`, `go.mod`, `mix.exs`, `pubspec.yaml`, `Gemfile`, and Gradle
   files, and flags directly-declared excluded packages. In catalog mode it reads
   each entry's frontmatter instead.
-- **Layer 2** walks npm / pnpm / yarn (classic + Berry) / Cargo / uv / Poetry /
+- **Layer 2** walks npm / pnpm / yarn (classic + Berry) / Bun (`bun.lock`) / Cargo / uv / Poetry /
   pip-compile / Go (`go mod graph`) / Bundler / Hex / pub / Gradle lockfiles and
   emits the full chain to any excluded package. Closure-only formats are reported
   honestly as un-traceable.
