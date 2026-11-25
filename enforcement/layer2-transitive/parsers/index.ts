@@ -7,6 +7,7 @@ import { parseGemfileLock } from './ruby.ts';
 import { parseMixLock } from './elixir.ts';
 import { parsePubspecLock } from './dart.ts';
 import { parseGradleLockfile } from './gradle.ts';
+import { parseBunLock } from './bun.ts';
 
 export type LockParser = (content: string, file: string) => LockGraph;
 
@@ -24,6 +25,7 @@ const RULES: Rule[] = [
   { test: (f) => f === 'package-lock.json' || f === 'npm-shrinkwrap.json', parser: parseNpmLock },
   { test: (f) => f === 'pnpm-lock.yaml', parser: parsePnpmLock },
   { test: (f) => f === 'yarn.lock', parser: parseYarnLock },
+  { test: (f) => f === 'bun.lock', parser: parseBunLock },
   { test: (f) => f === 'Cargo.lock', parser: parseCargoLock },
   { test: (f) => f === 'uv.lock', parser: parseUvLock },
   { test: (f) => f === 'poetry.lock', parser: parsePoetryLock },
@@ -37,4 +39,24 @@ const RULES: Rule[] = [
 
 export function lookupLockParser(filename: string): LockParser | undefined {
   return RULES.find((r) => r.test(filename))?.parser;
+}
+
+/**
+ * Lockfiles for ecosystems the matcher covers (js, py) that the engine has NO
+ * reader for. Finding one fails the run (unsupported_lockfile) instead of being
+ * skipped: before this list existed, a tree whose only lockfile was bun.lock
+ * reported "0 lockfiles clean" and passed. Remove an entry only in the same
+ * change that adds its reader to RULES above, with a fixture-backed test
+ * (bun.lock moved to RULES that way; bun.lockb is binary and stays here).
+ */
+const UNSUPPORTED_LOCKFILES = new Map<string, string>([
+  ['bun.lockb', 'Bun binary lockfile (bun.lockb; Bun 1.2+ writes the text bun.lock instead)'],
+  ['deno.lock', 'Deno lockfile (deno.lock)'],
+  ['Pipfile.lock', 'Pipenv lockfile (Pipfile.lock)'],
+  ['pdm.lock', 'PDM lockfile (pdm.lock)'],
+]);
+
+/** A short description when `filename` is a recognised lockfile with no reader; otherwise undefined. */
+export function unsupportedLockfileKind(filename: string): string | undefined {
+  return UNSUPPORTED_LOCKFILES.get(filename);
 }

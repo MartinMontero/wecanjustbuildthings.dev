@@ -9,6 +9,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { basename } from 'node:path';
 import { parseFrontmatter, readDocEntries, type DocEntry } from './frontmatter.ts';
 import { block, dim, heading, pass, warn, writeJsonReport } from './report.ts';
+import { formatInputError, type InputError } from './input-errors.ts';
 import type { ExcludedOrg, ProviderSignals } from './types.ts';
 
 interface ParsedArgs {
@@ -73,6 +74,15 @@ const reportDir = typeof flags['report-dir'] === 'string' ? flags['report-dir'] 
 
 let hadBlock = false;
 let didWork = false;
+/** Inputs a tree scan could not check. Any entry fails the run (fail closed). */
+const inputErrors: InputError[] = [];
+
+function reportInputErrors(errors: InputError[] | undefined): void {
+  for (const e of errors ?? []) {
+    block(formatInputError(e));
+    inputErrors.push(e);
+  }
+}
 
 function doLayer1(): void {
   if (catalogDir) {
@@ -95,9 +105,10 @@ function doLayer1(): void {
     for (const f of report.findings) {
       block(`${f.manifest_file}: "${f.dependency}" (${f.dep_type}) → ${f.org_key} (${f.signal}: ${f.matched_value})`);
     }
+    reportInputErrors(report.errors);
     for (const w of report.warnings) warn(w);
+    if (report.findings.length > 0) hadBlock = true;
     if (report.status === 'pass') pass(`${report.scanned} manifests clean`);
-    else hadBlock = true;
   }
   if (!catalogDir && !treeDir) warn('layer1: nothing to do (pass --catalog and/or --tree)');
 }
@@ -116,9 +127,10 @@ function doLayer2(): void {
     const suffix = f.chain_known ? '' : '  [closure-only: chain not reconstructable]';
     block(`${f.lockfile}: ${chain} → ${f.org_key}${suffix}`);
   }
+  reportInputErrors(report.errors);
   for (const w of report.warnings) warn(w);
+  if (report.findings.length > 0) hadBlock = true;
   if (report.status === 'pass') pass(`${report.scanned} lockfiles clean`);
-  else hadBlock = true;
 }
 
 function loadCatalogEntries(): DocEntry[] {
@@ -242,9 +254,16 @@ switch (command) {
 
 const KNOWN_COMMANDS = new Set(['layer1', 'layer2', 'layer3', 'recipe', 'skill', 'all']);
 
-if (hadBlock) {
+if (hadBlock || inputErrors.length > 0) {
   console.log('');
-  block('Enforcement failed: one or more entries violate the exclusion policy.');
+  if (inputErrors.length > 0) {
+    const reasons = [...new Set(inputErrors.map((e) => e.reason))].join(', ');
+    block(
+      `Enforcement failed: ${inputErrors.length} input(s) could not be read, so they were not checked (${reasons}). ` +
+        'Unreadable input is a failure, never a pass.',
+    );
+  }
+  if (hadBlock) block('Enforcement failed: one or more entries violate the exclusion policy.');
   process.exitCode = 1;
 } else if (KNOWN_COMMANDS.has(command) && !didWork) {
   // A real command ran but had nothing to scan (no --catalog/--tree/--recipes).

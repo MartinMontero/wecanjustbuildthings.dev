@@ -1,4 +1,5 @@
 import TOML from '@iarna/toml';
+import { InputFailure, firstLine } from '../../input-errors.ts';
 import type { DependencyRef } from '../../types.ts';
 import type { ManifestParseResult } from './js.ts';
 
@@ -9,7 +10,7 @@ export function parseCargoToml(content: string, file: string): ManifestParseResu
   try {
     t = TOML.parse(content) as Record<string, unknown>;
   } catch (err) {
-    return { deps, warnings: [`${file}: invalid TOML (${(err as Error).message})`] };
+    throw new InputFailure('unparseable_manifest', file, `could not parse as TOML: ${firstLine(err)}`);
   }
 
   const collect = (obj: unknown, depType: string) => {

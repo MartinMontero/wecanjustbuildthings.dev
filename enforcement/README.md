@@ -21,8 +21,25 @@ tsx enforcement/cli.ts recipe src/content/docs/recipes/shakespeare-byok-configur
 tsx enforcement/cli.ts skill --skills src/content/docs/skills
 ```
 
-Exit code is non-zero if anything violates the policy. JSON reports are written to
-`reports/enforcement/`.
+Exit code is non-zero if anything violates the policy, or if a tree scan meets
+input it cannot check. JSON reports are written to `reports/enforcement/`.
+
+## It fails closed
+
+The engine only vouches for what it actually read. In the Layer 1 and Layer 2
+tree scans, input it cannot check is a failure (exit 1) with a named reason,
+never a pass:
+
+| Reason | Meaning |
+|---|---|
+| `unparseable_manifest` | a manifest's syntax could not be parsed (or it is not a mapping) |
+| `unparseable_lockfile` | a lockfile's syntax could not be parsed, incl. an unresolved yarn merge conflict |
+| `unsupported_lockfile` | a lockfile with no reader yet: `bun.lockb` (binary), `deno.lock`, `Pipfile.lock`, `pdm.lock` |
+| `unreadable_file` | the file could not be read from disk |
+| `unreadable_directory` | a directory under `--tree`, or `--tree` itself, could not be listed (e.g. it does not exist) |
+
+Files that parse but contain entries a parser cannot resolve statically (Gradle
+version catalogs, dynamic `mix.exs` deps blocks) still produce warnings, as before.
 
 ## Layout
 
@@ -35,7 +52,7 @@ fs-walk.ts / frontmatter.ts   shared filesystem + frontmatter helpers
 excluded-organizations.yaml   WHO is excluded (ownership signals)
 excluded-provider-signals.yaml WHAT data-flow strings to scan for
 layer1-direct/                8 manifest parsers + registry
-layer2-transitive/            13 lockfile parsers + chain-tracing walk
+layer2-transitive/            lockfile parsers (one per format in parsers/index.ts) + chain-tracing walk
 layer3-provider-strings/      portable scanner + recipe-contract validator
                               + contributed-skill validator (skill-validator.ts)
 tests/                        node:test suite over every parser + the contract
@@ -47,7 +64,7 @@ tests/                        node:test suite over every parser + the contract
   `requirements.txt`, `go.mod`, `mix.exs`, `pubspec.yaml`, `Gemfile`, and Gradle
   files, and flags directly-declared excluded packages. In catalog mode it reads
   each entry's frontmatter instead.
-- **Layer 2** walks npm / pnpm / yarn (classic + Berry) / Cargo / uv / Poetry /
+- **Layer 2** walks npm / pnpm / yarn (classic + Berry) / Bun (`bun.lock`) / Cargo / uv / Poetry /
   pip-compile / Go (`go mod graph`) / Bundler / Hex / pub / Gradle lockfiles and
   emits the full chain to any excluded package. Closure-only formats are reported
   honestly as un-traceable.
@@ -60,5 +77,9 @@ tests/                        node:test suite over every parser + the contract
 
 - **New excluded org / signal:** edit the YAML files only; the matcher reads them.
 - **New manifest/lockfile format:** add a parser under the matching `parsers/`
-  dir, register it in that dir's `index.ts`, and add a fixture-backed test.
+  dir, register it in that dir's `index.ts`, and add a fixture-backed test. A
+  parser that cannot read its input must `throw new InputFailure(...)`
+  (`input-errors.ts`), never return an empty result. Adding a lockfile reader
+  also means removing its name from `UNSUPPORTED_LOCKFILES` in
+  `layer2-transitive/parsers/index.ts`.
 - Always add a test. The thing that enforces accountability has to be accountable.

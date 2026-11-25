@@ -1,4 +1,5 @@
 /** Shared types for the three-layer enforcement engine. */
+import type { InputError } from './input-errors.ts';
 
 export type Ecosystem =
   | 'js'
@@ -101,6 +102,11 @@ export interface LayerReport<T> {
   status: 'pass' | 'block';
   findings: T[];
   warnings: string[];
+  /**
+   * Inputs that could not be checked (unreadable / unparseable / unsupported).
+   * Set by the fail-closed tree scans (Layers 1 and 2); any entry makes status 'block'.
+   */
+  errors?: InputError[];
   scanned: number;
   generated_at: string;
 }
